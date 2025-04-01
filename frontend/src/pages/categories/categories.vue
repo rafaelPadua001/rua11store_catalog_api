@@ -77,7 +77,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://rua11storecatalogapi-production.up.railway.app/',
+  baseURL: 'http://localhost:5000' ?? 'https://rua11storecatalogapi-production.up.railway.app',
   headers: { 'Content-Type': 'application/json' }
 });
 
