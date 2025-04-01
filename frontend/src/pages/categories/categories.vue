@@ -83,10 +83,6 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 });
 
-console.log(api.defaults.baseURL);
-
-
-
 export default {
   data() {
     return {
@@ -106,20 +102,17 @@ export default {
         { text: 'Subcategory', value: true }
       ],
       categories: []
-    }
+    };
   },
   computed: {
     allCategories() {
-      const sorted = [];
-      this.categories.forEach(category => {
+      return this.categories.reduce((sorted, category) => {
         if (!category.is_subcategory) {
           sorted.push(category);
-          this.categories
-            .filter(sub => sub.is_subcategory && sub.parent_id === category.id)
-            .forEach(sub => sorted.push(sub));
+          sorted.push(...this.categories.filter(sub => sub.is_subcategory && sub.parent_id === category.id));
         }
-      });
-      return sorted;
+        return sorted;
+      }, []);
     },
     mainCategories() {
       return this.categories.filter(c => !c.is_subcategory);
@@ -148,19 +141,22 @@ export default {
       this.dialog = true;
     },
     editItem(item) {
-      this.editedIndex = this.categories.indexOf(item);
+      this.editedIndex = this.categories.findIndex(c => c.id === item.id);
       this.editedItem = { ...item };
       this.dialog = true;
     },
     async save() {
-      
       try {
+        const token = localStorage.getItem('user_token');
+        if (!token) return this.$router.push('/login');
+
+        const config = { headers: { 'Authorization': `Bearer ${token}` } };
+        let response;
         if (this.editedIndex === -1) {
-          const response = await api.post('/categories/', this.editedItem);
-          console.log(response.data.category);
+          response = await api.post('/categories/', this.editedItem, config);
           this.categories.push(response.data.category);
         } else {
-          const response = await api.put(`/categories/${this.editedItem.id}`, this.editedItem);
+          response = await api.put(`/categories/${this.editedItem.id}`, this.editedItem, config);
           Object.assign(this.categories[this.editedIndex], response.data.category);
         }
         this.close();
@@ -172,7 +168,7 @@ export default {
       if (!confirm('Are you sure you want to delete this item?')) return;
       try {
         await api.delete(`/categories/${item.id}`);
-        this.categories = this.categories.filter(c => c.id !== item.id && c.parent_id !== item.id);
+        this.categories = this.categories.filter(c => c.id !== item.id);
       } catch (error) {
         console.error("Error deleting category:", error);
       }
@@ -185,5 +181,5 @@ export default {
       });
     }
   }
-}
+};
 </script>

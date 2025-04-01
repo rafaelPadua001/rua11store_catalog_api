@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, jsonify
 from controllers.categoryController import CategoryController
 from flask_cors import CORS
 
@@ -11,14 +11,13 @@ CORS(category_bp,
          r"/*": {
              "origins": [
                  "https://rua11store-catalog-api.vercel.app",
-                 "http://localhost:3000"  # Mantenha para desenvolvimento local
+                 "http://localhost:3000"
              ],
              "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
              "allow_headers": ["Content-Type", "Authorization"],
              "supports_credentials": True
          }
      })
-
 
 @category_bp.route('/', methods=['GET', 'POST'])
 def handle_categories():
@@ -29,21 +28,14 @@ def handle_categories():
     elif request.method == 'POST':
         """Cria uma nova categoria ou subcategoria"""
         try:
-            # Verifica se há dados JSON
-            if not request.is_json:
-                return jsonify({"error": "Content-Type deve ser application/json"}), 415
-                
+            if not request.is_json or request.get_json(silent=True) is None:
+                return jsonify({"error": "Content-Type deve ser application/json e JSON válido"}), 415
+
             return CategoryController.create_category()
             
         except Exception as e:
             print(f"Erro na rota: {str(e)}")
             return jsonify({"error": "Erro interno no processamento"}), 500
-            
-    elif request.method == 'OPTIONS':
-        """Responde às requisições de preflight CORS"""
-        response = jsonify()
-        response.headers.add('Access-Control-Allow-Methods', 'GET, POST')
-        return response
 
 @category_bp.route('/<int:category_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_category(category_id):
@@ -60,15 +52,17 @@ def handle_category(category_id):
 # Middleware para garantir o CORS em todas as respostas
 @category_bp.after_request
 def after_request(response):
-    # Permitir os domínios específicos
     allowed_origins = [
         "https://rua11store-catalog-api.vercel.app",
         "http://localhost:3000"
     ]
     origin = request.headers.get('Origin')
-    if origin in allowed_origins:
+    
+    if origin and origin in allowed_origins:
         response.headers.add('Access-Control-Allow-Origin', origin)
+
     response.headers.add('Access-Control-Allow-Credentials', 'true')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
     return response
