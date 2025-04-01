@@ -93,7 +93,7 @@ const login = async () => {
     if (valid) {
         loading.value = true; // Ativa o loading no botão
         try {
-            const response = await axios.post('http://127.0.0.1:5000/auth/login', {
+            const response = await axios.post('https://rua11storecatalogapi-production.up.railway.app/auth/login', {
                 email: email.value,
                 password: password.value,
             });
