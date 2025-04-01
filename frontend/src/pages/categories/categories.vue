@@ -77,9 +77,15 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000' ?? 'https://rua11storecatalogapi-production.up.railway.app',
+  baseURL: window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
+    : 'https://rua11storecatalogapi-production.up.railway.app',
   headers: { 'Content-Type': 'application/json' }
 });
+
+console.log(api.defaults.baseURL);
+
+
 
 export default {
   data() {
@@ -147,6 +153,7 @@ export default {
       this.dialog = true;
     },
     async save() {
+      
       try {
         if (this.editedIndex === -1) {
           const response = await api.post('/categories/', this.editedItem);
