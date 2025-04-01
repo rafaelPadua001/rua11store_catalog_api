@@ -7,7 +7,7 @@ category_bp = Blueprint('category', __name__)
 
 # Configuração Global do CORS para esse Blueprint
 CORS(category_bp, 
-     origins="http://localhost:3000",
+     origins="*",
      supports_credentials=True,
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
      allow_headers=["Content-Type"],

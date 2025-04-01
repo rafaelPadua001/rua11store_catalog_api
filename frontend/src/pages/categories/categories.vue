@@ -77,7 +77,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/',
+  baseURL: 'https://rua11storecatalogapi-production.up.railway.app/',
   headers: { 'Content-Type': 'application/json' }
 });
 
@@ -129,7 +129,7 @@ export default {
     async loadCategories() {
       this.loading = true;
       try {
-        const response = await api.get('/');
+        const response = await api.get('/categories');
         this.categories = response.data;
       } catch (error) {
         console.error("Error loading categories:", error);
@@ -149,11 +149,11 @@ export default {
     async save() {
       try {
         if (this.editedIndex === -1) {
-          const response = await api.post('/', this.editedItem);
+          const response = await api.post('/categories/', this.editedItem);
           console.log(response.data.category);
           this.categories.push(response.data.category);
         } else {
-          const response = await api.put(`/${this.editedItem.id}`, this.editedItem);
+          const response = await api.put(`/categories/${this.editedItem.id}`, this.editedItem);
           Object.assign(this.categories[this.editedIndex], response.data.category);
         }
         this.close();
