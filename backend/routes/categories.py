@@ -23,31 +23,63 @@ CORS(category_bp,
 def handle_categories():
     if request.method == 'GET':
         """Lista todas as categorias"""
-        return CategoryController.get_all_categories()
+        try:
+            return CategoryController.get_all_categories()
+        except Exception as e:
+            print(f"Erro ao listar categorias: {str(e)}")
+            return jsonify({"error": "Erro ao obter categorias"}), 500
         
     elif request.method == 'POST':
         """Cria uma nova categoria ou subcategoria"""
         try:
-            if not request.is_json or request.get_json(silent=True) is None:
-                return jsonify({"error": "Content-Type deve ser application/json e JSON válido"}), 415
-
-            return CategoryController.create_category()
+            if not request.is_json:
+                return jsonify({"error": "Content-Type deve ser application/json"}), 415
             
+            data = request.get_json(silent=True)
+            if data is None:
+                return jsonify({"error": "JSON inválido"}), 400
+            
+            # Corrigido: Passando a chamada corretamente, sem passar `data`
+            return CategoryController.create_category()
         except Exception as e:
-            print(f"Erro na rota: {str(e)}")
+            print(f"Erro ao criar categoria: {str(e)}")
             return jsonify({"error": "Erro interno no processamento"}), 500
+
+        
+
 
 @category_bp.route('/<int:category_id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_category(category_id):
     if request.method == 'GET':
         """Obtém uma categoria específica"""
-        return CategoryController.get_category_by_id(category_id)
+        try:
+            return CategoryController.get_category_by_id(category_id)
+        except Exception as e:
+            print(f"Erro ao buscar categoria {category_id}: {str(e)}")
+            return jsonify({"error": "Erro ao obter categoria"}), 500
+        
     elif request.method == 'PUT':
         """Atualiza uma categoria existente"""
-        return CategoryController.update_category(category_id)
+        try:
+            if not request.is_json:
+                return jsonify({"error": "Content-Type deve ser application/json"}), 415
+            
+            data = request.get_json(silent=True)
+            if data is None:
+                return jsonify({"error": "JSON inválido"}), 400
+            
+            return CategoryController.update_category(category_id, data)
+        except Exception as e:
+            print(f"Erro ao atualizar categoria {category_id}: {str(e)}")
+            return jsonify({"error": "Erro interno ao atualizar categoria"}), 500
+
     elif request.method == 'DELETE':
         """Remove uma categoria"""
-        return CategoryController.delete_category(category_id)
+        try:
+            return CategoryController.delete_category(category_id)
+        except Exception as e:
+            print(f"Erro ao deletar categoria {category_id}: {str(e)}")
+            return jsonify({"error": "Erro ao deletar categoria"}), 500
 
 # Middleware para garantir o CORS em todas as respostas
 @category_bp.after_request
