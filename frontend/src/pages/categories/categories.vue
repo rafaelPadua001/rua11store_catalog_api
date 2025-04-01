@@ -171,7 +171,7 @@ export default {
     async deleteItem(item) {
       if (!confirm('Are you sure you want to delete this item?')) return;
       try {
-        await api.delete(`/${item.id}`);
+        await api.delete(`/categories/${item.id}`);
         this.categories = this.categories.filter(c => c.id !== item.id && c.parent_id !== item.id);
       } catch (error) {
         console.error("Error deleting category:", error);
