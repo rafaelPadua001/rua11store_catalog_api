@@ -71,7 +71,7 @@ const fetchUserProfile = async () => {
   }
 
   try {
-    const response = await axios.get('http://127.0.0.1:5000/auth/profile', {
+    const response = await axios.get('https://rua11storecatalogapi-production.up.railway.app/auth/profile', {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -130,7 +130,7 @@ const uploadAvatar = async (event) => {
   }
 
   try {
-    const response = await axios.post('http://127.0.0.1:5000/auth/upload-avatar', formData, {
+    const response = await axios.post('https://rua11storecatalogapi-production.up.railway.app/auth/upload-avatar', formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'multipart/form-data'

@@ -87,7 +87,7 @@ const logout = async () => {
 
   try {
     const response = await axios.post(
-      'http://127.0.0.1:5000/auth/logout',
+      'https://rua11storecatalogapi-production.up.railway.app/auth/logout',
       {},
       {
         headers: {
