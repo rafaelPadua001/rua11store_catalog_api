@@ -19,7 +19,7 @@ CORS(category_bp,
          }
      })
 
-@category_bp.route('/categories', methods=['GET', 'POST'])
+@category_bp.route('/', methods=['GET', 'POST'])
 def handle_categories():
     if request.method == 'GET':
         """Lista todas as categorias"""
