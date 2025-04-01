@@ -148,6 +148,7 @@ export default {
     async save() {
       try {
         const token = localStorage.getItem('user_token');
+        console.log(token);
         if (!token) return this.$router.push('/login');
 
         const config = { headers: { 'Authorization': `Bearer ${token}` } };
