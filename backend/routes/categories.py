@@ -7,11 +7,18 @@ category_bp = Blueprint('category', __name__)
 
 # Configuração Global do CORS para esse Blueprint
 CORS(category_bp, 
-     origins="https://rua11store-catalog-api.vercel.app",
-     supports_credentials=True,
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-     allow_headers=["Content-Type"],
-     expose_headers=["Content-Disposition"])
+     resources={
+         r"/*": {
+             "origins": [
+                 "https://rua11store-catalog-api.vercel.app",
+                 "http://localhost:3000"  # Mantenha para desenvolvimento local
+             ],
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+             "allow_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": True
+         }
+     })
+
 
 @category_bp.route('/', methods=['GET', 'POST'])
 def handle_categories():
@@ -53,8 +60,15 @@ def handle_category(category_id):
 # Middleware para garantir o CORS em todas as respostas
 @category_bp.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+    # Permitir os domínios específicos
+    allowed_origins = [
+        "https://rua11store-catalog-api.vercel.app",
+        "http://localhost:3000"
+    ]
+    origin = request.headers.get('Origin')
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
     response.headers.add('Access-Control-Allow-Credentials', 'true')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     return response

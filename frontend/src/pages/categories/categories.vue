@@ -129,7 +129,7 @@ export default {
     async loadCategories() {
       this.loading = true;
       try {
-        const response = await api.get('/categories');
+        const response = await api.get('/categories/');
         this.categories = response.data;
       } catch (error) {
         console.error("Error loading categories:", error);
