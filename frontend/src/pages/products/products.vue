@@ -18,8 +18,18 @@
                     <!-- 🔹 Slot para exibir imagens -->
                     <template v-slot:item.image="{ item }">
                         <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
-                            alt="Imagem do Produto" contain min-width="60" max-width="70" min-height="10" class="rounded-lg"></v-img>
+                            alt="Imagem do Produto" contain min-width="60" max-width="70" min-height="10"
+                            class="rounded-lg"></v-img>
                         <span v-else>Sem Imagem</span>
+                    </template>
+
+                    <template v-slot:item.description="{ item }">
+                        <span v-if="item.description && item.description.length > 100">
+                            {{ item.description.substring(0, 38) }}...
+                        </span>
+                        <span v-else>
+                            {{ item.description }}
+                        </span>
                     </template>
 
                     <!-- 🔹 Slot para categoria -->
@@ -277,12 +287,12 @@ export default {
 
             return `${baseUrl}/${imagePath}`;
         },
-        async deleteProduct(productId){
-            if(!confirm("Tem certeza que deseja remover este produto permanentemente ?")) return;
+        async deleteProduct(productId) {
+            if (!confirm("Tem certeza que deseja remover este produto permanentemente ?")) return;
 
-            try{
+            try {
                 const token = localStorage.getItem('user_token')
-                if(!token) return this.$router.push('/login')
+                if (!token) return this.$router.push('/login')
 
                 await api.delete(`/products/${productId}`, {
                     headers: {
@@ -295,7 +305,7 @@ export default {
 
                 this.$toast.success('Produto removido com sucesso');
             }
-            catch(error){
+            catch (error) {
                 console.log("Error deleting product:", error);
                 this.$toast.error("Erro ao excluir produto");
             }
