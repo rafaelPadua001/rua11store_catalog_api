@@ -15,8 +15,13 @@
 
                 <v-data-table :headers="headers" :items="products" :items-per-page="10" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading products...">
-                    <template v-slot:item.category="{ item }">
-                        <span>{{ getCategoryName(item.category_id) }}</span>
+                    <template v-if="products.length > 0">
+                        <v-data-table :items="products">
+                            <template v-slot:item.category="{ item }">
+                                <span v-if="item && item.category_id">{{ getCategoryName(item.category_id) }}</span>
+                                <span v-else>Sem Categoria</span>
+                            </template>
+                        </v-data-table>
                     </template>
 
                     <template v-slot:item.actions="{ item }">
@@ -168,7 +173,7 @@ export default {
         async loadProducts() {
             this.loading = true;
             try {
-                const response = await api.get("/products/");
+                const response = await api.get("/products");
                 this.products = response.data;
             } catch (error) {
                 console.error("Error loading products:", error);
@@ -187,29 +192,53 @@ export default {
         },
         async saveProduct() {
             try {
+                if (!this.editedProduct) {
+                    console.error("Erro: editedProduct está null");
+                    return;
+                }
+
                 const token = localStorage.getItem("user_token");
                 if (!token) return this.$router.push("/login");
 
-                const config = { headers: { Authorization: `Bearer ${token}` } };
+                const formData = new FormData();
+                formData.append("name", this.editedProduct.name || ""); // Evita erro
+                formData.append("description", this.editedProduct.description || "");
+                formData.append("price", this.editedProduct.price || 0);
+                formData.append("category_id", this.editedProduct.category_id || "");
+                formData.append("subcategory_id", this.editedProduct.subcategory_id || "");
+                formData.append("quantity", this.editedProduct.quantity || 1);
+                formData.append("imagem", this.editedProduct.image || "");
+
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                };
+
                 let response;
                 if (this.editedIndex === -1) {
-                    response = await api.post("/products", this.editedProduct, config);
+                    response = await api.post("/products", formData, config);
                     console.log(response);
                     this.products.push(response.data.product);
                 } else {
-                    response = await api.put(`/products/${this.editedProduct.id}`, this.editedProduct, config);
+                    response = await api.put(`/products/${this.editedProduct.id}`, formData, config);
                     Object.assign(this.products[this.editedIndex], response.data.product);
                 }
+
                 this.close();
             } catch (error) {
                 console.error("Error saving product:", error);
             }
         },
+
+
         close() {
             this.productDialog = false;
-            this.editedProduct = null;
+            this.editedProduct = { ...this.defaultProduct }; // Mantém um objeto válido
             this.editedIndex = -1;
         },
+
         getCategoryName(id) {
             const category = this.categories.find((c) => c.id === id);
             return category ? category.name : "Unknown";
