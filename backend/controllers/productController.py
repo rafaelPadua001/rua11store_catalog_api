@@ -1,5 +1,5 @@
 import os
-from flask import jsonify, request
+from flask import jsonify, request, send_from_directory
 from werkzeug.utils import secure_filename
 from database import db
 from models.product import Product
@@ -29,6 +29,10 @@ def upload_imagem(imagem, product_name):
         imagem.save(filepath)
         return filepath  # Retorna o caminho completo da imagem
     return None
+
+def serve_uploaded_file(filename):
+    """Serve arquivos estáticos da pasta de uploads."""
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 def listar_produtos():
     """Retorna todos os produtos em formato JSON."""
