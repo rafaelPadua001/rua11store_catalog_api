@@ -11,7 +11,7 @@ def get_produtos():
         return _build_cors_preflight_response()
     return listar_produtos()
 
-@products_bp.route("/", methods=["OPTIONS", "POST"])
+@products_bp.route("/products/", methods=["OPTIONS", "POST"])
 def post_produto():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
