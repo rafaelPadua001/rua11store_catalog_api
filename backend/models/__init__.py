@@ -1,5 +1,5 @@
 from .userProfile import UserProfile
-from .produto import Produto
+from .product import Product
 from .category import Category
 
-__all__ = ['UserProfile', 'Produto', 'Category']
+__all__ = ['UserProfile', 'Product', 'Category']
