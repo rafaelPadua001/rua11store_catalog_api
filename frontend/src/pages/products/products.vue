@@ -18,7 +18,7 @@
                     <!-- 🔹 Slot para exibir imagens -->
                     <template v-slot:item.image="{ item }">
                         <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
-                            alt="Imagem do Produto" contain max-width="60" max-height="60" class="rounded-lg"></v-img>
+                            alt="Imagem do Produto" contain min-width="60" max-width="70" min-height="10" class="rounded-lg"></v-img>
                         <span v-else>Sem Imagem</span>
                     </template>
 
@@ -33,7 +33,7 @@
                         <v-icon small class="mr-2" @click.stop="editProduct(item)">
                             mdi-pencil
                         </v-icon>
-                        <v-icon small @click.stop="deleteProduct(item)">
+                        <v-icon small @click.stop="deleteProduct(item.id)">
                             mdi-delete
                         </v-icon>
                     </template>
@@ -127,9 +127,10 @@ export default {
             products: [],
             categories: [],
             headers: [
-                { text: "ID", value: "id", width: "80px", align: "center" },
-                { text: "Image", value: "image", width: "100px", align: "center", sortable: false },
+                { text: "ID", value: "id", width: "20px", align: "center" },
+                { text: "Image", value: "image", width: "700px", align: "center", sortable: false },
                 { text: "Product Name", value: "name", width: "250px" },
+                { text: "Product Description", value: "description", width: "250px" },
                 { text: "Category", value: "category", width: "200px" },
                 { text: "Price", value: "price", width: "120px", align: "right" },
                 { text: "Quantity", value: "quantity", width: "120px", align: "right" },
@@ -274,7 +275,30 @@ export default {
                 productName = this.editedProduct.name.replace(/\s+/g, '_').toLowerCase();
             }
 
-            return `${baseUrl}/uploads/product_images/${productName}/${filename}`;
+            return `${baseUrl}/${imagePath}`;
+        },
+        async deleteProduct(productId){
+            if(!confirm("Tem certeza que deseja remover este produto permanentemente ?")) return;
+
+            try{
+                const token = localStorage.getItem('user_token')
+                if(!token) return this.$router.push('/login')
+
+                await api.delete(`/products/${productId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                //Remove product from local list
+                this.products = this.products.filter(p => p.id !== productId);
+
+                this.$toast.success('Produto removido com sucesso');
+            }
+            catch(error){
+                console.log("Error deleting product:", error);
+                this.$toast.error("Erro ao excluir produto");
+            }
         },
         close() {
             this.productDialog = false;

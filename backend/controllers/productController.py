@@ -176,3 +176,31 @@ def update_product_data(product_id):
 
     finally:
         conn.close()
+
+
+def delete_product(product_id):
+    verify_jwt_in_request()  # Verifica se o usuário está autenticado
+    user_id = get_jwt_identity()  # Obtém o ID do usuário logado
+
+    try:
+        # Verifica se o produto existe e pertence ao usuário
+        conn = Product.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM products WHERE id = ? AND user_id = ?", (product_id, user_id))
+        product = cursor.fetchone()
+
+        if not product:
+            return jsonify({"error": "Produto não encontrado ou sem permissão"}), 404
+
+        # Remove o produto do banco de dados
+        cursor.execute("DELETE FROM products WHERE id = ? AND user_id = ?", (product_id, user_id))
+        conn.commit()
+
+        return jsonify({"message": "Produto excluído com sucesso"}), 200
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": f"Erro ao excluir produto: {str(e)}"}), 500
+
+    finally:
+        conn.close()
