@@ -5,13 +5,13 @@ from flask_cors import CORS
 products_bp = Blueprint("products", __name__)
 CORS(products_bp, supports_credentials=True)  # Habilita CORS para este Blueprint
 
-@products_bp.route("/products/", methods=["OPTIONS", "GET"])
+@products_bp.route("/", methods=["OPTIONS", "GET"])
 def get_produtos():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
     return listar_produtos()
 
-@products_bp.route("/products/", methods=["OPTIONS", "POST"])
+@products_bp.route("/", methods=["OPTIONS", "POST"])
 def post_produto():
     if request.method == "OPTIONS":
         return _build_cors_preflight_response()
