@@ -17,8 +17,8 @@
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading products...">
                     <!-- 🔹 Slot para exibir imagens -->
                     <template v-slot:item.image="{ item }">
-                        <v-img v-if="item.image_path" :src="getProductImage(item.image_path)" alt="Imagem do Produto"
-                            contain max-width="60" max-height="60" class="rounded-lg"></v-img>
+                        <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
+                            alt="Imagem do Produto" contain max-width="60" max-height="60" class="rounded-lg"></v-img>
                         <span v-else>Sem Imagem</span>
                     </template>
 
@@ -225,10 +225,15 @@ export default {
                 let response;
                 if (this.editedIndex === -1) {
                     response = await api.post("/products", formData, config);
+                    if (response.data.product) {
+                        response.data.product.image_url = this.getProductImage(
+                            response.data.product.image_path,
+                            response.data.product.id
+                        );
+                    }
                     this.products.push(response.data.product);
                 } else {
                     response = await api.put(`/products/${this.editedProduct.id}`, formData, config);
-                    console.log(response);
                     Object.assign(this.products[this.editedIndex], response.data.product);
                 }
 
@@ -237,22 +242,39 @@ export default {
                 console.error("Error saving product:", error);
             }
         },
-        getProductImage(imagePath) {
-            if (!imagePath) return "https://via.placeholder.com/300"; // Imagem padrão maior
-            
-            // Se já for uma URL completa (http ou https)
-            if (imagePath.startsWith('http')) return imagePath;
-            
-            // Para ambiente de desenvolvimento (local)
-            if (process.env.NODE_ENV === 'development') {
-                const localBaseUrl = "http://localhost:5000";
-                console.log(localBaseUrl);
-                return `${localBaseUrl}/uploads/${imagePath.split('/').pop()}`;
+        getProductImage(imagePath, productId = null) {
+            // Imagem padrão se não houver caminho
+            if (!imagePath) return "https://via.placeholder.com/300";
+
+            // Se já for URL completa (http ou https)
+            if (imagePath.startsWith('http')) {
+                return imagePath.replace('http://', 'https://'); // Força HTTPS
             }
-            
-            // Para produção no Railway
-            const railwayBaseUrl = import.meta.env.VITE_RAILWAY_URL || "https://rua11storecatalogapi-production.up.railway.app";
-            return `${railwayBaseUrl}/uploads/${imagePath.split('/').pop()}`;
+
+            // Define a base URL conforme o ambiente
+            const baseUrl = window.location.hostname === 'localhost'
+                ? 'http://localhost:5000'
+                : 'https://rua11storecatalogapi-production.up.railway.app';
+
+            // Extrai o nome do arquivo (última parte do caminho)
+            const filename = imagePath.split('/').pop();
+
+            // Obtém o nome do produto de forma segura
+            let productName = 'produto';
+
+            // Se tiver productId, busca na lista de produtos
+            if (productId) {
+                const product = this.products.find(p => p.id === productId);
+                if (product?.name) {
+                    productName = product.name.replace(/\s+/g, '_').toLowerCase();
+                }
+            }
+            // Se estiver editando, usa o editedProduct
+            else if (this.editedProduct?.name) {
+                productName = this.editedProduct.name.replace(/\s+/g, '_').toLowerCase();
+            }
+
+            return `${baseUrl}/uploads/product_images/${productName}/${filename}`;
         },
         close() {
             this.productDialog = false;
