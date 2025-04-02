@@ -238,9 +238,21 @@ export default {
             }
         },
         getProductImage(imagePath) {
-            if (!imagePath) return "https://via.placeholder.com/100"; // 🔹 Imagem padrão
-            const baseUrl = "http://localhost:5000";
-            return imagePath.startsWith("http") ? imagePath : `${baseUrl}/${imagePath}`;
+            if (!imagePath) return "https://via.placeholder.com/300"; // Imagem padrão maior
+            
+            // Se já for uma URL completa (http ou https)
+            if (imagePath.startsWith('http')) return imagePath;
+            
+            // Para ambiente de desenvolvimento (local)
+            if (process.env.NODE_ENV === 'development') {
+                const localBaseUrl = "http://localhost:5000";
+                console.log(localBaseUrl);
+                return `${localBaseUrl}/uploads/${imagePath.split('/').pop()}`;
+            }
+            
+            // Para produção no Railway
+            const railwayBaseUrl = import.meta.env.VITE_RAILWAY_URL || "https://rua11storecatalogapi-production.up.railway.app";
+            return `${railwayBaseUrl}/uploads/${imagePath.split('/').pop()}`;
         },
         close() {
             this.productDialog = false;
