@@ -3,7 +3,18 @@ from controllers.productController import listar_produtos, adicionar_produto
 from flask_cors import CORS
 
 products_bp = Blueprint("products", __name__)
-CORS(products_bp, supports_credentials=True)  # Habilita CORS para este Blueprint
+CORS(products_bp, 
+     resources={
+         r"/*": {
+             "origins": [
+                 "https://rua11store-catalog-api.vercel.app",
+                 "http://localhost:3000"
+             ],
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+             "allow_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": True
+         }
+     })
 
 @products_bp.route("/", methods=["OPTIONS", "GET"])
 def get_produtos():
