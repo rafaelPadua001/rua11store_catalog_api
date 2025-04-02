@@ -15,15 +15,20 @@
 
                 <v-data-table :headers="headers" :items="products" :items-per-page="10" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading products...">
-                    <template v-if="products.length > 0">
-                        <v-data-table :items="products">
-                            <template v-slot:item.category="{ item }">
-                                <span v-if="item && item.category_id">{{ getCategoryName(item.category_id) }}</span>
-                                <span v-else>Sem Categoria</span>
-                            </template>
-                        </v-data-table>
+                    <!-- 🔹 Slot para exibir imagens -->
+                    <template v-slot:item.image="{ item }">
+                        <v-img v-if="item.image_path" :src="getProductImage(item.image_path)" alt="Imagem do Produto"
+                            contain max-width="60" max-height="60" class="rounded-lg"></v-img>
+                        <span v-else>Sem Imagem</span>
                     </template>
 
+                    <!-- 🔹 Slot para categoria -->
+                    <template v-slot:item.category="{ item }">
+                        <span v-if="item && item.category_id">{{ getCategoryName(item.category_id) }}</span>
+                        <span v-else>Sem Categoria</span>
+                    </template>
+
+                    <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
                         <v-icon small class="mr-2" @click.stop="editProduct(item)">
                             mdi-pencil
@@ -123,6 +128,7 @@ export default {
             categories: [],
             headers: [
                 { text: "ID", value: "id", width: "80px", align: "center" },
+                { text: "Image", value: "image", width: "100px", align: "center", sortable: false },
                 { text: "Product Name", value: "name", width: "250px" },
                 { text: "Category", value: "category", width: "200px" },
                 { text: "Price", value: "price", width: "120px", align: "right" },
@@ -219,10 +225,10 @@ export default {
                 let response;
                 if (this.editedIndex === -1) {
                     response = await api.post("/products", formData, config);
-                    console.log(response);
                     this.products.push(response.data.product);
                 } else {
                     response = await api.put(`/products/${this.editedProduct.id}`, formData, config);
+                    console.log(response);
                     Object.assign(this.products[this.editedIndex], response.data.product);
                 }
 
@@ -231,14 +237,16 @@ export default {
                 console.error("Error saving product:", error);
             }
         },
-
-
+        getProductImage(imagePath) {
+            if (!imagePath) return "https://via.placeholder.com/100"; // 🔹 Imagem padrão
+            const baseUrl = "http://localhost:5000";
+            return imagePath.startsWith("http") ? imagePath : `${baseUrl}/${imagePath}`;
+        },
         close() {
             this.productDialog = false;
             this.editedProduct = { ...this.defaultProduct }; // Mantém um objeto válido
             this.editedIndex = -1;
         },
-
         getCategoryName(id) {
             const category = this.categories.find((c) => c.id === id);
             return category ? category.name : "Unknown";

@@ -12,43 +12,133 @@ class Product:
         self.subcategory_id = subcategory_id
         self.image_path = image_path
         self.quantity = quantity
-        self.user_id = user_id
-    
+        self.user_id = user_id  
+
+    @staticmethod
     def get_db_connection():
-        conn = sqlite3.connect("database.db")  # 🔹 Certifique-se de que este caminho está correto
-        conn.row_factory = sqlite3.Row
+        """Cria uma nova conexão com o banco de dados"""
+        conn = sqlite3.connect('database.db')
+        conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
         return conn
 
     def save(self):
-        """Salva o produto no banco de dados"""
-        conn = sqlite3.connect("database.db")
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO products (name, description, price, category_id, subcategory_id, image_path, quantity, user_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (self.name, self.description, self.price, self.category_id, 
-              self.subcategory_id, self.image_path, self.quantity, self.user_id))
-        
-        conn.commit()
-        conn.close()
+        """Salva ou atualiza o produto no banco de dados"""
+        conn = self.get_db_connection()
+        try:
+            cursor = conn.cursor()
+            
+            if self.id:
+                # Atualiza o produto existente
+                cursor.execute("""
+                    UPDATE products 
+                    SET name=?, description=?, price=?, category_id=?, 
+                        subcategory_id=?, image_path=?, quantity=?, user_id=?
+                    WHERE id=?
+                """, (self.name, self.description, self.price, self.category_id, 
+                      self.subcategory_id, self.image_path, self.quantity, 
+                      self.user_id, self.id))
+            else:
+                # Insere um novo produto
+                cursor.execute("""
+                    INSERT INTO products (name, description, price, category_id, 
+                                        subcategory_id, image_path, quantity, user_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (self.name, self.description, self.price, self.category_id, 
+                      self.subcategory_id, self.image_path, self.quantity, self.user_id))
+                self.id = cursor.lastrowid  # Obtém o ID do produto recém-criado
+            
+            conn.commit()  # Aplica as alterações
+            return True
+            
+        except sqlite3.Error as e:
+            print(f"Erro ao salvar produto: {str(e)}")
+            conn.rollback()  # Desfaz as alterações se houver erro
+            return False
+            
+        finally:
+            conn.close()  # Sempre fecha a conexão, mesmo em caso de erro
 
-    @classmethod
-    def get_all(cls):
-        """Busca todos os produtos"""
-        conn = sqlite3.connect("database.db")
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT id, name, description, price, category_id, subcategory_id, 
-                   image_path, quantity, user_id 
-            FROM products
-        """)
-        products = [cls(*row) for row in cursor.fetchall()]
-        conn.close()
-        return products
+    def delete(self):
+        """Exclui o produto do banco de dados"""
+        if self.id:
+            conn = self.get_db_connection()
+            try:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM products WHERE id = ?", (self.id,))
+                conn.commit()
+                return True
+            except sqlite3.Error as e:
+                print(f"Erro ao excluir produto: {str(e)}")
+                return False
+            finally:
+                conn.close()
 
+    @staticmethod
+    def get_all():
+        """Obtém todos os produtos do banco de dados"""
+        conn = Product.get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM products")
+            return [Product._create_from_row(row) for row in cursor.fetchall()]
+        except sqlite3.Error as e:
+            print(f"Erro ao buscar produtos: {str(e)}")
+            return []  # Retorna uma lista vazia em caso de erro
+        finally:
+            conn.close()
+
+    @staticmethod
+    def get_by_id(product_id):
+        """Busca um produto pelo seu ID."""
+        print(f"Buscando produto com ID: {product_id}")
+        conn = Product.get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
+            product_data = cursor.fetchone()
+            return Product._create_from_row(product_data) if product_data else None
+        except sqlite3.Error as e:
+            print(f"Erro de banco de dados: {e}")
+            raise
+        except Exception as e:
+            print(f"Erro inesperado: {e}")
+            raise
+        finally:
+            conn.close()
+
+    @staticmethod
+    def get_by_user(user_id):
+        """Obtém produtos associados a um usuário específico"""
+        conn = Product.get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM products WHERE user_id = ?", (user_id,))
+            return [Product._create_from_row(row) for row in cursor.fetchall()]
+        except sqlite3.Error as e:
+            print(f"Erro ao buscar produtos por usuário: {str(e)}")
+            return []  # Retorna uma lista vazia em caso de erro
+        finally:
+            conn.close()
+
+    @staticmethod
+    def _create_from_row(row):
+        """Cria uma instância de Product a partir de uma linha do banco de dados"""
+        if row is None:
+            return None
+        return Product(
+            id=row['id'],
+            name=row['name'],
+            description=row['description'],
+            price=row['price'],
+            category_id=row['category_id'],
+            subcategory_id=row['subcategory_id'],
+            image_path=row['image_path'],
+            quantity=row['quantity'],
+            user_id=row['user_id']
+        )
 
     def to_dict(self):
-        """Converte o objeto Product para um dicionário"""
+        """Converte a instância de Product em um dicionário"""
         return {
             "id": self.id,
             "name": self.name,
