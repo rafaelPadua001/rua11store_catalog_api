@@ -13,6 +13,11 @@ class Product:
         self.image_path = image_path
         self.quantity = quantity
         self.user_id = user_id
+    
+    def get_db_connection():
+        conn = sqlite3.connect("database.db")  # 🔹 Certifique-se de que este caminho está correto
+        conn.row_factory = sqlite3.Row
+        return conn
 
     def save(self):
         """Salva o produto no banco de dados"""
@@ -40,3 +45,18 @@ class Product:
         products = [cls(*row) for row in cursor.fetchall()]
         conn.close()
         return products
+
+
+    def to_dict(self):
+        """Converte o objeto Product para um dicionário"""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "price": self.price,
+            "category_id": self.category_id,
+            "subcategory_id": self.subcategory_id,
+            "image_path": self.image_path,
+            "quantity": self.quantity,
+            "user_id": self.user_id
+        }

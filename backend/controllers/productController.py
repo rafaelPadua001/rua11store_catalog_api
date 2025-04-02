@@ -3,9 +3,10 @@ from flask import jsonify, request
 from werkzeug.utils import secure_filename
 from database import db
 from models.product import Product
+from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 
 UPLOAD_FOLDER = "uploads/product_images"
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -33,35 +34,54 @@ def listar_produtos():
     products = Product.get_all()
     return jsonify([p.to_dict() for p in products])  # Certifique-se de que Product tem um método to_dict()
 
-def adicionar_produto(data):
+def adicionar_produto():
     """Adiciona um novo produto ao banco de dados."""
-    imagem = request.files.get("imagem")  # Obtém a imagem enviada no formulário
-    product_name = formatar_nome(data.get("name", ""))  # Formata o nome para criar a pasta
+    name = request.form.get("name")
+    description = request.form.get("description")
+    price = request.form.get("price")
+    category_id = request.form.get("category_id")
+    subcategory_id = request.form.get("subcategory_id")
+    quantity = request.form.get("quantity", 1)
+
+   
+    imagem = request.files.get("imagem")
+    product_name = formatar_nome(name) if name else "produto_sem_nome"
     imagem_path = upload_imagem(imagem, product_name) if imagem else None
 
-    user_id = data.get("user_id")  # Obtém o user_id da requisição
-
+    print("Verificando JWT...")
+    verify_jwt_in_request()  # Isso garante que o JWT seja verificado antes de acessar o conteúdo
+    user_id = get_jwt_identity()
+    print(f"Usuário autenticado: {user_id}")
     if not user_id:
         return jsonify({"erro": "Usuário não autenticado"}), 401
     
     try:
         novo_produto = Product(
-            nome=data["name"],
-            descricao=data["description"],
-            preco=data["price"],
-            categoria_id=data.get("category_id"),
-            subcategoria_id=data.get("subcategory_id"),
-            imagem=imagem_path,  # Salva apenas o caminho da imagem
-            quantidade=data.get("quantity", 1),
-            user_id=user_id  # Agora pega corretamente do data
+            name=name,
+            description=description,
+            price=price,
+            category_id=category_id,
+            subcategory_id=subcategory_id,
+            image_path=imagem_path,  # Salva apenas o caminho da imagem
+            quantity=quantity,
+            user_id=user_id
         )
-        db.session.add(novo_produto)
-        db.session.commit()
+        novo_produto.save()
         
         return jsonify({
             "mensagem": "Produto adicionado com sucesso!",
-            "imagem": imagem_path
+            "product": {
+                "id": novo_produto.id,
+                "name": novo_produto.name,
+                "description": novo_produto.description,
+                "price": novo_produto.price,
+                "category_id": novo_produto.category_id,
+                "subcategory_id": novo_produto.subcategory_id,
+                "quantity": novo_produto.quantity,
+                "image": novo_produto.image_path  # Certifique-se de que a imagem está no retorno
+            }
         }), 201
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"erro": f"Erro ao adicionar produto: {str(e)}"}), 500
