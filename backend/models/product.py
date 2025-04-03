@@ -107,6 +107,16 @@ class Product:
             conn.close()
 
     @staticmethod
+    def find_by_id_and_user(product_id, user_id):
+        conn = Product.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM products WHERE id = ? AND user_id = ?", (product_id, user_id))
+        result = cursor.fetchone()
+
+        if result:
+            return Product(*result)  # Ajuste conforme a estrutura da sua classe
+        return None
+    @staticmethod
     def get_by_user(user_id):
         """Obtém produtos associados a um usuário específico"""
         conn = Product.get_db_connection()

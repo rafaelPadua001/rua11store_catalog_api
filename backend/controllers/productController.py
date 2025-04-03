@@ -6,233 +6,143 @@ from models.product import Product
 from models.stock import Stock
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 
+class ProductController:
+    UPLOAD_FOLDER = "uploads/product_images"
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
-UPLOAD_FOLDER = "uploads/product_images"
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    @staticmethod
+    def allowed_file(filename):
+        return "." in filename and filename.rsplit(".", 1)[1].lower() in ProductController.ALLOWED_EXTENSIONS
 
-def allowed_file(filename):
-    """Verifica se o arquivo tem uma extensão permitida."""
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    @staticmethod
+    def formatar_nome(nome):
+        return secure_filename(nome.replace(" ", "_"))
 
-def formatar_nome(nome):
-    """Remove espaços e caracteres especiais do nome do produto."""
-    return secure_filename(nome.replace(" ", "_"))
+    @staticmethod
+    def upload_imagem(imagem, product_name):
+        if imagem and ProductController.allowed_file(imagem.filename):
+            filename = secure_filename(imagem.filename)
+            product_folder = os.path.join(ProductController.UPLOAD_FOLDER, product_name)
+            os.makedirs(product_folder, exist_ok=True)
+            filepath = os.path.join(product_folder, filename)
+            imagem.save(filepath)
+            return filepath
+        return None
 
-def upload_imagem(imagem, product_name):
-    """Salva a imagem na pasta 'uploads/product_images/NOME_DO_PRODUTO/' e retorna o caminho."""
-    if imagem and allowed_file(imagem.filename):
-        filename = secure_filename(imagem.filename)
-        product_folder = os.path.join(UPLOAD_FOLDER, product_name)
-        os.makedirs(product_folder, exist_ok=True)  # Cria a pasta do produto se não existir
-        filepath = os.path.join(product_folder, filename)
-        imagem.save(filepath)
-        return filepath  # Retorna o caminho completo da imagem
-    return None
+    @staticmethod
+    def serve_uploaded_file(filename):
+        return send_from_directory(ProductController.UPLOAD_FOLDER, filename)
 
-def serve_uploaded_file(filename):
-    """Serve arquivos estáticos da pasta de uploads."""
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    @staticmethod
+    def listar_produtos():
+        products = Product.get_all()
+        return jsonify([p.to_dict() for p in products])
 
-def listar_produtos():
-    """Retorna todos os produtos em formato JSON."""
-    products = Product.get_all()
-    return jsonify([p.to_dict() for p in products])  # Certifique-se de que Product tem um método to_dict()
-
-def adicionar_produto():
-    """Adiciona um novo produto ao banco de dados."""
-    name = request.form.get("name")
-    description = request.form.get("description")
-    price = request.form.get("price")
-    category_id = request.form.get("category_id")
-    subcategory_id = request.form.get("subcategory_id")
-    quantity = request.form.get("quantity", 1)
-
-   
-    imagem = request.files.get("imagem")
-    product_name = formatar_nome(name) if name else "produto_sem_nome"
-    imagem_path = upload_imagem(imagem, product_name) if imagem else None
-
-    print("Verificando JWT...")
-    verify_jwt_in_request()  # Isso garante que o JWT seja verificado antes de acessar o conteúdo
-    user_id = get_jwt_identity()
-    print(f"Usuário autenticado: {user_id}")
-    if not user_id:
-        return jsonify({"erro": "Usuário não autenticado"}), 401
-    
-    try:
-        novo_produto = Product(
-            name=name,
-            description=description,
-            price=price,
-            category_id=category_id,
-            subcategory_id=subcategory_id,
-            image_path=imagem_path,  # Salva apenas o caminho da imagem
-            quantity=quantity,
-            user_id=user_id
-        )
-        novo_produto.save()
-        
-        stock_data = {
-            "id_product": novo_produto.id,
-            "user_id": novo_produto.user_id,
-            "category_id": novo_produto.category_id,
-            "product_name": novo_produto.name,
-            "product_price": novo_produto.price,
-            "product_quantity": novo_produto.quantity,
-            "variations": None,
-        }
-
-        Stock.create(stock_data) 
-
-        return jsonify({
-            "mensagem": "Produto adicionado com sucesso!",
-            "product": {
-                "id": novo_produto.id,
-                "name": novo_produto.name,
-                "description": novo_produto.description,
-                "price": novo_produto.price,
-                "category_id": novo_produto.category_id,
-                "subcategory_id": novo_produto.subcategory_id,
-                "quantity": novo_produto.quantity,
-                "image": novo_produto.image_path  # Certifique-se de que a imagem está no retorno
-            }
-        }), 201
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"erro": f"Erro ao adicionar produto: {str(e)}"}), 500
-
-def update_product_data(product_id):
-    """Atualiza os dados de um produto existente e retorna os dados atualizados."""
-    verify_jwt_in_request()  # Garante que o usuário está autenticado
-    user_id = get_jwt_identity()
-
-    if not user_id:
-        return jsonify({"erro": "Usuário não autenticado"}), 401
-
-    conn = Product.get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        # Verifica se o produto existe e pertence ao usuário autenticado
-        cursor.execute("SELECT id, image_path FROM products WHERE id = ? AND user_id = ?", 
-                      (product_id, user_id))
-        product = cursor.fetchone()
-
-        if not product:
-            return jsonify({"erro": "Produto não encontrado ou sem permissão para editar"}), 404
-
-        existing_image_path = product[1]  # Caminho da imagem já salva
-
-        # Obtém os dados do formulário
+    @staticmethod
+    @jwt_required()
+    def adicionar_produto():
         name = request.form.get("name")
         description = request.form.get("description")
         price = request.form.get("price")
         category_id = request.form.get("category_id")
         subcategory_id = request.form.get("subcategory_id")
-        quantity = request.form.get("quantity")
-
-        # Valida os valores
-        price = float(price) if price and price.replace('.', '', 1).isdigit() else None
-        quantity = int(quantity) if quantity and quantity.isdigit() else None
-
-        # Processa a nova imagem (se enviada)
+        quantity = request.form.get("quantity", 1)
         imagem = request.files.get("imagem")
-        imagem_path = upload_imagem(imagem, name) if imagem else existing_image_path  # Mantém a imagem antiga se nenhuma nova for enviada
+        product_name = ProductController.formatar_nome(name) if name else "produto_sem_nome"
+        imagem_path = ProductController.upload_imagem(imagem, product_name) if imagem else None
 
-        # Atualiza os dados no banco de dados
-        cursor.execute("""
-            UPDATE products 
-            SET name = ?, description = ?, price = ?, category_id = ?, 
-                subcategory_id = ?, quantity = ?, image_path = ?
-            WHERE id = ? AND user_id = ?
-        """, (name, description, price, category_id, subcategory_id, quantity, imagem_path, product_id, user_id))
+        user_id = get_jwt_identity()
+        if not user_id:
+            return jsonify({"erro": "Usuário não autenticado"}), 401
 
-        conn.commit()
-
-        # Busca os dados atualizados do produto para retornar
-        cursor.execute("""
-            SELECT id, name, description, price, category_id, 
-                   subcategory_id, quantity, image_path, user_id
-            FROM products 
-            WHERE id = ?
-        """, (product_id,))
-        
-        updated_product = cursor.fetchone()
-        
-        if updated_product:
-            # Converte para dicionário para retornar como JSON
-            produto_atualizado = {
-                "id": updated_product[0],
-                "name": updated_product[1],
-                "description": updated_product[2],
-                "price": float(updated_product[3]) if updated_product[3] else None,
-                "category_id": updated_product[4],
-                "subcategory_id": updated_product[5],
-                "quantity": updated_product[6],
-                "image_path": updated_product[7],
-                "user_id": updated_product[8]
-            }
-
+        try:
+            novo_produto = Product(
+                name=name,
+                description=description,
+                price=price,
+                category_id=category_id,
+                subcategory_id=subcategory_id,
+                image_path=imagem_path,
+                quantity=quantity,
+                user_id=user_id
+            )
+            novo_produto.save()
+            
             stock_data = {
-                "id_product": produto_atualizado["id"],
-                "user_id": produto_atualizado["user_id"],
-                "category_id": produto_atualizado["category_id"],
-                "product_name": produto_atualizado["name"],
-                "product_price": produto_atualizado["price"],
-                "product_quantity": produto_atualizado["quantity"],
+                "id_product": novo_produto.id,
+                "user_id": novo_produto.user_id,
+                "category_id": novo_produto.category_id,
+                "product_name": novo_produto.name,
+                "product_price": novo_produto.price,
+                "product_quantity": novo_produto.quantity,
                 "variations": None,
             }
+            Stock.create(stock_data)
 
-            # found stock_id per id_product
-            stock_id = Stock.get_stock_id_by_product(produto_atualizado['id'])
+            return jsonify({"mensagem": "Produto adicionado com sucesso!", "product": novo_produto.to_dict()}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"erro": f"Erro ao adicionar produto: {str(e)}"}), 500
 
+    @staticmethod
+    @jwt_required()
+    def update_product_data(product_id):
+        user_id = get_jwt_identity()
+        if not user_id:
+            return jsonify({"erro": "Usuário não autenticado"}), 401
+
+        product = Product.find_by_id_and_user(product_id, user_id)
+        if not product:
+            return jsonify({"erro": "Produto não encontrado ou sem permissão"}), 404
+
+        name = request.form.get("name", product.name)
+        description = request.form.get("description", product.description)
+        price = request.form.get("price", product.price)
+        category_id = request.form.get("category_id", product.category_id)
+        subcategory_id = request.form.get("subcategory_id", product.subcategory_id)
+        quantity = request.form.get("quantity", product.quantity)
+        imagem = request.files.get("imagem")
+        imagem_path = ProductController.upload_imagem(imagem, name) if imagem else product.image_path
+
+        try:
+            product.update(name, description, price, category_id, subcategory_id, quantity, imagem_path)
+            stock_data = {
+                "id_product": product.id,
+                "user_id": product.user_id,
+                "category_id": product.category_id,
+                "product_name": product.name,
+                "product_price": product.price,
+                "product_quantity": product.quantity,
+                "variations": None,
+            }
+            stock_id = Stock.get_stock_id_by_product(product.id)
             if stock_id:
                 Stock.update(stock_id, stock_data)
-            else:
-                print('Nenhum estoque encontrado para este produto !')
-            
-            return jsonify({
-                "mensagem": "Produto atualizado com sucesso!",
-                "product": produto_atualizado
-            }), 200
 
-        return jsonify({"erro": "Produto atualizado mas não foi possível recuperar os dados"}), 500
+            return jsonify({"mensagem": "Produto atualizado com sucesso!", "product": product.to_dict()}), 200
+        except Exception as e:
+            return jsonify({"erro": f"Erro ao atualizar produto: {str(e)}"}), 500
 
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"erro": f"Erro ao atualizar produto: {str(e)}"}), 500
+    @staticmethod
+    @jwt_required()
+    def delete_product(product_id):
+        user_id = get_jwt_identity()
+        if not user_id:
+            return jsonify({"erro": "Usuário não autenticado"}), 401
 
-    finally:
-        conn.close()
-
-
-def delete_product(product_id):
-    verify_jwt_in_request()  # Verifica se o usuário está autenticado
-    user_id = get_jwt_identity()  # Obtém o ID do usuário logado
-
-    try:
-        # Verifica se o produto existe e pertence ao usuário
-        conn = Product.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM products WHERE id = ? AND user_id = ?", (product_id, user_id))
-        product = cursor.fetchone()
-
+        product = Product.find_by_id_and_user(product_id, user_id)
         if not product:
-            return jsonify({"error": "Produto não encontrado ou sem permissão"}), 404
+            return jsonify({"erro": "Produto não encontrado ou sem permissão"}), 404
 
-        # Remove o produto do banco de dados
-        cursor.execute("DELETE FROM stock WHERE id_product = ? AND user_id = ?", (product_id, user_id))
-        cursor.execute("DELETE FROM products WHERE id = ? AND user_id = ?", (product_id, user_id))
-        conn.commit()
-
-        return jsonify({"message": "Produto excluído com sucesso"}), 200
-
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"error": f"Erro ao excluir produto: {str(e)}"}), 500
-
-    finally:
-        conn.close()
+        try:
+            try:
+                Stock.delete_by_product(product.id)
+            except Exception as e:
+                print(f'Erro ao excliur do estoque: {str(e)}')    
+            
+            product.delete()
+            return jsonify({"mensagem": "Produto excluído com sucesso"}), 200
+        except Exception as e:
+            return jsonify({"erro": f"Erro ao excluir produto: {str(e)}"}), 500
