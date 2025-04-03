@@ -15,11 +15,13 @@
 
                 <v-data-table :headers="headers" :items="products" :items-per-page="10" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading products...">
+                    
                     <template v-slot:item.image="{ item }">
-                        <v-img v-if="item.image" :src="item.image" alt="Product Image" contain min-width="60"
-                            max-width="70" min-height="10" class="rounded-lg"></v-img>
+                        <v-img v-if="item.image" :src="item.image" alt="Product Image" contain 
+                            :width="70" :height="70" class="rounded-lg"></v-img>
                         <span v-else>No Image</span>
                     </template>
+
                     <template v-slot:item.actions="{ item }">
                         <v-icon small class="mr-2" @click.stop="editProduct(item)">
                             mdi-pencil
@@ -59,6 +61,13 @@
 <script>
 import axios from "axios";
 
+const api = axios.create({
+    baseURL: window.location.hostname === "localhost"
+        ? "http://localhost:5000"
+        : "https://rua11storecatalogapi-production.up.railway.app",
+    headers: { "Content-Type": "application/json" },
+});
+
 export default {
     data() {
         return {
@@ -66,7 +75,7 @@ export default {
             productDialog: false,
             editedIndex: -1,
             editedProduct: { id: null, name: "", quantity: 1 },
-            products: [],
+            products: [], // Inicializando como array vazio para evitar erros
             headers: [
                 { text: "Product Name", value: "name" },
                 { text: "Quantity", value: "quantity" },
@@ -86,8 +95,8 @@ export default {
         async loadProducts() {
             this.loading = true;
             try {
-                const response = await axios.get("/api/stock");
-                this.products = response.data;
+                const response = await api.get("/stock");
+                this.products = Array.isArray(response.data) ? response.data : [];
             } catch (error) {
                 console.error("Error loading products:", error);
             } finally {
@@ -96,6 +105,7 @@ export default {
         },
         newProduct() {
             this.editedProduct = { id: null, name: "", quantity: 1 };
+            this.editedIndex = -1; // Garante que será um novo produto
             this.productDialog = true;
         },
         editProduct(item) {
@@ -106,9 +116,9 @@ export default {
         async saveProduct() {
             try {
                 if (this.editedIndex === -1) {
-                    await axios.post("/api/stock", this.editedProduct);
+                    await api.post("/stock", this.editedProduct);
                 } else {
-                    await axios.put(`/api/stock/${this.editedProduct.id}`, this.editedProduct);
+                    await api.put(`/stock/${this.editedProduct.id}`, this.editedProduct);
                 }
                 this.loadProducts();
                 this.close();
@@ -119,7 +129,7 @@ export default {
         async deleteProduct(id) {
             if (!confirm("Are you sure you want to delete this product?")) return;
             try {
-                await axios.delete(`/api/stock/${id}`);
+                await api.delete(`/stock/${id}`);
                 this.loadProducts();
             } catch (error) {
                 console.error("Error deleting product:", error);
@@ -127,6 +137,7 @@ export default {
         },
         close() {
             this.productDialog = false;
+            this.editedIndex = -1; // Reseta para evitar problemas ao editar um novo item
         }
     }
 };
