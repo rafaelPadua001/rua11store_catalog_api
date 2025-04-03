@@ -13,10 +13,15 @@
           </v-btn>
         </v-card-actions>
 
-        <v-data-table :headers="headers" :items="allCategories" :items-per-page="10" class="elevation-1" item-key="id"
+        <v-data-table :headers="headers" :items="visibleCategories" :items-per-page="10" class="elevation-1" item-key="id"
           fixed-header height="500" :loading="loading" loading-text="Loading categories...">
           <template v-slot:item.name="{ item }">
             <div class="d-flex align-center" :style="{ 'padding-left': item.is_subcategory ? '32px' : '0' }">
+
+              <v-icon v-if="!item.is_subcategory" @click="toggleCategory(item.id)" class="mr-2">
+                {{ expandedCategories.includes(item.id) ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
+              </v-icon>
+
               <v-icon v-if="item.is_subcategory" small class="mr-2">
                 mdi-subdirectory-arrow-right
               </v-icon>
@@ -51,15 +56,16 @@
               <v-row>
                 <v-col cols="12">
                   <v-select v-model="editedItem.is_subcategory" :items="categoryTypes" label="Category Type"
-                    item-text="text" item-value="value" outlined dense></v-select>
+                    item-text="text" item-title="text" item-value="value" outlined dense></v-select>
+                </v-col>
+                <v-col cols="12" v-if="editedItem.is_subcategory">
+                  <v-select v-model="editedItem.parent_id" :items="mainCategories" label="Parent Category"
+                    item-title="name" item-text="name" item-value="id" outlined dense></v-select>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field v-model="editedItem.name" label="Category Name" outlined dense></v-text-field>
                 </v-col>
-                <v-col cols="12" v-if="editedItem.is_subcategory">
-                  <v-select v-model="editedItem.parent_id" :items="mainCategories" label="Parent Category"
-                    item-text="name" item-value="id" outlined dense></v-select>
-                </v-col>
+
               </v-row>
             </v-container>
           </v-card-text>
@@ -87,6 +93,7 @@ export default {
   data() {
     return {
       loading: false,
+      expandedCategories: [],
       dialog: false,
       editedIndex: -1,
       editedItem: { id: null, name: '', is_subcategory: false, parent_id: null },
@@ -117,6 +124,11 @@ export default {
     mainCategories() {
       return this.categories.filter(c => !c.is_subcategory);
     },
+    visibleCategories(){
+      return this.allCategories.filter(c => 
+        !c.is_subcategory || this.expandedCategories.includes(c.parent_id)
+      );
+    },
     formTitle() {
       return this.editedIndex === -1 ? 'New Category' : 'Edit Category';
     }
@@ -134,6 +146,16 @@ export default {
         console.error("Error loading categories:", error);
       } finally {
         this.loading = false;
+      }
+    },
+    toggleCategory(categoryId){
+      const index = this.expandedCategories.indexOf(categoryId);
+
+      if(index === -1){
+        this.expandedCategories.push(categoryId);
+      }
+      else{
+        this.expandedCategories.splice(index, 1);
       }
     },
     newItem() {
