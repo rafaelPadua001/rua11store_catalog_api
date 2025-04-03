@@ -63,8 +63,8 @@ const goToDashboard = () => {
 };
 
 const goToCategories = () => {
-    drawer.value = false;
-    router.push('/categories/categories')
+  drawer.value = false;
+  router.push('/categories/categories')
 }
 
 const goToLogin = () => {
