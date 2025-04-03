@@ -99,7 +99,7 @@ export default {
       editedItem: { id: null, name: '', is_subcategory: false, parent_id: null },
       defaultItem: { id: null, name: '', is_subcategory: false, parent_id: null },
       headers: [
-        { text: 'ID', value: 'id', width: '80px', align: 'center' },
+        // { text: 'ID', value: 'id', width: '80px', align: 'center' },
         { text: 'Name', value: 'name', width: '250px' },
         { text: 'Type', value: 'type', width: '150px', align: 'center' },
         { text: 'Actions', value: 'actions', width: '120px', align: 'center', sortable: false }
