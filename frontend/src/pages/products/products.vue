@@ -59,12 +59,12 @@
                             <v-row>
                                 <v-col cols="12">
                                     <v-select v-model="editedProduct.category_id" :items="mainCategories"
-                                        label="Category" item-text="name" item-value="id" outlined dense></v-select>
+                                        label="Category" item-title="name" item-text="name" item-value="id" outlined dense></v-select>
                                 </v-col>
 
                                 <v-col cols="12" v-if="subcategories.length">
                                     <v-select v-model="editedProduct.subcategory_id" :items="subcategories"
-                                        label="Subcategory" item-text="name" item-value="id" outlined dense></v-select>
+                                        label="Subcategory" item-title="name" item-text="name" item-value="id" outlined dense></v-select>
                                 </v-col>
 
                                 <v-col cols="12">
@@ -137,7 +137,7 @@ export default {
             products: [],
             categories: [],
             headers: [
-                { text: "ID", value: "id", width: "20px", align: "center" },
+                // { text: "ID", value: "id", width: "20px", align: "center" },
                 { text: "Image", value: "image", width: "700px", align: "center", sortable: false },
                 { text: "Product Name", value: "name", width: "250px" },
                 { text: "Product Description", value: "description", width: "250px" },
