@@ -3,6 +3,7 @@ from flask import jsonify, request, send_from_directory
 from werkzeug.utils import secure_filename
 from database import db
 from models.product import Product
+from models.stock import Stock
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 
 
@@ -73,6 +74,18 @@ def adicionar_produto():
         )
         novo_produto.save()
         
+        stock_data = {
+            "id_product": novo_produto.id,
+            "user_id": novo_produto.user_id,
+            "category_id": novo_produto.category_id,
+            "product_name": novo_produto.name,
+            "product_price": novo_produto.price,
+            "product_quantity": novo_produto.quantity,
+            "variations": None,
+        }
+
+        Stock.create(stock_data) 
+
         return jsonify({
             "mensagem": "Produto adicionado com sucesso!",
             "product": {
@@ -162,6 +175,24 @@ def update_product_data(product_id):
                 "image_path": updated_product[7],
                 "user_id": updated_product[8]
             }
+
+            stock_data = {
+                "id_product": produto_atualizado["id"],
+                "user_id": produto_atualizado["user_id"],
+                "category_id": produto_atualizado["category_id"],
+                "product_name": produto_atualizado["name"],
+                "product_price": produto_atualizado["price"],
+                "product_quantity": produto_atualizado["quantity"],
+                "variations": None,
+            }
+
+            # found stock_id per id_product
+            stock_id = Stock.get_stock_id_by_product(produto_atualizado['id'])
+
+            if stock_id:
+                Stock.update(stock_id, stock_data)
+            else:
+                print('Nenhum estoque encontrado para este produto !')
             
             return jsonify({
                 "mensagem": "Produto atualizado com sucesso!",
@@ -193,6 +224,7 @@ def delete_product(product_id):
             return jsonify({"error": "Produto não encontrado ou sem permissão"}), 404
 
         # Remove o produto do banco de dados
+        cursor.execute("DELETE FROM stock WHERE id_product = ? AND user_id = ?", (product_id, user_id))
         cursor.execute("DELETE FROM products WHERE id = ? AND user_id = ?", (product_id, user_id))
         conn.commit()
 
