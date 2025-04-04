@@ -13,8 +13,9 @@
             <v-col cols="auto" class="d-flex justify-center">
               <!-- Avatar com ícone de upload dentro -->
               <v-avatar size="100" class="mx-auto" style="position: relative; display: flex; justify-content: center;">
+                
                 <v-img
-                  :src="user && user.avatar_url ? user.avatar_url : 'https://m.media-amazon.com/images/S/pv-target-images/16627900db04b76fae3b64266ca161511422059cd24062fb5d900971003a0b70._SX1080_FMjpg_.jpg'"
+                  :src="user && user.avatar_url ? user.avatar_url : 'https://imgs.search.brave.com/Zsapxs7JqY0v8BYpGwgMnI1WLK_J9l-O1IMIOUuzTGc/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9waWNz/LmNyYWl5b24uY29t/LzIwMjQtMDktMDcv/djc1XzNnV0VUTWVL/UHJmWmFXWlFKQS53/ZWJw'"
                   alt="Avatar" class="rounded-circle" style="object-fit: cover;" />
 
                 <!-- Ícone de upload dentro da imagem -->
@@ -138,7 +139,7 @@ const uploadAvatar = async (event) => {
   }
 
   try {
-    const response = await axios.post('https://rua11storecatalogapi-production.up.railway.app/auth/upload-avatar', formData, {
+    const response = await api.post('/auth/upload-avatar', formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'multipart/form-data'
