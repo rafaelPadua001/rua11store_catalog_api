@@ -224,7 +224,7 @@ def upload_avatar():
 
     #update url avatar on database
     user_id = get_jwt_identity()
-    avatar_url = f'https://rua11storecatalogapi-production.up.railway.app/auth/{file_path}' #public url
+    avatar_url = f'https://rua11storecatalogapi-production.up.railway.app/auth/uploads/avatars/{file_path}' #public url
 
     #update on database
     conn = create_connection()
@@ -242,7 +242,7 @@ def upload_avatar():
 @jwt_required()
 def uploaded_file(filename):
     print(filename)
-    return send_from_directory(os.path.join(os.getcwd(), 'uploads', 'avatars'), filename)
+    return send_from_directory('uploads/avatars', filename)
 
 
 # Rota de login
