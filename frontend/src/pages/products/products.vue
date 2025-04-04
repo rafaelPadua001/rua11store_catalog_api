@@ -160,16 +160,17 @@ export default {
             return this.editedIndex === -1 ? "New Product" : "Edit Product";
         },
         formattedPrice: {
-            get() {
-                return this.editedProduct.price
-                    ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(this.editedProduct.price)
-                    : "";
-            },
-            set(value) {
-                let numericValue = parseFloat(value.replace(/[^0-9,]/g, "").replace(",", "."));
-                this.editedProduct.price = isNaN(numericValue) ? 0 : numericValue;
-            }
-        }
+    get() {
+        return this.editedProduct.price !== null && this.editedProduct.price !== undefined
+            ? Number(this.editedProduct.price).toFixed(2).replace(".", ",") // Garante sempre 2 casas decimais
+            : "";
+    },
+    set(value) {
+        let numericValue = parseFloat(value.replace(/[^0-9,]/g, "").replace(",", "."));
+        this.editedProduct.price = isNaN(numericValue) ? 0.00 :  parseFloat(numericValue.toFixed(2)); // Mantém como número
+    }
+}
+
     },
     created() {
         this.loadCategories();

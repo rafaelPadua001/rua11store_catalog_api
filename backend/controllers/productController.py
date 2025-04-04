@@ -113,7 +113,7 @@ class ProductController:
                 "user_id": product.user_id,
                 "category_id": product.category_id,
                 "product_name": product.name,
-                "product_price": product.price,
+                "product_price": float(product.price),
                 "product_quantity": product.quantity,
                 "variations": None,
             }
