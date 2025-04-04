@@ -58,6 +58,43 @@ class Product:
         finally:
             conn.close()  # Sempre fecha a conexão, mesmo em caso de erro
 
+    def update(self, name, description, price, category_id, subcategory_id, quantity, image_path):
+        """Atualiza os dados de um produto existente no banco de dados"""
+        if not self.id:
+            print("Erro: Não é possível atualizar um produto sem ID.")
+            return False
+
+        self.name = name
+        self.description = description
+        self.price = price
+        self.category_id = category_id
+        self.subcategory_id = subcategory_id
+        self.quantity = quantity
+        self.image_path = image_path
+
+        conn = self.get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE products 
+                SET name=?, description=?, price=?, category_id=?, 
+                    subcategory_id=?, image_path=?, quantity=?
+                WHERE id=?
+            """, (self.name, self.description, self.price, self.category_id, 
+                self.subcategory_id, self.image_path, self.quantity, self.id))
+
+            conn.commit()
+            return True
+
+        except sqlite3.Error as e:
+            print(f"Erro ao atualizar produto: {str(e)}")
+            conn.rollback()
+            return False
+
+        finally:
+            conn.close()
+
+
     def delete(self):
         """Exclui o produto do banco de dados"""
         if self.id:
