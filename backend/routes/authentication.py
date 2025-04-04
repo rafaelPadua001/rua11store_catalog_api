@@ -224,7 +224,7 @@ def upload_avatar():
 
     #update url avatar on database
     user_id = get_jwt_identity()
-    avatar_url = f'https://rua11storecatalogapi-production.up.railway.app/auth/uploads/avatars/{file_path}' #public url
+    avatar_url = f'https://rua11storecatalogapi-production.up.railway.app/{file_path}' #public url
 
     #update on database
     conn = create_connection()
