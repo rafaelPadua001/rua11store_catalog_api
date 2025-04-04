@@ -57,6 +57,14 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
+const api = axios.create({
+    baseURL:
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://rua11storecatalogapi-production.up.railway.app",
+    headers: { "Content-Type": "application/json" },
+});
+
 const user = ref(null);
 const fileInput = ref(null);
 
@@ -71,7 +79,7 @@ const fetchUserProfile = async () => {
   }
 
   try {
-    const response = await axios.get('https://rua11storecatalogapi-production.up.railway.app/auth/profile', {
+    const response = await api.get('/auth/profile', {
       headers: {
         Authorization: `Bearer ${token}`
       }

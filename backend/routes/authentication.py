@@ -239,6 +239,7 @@ def upload_avatar():
     return jsonify({"avatar_url": avatar_url}), 200
 
 @auth_bp.route('/uploads/avatars/<filename>')
+@jwt_required()
 def uploaded_file(filename):
     print(filename)
     return send_from_directory(os.path.join(os.getcwd(), 'uploads', 'avatars'), filename)
