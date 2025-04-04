@@ -153,7 +153,7 @@ class CategoryController:
         try:
             categories = Category.get_all()  # Chamando o método estático get_all da Categoria
             return jsonify([category.to_dict() for category in categories]), 200  # Convertendo as categorias para dicionário e retornando como JSON
-        except sqlite3.Error as e:
+        except Exception as e:
             print(f"Erro ao buscar categorias: {str(e)}")
             return jsonify({"error": "Erro ao buscar categorias"}), 500
     
