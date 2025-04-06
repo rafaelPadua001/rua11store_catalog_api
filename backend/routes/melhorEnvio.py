@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from services.melhorEnvioService import MelhorEnvioService
 import os;
 
-melhorenvio_bp = Blueprint('melhorenvio', __name__)
+melhorenvio_bp = Blueprint('melhorEnvio', __name__)
 melhor_envio = MelhorEnvioService()
 
 @melhorenvio_bp.route("/calculate-delivery", methods=["POST"])
