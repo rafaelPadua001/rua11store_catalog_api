@@ -6,7 +6,6 @@ load_dotenv()  # auto load .env
 
 class MelhorEnvioService:
     def __init__(self):
-        self.token = os.getenv("MELHOR_ENVIO_TOKEN")
         self.baseUrl = "https://sandbox.melhorenvio.com.br/api/v2"
         self.token = os.getenv("MELHOR_ENVIO_TOKEN")
         self.headers = {
