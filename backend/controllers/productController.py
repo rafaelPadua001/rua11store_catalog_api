@@ -113,9 +113,9 @@ class ProductController:
         category_id = request.form.get("category_id", product.category_id)
         subcategory_id = request.form.get("subcategory_id", product.subcategory_id)
         quantity = request.form.get("quantity", product.quantity)
-        width = request.form.get('width')
-        height = request.form.get('height')
-        weight = request.form.get('weight')
+        width = request.form.get('width', product.width)
+        height = request.form.get('height', product.height)
+        weight = request.form.get('weight', product.weight)
         imagem = request.files.get("imagem")
         imagem_path = ProductController.upload_imagem(imagem, name) if imagem else product.image_path
 
