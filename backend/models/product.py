@@ -35,10 +35,10 @@ class Product:
                 cursor.execute("""
                     UPDATE products 
                     SET name=?, description=?, price=?, category_id=?, 
-                        subcategory_id=?, image_path=?, quantity=?, user_id=?
+                        subcategory_id=?, image_path=?, quantity=?, width=?, height=?, weight=?, user_id=?
                     WHERE id=?
                 """, (self.name, self.description, self.price, self.category_id, 
-                      self.subcategory_id, self.image_path, self.quantity, 
+                      self.subcategory_id, self.image_path, self.quantity, self.width, self.height, self.weight,
                       self.user_id, self.id))
             else:
                 # Insere um novo produto
@@ -86,7 +86,7 @@ class Product:
             cursor.execute("""
                 UPDATE products 
                 SET name=?, description=?, price=?, category_id=?, 
-                    subcategory_id=?, image_path=?, quantity=?, width=?, height=?, weigth=?
+                    subcategory_id=?, image_path=?, quantity=?, width=?, height=?, weight=?
                 WHERE id=?
             """, (self.name, self.description, self.price, self.category_id, 
                 self.subcategory_id, self.image_path, self.quantity, self.width,
@@ -205,5 +205,8 @@ class Product:
             "subcategory_id": self.subcategory_id,
             "image_path": self.image_path,
             "quantity": self.quantity,
+            "width": self.width,
+            "height": self.height,
+            "weight": self.weight,
             "user_id": self.user_id
         }

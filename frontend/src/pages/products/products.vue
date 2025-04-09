@@ -247,7 +247,7 @@ export default {
                 formData.append("imagem", this.editedProduct.image || "");
                 formData.append('width', this.editedProduct.width || "");
                 formData.append('height', this.editedProduct.height || "");
-                formData.append('weight', this.editedProduct.weight);
+                formData.append('weight', this.editedProduct.weight || "");
 
                 const config = {
                     headers: {
