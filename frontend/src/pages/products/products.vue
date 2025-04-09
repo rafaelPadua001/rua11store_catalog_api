@@ -108,6 +108,11 @@
                                     <v-text-field v-model="editedProduct.weight" label="Weight (kg)" type="number"
                                         outlined dense></v-text-field>
                                 </v-col>
+
+                                <v-col cols="4">
+                                    <v-text-field v-model="editedProduct.length" label="length (cm)" type="number"
+                                        outlined dense></v-text-field>
+                                </v-col>
                             </v-row>
                         </v-container>
                     </v-card-text>
@@ -151,6 +156,7 @@ export default {
                 price: 0,
                 quantity: 1,
                 width: 1,
+                length: 1,
             },
             products: [],
             categories: [],
@@ -248,6 +254,7 @@ export default {
                 formData.append('width', this.editedProduct.width || "");
                 formData.append('height', this.editedProduct.height || "");
                 formData.append('weight', this.editedProduct.weight || "");
+                formData.append('length', this.editedProduct.length || "");
 
                 const config = {
                     headers: {
