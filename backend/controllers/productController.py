@@ -55,6 +55,7 @@ class ProductController:
         width = request.form.get('width')
         height = request.form.get('height')
         weight = request.form.get('weight')
+        length = request.form.get('length')
 
         user_id = get_jwt_identity()
         if not user_id:
@@ -72,6 +73,7 @@ class ProductController:
                 width=width,
                 height=height,
                 weight=weight,
+                length=length,
                 user_id=user_id
 
             )
@@ -87,6 +89,7 @@ class ProductController:
                 "product_widht": novo_produto.width,
                 "product_height": novo_produto.height,
                 "product_weight": novo_produto.weight,
+                "product_length": novo_produto.lenght,
                 "variations": None,
             }
             Stock.create(stock_data)
@@ -117,10 +120,11 @@ class ProductController:
         height = request.form.get('height', product.height)
         weight = request.form.get('weight', product.weight)
         imagem = request.files.get("imagem")
+        length = request.form.get('length', product.length)
         imagem_path = ProductController.upload_imagem(imagem, name) if imagem else product.image_path
 
         try:
-            product.update(name, description, price, category_id, subcategory_id, quantity, width, height, weight, imagem_path)
+            product.update(name, description, price, category_id, subcategory_id, quantity, width, height, weight, length, imagem_path)
             stock_data = {
                 "id_product": product.id,
                 "user_id": product.user_id,
@@ -131,6 +135,7 @@ class ProductController:
                 "product_width": product.width,
                 "product_height": product.height,
                 "product_weight": product.weight,
+                "product_lenght": product.length,
                 "variations": None,
             }
 
