@@ -3,7 +3,7 @@ import sqlite3
 class Product:
     def __init__(self, id=None, name=None, description=None, price=None, 
                  category_id=None, subcategory_id=None, image_path=None, 
-                 quantity=1, width=1, height=1, weight=1, user_id=None):
+                 quantity=1, width=None, height=None, weight=None, user_id=None):
         self.id = id
         self.name = name
         self.description = description
@@ -191,6 +191,9 @@ class Product:
             subcategory_id=row['subcategory_id'],
             image_path=row['image_path'],
             quantity=row['quantity'],
+            width=row['width'],
+            height=row['height'],
+            weight=row['weight'],
             user_id=row['user_id']
         )
 
