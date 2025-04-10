@@ -3,9 +3,15 @@ import requests
 # from dotenv import load_dotenv
 
 # load_dotenv()  # auto load .env
+
+
+print("=== DEBUG ENV ===")
 print("MELHOR_ENVIO_TOKEN:", os.environ.get("MELHOR_ENVIO_TOKEN"))
-
-
+print("VARIÁVEIS DE AMBIENTE PRESENTES:")
+for key in os.environ:
+    if "MELHOR" in key or "TOKEN" in key:
+        print(f"{key}: {os.environ.get(key)}")
+print("=== FIM DEBUG ===")
 class MelhorEnvioService:
     def __init__(self):
         self.token = os.environ.get("MELHOR_ENVIO_TOKEN")
