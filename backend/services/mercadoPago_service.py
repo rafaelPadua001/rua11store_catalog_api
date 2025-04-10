@@ -4,9 +4,16 @@ from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 
 load_dotenv()
-sdk = mercadopago.SDK(os.getenv("MERCADO_PAGO_ACCESS_TOKEN_TEST"))
+
+def get_mercado_sdk():
+        sdk = mercadopago.SDK(os.getenv("MERCADO_PAGO_ACCESS_TOKEN_TEST"))
+        if not sdk:
+            raise RuntimeError("Variavel ACCess token nao definida")
+        return mercadopago.SDK(sdk)
+
 
 class PaymentStrategy(ABC):
+    
     @abstractmethod
     def create_payment(self, data):
         pass
