@@ -3,6 +3,8 @@ import requests
 from dotenv import load_dotenv
 
 load_dotenv()  # auto load .env
+print("Token MELHOR_ENVIO_TOKEN carregado:", os.getenv("MELHOR_ENVIO_TOKEN"))
+
 
 class MelhorEnvioService:
     def __init__(self):
