@@ -2,7 +2,9 @@ import os
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()  # auto load .env
+if os.getenv("RAILWAY_ENVIRONMENT") is None:
+    from dotenv import load_dotenv
+    load_dotenv()
 print("Token MELHOR_ENVIO_TOKEN carregado:", os.getenv("MELHOR_ENVIO_TOKEN"))
 
 
