@@ -45,7 +45,7 @@ class StockController:
         if not stock_item:
             jsonify({"error": "Item não encontrado"}), 404
 
-        product_id = stock_item.product_id
+        # product_id = stock_item.product_id
         
         deleted = Stock.delete(stock_id)
         if deleted:
