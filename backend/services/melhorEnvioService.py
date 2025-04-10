@@ -1,6 +1,6 @@
 import os
 import requests
-from dotenv import load_dotenv
+
 
 if os.getenv("RAILWAY_ENVIRONMENT") is None:
     from dotenv import load_dotenv
