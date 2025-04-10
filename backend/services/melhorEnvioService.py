@@ -8,7 +8,7 @@ print("MELHOR_ENVIO_TOKEN:", os.environ.get("MELHOR_ENVIO_TOKEN"))
 
 class MelhorEnvioService:
     def __init__(self):
-        self.token = os.getenv("MELHOR_ENVIO_TOKEN")
+        self.token = os.environ.get("MELHOR_ENVIO_TOKEN")
         self.baseUrl = "https://sandbox.melhorenvio.com.br/api/v2"
         self.token = os.getenv("MELHOR_ENVIO_TOKEN")
         self.headers = {
