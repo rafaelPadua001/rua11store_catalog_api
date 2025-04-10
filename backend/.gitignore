@@ -1,0 +1,16 @@
+# Ignorar arquivos de ambiente
+.env
+
+# Ignorar virtualenv (caso esteja dentro do projeto)
+venv/
+__pycache__/
+
+# Ignorar arquivos do sistema
+*.pyc
+*.pyo
+*.log
+
+# Ignorar IDEs
+.vscode/
+.idea/
+*.swp
