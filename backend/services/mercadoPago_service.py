@@ -6,10 +6,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_mercado_sdk():
-        sdk = mercadopago.SDK(os.getenv("MERCADO_PAGO_ACCESS_TOKEN_TEST"))
-        if not sdk:
+        access_token = os.getenv("MERCADO_PAGO_ACCESS_TOKEN_TEST")
+        if not access_token:
             raise RuntimeError("Variavel ACCess token nao definida")
-        return mercadopago.SDK(sdk)
+        return mercadopago.SDK(access_token)
+
+sdk = get_mercado_sdk()
 
 
 class PaymentStrategy(ABC):
@@ -20,18 +22,26 @@ class PaymentStrategy(ABC):
 
 class CreditCardPayment(PaymentStrategy):
     def create_payment(self, data):
+        
         payment_data = {
-           "transaction_amount": float(data["amount"]),
+           "transaction_amount": float(data["total"]),
             "token": data["card_token"],
             "description": data.get("description", "Compra com cartão de crédito"),
             "installments": int(data["installments"]),
             "payment_method_id": "visa",  # ou "master", "amex", etc.
             "payer": {
-                "email": data["payer_email"]
+            "email": data["payer_email"],  # Certifique-se de que o e-mail está vindo corretamente
+           # "first_name": data.get("first_name", "Nome"),  # Nome do pagador
+           # "last_name": data.get("last_name", "Sobrenome"),  # Sobrenome do pagador
+            "identification": {
+                "type": "CPF",  # Pode ser "CPF" ou "CNPJ", dependendo do tipo de documento
+                "number": data["payer_cpf"]  # CPF do pagador (certifique-se de ter essa informação)
             }
         }
-
-        return sdk.payment().create(payment_data)['response']
+        }
+        response = sdk.payment().create(payment_data)
+        print(response)
+        return response['response']
     
 class DebitCardPayment(PaymentStrategy):
     def create_payment(self, data):
