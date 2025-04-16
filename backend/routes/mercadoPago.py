@@ -14,8 +14,7 @@ mercadoPago_bp = Blueprint("payment", __name__)
 def payment():
     data = request.json
     payment_type = data.get('paymentType')
-    
-    print(data)
+   
     processor = None
 
     if payment_type == "credit":
