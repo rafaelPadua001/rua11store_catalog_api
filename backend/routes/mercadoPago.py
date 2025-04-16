@@ -8,12 +8,14 @@ from services.mercadoPago_service import (
 
 mercadoPago_bp = Blueprint("payment", __name__)
 
+
+
 @mercadoPago_bp.route("/payment", methods=["POST"])
 def payment():
     data = request.json
-    payment_type = data.get('type')
-
-
+    payment_type = data.get('paymentType')
+    
+    print(data)
     processor = None
 
     if payment_type == "credit":
