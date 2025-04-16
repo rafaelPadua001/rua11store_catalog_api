@@ -2,6 +2,7 @@ import mercadopago
 import os
 from abc import ABC, abstractmethod
 from dotenv import load_dotenv
+from models.payment import Payment
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ class PaymentStrategy(ABC):
 
 class CreditCardPayment(PaymentStrategy):
     def create_payment(self, data):
-        
+        print(data)
         payment_data = {
            "transaction_amount": float(data["total"]),
             "token": data["card_token"],
@@ -41,6 +42,22 @@ class CreditCardPayment(PaymentStrategy):
         }
         response = sdk.payment().create(payment_data)
         print(response)
+
+        result = response['response']
+
+        if result.get("status") == "approved":
+            payment = Payment(
+                total_value=result.get("transaction_amount"),
+                payment_date=result.get("date_approved"),  # vem em ISO8601
+                payment_type="crédito",  # pois estamos usando cartão
+                cpf=data["payer_cpf"],
+                email=data["payer_email"],
+                status=result["status"],
+                usuario_id=data["userId"],
+                products=data["products"]
+            )
+
+            payment.save()
         return response['response']
     
 class DebitCardPayment(PaymentStrategy):
