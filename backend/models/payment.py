@@ -17,6 +17,20 @@ class Payment:
         conn = sqlite3.connect('database.db')
         conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
         return conn
+    
+    @staticmethod
+    def get_all_payments():
+        conn = Payment.get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(""" 
+            SELECT * FROM payments ORDER BY payment_date DESC
+        """)
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [dict(row) for row in rows]
 
     def save(self):
         conn = self.get_db_connection()
