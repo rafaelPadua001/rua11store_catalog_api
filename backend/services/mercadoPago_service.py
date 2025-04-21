@@ -23,7 +23,7 @@ class PaymentStrategy(ABC):
 
 class CreditCardPayment(PaymentStrategy):
     def create_payment(self, data):
-       
+        print(data)
         payment_data = {
            "transaction_amount": float(data["total"]),
             "token": data["card_token"],
