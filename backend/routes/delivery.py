@@ -6,7 +6,7 @@ delivery_bp = Blueprint('delivery', __name__)
 @delivery_bp.route('/deliveries', methods=['GET'])
 def get_deliveries():
     deliveries = Delivery.get_all()
-    return jsonify([d.__dict__ for d in deliveries])
+    return jsonify([deliveries])
 
 @delivery_bp.route('/deliveries', methods=['POST'])
 def create_delivery():
