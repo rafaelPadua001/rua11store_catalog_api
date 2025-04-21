@@ -42,8 +42,15 @@
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
                         <v-icon small @click.stop="deleteProduct(item.id)">
+                            mdi-tab
+                        </v-icon>
+                        <v-icon small @click.stop="deleteProduct(item.id)">
+                            mdi-bookmark
+                        </v-icon>
+                        <v-icon small @click.stop="deleteProduct(item.id)">
                             mdi-delete
                         </v-icon>
+                        
                     </template>
                 </v-data-table>
             </v-card>
@@ -81,7 +88,7 @@ export default {
                 { text: "phone", value: "phone" },
                 { text: "Email", value: "userEmail" },
                 { text: "Price", value: "price" },
-                { text: "Delivery", value: "delivery_id" },
+                // { text: "Delivery", value: "delivery_id" },
                 { text: "Actions", value: "actions", width: "120px", align: "center", sortable: false },
             ],
         };
