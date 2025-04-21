@@ -23,7 +23,7 @@ class PaymentStrategy(ABC):
 
 class CreditCardPayment(PaymentStrategy):
     def create_payment(self, data):
-       
+        print(data)
         payment_data = {
            "transaction_amount": float(data["total"]),
             "token": data["card_token"],
@@ -41,10 +41,10 @@ class CreditCardPayment(PaymentStrategy):
         }
         }
         response = sdk.payment().create(payment_data)
-        print(response)
+        # print(response)
 
         result = response['response']
-
+       
         if result.get("status") == "approved":
             payment = Payment(
                 total_value=result.get("transaction_amount"),
@@ -54,9 +54,10 @@ class CreditCardPayment(PaymentStrategy):
                 email=data["payer_email"],
                 status=result["status"],
                 usuario_id=data["userId"],
-                products=data["products"]
+                products=data["products"],
+                address=data.get("address")
             )
-
+            
             payment.save()
         return response['response']
     

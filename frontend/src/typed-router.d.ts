@@ -24,6 +24,7 @@ declare module 'vue-router/auto-routes' {
     '/authenticator/profile': RouteRecordInfo<'/authenticator/profile', '/authenticator/profile', Record<never, never>, Record<never, never>>,
     '/authenticator/register': RouteRecordInfo<'/authenticator/register', '/authenticator/register', Record<never, never>, Record<never, never>>,
     '/categories/categories': RouteRecordInfo<'/categories/categories', '/categories/categories', Record<never, never>, Record<never, never>>,
+    '/delivery/delivery': RouteRecordInfo<'/delivery/delivery', '/delivery/delivery', Record<never, never>, Record<never, never>>,
     '/payments/payments': RouteRecordInfo<'/payments/payments', '/payments/payments', Record<never, never>, Record<never, never>>,
     '/products/products': RouteRecordInfo<'/products/products', '/products/products', Record<never, never>, Record<never, never>>,
     '/stock/stock': RouteRecordInfo<'/stock/stock', '/stock/stock', Record<never, never>, Record<never, never>>,
