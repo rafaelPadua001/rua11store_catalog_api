@@ -1,7 +1,8 @@
 import sqlite3
 
 class Delivery:
-    def __init__(self, product_id, user_id, recipient_name, street, number, complement, city, state, zip_code, country, phone, bairro, total_value, delivery_id, width=None, height=None, length=None, weight=None):
+    def __init__(self, id, product_id, user_id, recipient_name, street, number, complement, city, state, zip_code, country, phone, bairro, total_value, delivery_id, width=None, height=None, length=None, weight=None):
+        self.id = id
         self.product_id = product_id
         self.user_id = user_id
         self.recipient_name = recipient_name
@@ -23,6 +24,7 @@ class Delivery:
 
     def to_dict(self):
         return {
+            "id": self.id,
             "product_id": self.product_id,
             "user_id": self.user_id,
             "recipient_name": self.recipient_name,
@@ -60,6 +62,7 @@ class Delivery:
         deliveries = []
         for row in rows:
             delivery = Delivery(
+                row['id'],
                 row['product_id'],   
                 row['user_id'],
                 row['recipient_name'],
