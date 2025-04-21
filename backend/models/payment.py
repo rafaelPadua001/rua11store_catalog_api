@@ -54,6 +54,7 @@ class Payment:
 
                 payment_id = cursor.lastrowid
 
+                # Inserir os produtos do pagamento
                 for product in self.products:
                     if 'id' not in product:
                         print("Erro: 'id' não encontrado no produto:", product)
@@ -73,44 +74,39 @@ class Payment:
                         price
                     ))
 
-                    # Se há endereço, criar uma entrega
-                    if self.address:
-                        for product in self.products:
-                            delivery = Delivery(
-                                product_id=product['id'],
-                                user_id=self.usuario_id,
-                                recipient_name=self.address.get('recipient_name'),
-                                street=self.address.get('street'),
-                                number=self.address.get('number'),
-                                complement=self.address.get('complement'),
-                                city=self.address.get('city'),
-                                state=self.address.get('state'),
-                                zip_code=self.address.get('zip_code'),
-                                country=self.address.get('country'),
-                                phone=self.address.get('phone'),
-                                bairro=self.address.get('bairro')
-                            )
-                            cursor.execute("""
-                                INSERT INTO delivery (product_id, user_id, recipient_name, street, number, complement, city, state, zip_code, country, phone, bairro)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            """, (
-                                product['id'],
-                                self.usuario_id,
-                                self.address.get('recipient_name'),
-                                self.address.get('street'),
-                                self.address.get('number'),
-                                self.address.get('complement'),
-                                self.address.get('city'),
-                                self.address.get('state'),
-                                self.address.get('zip_code'),
-                                self.address.get('country'),
-                                self.address.get('phone'),
-                                self.address.get('bairro')
-                            ))
+                # Se há endereço, criar uma entrega
+                if self.address:
+                    for product in self.products:
+                        print(f"Address product: {product}")
+                        cursor.execute("""
+                            INSERT INTO delivery (
+                                product_id, user_id, recipient_name, street, number,
+                                complement, city, state, zip_code, country, phone, bairro,
+                                total_value, delivery_id, width, height, length, weight
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            product['id'],
+                            self.usuario_id,
+                            self.address.get('recipient_name', ''),
+                            self.address.get('street', ''),
+                            self.address.get('number', ''),
+                            self.address.get('complement', ''),
+                            self.address.get('city', ''),
+                            self.address.get('state', ''),
+                            self.address.get('zip_code', ''),
+                            self.address.get('country', ''),
+                            self.address.get('phone', ''),
+                            self.address.get('bairro', ''),
+                            self.address.get('total_value', 0),
+                            self.address.get('delivery_id', ''),
+                            product.get('width', 0),
+                            product.get('height', 0),
+                            product.get('length', 0),
+                            product.get('weight', 0)
+                        ))
 
         except sqlite3.Error as e:
             print(f"Erro ao salvar o pagamento: {e}")
             conn.rollback()
         finally:
-            conn.close()  # Garantir que a conexão será fechada
-
+            conn.close()
