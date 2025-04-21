@@ -80,6 +80,8 @@ export default {
                 { text: "country", value: "country" },
                 { text: "phone", value: "phone" },
                 { text: "Email", value: "userEmail" },
+                { text: "Price", value: "price" },
+                { text: "Delivery", value: "delivery_id" },
                 { text: "Actions", value: "actions", width: "120px", align: "center", sortable: false },
             ],
         };
@@ -118,6 +120,8 @@ export default {
                         bairro: delivery.bairro,
                         country: delivery.country,
                         phone: delivery.phone,
+                        price: delivery.total_value,
+                        delivery_id: delivery.delivery_id
                      //   email: delivery.userEmail,
 
                     }));
