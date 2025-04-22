@@ -41,10 +41,10 @@
 
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
-                        <v-icon small @click.stop="deleteProduct(item.id)">
+                        <!-- <v-icon small @click.stop="deleteProduct(item.id)">
                             mdi-tab
-                        </v-icon>
-                        <v-icon small @click.stop="deleteProduct(item.id)">
+                        </v-icon> -->
+                        <v-icon small @click.stop="createTag(item)">
                             mdi-bookmark
                         </v-icon>
                         <v-icon small @click.stop="deleteProduct(item.id)">
@@ -128,7 +128,15 @@ export default {
                         country: delivery.country,
                         phone: delivery.phone,
                         price: delivery.total_value,
-                        delivery_id: delivery.delivery_id
+                        delivery_id: delivery.delivery_id,
+                        email: delivery.email,
+                        product_name: delivery.product_name,
+                        product_price: delivery.product_price,
+                        height: delivery.height,
+                        width: delivery.width,
+                        length: delivery.length,
+                        weight: delivery.weight,
+                        cpf: delivery.cpf
                      //   email: delivery.userEmail,
 
                     }));
@@ -143,9 +151,19 @@ export default {
                 this.loading = false;
             }
         },
-        getCategoryName(categoryId) {
-            // Implemente aqui a lógica para buscar o nome da categoria baseado no categoryId
-            return "Categoria Exemplo"; // Exemplo de retorno
+        // getCategoryName(categoryId) {
+        //     // Implemente aqui a lógica para buscar o nome da categoria baseado no categoryId
+        //     return "Categoria Exemplo"; // Exemplo de retorno
+        // },
+        async createTag(item){
+            try{
+                const response = await api.post('/melhorEnvio/createTag', item);
+                this.$toast.success('Etiqueta enviada com sucesso');
+            }
+            catch(error){
+                console.log('erro ao enviar os dados da etiqueta', error);
+                this.$thoast.error('Erro ao enviar os dados para o backend');
+            }
         },
         deleteProduct(productId) {
             // Lógica para excluir o produto

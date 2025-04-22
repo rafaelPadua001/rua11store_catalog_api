@@ -50,3 +50,15 @@ def calculate_delivery():
     except KeyError as e:
         return jsonify({"error": f"Campo obrigatorio faltando {str(e)}"}), 400
     
+@melhorenvio_bp.route('/createTag', methods=['POST'])
+def crateTag():
+    data = request.get_json()
+
+    try:
+        service = MelhorEnvioService()
+        result, status_code = service.create_tag(data)  # Desempacota a tupla
+        return jsonify(result), status_code  # Usa o resultado diretamente
+
+    except Exception as e:
+        print('Error', str(e))
+        return jsonify({"error": "Erro ao criar etiquetas"}), 500

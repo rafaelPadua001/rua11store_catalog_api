@@ -1,7 +1,7 @@
 import sqlite3
 
 class Delivery:
-    def __init__(self, id, product_id, user_id, recipient_name, street, number, complement, city, state, zip_code, country, phone, bairro, total_value, delivery_id, width=None, height=None, length=None, weight=None):
+    def __init__(self, id, product_id, user_id, recipient_name, street, number, complement, city, state, zip_code, country, phone, bairro, total_value, delivery_id, width=None, height=None, length=None, weight=None, cpf=None):
         self.id = id
         self.product_id = product_id
         self.user_id = user_id
@@ -20,7 +20,8 @@ class Delivery:
         self.width = width  
         self.height = height  
         self.length = length  
-        self.weight = weight  
+        self.weight = weight 
+        self.cpf = cpf
 
     def to_dict(self):
         return {
@@ -42,7 +43,8 @@ class Delivery:
             "width": self.width,  
             "height": self.height,  
             "length": self.length,  
-            "weight": self.weight,  
+            "weight": self.weight,
+            "cpf": self.cpf 
         }
     @staticmethod
     def get_db_connection():
@@ -55,7 +57,21 @@ class Delivery:
     def get_all():
         conn = Delivery.get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM delivery")
+        cursor.execute("""
+            SELECT 
+                d.*, 
+                p.email, 
+                pp.product_name, 
+                pp.product_price, 
+                p.cpf  
+            FROM delivery d
+            LEFT JOIN (
+                SELECT usuario_id, id AS payment_id, email, cpf  -- Incluindo o CPF aqui
+                FROM payments
+                GROUP BY usuario_id
+            ) p ON d.user_id = p.usuario_id 
+            LEFT JOIN payments_product pp ON pp.payment_id = p.payment_id
+            """)
         rows = cursor.fetchall()
         conn.close()
 
@@ -80,9 +96,16 @@ class Delivery:
                 row['width'],  
                 row['height'],  
                 row['length'],  
-                row['weight'],  
+                row['weight'],
+                row['cpf'],
             )
-            deliveries.append(delivery.to_dict())
+
+            delivery_dict = delivery.to_dict()
+            delivery_dict['email'] = row['email']
+            delivery_dict['product_name'] = row['product_name']
+            delivery_dict['product_price'] = row['product_price']
+            delivery_dict['cpf'] = row['cpf']
+            deliveries.append(delivery_dict)
 
         return deliveries
 
