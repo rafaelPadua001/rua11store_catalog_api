@@ -1,7 +1,9 @@
 import sqlite3
 
 class Delivery:
-    def __init__(self, id, product_id, user_id, recipient_name, street, number, complement, city, state, zip_code, country, phone, bairro, total_value, delivery_id, width=None, height=None, length=None, weight=None, cpf=None):
+    def __init__(self, id, product_id, user_id, recipient_name, street, number,
+                  complement, city, state, zip_code, country, phone, bairro, total_value,
+                delivery_id, width=None, height=None, length=None, weight=None, cpf=None, melhorenvio_id=None, order_id=None):
         self.id = id
         self.product_id = product_id
         self.user_id = user_id
@@ -22,6 +24,8 @@ class Delivery:
         self.length = length  
         self.weight = weight 
         self.cpf = cpf
+        self.melhorenvio_id = melhorenvio_id
+        self.order_id = order_id
 
     def to_dict(self):
         return {
@@ -44,7 +48,9 @@ class Delivery:
             "height": self.height,  
             "length": self.length,  
             "weight": self.weight,
-            "cpf": self.cpf 
+            "cpf": self.cpf,
+            "melhorenvio_id": self.melhorenvio_id,
+            'order_id': self.order_id
         }
     @staticmethod
     def get_db_connection():
@@ -66,7 +72,7 @@ class Delivery:
                 p.cpf  
             FROM delivery d
             LEFT JOIN (
-                SELECT usuario_id, id AS payment_id, email, cpf  -- Incluindo o CPF aqui
+                SELECT usuario_id, id AS payment_id, email, cpf
                 FROM payments
                 GROUP BY usuario_id
             ) p ON d.user_id = p.usuario_id 
@@ -98,6 +104,8 @@ class Delivery:
                 row['length'],  
                 row['weight'],
                 row['cpf'],
+                row['melhorenvio_id'],
+                row['order_id']
             )
 
             delivery_dict = delivery.to_dict()
@@ -105,6 +113,8 @@ class Delivery:
             delivery_dict['product_name'] = row['product_name']
             delivery_dict['product_price'] = row['product_price']
             delivery_dict['cpf'] = row['cpf']
+            delivery_dict['melhorenvio_id'] = row['melhorenvio_id']
+            delivery_dict['order_id'] = row['order_id']
             deliveries.append(delivery_dict)
 
         return deliveries

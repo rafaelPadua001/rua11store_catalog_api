@@ -1,5 +1,6 @@
 import os
 import requests
+import sqlite3
 
 class MelhorEnvioService:
     def __init__(self):
@@ -10,8 +11,13 @@ class MelhorEnvioService:
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
+    def get_db_connection(self):
+        """Cria uma nova conexão com o banco de dados"""
+        conn = sqlite3.connect('database.db')
+        conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
+        return conn
 
-    def create_tag(self, data):
+    def create_tag(self, data, delivery_id=None):
         print(f"Dados recebidos para criar etiqueta: {data}")
 
         # Campos obrigatórios
@@ -43,28 +49,57 @@ class MelhorEnvioService:
         shipment_payload = self.build_shipment_payload(data, cpf_cnpj)
 
         try:
-            # Criando o envio
+            # Criando o envio (cart)
             shipment_data = self.create_shipment(shipment_payload)
             shipment_id = shipment_data["id"]
             print(f"ID do envio criado: {shipment_id}")
-
-            # Realizando checkout do envio
-            checkout_data = self.checkout_shipment(shipment_id)
-            print(f"Dados do checkout: {checkout_data}")
-
-            # Gerando a etiqueta
-            generate_data = self.generate_label(shipment_id)
-            print(f"Dados da etiqueta gerada: {generate_data}")
+           
+            # Atualizando a tabela 'delivery' com o ID do envio criado
+           
+            update = self.update_delivery_with_shipment_id(data, shipment_data)
 
             return {
-                "shipment": shipment_data,
-                "checkout": checkout_data,
-                "generate": generate_data
+                "message": "Envio criado com sucesso. Aguarde pagamento.",
+                "shipment": shipment_data
             }, 200
 
         except requests.exceptions.RequestException as e:
             print(f"Erro na requisição: {e}")
             return {"error": "Erro ao criar etiqueta", "exception": str(e)}, 500
+
+    def update_delivery_with_shipment_id(self, data, shipment_data):
+        print('Merdaaaa', data['id'], shipment_data)
+        # Aqui, você deve escrever a lógica para atualizar a tabela 'delivery'
+        # Exemplo: Atualizar as colunas 'melhorenvio_id' e 'order_id'
+        
+        try:
+            # Atualizando no banco de dados (ajuste conforme sua ORM ou método de acesso ao DB)
+            query = """
+            UPDATE delivery
+            SET melhorenvio_id = ?, order_id = ?
+            WHERE id = ?
+            """
+            params = (shipment_data['id'], shipment_data['protocol'], data['id'])
+
+            # Suponha que você tenha um método para executar essa query no seu banco de dados
+            self.execute_query(query, params)
+            print(f"Delivery ID atualizado com o melhorenvio_id {shipment_data['id']} e order_id {shipment_data['protocol']}")
+        except Exception as e:
+            print(f"Erro ao atualizar o delivery: {e}")
+
+
+    def execute_query(self, query, params=None):
+        """Executa uma query SQL no banco de dados"""
+        conn = self.get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(query, params or ())  # Executa a query com os parâmetros fornecidos
+            conn.commit()  # Faz o commit das alterações
+        except sqlite3.Error as e:
+            print(f"Erro ao executar query: {e}")
+            conn.rollback()  # Faz rollback em caso de erro
+        finally:
+            conn.close()  # Fecha a conexão
 
     def build_shipment_payload(self, data, cpf_cnpj):
         # Corrigindo a chave para enviar CPF ou CNPJ
@@ -105,21 +140,49 @@ class MelhorEnvioService:
         }
 
     def make_request(self, url, method, payload=None):
-        print(f"Enviando requisição {method.upper()} para: {url}")
-        response = requests.request(method, url, headers=self.headers, json=payload)
-        
-        print("Resposta da API:", response.text)
-        print("Status:", response.status_code)
-        
-        if response.status_code != 200:
-            print(f"Erro na requisição: {response.text}")
-            raise Exception(f"Erro na requisição: {response.text}")
-        
-        return response.json()
+        headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+
+        try:
+            if method.lower() == "post":
+                response = requests.post(url, headers=headers, json=payload)
+            elif method.lower() == "get":
+                response = requests.get(url, headers=headers)
+            else:
+                raise ValueError("Método HTTP não suportado")
+
+            # Verificando o código de status
+            if response.status_code == 200 or response.status_code == 201:
+                print(f"Requisição OK ({response.status_code})")
+                
+                # Verificar se a resposta não está vazia
+                if response.text.strip():  # Verifica se o corpo da resposta não é vazio
+                    try:
+                        return response.json()  # Retorna a resposta como JSON
+                    except ValueError as e:
+                        print(f"Erro ao tentar converter resposta para JSON: {e}")
+                        return None
+                else:
+                    print("Resposta da API está vazia.")
+                    return None
+            else:
+                print(f"Erro na requisição: {response.status_code} - {response.text}")
+                return None  # Retorna None em caso de erro
+        except Exception as e:
+            print(f"Erro na requisição: {e}")
+            return None  # Retorna None em caso de exceção
+
 
     def create_shipment(self, shipment_payload):
         url = f"{self.baseUrl}/me/cart"
         return self.make_request(url, "post", shipment_payload)
+
+    def checkout_cart(self):
+        url = f"{self.baseUrl}/cart/checkout"
+        return self.make_request(url, "post")
 
     def checkout_shipment(self, shipment_id):
         url = f"{self.baseUrl}/shipment/checkout"
@@ -140,3 +203,27 @@ class MelhorEnvioService:
         if len(cnpj) != 14 or not cnpj.isdigit():
             return False
         return True  # Pode adicionar a verificação do algoritmo de CNPJ aqui
+    
+    def checkItemCart(self, data):
+        print('Dados recebidos:', data)
+        order_id = data['order_id']  # Supondo que data seja um dicionário com 'order_id'
+
+        # URL da API do Melhor Envio
+        url = f"{self.baseUrl}/me/cart/{order_id}"
+        print(url)
+        # Usando o método make_request para fazer a requisição GET
+        item_data = self.make_request(url, "get")
+
+        if item_data and 'data' in item_data:  # Verificando se 'data' existe
+            items = item_data['data']
+            if items:  # Se houver itens no carrinho
+                print('Item encontrado no carrinho:', items)
+                return items  # Retorna os itens encontrados
+            else:
+                print('Carrinho está vazio.')
+                return None  # Caso o carrinho esteja vazio
+        else:
+            print('Erro na requisição ou dados não encontrados.')
+            return None  # Caso a resposta seja vazia ou não tenha 'data'
+
+

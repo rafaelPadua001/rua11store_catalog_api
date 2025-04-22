@@ -41,17 +41,28 @@
 
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
-                        <!-- <v-icon small @click.stop="deleteProduct(item.id)">
-                            mdi-tab
-                        </v-icon> -->
-                        <v-icon small @click.stop="createTag(item)">
-                            mdi-bookmark
-                        </v-icon>
-                        <v-icon small @click.stop="deleteProduct(item.id)">
-                            mdi-delete
-                        </v-icon>
-                        
-                    </template>
+    <!-- Ícone de criar etiqueta -->
+    <v-icon small @click.stop="createTag(item)">
+        mdi-cart
+    </v-icon>
+
+    <!-- Ícone de deletar produto -->
+    <v-icon small @click.stop="deleteProduct(item.id)">
+        mdi-delete
+    </v-icon>
+
+    <v-icon small @click.stop="deleteProduct(item.id)">
+        mdi-bookmark
+    </v-icon>
+
+    <!-- Botão de buscar item no carrinho -->
+    <v-btn 
+        small 
+        color="secondary" 
+        @click.stop="checkItemInCart(item)">
+        Verificar no Carrinho
+    </v-btn>
+</template>
                 </v-data-table>
             </v-card>
         </v-col>
@@ -91,6 +102,7 @@ export default {
                 // { text: "Delivery", value: "delivery_id" },
                 { text: "Actions", value: "actions", width: "120px", align: "center", sortable: false },
             ],
+            isPaymentButtonPayTagDisabled: true,
         };
     },
     computed: {
@@ -136,7 +148,9 @@ export default {
                         width: delivery.width,
                         length: delivery.length,
                         weight: delivery.weight,
-                        cpf: delivery.cpf
+                        cpf: delivery.cpf,
+                        melhorenvio_id: delivery.melhorenvio_id,
+                        order_id: delivery.order_id
                      //   email: delivery.userEmail,
 
                     }));
@@ -155,16 +169,49 @@ export default {
         //     // Implemente aqui a lógica para buscar o nome da categoria baseado no categoryId
         //     return "Categoria Exemplo"; // Exemplo de retorno
         // },
-        async createTag(item){
-            try{
+        async createTag(item) {
+            try {
                 const response = await api.post('/melhorEnvio/createTag', item);
-                this.$toast.success('Etiqueta enviada com sucesso');
-            }
-            catch(error){
-                console.log('erro ao enviar os dados da etiqueta', error);
-                this.$thoast.error('Erro ao enviar os dados para o backend');
+                
+                // Exibindo a resposta no console. Normalmente, a resposta está em response.data
+                console.log('Resposta da API:', response.data); // Isso é geralmente a parte importante
+
+                if(response.data.message == 'Envio criado com sucesso. Aguarde pagamento.'){
+                    this.isPaymentButtonPayTagDisabled  = false;
+                    this.$toast.success('Etiqueta enviada com sucesso');
+                }
+                else{
+                    this.$toast.error('Algo deu errado. Por favor, tente novamente.');
+                }
+                // Exibe uma mensagem de sucesso
+               
+            } catch (error) {
+                console.log('Erro ao enviar os dados da etiqueta:', error);
+                this.$toast.error('Erro ao enviar os dados para o backend');
             }
         },
+        async checkItemInCart(item){
+    try {
+        // Envia a requisição POST com o delivery_id no corpo
+        const response = await api.post(`/melhorEnvio/checkItemInCart/${item.id}`, {
+            order_id: item.order_id  // Envia o delivery_id no corpo da requisição
+        }, {
+            headers: {
+                'Content-Type': 'application/json'  // Define o cabeçalho Content-Type para application/json
+            }
+        });
+
+        if (response.data.status === 'success') {
+            this.$toast.success('O item está no carrinho');
+            window.alert('O item está no carrinho');
+        } else {
+            this.$toast.info('O item não está no carrinho');
+        }
+    } catch (error) {
+        console.log('Erro ao verificar item no carrinho:', error);
+        this.$toast.error('Erro ao verificar item no carrinho');
+    }
+},
         deleteProduct(productId) {
             // Lógica para excluir o produto
             console.log("Deletando produto:", productId);

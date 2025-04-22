@@ -62,3 +62,16 @@ def crateTag():
     except Exception as e:
         print('Error', str(e))
         return jsonify({"error": "Erro ao criar etiquetas"}), 500
+    
+@melhorenvio_bp.route('/checkItemInCart/<int:id>', methods=["POST"])
+def checkItemInCart(id):
+    data = request.get_json()
+    
+    try:
+        service = MelhorEnvioService()
+        result, status_code = service.checkItemCart(data)
+        return jsonify(result), status_code
+    except Exception as e:
+        print('Error', str(e))
+        return jsonify({"error": "Erro ao consultar item"}), 500
+
