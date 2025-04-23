@@ -63,7 +63,7 @@ def crateTag():
         print('Error', str(e))
         return jsonify({"error": "Erro ao criar etiquetas"}), 500
     
-@melhorenvio_bp.route('/checkItemInCart/<int:id>', methods=["POST"])
+@melhorenvio_bp.route('/checkItemInCart/<string:id>', methods=["POST"])
 def checkItemInCart(id):
     data = request.get_json()
     
