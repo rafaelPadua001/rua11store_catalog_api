@@ -60,7 +60,7 @@
                             mdi-file-pdf-box
                         </v-icon>
                         <!-- Ícone de deletar produto -->
-                        <v-icon small @click.stop="deleteProduct(item.id)">
+                        <v-icon small @click.stop="deleteItemCart(item)">
                             mdi-delete
                         </v-icon>
                     </template>
@@ -362,7 +362,7 @@ export default {
         },
         async pdfTag(item){
             try{
-                response = await api.post('melhorEnvio/pdfTag',{
+                const response = await api.post('melhorEnvio/pdfTag',{
                     melhorenvio_id: item.melhorenvio_id
                 });
 
@@ -378,9 +378,31 @@ export default {
                 // this.$toast.error('Erro ao pagar a etiqueta');
             }
         },
-        deleteProduct(productId) {
-            // Lógica para excluir o produto
-            console.log("Deletando produto:", productId);
+        async deleteItemCart(item) {
+            console.log(item);
+          try{
+            const response = await api.delete('melhorEnvio/deleteItemCart',{
+                data: {melhorenvio_id: item.melhorenvio_id}
+            });
+            console.log(response)
+            if(response.data && response.data.status == 'success' || response.status == 204){
+                window.alert('Item deletado com sucesso');
+                this.cartItems = this.cartItems.filter(cartItem => cartItem.id !== item.id);
+            }
+            else{
+                window.alert('Erro ao deletar o item');
+            }
+          }
+          catch(error){
+            if(error.response){
+                    window.alert('item não encontrado no carrinho:', error.response.data);
+                  //  this.$toast.error('Erro ao verificar item no carrinho');
+                }
+                else{
+                    console.log('Erro desconhecido:', error);
+                 //   this.$toast.error('Erro desconhecido');
+                }
+          }
         },
     }
 };

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.melhorEnvioService import MelhorEnvioService
 import os;
+from flask_cors import cross_origin
 
 melhorenvio_bp = Blueprint('melhorEnvio', __name__)
 melhor_envio = MelhorEnvioService()
@@ -111,4 +112,26 @@ def payTag():
     except Exception as e:
         print('Error', str(e))
         return jsonify({"error": "Erro ao pagar etiqueta"}), 500
+    
+@melhorenvio_bp.route('/deleteItemCart', methods=["DELETE", "OPTIONS"])
+@cross_origin()  # Habilita CORS para essa rota
+def deleteItemCart():
+    data = request.get_json()
+
+    try:
+        print(f"Recebido ID para deleção: {data['melhorenvio_id']}")  # Adiciona log para depuração
+        service = MelhorEnvioService()
+        result, status_code = service.deleteItemCart(data)
+
+        if status_code == 204:
+            # Se o status code for 204, a API foi bem-sucedida mas não há conteúdo a ser retornado
+            return jsonify({"status": "success"}), 204
+        else:
+            # Caso contrário, retorne o resultado como está
+            return jsonify(result), status_code
+    except Exception as e:
+        print('Error', str(e))
+        return jsonify({"error": "Erro ao deletar item do carrinho"}), 500
+
+
     
