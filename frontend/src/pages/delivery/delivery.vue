@@ -1,6 +1,6 @@
 <template>
     <v-row justify="center">
-        <v-col cols="12" md="8" lg="8" xl="6">
+        <v-col cols="12" md="12" lg="10" xl="10" sm="12">
             <v-card class="pa-4">
                 <v-card-title class="d-flex justify-center">
                     <h1 class="text-h5">Delivery Management</h1>
@@ -45,83 +45,92 @@
                         <v-icon small @click.stop="createTag(item)">
                             mdi-cart
                         </v-icon>
-                        
-                        <!-- Botão de buscar item no carrinho -->
-                        <v-btn small color="secondary" @click.stop="checkItemInCart(item)">
-                            Verificar no Carrinho
-                        </v-btn>
 
-                        <v-icon small @click.stop="deleteProduct(item.id)">
+                        <!-- Botão de buscar item no carrinho -->
+                        <v-icon small @click.stop="checkItemInCart(item)">
+                            mdi-file-search
+                        </v-icon>
+
+                        <v-icon small @click.stop="shipmentGenerate(item)">
                             mdi-bookmark
                         </v-icon>
 
-                         <!-- Ícone de deletar produto -->
-                         <v-icon small @click.stop="deleteProduct(item.id)">
+                        <!-- Ícone de criar etiqueta -->
+                        <v-icon small @click.stop="pdfTag(item)">
+                            mdi-file-pdf-box
+                        </v-icon>
+                        <!-- Ícone de deletar produto -->
+                        <v-icon small @click.stop="deleteProduct(item.id)">
                             mdi-delete
                         </v-icon>
                     </template>
                 </v-data-table>
 
                 <v-dialog v-model="dialogCheckItemCart" max-width="600px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">Detalhes do Produto</span>
-        </v-card-title>
+                    <v-card>
+                        <v-card-title>
+                            <span class="headline">Detalhes do Produto</span>
+                        </v-card-title>
 
-            <v-card-subtitle> 
-           <v-row v-for="item in cartItems.data.products">
-            <v-col cols="12" sm="6">
-              <strong>Nome do Produto:</strong> {{ item.name }}
-            </v-col>
-             <v-col cols="12" sm="6">
-              <strong>Status:</strong> {{ cartItems.data.status }}
-            </v-col>
-             <v-col cols="12" sm="6">
-              <strong>Protocolo:</strong> {{ cartItems.data.protocol }}
-            </v-col>
-        <v-col cols="12" sm="6">
-              <strong>Quote:</strong> {{ cartItems.data.quote }}
-            </v-col> 
-            <v-col cols="12" sm="6">
-              <strong>Preço:</strong> {{ cartItems.data.price }}
-            </v-col>
-            <v-col cols="12" sm="6">
-              <strong>Entrega (máximo):</strong> {{ cartItems.data.delivery_max }} dias
-            </v-col> 
-          </v-row>
-        </v-card-subtitle>
+                        <v-card-subtitle>
+                            <v-row v-for="item in cartItems.data.products">
+                                <v-col cols="12" sm="6">
+                                    <strong>Nome do Produto:</strong> {{ item.name }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Status:</strong> {{ cartItems.data.status }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Protocolo:</strong> {{ cartItems.data.protocol }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Quote:</strong> {{ cartItems.data.quote }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Preço:</strong> {{ cartItems.data.price }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Entrega (máximo):</strong> {{ cartItems.data.delivery_max }} dias
+                                </v-col>
+                            </v-row>
+                        </v-card-subtitle>
 
-        <v-card-subtitle>
-          <v-row>
-            <v-col cols="12" sm="6">
-              <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
-            </v-col>
-            <v-col cols="12" sm="6">
-              <strong>Endereço:</strong> {{ cartItems.data.to.address }}
-            </v-col>
-            <v-col cols="12" sm="6">
-              <strong>Cidade:</strong> {{ cartItems.data.to.city }}
-            </v-col>
-            <v-col cols="12" sm="6">
-              <strong>Estado:</strong> {{ cartItems.data.to.state }}
-            </v-col>
-            <v-col cols="12" sm="6">
-              <strong>Telefone:</strong> {{ cartItems.data.to.phone }}
-            </v-col>
-            <v-col cols="12" sm="6">
-              <strong>Email:</strong> {{ cartItems.data.to.email }}
-            </v-col>
-          </v-row>
-        </v-card-subtitle> 
+                        <v-card-subtitle>
+                            <v-row>
+                                <v-col cols="12" sm="6">
+                                    <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Endereço:</strong> {{ cartItems.data.to.address }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Cidade:</strong> {{ cartItems.data.to.city }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Estado:</strong> {{ cartItems.data.to.state }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Telefone:</strong> {{ cartItems.data.to.phone }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Email:</strong> {{ cartItems.data.to.email }}
+                                </v-col>
+                            </v-row>
+                        </v-card-subtitle>
 
-        <v-card-actions>
-          <v-btn color="green" text @click="dialogCheckItemCart = false">Fechar</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+                        <v-card-actions>
+                             <!-- Botão de compra de etiqueta no carrinho -->
+                              <v-btn small @click.stop="shipmentCheckout(cartItems.data)">
+                                checkout
+                              </v-btn>
+                            
+                            <v-btn color="green" text @click="dialogCheckItemCart = false">Close</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
             </v-card>
 
-          
+
         </v-col>
     </v-row>
 </template>
@@ -250,40 +259,125 @@ export default {
             }
         },
         async checkItemInCart(item) {
-    try {
-        const response = await api.post(`/melhorEnvio/checkItemInCart/${item.id}`, {
-            melhorenvio_id: item.melhorenvio_id
-        }, {
-            headers: {
-                'Content-Type': 'application/json'
+            try {
+                const response = await api.post(`/melhorEnvio/checkItemInCart/${item.id}`, {
+                    melhorenvio_id: item.melhorenvio_id
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+
+
+                if (response.status === 200 && response.data && response.data.status === 'success') {
+                    // this.$toast.success('O item está no carrinho');
+                    //window.alert('O item está no carrinho');
+                    this.cartItems = response.data;
+
+                    this.dialogCheckItemCart = true;
+                } else {
+                    this.$toast.info('O item não está no carrinho');
+                }
+
+            } catch (error) {
+                // Verifique se o erro contém a propriedade response
+                if (error.response) {
+                    window.alert('item não encontrado no carrinho:', error.response.data);
+                    this.$toast.error('Erro ao verificar item no carrinho');
+                } else {
+                    // Se não houver response, logue o erro simples
+                    console.log('Erro desconhecido:', error);
+                    this.$toast.error('Erro desconhecido');
+                }
             }
-        });
+        },
+        async shipmentCheckout(item) {
+            console.log(item.id);
+            try {
+                const response = await api.post(`/melhorEnvio/shipmentCheckout`, {
+                    melhorenvio_id: item.id
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-        
 
-        if (response.status === 200 && response.data && response.data.status === 'success') {
-            // this.$toast.success('O item está no carrinho');
-            //window.alert('O item está no carrinho');
-            this.cartItems = response.data;
-          
-            this.dialogCheckItemCart = true;
-        } else {
-            this.$toast.info('O item não está no carrinho');
-        }
 
-    } catch (error) {
-        // Verifique se o erro contém a propriedade response
-        if (error.response) {
-            window.alert('item não encontrado no carrinho:', error.response.data);
-            this.$toast.error('Erro ao verificar item no carrinho');
-        } else {
-            // Se não houver response, logue o erro simples
-            console.log('Erro desconhecido:', error);
-            this.$toast.error('Erro desconhecido');
-        }
-    }
-},
+                if (response.status === 200 && response.data && response.data.status === 'success') {
+                    // this.$toast.success('O item está no carrinho');
+                    //window.alert('O item está no carrinho');
+                    this.cartItems = response.data;
 
+                    this.dialogCheckItemCart = true;
+                } else {
+                    this.$toast.info('O item não está no carrinho');
+                }
+
+            } catch (error) {
+                // Verifique se o erro contém a propriedade response
+                if (error.response) {
+                    window.alert('item não encontrado no carrinho:', error.response.data);
+                    this.$toast.error('Erro ao verificar item no carrinho');
+                } else {
+                    // Se não houver response, logue o erro simples
+                    console.log('Erro desconhecido:', error);
+                   // this.$toast.error('Erro desconhecido');
+                }
+            }
+        },
+        async shipmentGenerate(item){
+            console.log(item);
+            try{
+                const response = await api.post(`/melhorEnvio/shipmentGenerate`, {
+                    melhorenvio_id: item.melhorenvio_id
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 200 && response.data && response.data.status === 'success') {
+                    //this.$toast.success('O item está no carrinho');
+                    //window.alert('O item está no carrinho');
+                   // this.cartItems = response.data;
+
+                    //this.dialogCheckItemCart = true;
+                    console.log('Resposta da API:', response.data);
+                } else {
+                    window.alert('O item não está no carrinho');
+                }
+            }
+            catch(error){
+                if(error.response){
+                    window.alert('item não encontrado no carrinho:', error.response.data);
+                  //  this.$toast.error('Erro ao verificar item no carrinho');
+                }
+                else{
+                    console.log('Erro desconhecido:', error);
+                    this.$toast.error('Erro desconhecido');
+                }
+            }
+        },
+        async pdfTag(item){
+            try{
+                response = await api.post('melhorEnvio/pdfTag',{
+                    melhorenvio_id: item.melhorenvio_id
+                });
+
+                if(response.data && response.data.status == 'success'){
+                    window.alert('Etiqueta paga com sucesso');
+                }
+                else{
+                    window.alert('Erro ao pagar a etiqueta');
+                }
+            }
+            catch(error){
+                console.log('Erro ao pagar a etiqueta:', error);
+                // this.$toast.error('Erro ao pagar a etiqueta');
+            }
+        },
         deleteProduct(productId) {
             // Lógica para excluir o produto
             console.log("Deletando produto:", productId);

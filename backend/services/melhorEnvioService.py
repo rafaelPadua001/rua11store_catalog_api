@@ -58,7 +58,7 @@ class MelhorEnvioService:
                 print("Resposta da API:", e.response.text)
 
     def create_tag(self, data, delivery_id=None):
-        print(f"Dados recebidos para criar etiqueta: {data}")
+        # print(f"Dados recebidos para criar etiqueta: {data}")
 
         # Campos obrigatórios
         required_fields = [
@@ -92,7 +92,7 @@ class MelhorEnvioService:
             # Criando o envio (cart)
             shipment_data = self.create_shipment(shipment_payload)
             shipment_id = shipment_data["id"]
-            print(f"ID do envio criado: {shipment_id}")
+            # print(f"ID do envio criado: {shipment_id}")
            
             # Atualizando a tabela 'delivery' com o ID do envio criado
            
@@ -123,7 +123,7 @@ class MelhorEnvioService:
 
             # Suponha que você tenha um método para executar essa query no seu banco de dados
             self.execute_query(query, params)
-            print(f"Delivery ID atualizado com o melhorenvio_id {shipment_data['id']} e order_id {shipment_data['protocol']}")
+            # print(f"Delivery ID atualizado com o melhorenvio_id {shipment_data['id']} e order_id {shipment_data['protocol']}")
         except Exception as e:
             print(f"Erro ao atualizar o delivery: {e}")
 
@@ -224,13 +224,29 @@ class MelhorEnvioService:
         url = f"{self.baseUrl}/cart/checkout"
         return self.make_request(url, "post")
 
-    def checkout_shipment(self, shipment_id):
-        url = f"{self.baseUrl}/shipment/checkout"
-        return self.make_request(url, "post", {"shipments": [shipment_id]})
+    def checkout_shipment(self, data):
+        melhorenvio_id = data['melhorenvio_id']
 
-    def generate_label(self, shipment_id):
-        url = f"{self.baseUrl}/shipment/generate"
-        return self.make_request(url, "post", {"shipments": [shipment_id]})
+
+        url = f"{self.baseUrl}/me/shipment/checkout"
+        payload = {"shipments": [melhorenvio_id]}
+
+
+        item_data = self.make_request(url, "post", payload)
+       
+        if item_data:
+            print('Item encontrado no carrinho:', item_data)
+            return {"status": "success", "data": item_data}, 200
+        else:
+            print('Erro na requisição ou dados não encontrados.')
+            return {"status": "not_found"}, 404
+        
+    def generate_label(self, data):
+        print(data)
+        melhorenvio_id = data['melhorenvio_id']
+
+        url = f"{self.baseUrl}/me/shipment/generate"
+        return self.make_request(url, "post", {"shipments": [melhorenvio_id]})
 
     def is_valid_cpf(self, cpf):
         # Lógica simples para validar CPF (pode ser melhorado)
@@ -245,11 +261,11 @@ class MelhorEnvioService:
         return True  # Pode adicionar a verificação do algoritmo de CNPJ aqui
     
     def checkItemCart(self, data):
-        print('Dados recebidos:', data)
+        # print('Dados recebidos:', data)
         melhorenvio_id = data['melhorenvio_id']
 
         url = f"{self.baseUrl}/me/cart/{melhorenvio_id}"
-        print(url)
+        # print(url)
 
         item_data = self.make_request(url, "get")
 
@@ -260,4 +276,15 @@ class MelhorEnvioService:
             print('Erro na requisição ou dados não encontrados.')
             return {"status": "not_found"}, 404
 
+    def pdfTag(self, data):
+        melhorenvio_id = data['melhorenvio_id']
+        url = f"{self.baseUrl}/me/shipment/print?shipments[]=<melhorenvio_id>"
+        payload = {"shipments": [melhorenvio_id]}
 
+        response = requests.post(url, headers=self.headers)
+
+        if response.status_code == 200:
+            return response.content
+        else:
+            print(f"Erro ao gerar PDF: {response.status_code} - {response.text}")
+            return None
