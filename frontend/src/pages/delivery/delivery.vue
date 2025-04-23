@@ -41,30 +41,87 @@
 
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
-    <!-- Ícone de criar etiqueta -->
-    <v-icon small @click.stop="createTag(item)">
-        mdi-cart
-    </v-icon>
+                        <!-- Ícone de criar etiqueta -->
+                        <v-icon small @click.stop="createTag(item)">
+                            mdi-cart
+                        </v-icon>
+                        
+                        <!-- Botão de buscar item no carrinho -->
+                        <v-btn small color="secondary" @click.stop="checkItemInCart(item)">
+                            Verificar no Carrinho
+                        </v-btn>
 
-    <!-- Ícone de deletar produto -->
-    <v-icon small @click.stop="deleteProduct(item.id)">
-        mdi-delete
-    </v-icon>
+                        <v-icon small @click.stop="deleteProduct(item.id)">
+                            mdi-bookmark
+                        </v-icon>
 
-    <v-icon small @click.stop="deleteProduct(item.id)">
-        mdi-bookmark
-    </v-icon>
-
-    <!-- Botão de buscar item no carrinho -->
-    <v-btn 
-        small 
-        color="secondary" 
-        @click.stop="checkItemInCart(item)">
-        Verificar no Carrinho
-    </v-btn>
-</template>
+                         <!-- Ícone de deletar produto -->
+                         <v-icon small @click.stop="deleteProduct(item.id)">
+                            mdi-delete
+                        </v-icon>
+                    </template>
                 </v-data-table>
+
+                <v-dialog v-model="dialogCheckItemCart" max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Detalhes do Produto</span>
+        </v-card-title>
+
+            <v-card-subtitle> 
+           <v-row v-for="item in cartItems.data.products">
+            <v-col cols="12" sm="6">
+              <strong>Nome do Produto:</strong> {{ item.name }}
+            </v-col>
+             <v-col cols="12" sm="6">
+              <strong>Status:</strong> {{ cartItems.data.status }}
+            </v-col>
+             <v-col cols="12" sm="6">
+              <strong>Protocolo:</strong> {{ cartItems.data.protocol }}
+            </v-col>
+        <v-col cols="12" sm="6">
+              <strong>Quote:</strong> {{ cartItems.data.quote }}
+            </v-col> 
+            <v-col cols="12" sm="6">
+              <strong>Preço:</strong> {{ cartItems.data.price }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <strong>Entrega (máximo):</strong> {{ cartItems.data.delivery_max }} dias
+            </v-col> 
+          </v-row>
+        </v-card-subtitle>
+
+        <v-card-subtitle>
+          <v-row>
+            <v-col cols="12" sm="6">
+              <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <strong>Endereço:</strong> {{ cartItems.data.to.address }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <strong>Cidade:</strong> {{ cartItems.data.to.city }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <strong>Estado:</strong> {{ cartItems.data.to.state }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <strong>Telefone:</strong> {{ cartItems.data.to.phone }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <strong>Email:</strong> {{ cartItems.data.to.email }}
+            </v-col>
+          </v-row>
+        </v-card-subtitle> 
+
+        <v-card-actions>
+          <v-btn color="green" text @click="dialogCheckItemCart = false">Fechar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
             </v-card>
+
+          
         </v-col>
     </v-row>
 </template>
@@ -84,6 +141,7 @@ export default {
         return {
             loading: false,
             deliveries: [],
+            cartItems: [],
             headers: [
                 { text: "ID", value: "id" },
                 { text: "User ID", value: "user_id" },
@@ -103,6 +161,7 @@ export default {
                 { text: "Actions", value: "actions", width: "120px", align: "center", sortable: false },
             ],
             isPaymentButtonPayTagDisabled: true,
+            dialogCheckItemCart: false,
         };
     },
     computed: {
@@ -151,7 +210,7 @@ export default {
                         cpf: delivery.cpf,
                         melhorenvio_id: delivery.melhorenvio_id,
                         order_id: delivery.order_id
-                     //   email: delivery.userEmail,
+                        //   email: delivery.userEmail,
 
                     }));
 
@@ -172,46 +231,59 @@ export default {
         async createTag(item) {
             try {
                 const response = await api.post('/melhorEnvio/createTag', item);
-                
+
                 // Exibindo a resposta no console. Normalmente, a resposta está em response.data
                 console.log('Resposta da API:', response.data); // Isso é geralmente a parte importante
 
-                if(response.data.message == 'Envio criado com sucesso. Aguarde pagamento.'){
-                    this.isPaymentButtonPayTagDisabled  = false;
+                if (response.data.message == 'Envio criado com sucesso. Aguarde pagamento.') {
+                    this.isPaymentButtonPayTagDisabled = false;
                     this.$toast.success('Etiqueta enviada com sucesso');
                 }
-                else{
+                else {
                     this.$toast.error('Algo deu errado. Por favor, tente novamente.');
                 }
                 // Exibe uma mensagem de sucesso
-               
+
             } catch (error) {
                 console.log('Erro ao enviar os dados da etiqueta:', error);
                 this.$toast.error('Erro ao enviar os dados para o backend');
             }
         },
-        async checkItemInCart(item){
+        async checkItemInCart(item) {
     try {
-        // Envia a requisição POST com o delivery_id no corpo
         const response = await api.post(`/melhorEnvio/checkItemInCart/${item.id}`, {
-            order_id: item.order_id  // Envia o delivery_id no corpo da requisição
+            melhorenvio_id: item.melhorenvio_id
         }, {
             headers: {
-                'Content-Type': 'application/json'  // Define o cabeçalho Content-Type para application/json
+                'Content-Type': 'application/json'
             }
         });
 
-        if (response.data.status === 'success') {
-            this.$toast.success('O item está no carrinho');
-            window.alert('O item está no carrinho');
+        
+
+        if (response.status === 200 && response.data && response.data.status === 'success') {
+            // this.$toast.success('O item está no carrinho');
+            //window.alert('O item está no carrinho');
+            this.cartItems = response.data;
+          
+            this.dialogCheckItemCart = true;
         } else {
             this.$toast.info('O item não está no carrinho');
         }
+
     } catch (error) {
-        console.log('Erro ao verificar item no carrinho:', error);
-        this.$toast.error('Erro ao verificar item no carrinho');
+        // Verifique se o erro contém a propriedade response
+        if (error.response) {
+            window.alert('item não encontrado no carrinho:', error.response.data);
+            this.$toast.error('Erro ao verificar item no carrinho');
+        } else {
+            // Se não houver response, logue o erro simples
+            console.log('Erro desconhecido:', error);
+            this.$toast.error('Erro desconhecido');
+        }
     }
 },
+
         deleteProduct(productId) {
             // Lógica para excluir o produto
             console.log("Deletando produto:", productId);

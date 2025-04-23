@@ -197,7 +197,7 @@ class MelhorEnvioService:
             # Verificando o código de status
             if response.status_code == 200 or response.status_code == 201:
                 print(f"Requisição OK ({response.status_code})")
-                
+                print("Resposta bruta:", response.text)
                 # Verificar se a resposta não está vazia
                 if response.text.strip():  # Verifica se o corpo da resposta não é vazio
                     try:
@@ -246,24 +246,18 @@ class MelhorEnvioService:
     
     def checkItemCart(self, data):
         print('Dados recebidos:', data)
-        order_id = data['order_id']  # Supondo que data seja um dicionário com 'order_id'
+        melhorenvio_id = data['melhorenvio_id']
 
-        # URL da API do Melhor Envio
-        url = f"{self.baseUrl}/me/cart/{order_id}"
+        url = f"{self.baseUrl}/me/cart/{melhorenvio_id}"
         print(url)
-        # Usando o método make_request para fazer a requisição GET
+
         item_data = self.make_request(url, "get")
 
-        if item_data and 'data' in item_data:  # Verificando se 'data' existe
-            items = item_data['data']
-            if items:  # Se houver itens no carrinho
-                print('Item encontrado no carrinho:', items)
-                return items  # Retorna os itens encontrados
-            else:
-                print('Carrinho está vazio.')
-                return None  # Caso o carrinho esteja vazio
+        if item_data:
+            print('Item encontrado no carrinho:', item_data)
+            return {"status": "success", "data": item_data}, 200
         else:
             print('Erro na requisição ou dados não encontrados.')
-            return None  # Caso a resposta seja vazia ou não tenha 'data'
+            return {"status": "not_found"}, 404
 
 
