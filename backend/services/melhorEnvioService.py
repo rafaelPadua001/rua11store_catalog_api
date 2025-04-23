@@ -16,6 +16,46 @@ class MelhorEnvioService:
         conn = sqlite3.connect('database.db')
         conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
         return conn
+    
+    def delivery_calculate(self, zipcode_origin, zipcode_destiny, weight, height, width, length, secure_value=0, quantity=1):
+        url = f"{self.baseUrl}/me/shipment/calculate"
+
+        products = [
+            {
+                "width": width,
+                "height": height,
+                "length": length,
+                "weight": weight,
+                "insurance_value": secure_value,
+                "quantity": quantity
+            }
+        ]
+
+        payload = {
+            "from": {
+                "postal_code": zipcode_origin
+            },
+            "to": {
+                "postal_code": zipcode_destiny
+            },
+            "products": products,
+            "services": [],  # get all carrier
+            "options": {
+                "receipt": False,
+                "own_hand": False,
+                "collect": False
+            },
+        }
+
+        try:
+            
+            response = requests.post(url, headers=self.headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print('Erro ao calcular frete:', e)
+            if e.response is not None:
+                print("Resposta da API:", e.response.text)
 
     def create_tag(self, data, delivery_id=None):
         print(f"Dados recebidos para criar etiqueta: {data}")
