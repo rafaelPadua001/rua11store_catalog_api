@@ -74,4 +74,41 @@ def checkItemInCart(id):
     except Exception as e:
         print('Error', str(e))
         return jsonify({"error": "Erro ao consultar item"}), 500
+    
+@melhorenvio_bp.route('shipmentCheckout', methods=["POST"])
+def shipmentCheckout():
+    data = request.get_json()
+    print('Data', data)
+    try:
+        service = MelhorEnvioService()
+        result, status_code = service.checkout_shipment(data)
+        return jsonify(result), status_code
+    except Exception as e:
+        print('Error', str(e))
+        return jsonify({"error": "Erro ao consultar item"}), 500
 
+
+@melhorenvio_bp.route('/shipmentGenerate', methods=["POST"])
+def shipmentGenerate():
+    data = request.get_json()
+
+    try:
+        service = MelhorEnvioService()
+        result, status_code = service.generate_label(data)
+        return jsonify(result), status_code
+    except Exception as e:
+        print('Error', str(e))
+        return jsonify({"error": "Erro ao gerar remessa"}), 500
+    
+@melhorenvio_bp.route('/pdfTag', methods=["POST"])
+def payTag():
+    data = request.get_json()
+
+    try:
+        service = MelhorEnvioService()
+        result, status_code = service.pdfTag(data)
+        return jsonify(result), status_code
+    except Exception as e:
+        print('Error', str(e))
+        return jsonify({"error": "Erro ao pagar etiqueta"}), 500
+    
