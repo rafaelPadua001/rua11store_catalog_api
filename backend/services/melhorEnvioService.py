@@ -187,19 +187,28 @@ class MelhorEnvioService:
         }
 
         try:
+            # Realiza a requisição de acordo com o método
             if method.lower() == "post":
                 response = requests.post(url, headers=headers, json=payload)
             elif method.lower() == "get":
                 response = requests.get(url, headers=headers)
+            elif method.lower() == "delete":
+                response = requests.delete(url, headers=headers, json=payload)
             else:
                 raise ValueError("Método HTTP não suportado")
 
-            # Verificando o código de status
-            if response.status_code == 200 or response.status_code == 201:
+            # Verifica se a resposta tem um status adequado
+            if response.status_code in [200, 201, 204]:
                 print(f"Requisição OK ({response.status_code})")
                 print("Resposta bruta:", response.text)
-                # Verificar se a resposta não está vazia
-                if response.text.strip():  # Verifica se o corpo da resposta não é vazio
+                
+                # Se o status for 204 (sem conteúdo), não há resposta no corpo
+                if response.status_code == 204:
+                    print("Resposta da API está vazia.")
+                    return {"status": "success"}  # Retorna um status de sucesso, mesmo sem corpo
+
+                # Verifica se a resposta não está vazia para outros status
+                if response.text.strip():  # Verifica se o corpo da resposta não está vazio
                     try:
                         return response.json()  # Retorna a resposta como JSON
                     except ValueError as e:
@@ -211,9 +220,17 @@ class MelhorEnvioService:
             else:
                 print(f"Erro na requisição: {response.status_code} - {response.text}")
                 return None  # Retorna None em caso de erro
-        except Exception as e:
+
+        except requests.exceptions.RequestException as e:
+            # Captura erros de rede ou outros erros da requisição
             print(f"Erro na requisição: {e}")
             return None  # Retorna None em caso de exceção
+
+        except Exception as e:
+            # Captura outros erros inesperados
+            print(f"Erro inesperado: {e}")
+        return None  # Retorna None em caso de exceção genérica
+
 
 
     def create_shipment(self, shipment_payload):
@@ -279,7 +296,7 @@ class MelhorEnvioService:
     def pdfTag(self, data):
         melhorenvio_id = data['melhorenvio_id']
         url = f"{self.baseUrl}/me/shipment/print?shipments[]=<melhorenvio_id>"
-        payload = {"shipments": [melhorenvio_id]}
+        # payload = {"shipments": [melhorenvio_id]}
 
         response = requests.post(url, headers=self.headers)
 
@@ -288,3 +305,30 @@ class MelhorEnvioService:
         else:
             print(f"Erro ao gerar PDF: {response.status_code} - {response.text}")
             return None
+        
+    def deleteItemCart(self, data):
+        print(data)
+        melhorenvio_id = data['melhorenvio_id']
+        print(melhorenvio_id)
+        url = f"{self.baseUrl}/me/cart/{melhorenvio_id}"
+
+        # Realiza a requisição de delete
+        response = self.make_request(url, "delete")
+        print(response)
+
+        # Verifica a resposta da requisição
+        if response is None:
+            # Caso o retorno seja None (erro na requisição)
+            return {"status": "error", "message": "Erro na requisição."}, 500
+        
+        # Verifica se a resposta contém a chave 'status'
+        if response.get("status") == "success":
+            print('Item deletado com sucesso.')
+            return {"status": "success"}, 204
+        elif response.get("status") == "not_found":
+            print('Erro: item não encontrado no carrinho.')
+            return {"status": "not_found"}, 404
+        else:
+            print(f'Erro desconhecido: {response}')
+            return {"status": "error", "message": "Erro na requisição."}, 500
+
