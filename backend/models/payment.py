@@ -1,5 +1,6 @@
 import sqlite3
 from models.delivery import Delivery
+from models.order import Order
 from datetime import datetime
 
 class Payment:
@@ -54,6 +55,17 @@ class Payment:
 
                 payment_id = cursor.lastrowid
 
+                cursor.execute(""" 
+                    INSERT INTO orders(user_id, payment_id, shipment_info, total_amount, order_date)
+                            VALUES(?, ?, ?, ?, datetime('now'))
+                """,( self.usuario_id,
+                    payment_id,
+                    self.address.get('zip_code', '') if self.address else '',
+                    self.total_value
+                ))
+
+                order_id = cursor.lastrowid
+
                 # Inserir os produtos do pagamento
                 for product in self.products:
                     if 'id' not in product:
@@ -72,6 +84,17 @@ class Payment:
                         product['name'],
                         quantity,
                         price
+                    ))
+                       # order_items
+                    cursor.execute("""
+                        INSERT INTO order_items (order_id, product_id, quantity, unit_price, total_price)
+                        VALUES (?, ?, ?, ?, ?)
+                    """, (
+                        order_id,
+                        product['id'],
+                        quantity,
+                        price,
+                        self.total_value
                     ))
 
                 # Se há endereço, criar uma entrega

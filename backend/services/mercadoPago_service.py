@@ -64,7 +64,7 @@ class CreditCardPayment(PaymentStrategy):
 class DebitCardPayment(PaymentStrategy):
     def create_payment(self, data):
         payment_data = { 
-            "transaction_amount": float(data["amount"]),
+            "transaction_amount": float(data["total"]),
             "token": data["card_token"],
             "description": data.get("description", "Compra com cartão de débito"),
             "payment_method_id": data["payment_method_id"],
