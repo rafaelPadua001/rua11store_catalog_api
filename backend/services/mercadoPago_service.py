@@ -67,12 +67,35 @@ class DebitCardPayment(PaymentStrategy):
             "transaction_amount": float(data["total"]),
             "token": data["card_token"],
             "description": data.get("description", "Compra com cartão de débito"),
-            "payment_method_id": data["payment_method_id"],
+            "installments": 1,
+            #"payment_method_id": "Debin_transfer",
             "payer": {
-                "email": data["payer_email"]
+                "email": data["payer_email"],
+                "identification": {
+                    "type": "CPF",
+                    "number": data["payer_cpf"]
+                }
             }
         }
-        return sdk.payment().crete(payment_data)['response']
+        response = sdk.payment().create(payment_data)
+         
+        result = response['response']
+       
+        if result.get("status") == "approved":
+            payment = Payment(
+                total_value=result.get("transaction_amount"),
+                payment_date=result.get("date_approved"),  # vem em ISO8601
+                payment_type="débito",  # pois estamos usando cartão
+                cpf=data["payer_cpf"],
+                email=data["payer_email"],
+                status=result["status"],
+                usuario_id=data["userId"],
+                products=data["products"],
+                address=data.get("address")
+            )
+            
+            payment.save()
+        return response['response']
 
 class PixPayment(PaymentStrategy):
     def create_payment(self, data):
