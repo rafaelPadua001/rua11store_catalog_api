@@ -21,32 +21,74 @@ class Order:
         conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
         return conn
     
+    @staticmethod
     def get_all():
-        orders = []
+        orders = {}
         conn = Order.get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute(""" 
-            SELECT * FROM orders
+            SELECT 
+                o.id AS order_id,
+                o.user_id,
+                o.payment_id,
+                o.shipment_info,
+                o.total_amount AS order_total,
+                o.order_date,
+                o.status,
+                oi.id AS item_id,
+                oi.product_id,
+                oi.quantity,
+                oi.unit_price,
+                oi.total_price,
+                p.name AS product_name,
+                p.description as product_description,
+                p.price as product_price,
+                p.image_path as product_image       
+            FROM 
+                orders o
+            JOIN 
+                order_items oi ON o.id = oi.order_id
+            JOIN
+                products p ON oi.product_id = p.id
+            ORDER BY 
+                o.id DESC
         """)
 
         rows = cursor.fetchall()
         conn.close()
 
         for row in rows:
-            order = Order(
-                row['id'],
-                row['user_id'],
-                row['payment_id'],
-                row['shipment_info'],
-                row['order_date'],
-                row['status'],
-                row['total_amount']
-            )
-        orders_dict = order.to_dict()
-        orders.append(orders_dict)
+            order_id = row['order_id']
+            
+            # Se ainda não adicionamos esse pedido ao dicionário, criamos ele
+            if order_id not in orders:
+                orders[order_id] = Order(
+                    id=row['order_id'],
+                    user_id=row['user_id'],
+                    payment_id=row['payment_id'],
+                    shipment_info=row['shipment_info'],
+                    order_date=row['order_date'],
+                    total_amount=row['order_total'],
+                    status=row['status'],
+                    items=[]
+                )
 
-        return orders
+            # Adiciona o item à lista de items da order
+            orders[order_id].items.append({
+                "item_id": row['item_id'],
+                "product_id": row['product_id'],
+                "quantity": row['quantity'],
+                "unit_price": row['unit_price'],
+                "total_price": row['total_price'],
+                "product_name": row['product_name'],
+                "product_description": row['product_description'],
+                "product_image": row['product_image']
+            })
+
+        # Converte cada pedido em dicionário
+        return [order.to_dict() for order in orders.values()]
+
 
     def to_dict(self):
         return {
@@ -56,8 +98,10 @@ class Order:
             "shipment_info": self.shipment_info,
             "order_date": self.order_date,
             "status": self.status,
-            "total_amount": self.total_amount
+            "total_amount": self.total_amount,
+            "items": self.items  # já é uma lista de dicionários
         }
+
 
     def save(self):
         try:
