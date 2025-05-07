@@ -71,6 +71,10 @@ class Payment:
                     if 'id' not in product:
                         print("Erro: 'id' não encontrado no produto:", product)
                         continue
+                    product_id = product.get('id') if isinstance(product.get('id'), int) else product.get('product_id')
+
+                    
+                    
                     product_name = product.get('name') or product.get('product_name')
                     if not product_name:
                         raise ValueError("Nome do produto ausente")
@@ -83,7 +87,7 @@ class Payment:
                         VALUES (?, ?, ?, ?, ?)
                     """, (
                         payment_id,
-                        product['id'],
+                        product_id,
                         product_name,
                         quantity,
                         price
