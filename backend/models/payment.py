@@ -6,7 +6,7 @@ from controllers.stockController import StockController
 
 class Payment:
     def __init__(self, payment_id, total_value, payment_date, payment_type, cpf, email, status, usuario_id, products, address=None):
-        self.payment_id = payment_id,
+        self.payment_id = payment_id
         self.total_value = total_value
         self.payment_date = payment_date or datetime.now().isoformat()
         self.payment_type = payment_type
@@ -37,6 +37,7 @@ class Payment:
 
     def save(self):
         conn = self.get_db_connection()
+     
         try:
             with conn:
                 cursor = conn.cursor()
@@ -44,7 +45,7 @@ class Payment:
                 # Inserir pagamento
                 cursor.execute("""
                     INSERT INTO payments (payment_id, total_value, payment_date, payment_type, cpf, email, status, usuario_id)
-                    VALUES (? ,?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     self.payment_id,
                     self.total_value,
@@ -56,13 +57,15 @@ class Payment:
                     self.usuario_id
                 ))
 
-                payment_id = cursor.lastrowid
+                conn.commit()
+                
+                id = cursor.lastrowid
 
                 cursor.execute(""" 
                     INSERT INTO orders(user_id, payment_id, shipment_info, total_amount, order_date)
                             VALUES(?, ?, ?, ?, datetime('now'))
                 """,( self.usuario_id,
-                    payment_id,
+                    id,
                     self.address.get('zip_code', '') if self.address else '',
                     self.total_value
                 ))
@@ -89,7 +92,7 @@ class Payment:
                         INSERT INTO payments_product(payment_id, product_id, product_name, product_quantity, product_price)
                         VALUES (?, ?, ?, ?, ?)
                     """, (
-                        payment_id,
+                        id,
                         product_id,
                         product_name,
                         quantity,
