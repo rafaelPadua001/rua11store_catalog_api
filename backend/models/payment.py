@@ -2,6 +2,7 @@ import sqlite3
 from models.delivery import Delivery
 from models.order import Order
 from datetime import datetime
+from controllers.stockController import StockController
 
 class Payment:
     def __init__(self, total_value, payment_date, payment_type, cpf, email, status, usuario_id, products, address=None):
@@ -134,6 +135,17 @@ class Payment:
                             product.get('length', 0),
                             product.get('weight', 0)
                         ))
+                        
+                    for product in self.products:
+                        
+                        product_id = product.get('id') if isinstance(product.get('id'), int) else product.get('product_id')
+                        
+                        stock_quantity = StockController.update_stock_quantity(product_id, quantity, conn=conn)
+                        if 'error' in stock_quantity:
+                            print(f"Erro ao atualizar o estoque para o produto {product_id}: {stock_quantity['error']}")
+
+
+
 
         except sqlite3.Error as e:
             print(f"Erro ao salvar o pagamento: {e}")

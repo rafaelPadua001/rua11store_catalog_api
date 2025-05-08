@@ -1,3 +1,4 @@
+import sqlite3
 from flask import jsonify, request
 from models.stock import Stock
 from controllers.productController import ProductController 
@@ -38,14 +39,56 @@ class StockController:
             return jsonify({"message": "Item atualizado com sucesso!"}), 200 
 
         return jsonify({"error": "Item não encontrado"}), 404
+    
+    @staticmethod
+    def update_stock_quantity(product_id, quantity, conn=None):
+        """Atualiza a quantidade de um item do estoque"""
+        should_close = False
+        if conn is None:
+            conn = Stock.get_db_connection()
+            should_close = True
 
+        try:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            cursor.execute(""" 
+                SELECT product_quantity, id FROM stock WHERE id_product = ?
+            """, (product_id,))
+            row = cursor.fetchone()
+
+            if row is None:
+                return False
+            
+            current_quantity = row['product_quantity']
+            new_quantity = current_quantity - quantity
+
+            if new_quantity < 0:
+                return {"error": "Quantidade insuficiente em estoque"}
+
+            cursor.execute(
+                "UPDATE stock SET product_quantity = ? WHERE id = ?",
+                (new_quantity, row['id'])
+            )
+
+            return {
+                "stock_id": row['id'],
+                "old_quantity": current_quantity,
+                "new_quantity": new_quantity
+            }
+        finally:
+            if should_close:
+                conn.close()
+
+
+            
     @staticmethod
     def delete_stock(stock_id): 
         stock_item = Stock.get_by_id(stock_id)
         if not stock_item:
             jsonify({"error": "Item não encontrado"}), 404
 
-        # product_id = stock_item.product_id
+        product_id = stock_item.product_id
         
         deleted = Stock.delete(stock_id)
         if deleted:

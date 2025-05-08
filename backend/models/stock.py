@@ -103,6 +103,47 @@ class Stock:
         updated = cursor.rowcount > 0
         conn.close()
         return updated
+    
+    @staticmethod
+    def update_stock_quantity(product_id, quantity, conn=None):
+        """Atualiza a quantidade de um item do estoque"""
+        should_close = False
+        if conn is None:
+            conn = Stock.get_db_connection()
+            should_close = True
+
+        try:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute(""" 
+                SELECT product_quantity, id FROM stock WHERE id_product = ?
+            """, (product_id,))
+            row = cursor.fetchone()
+
+            if row is None:
+                return False
+            
+            current_quantity = row['product_quantity']
+            new_quantity = current_quantity - quantity
+
+            if new_quantity < 0:
+                return {"error": "Quantidade insuficiente em estoque"}
+
+            cursor.execute(
+                "UPDATE stock SET product_quantity = ? WHERE id = ?",
+                (new_quantity, row['id'])
+            )
+            conn.commit()
+
+            return {
+                "stock_id": row['id'],
+                "old_quantity": current_quantity,
+                "new_quantity": new_quantity
+            }
+        finally:
+            if should_close:
+                conn.close()
+
 
     @staticmethod
     def delete(stock_id):
