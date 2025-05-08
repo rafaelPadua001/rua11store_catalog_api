@@ -47,7 +47,7 @@ class PaymentController:
         try:
             url = f"https://api.mercadopago.com/v1/payments/{payment_id}"
             headers = {  
-                "Authorization": f"Bearer {os.getenv('MERCADOPAGO_ACCESS_TOKEN')}"
+                "Authorization": f"Bearer {os.getenv('MERCADOPAGO_ACCESS_TOKEN_TESTE')}"
             }
 
             response = requests.get(url, headers=headers)
