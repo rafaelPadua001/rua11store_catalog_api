@@ -47,7 +47,7 @@ class CreditCardPayment(PaymentStrategy):
 
         result = response['response']
        
-        if result.get("status") == "approved":
+        if result.get("status") in ["approved", "pending", "in_process"]:
             payment = Payment(
                 payment_id=result.get("id"),
                 total_value=result.get("transaction_amount"),

@@ -39,7 +39,7 @@ class PaymentController:
                     bairro=address_data.get('bairro'),
                     phone=address_data.get('phone')
                 )
-                print('Delivery', delivery)
+               
                 delivery.create()
             return {'message': 'Pagamento salvo com sucesso.'}, 201
         except Exception as e:

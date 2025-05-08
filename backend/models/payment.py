@@ -113,7 +113,7 @@ class Payment:
                 # Se há endereço, criar uma entrega
                 if self.address:
                     for product in self.products:
-                        print(f"Address product: {product}")
+                        
                         cursor.execute("""
                             INSERT INTO delivery (
                                 product_id, user_id, recipient_name, street, number,
