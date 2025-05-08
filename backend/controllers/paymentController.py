@@ -3,6 +3,7 @@ from models.delivery import Delivery;
 import os
 from dotenv import load_dotenv
 import requests
+from models.payment import Payment
 
 load_dotenv()
 
@@ -77,3 +78,18 @@ class PaymentController:
                 'message': 'Erro interno ao buscar pagamento.',
                 'error': str(e)
             }, 500
+        
+    @staticmethod
+    def update_status_payment(payment_id, status):
+        try:
+            if not payment_id or not status:
+                return {"error": "payment_id e status são obrigatórios."}, 400
+
+            updated = Payment.update_status(payment_id, status)
+
+            if updated:
+                return {"message": f"Status do pagamento {payment_id} atualizado para {status}."}, 200
+            else:
+                return {"error": f"Pagamento {payment_id} não encontrado."}, 404
+        except Exception as e:
+            return {"error": str(e)}, 500
