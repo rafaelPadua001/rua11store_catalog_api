@@ -2,6 +2,7 @@ from models.payment import Payment
 from models.delivery import Delivery;
 import os
 from dotenv import load_dotenv
+import requests
 
 load_dotenv()
 
@@ -68,18 +69,7 @@ class PaymentController:
             else:
                 print(f"Erro ao buscar pagamento: {response.status_code} - {response.text}")
                 return None
-            payment = Payment.get_payment_by_id(payment_id)
-            if payment:
-                return {
-                    'status': 200,
-                    'message': 'Pagamento encontrado com sucesso.',
-                    'payment': payment
-                }, 200
-            else:
-                return {
-                    'status': 404,
-                    'message': 'Pagamento não encontrado.'
-                }, 404
+           
         except Exception as e:
             return {
                 'status': 500,
