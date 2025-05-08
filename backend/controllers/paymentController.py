@@ -10,6 +10,7 @@ class PaymentController:
     def processar_pagamento(dados_pagamento):
         try:
             payment = Payment(
+                payment_id=dados_pagamento['payment_id'],
                 total_value=dados_pagamento['total_value'],
                 payment_date=dados_pagamento.get('date_approved'),
                 payment_type=dados_pagamento['payment_type'],
@@ -47,7 +48,7 @@ class PaymentController:
         try:
             url = f"https://api.mercadopago.com/v1/payments/{payment_id}"
             headers = {  
-                "Authorization": f"Bearer {os.getenv('MERCADOPAGO_ACCESS_TOKEN_TESTE')}"
+                "Authorization": f"Bearer {os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')}"
             }
 
             response = requests.get(url, headers=headers)
