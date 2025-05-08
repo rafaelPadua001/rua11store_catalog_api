@@ -52,10 +52,6 @@ class ProductController:
         imagem = request.files.get("imagem")
         product_name = ProductController.formatar_nome(name) if name else "produto_sem_nome"
         imagem_path = ProductController.upload_imagem(imagem, product_name) if imagem else None
-        width = request.form.get('width')
-        height = request.form.get('height')
-        weight = request.form.get('weight')
-        length = request.form.get('length')
 
         user_id = get_jwt_identity()
         if not user_id:
@@ -70,12 +66,7 @@ class ProductController:
                 subcategory_id=subcategory_id,
                 image_path=imagem_path,
                 quantity=quantity,
-                width=width,
-                height=height,
-                weight=weight,
-                length=length,
                 user_id=user_id
-
             )
             novo_produto.save()
             
@@ -86,10 +77,6 @@ class ProductController:
                 "product_name": novo_produto.name,
                 "product_price": novo_produto.price,
                 "product_quantity": novo_produto.quantity,
-                "product_widht": novo_produto.width,
-                "product_height": novo_produto.height,
-                "product_weight": novo_produto.weight,
-                "product_length": novo_produto.lenght,
                 "variations": None,
             }
             Stock.create(stock_data)
@@ -116,15 +103,11 @@ class ProductController:
         category_id = request.form.get("category_id", product.category_id)
         subcategory_id = request.form.get("subcategory_id", product.subcategory_id)
         quantity = request.form.get("quantity", product.quantity)
-        width = request.form.get('width', product.width)
-        height = request.form.get('height', product.height)
-        weight = request.form.get('weight', product.weight)
         imagem = request.files.get("imagem")
-        length = request.form.get('length', product.length)
         imagem_path = ProductController.upload_imagem(imagem, name) if imagem else product.image_path
 
         try:
-            product.update(name, description, price, category_id, subcategory_id, quantity, width, height, weight, length, imagem_path)
+            product.update(name, description, price, category_id, subcategory_id, quantity, imagem_path)
             stock_data = {
                 "id_product": product.id,
                 "user_id": product.user_id,
@@ -132,13 +115,8 @@ class ProductController:
                 "product_name": product.name,
                 "product_price": float(product.price),
                 "product_quantity": product.quantity,
-                "product_width": product.width,
-                "product_height": product.height,
-                "product_weight": product.weight,
-                "product_lenght": product.length,
                 "variations": None,
             }
-
             stock_id = Stock.get_stock_id_by_product(product.id)
             if stock_id:
                 Stock.update(stock_id, stock_data)

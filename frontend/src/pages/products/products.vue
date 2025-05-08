@@ -57,17 +57,14 @@
                     <v-card-text>
                         <v-container>
                             <v-row>
-                          
                                 <v-col cols="12">
                                     <v-select v-model="editedProduct.category_id" :items="mainCategories"
-                                        label="Category" item-title="name" item-text="name" item-value="id" outlined
-                                        dense></v-select>
+                                        label="Category" item-title="name" item-text="name" item-value="id" outlined dense></v-select>
                                 </v-col>
 
                                 <v-col cols="12" v-if="subcategories.length">
                                     <v-select v-model="editedProduct.subcategory_id" :items="subcategories"
-                                        label="Subcategory" item-title="name" item-text="name" item-value="id" outlined
-                                        dense></v-select>
+                                        label="Subcategory" item-title="name" item-text="name" item-value="id" outlined dense></v-select>
                                 </v-col>
 
                                 <v-col cols="12">
@@ -92,25 +89,6 @@
 
                                 <v-col cols="6">
                                     <v-text-field v-model="editedProduct.quantity" label="Quantity" type="number"
-                                        outlined dense></v-text-field>
-                                </v-col>
-
-                                <v-col cols="4">
-                                    <v-text-field v-model="editedProduct.width" label="width(cm)" type="number" outlined
-                                        dense></v-text-field>
-                                </v-col>
-                                <v-col cols="4">
-                                    <v-text-field v-model="editedProduct.height" label="Height (cm)" type="number"
-                                        outlined dense></v-text-field>
-                                </v-col>
-
-                                <v-col cols="4">
-                                    <v-text-field v-model="editedProduct.weight" label="Weight (kg)" type="number"
-                                        outlined dense></v-text-field>
-                                </v-col>
-
-                                <v-col cols="4">
-                                    <v-text-field v-model="editedProduct.length" label="length (cm)" type="number"
                                         outlined dense></v-text-field>
                                 </v-col>
                             </v-row>
@@ -155,8 +133,6 @@ export default {
                 description: "",
                 price: 0,
                 quantity: 1,
-                width: 1,
-                length: 1,
             },
             products: [],
             categories: [],
@@ -184,16 +160,16 @@ export default {
             return this.editedIndex === -1 ? "New Product" : "Edit Product";
         },
         formattedPrice: {
-            get() {
-                return this.editedProduct.price !== null && this.editedProduct.price !== undefined
-                    ? Number(this.editedProduct.price).toFixed(2).replace(".", ",") // Garante sempre 2 casas decimais
-                    : "";
-            },
-            set(value) {
-                let numericValue = parseFloat(value.replace(/[^0-9,]/g, "").replace(",", "."));
-                this.editedProduct.price = isNaN(numericValue) ? 0.00 : parseFloat(numericValue.toFixed(2)); // Mantém como número
-            }
-        }
+    get() {
+        return this.editedProduct.price !== null && this.editedProduct.price !== undefined
+            ? Number(this.editedProduct.price).toFixed(2).replace(".", ",") // Garante sempre 2 casas decimais
+            : "";
+    },
+    set(value) {
+        let numericValue = parseFloat(value.replace(/[^0-9,]/g, "").replace(",", "."));
+        this.editedProduct.price = isNaN(numericValue) ? 0.00 :  parseFloat(numericValue.toFixed(2)); // Mantém como número
+    }
+}
 
     },
     created() {
@@ -217,7 +193,6 @@ export default {
             try {
                 const response = await api.get("/products");
                 this.products = response.data;
-                console.log(this.products);
             } catch (error) {
                 console.error("Error loading products:", error);
             } finally {
@@ -251,10 +226,6 @@ export default {
                 formData.append("subcategory_id", this.editedProduct.subcategory_id || "");
                 formData.append("quantity", this.editedProduct.quantity || 1);
                 formData.append("imagem", this.editedProduct.image || "");
-                formData.append('width', this.editedProduct.width || "");
-                formData.append('height', this.editedProduct.height || "");
-                formData.append('weight', this.editedProduct.weight || "");
-                formData.append('length', this.editedProduct.length || "");
 
                 const config = {
                     headers: {
