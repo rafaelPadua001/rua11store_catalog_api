@@ -38,7 +38,20 @@ class StockController:
             return jsonify({"message": "Item atualizado com sucesso!"}), 200 
 
         return jsonify({"error": "Item não encontrado"}), 404
+    
+    @staticmethod
+    def update_stock_quantity(stock_id):
+        
+        stock_item = Stock.get_by_id(stock_id)
+        if not stock_item:
+            
+            return jsonify({"error": "Item de estoque não encontrado"}), 404
 
+        stock_dict = dict(stock_item)
+        updated_quantity = Stock.update_stock_quantity(stock_id, 1)
+        if updated_quantity:
+            return jsonify({"message": "Quantidade de estoque atualizada com sucesso", "stock_id": stock_dict}), 200
+            
     @staticmethod
     def delete_stock(stock_id): 
         stock_item = Stock.get_by_id(stock_id)
