@@ -3,7 +3,7 @@ import sqlite3
 class Product:
     def __init__(self, id=None, name=None, description=None, price=None, 
                  category_id=None, subcategory_id=None, image_path=None, 
-                 quantity=1, user_id=None):
+                 quantity=1, width=None, height=None, weight=None, length=None, user_id=None):
         self.id = id
         self.name = name
         self.description = description
@@ -12,6 +12,10 @@ class Product:
         self.subcategory_id = subcategory_id
         self.image_path = image_path
         self.quantity = quantity
+        self.width = width
+        self.height = height
+        self.weight = weight
+        self.length = length
         self.user_id = user_id  
 
     @staticmethod
@@ -32,19 +36,21 @@ class Product:
                 cursor.execute("""
                     UPDATE products 
                     SET name=?, description=?, price=?, category_id=?, 
-                        subcategory_id=?, image_path=?, quantity=?, user_id=?
-                    WHERE id=?
+                        subcategory_id=?, image_path=?, quantity=?, width=?, height=?, weight=?, length=?, 
+                            user_id=? WHERE id=?
                 """, (self.name, self.description, self.price, self.category_id, 
-                      self.subcategory_id, self.image_path, self.quantity, 
-                      self.user_id, self.id))
+                      self.subcategory_id, self.image_path, self.quantity, self.width, self.height, 
+                      self.weight, self.length, self.user_id, self.id))
             else:
                 # Insere um novo produto
                 cursor.execute("""
                     INSERT INTO products (name, description, price, category_id, 
-                                        subcategory_id, image_path, quantity, user_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                                        subcategory_id, image_path, quantity, width,
+                                height, weight, length, user_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?)
                 """, (self.name, self.description, self.price, self.category_id, 
-                      self.subcategory_id, self.image_path, self.quantity, self.user_id))
+                      self.subcategory_id, self.image_path, self.quantity, self.width,
+                        self.height, self.weight, self.length, self.user_id))
                 self.id = cursor.lastrowid  # Obtém o ID do produto recém-criado
             
             conn.commit()  # Aplica as alterações
@@ -58,7 +64,7 @@ class Product:
         finally:
             conn.close()  # Sempre fecha a conexão, mesmo em caso de erro
 
-    def update(self, name, description, price, category_id, subcategory_id, quantity, image_path):
+    def update(self, name, description, price, category_id, subcategory_id, quantity, width, height, weight, length, image_path):
         """Atualiza os dados de um produto existente no banco de dados"""
         if not self.id:
             print("Erro: Não é possível atualizar um produto sem ID.")
@@ -71,6 +77,10 @@ class Product:
         self.subcategory_id = subcategory_id
         self.quantity = quantity
         self.image_path = image_path
+        self.width = width
+        self.height = height
+        self.weight = weight
+        self.length = length
 
         conn = self.get_db_connection()
         try:
@@ -78,10 +88,12 @@ class Product:
             cursor.execute("""
                 UPDATE products 
                 SET name=?, description=?, price=?, category_id=?, 
-                    subcategory_id=?, image_path=?, quantity=?
-                WHERE id=?
+                    subcategory_id=?, image_path=?, quantity=?, width=?,
+                    height=?, weight=?, length=? WHERE id=?
             """, (self.name, self.description, self.price, self.category_id, 
-                self.subcategory_id, self.image_path, self.quantity, self.id))
+                self.subcategory_id, self.image_path, self.quantity, self.width,
+                self.height, self.weight, self.length, self.id
+            ))
 
             conn.commit()
             return True
@@ -181,6 +193,10 @@ class Product:
             subcategory_id=row['subcategory_id'],
             image_path=row['image_path'],
             quantity=row['quantity'],
+            width=row['width'],
+            height=row['height'],
+            weight=row['weight'],
+            length=row['length'],
             user_id=row['user_id']
         )
 
@@ -195,5 +211,9 @@ class Product:
             "subcategory_id": self.subcategory_id,
             "image_path": self.image_path,
             "quantity": self.quantity,
+            "width": self.width,
+            "height": self.height,
+            "weight": self.weight,
+            "length": self.length,
             "user_id": self.user_id
         }

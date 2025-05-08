@@ -23,10 +23,6 @@ def get_produto_by_id(stock_id):
 def update_product(stock_id):
     return StockController.update_stock(stock_id)
 
-@stock_bp.route("/update-stock-quantity/<int:stock_id>", methods=["POST"], strict_slashes=False)
-def update_stock_quantity(stock_id):
-    return StockController.update_stock_quantity(stock_id)
-
 @stock_bp.route("/<int:stock_id>", methods=["DELETE"], strict_slashes=False)
 def delete_product(stock_id):
     return StockController.delete_stock(stock_id)

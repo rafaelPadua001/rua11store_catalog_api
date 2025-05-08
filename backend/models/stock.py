@@ -103,33 +103,6 @@ class Stock:
         updated = cursor.rowcount > 0
         conn.close()
         return updated
-    
-    @staticmethod
-    def update_stock_quantity(stock_id, quantity):
-        """Atualiza a quantidade de um item do stock"""
-        conn = Stock.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(""" 
-            SELECT product_quantity from stock where id = ?
-        """, (stock_id,))
-        row = cursor.fetchone()
-
-        if row is None:
-            conn.close()
-            return False
-        
-        current_quantity = row['product_quantity']
-        new_quantity = current_quantity - quantity
-        
-        if new_quantity < 0:
-            conn.close()
-            return {"error": "Quantidade insuficiente em estoque"}
-
-        conn.execute("UPDATE stock SET product_quantity = ? WHERE id = ?", (new_quantity, stock_id))
-        conn.commit()
-        conn.close()
-
-        return {"stock_id": stock_id, "old_quantity": current_quantity, "new_quantity": new_quantity}
 
     @staticmethod
     def delete(stock_id):
