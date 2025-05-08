@@ -148,12 +148,32 @@ class Payment:
                         stock_quantity = StockController.update_stock_quantity(product_id, quantity, conn=conn)
                         if 'error' in stock_quantity:
                             print(f"Erro ao atualizar o estoque para o produto {product_id}: {stock_quantity['error']}")
-
-
-
-
         except sqlite3.Error as e:
             print(f"Erro ao salvar o pagamento: {e}")
             conn.rollback()
         finally:
             conn.close()
+
+    @staticmethod
+    def update_status(self, payment_id, status):
+        try:
+            conn = self.get_db_connection() 
+            cursor = conn.cursor()
+
+            cursor.execute(
+                "UPDATE payments SET status = ? WHERE payment_id = ?",
+                (status, payment_id)
+            )
+            conn.commit()
+            updated = cursor.rowcount
+            conn.close()
+
+            if updated:
+                print(f"Status do pagamento {payment_id} atualizado para {status}.")
+                return True
+            else:
+                print(f"Pagamento com ID {payment_id} não encontrado.")
+                return False
+        except Exception as e:
+            print(f"Erro ao atualizar status: {e}")
+            return False
