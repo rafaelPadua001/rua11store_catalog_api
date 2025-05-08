@@ -10,6 +10,7 @@ class PaymentController:
     def processar_pagamento(dados_pagamento):
         try:
             payment = Payment(
+                payment_id=dados_pagamento['payment_id'],
                 total_value=dados_pagamento['total_value'],
                 payment_date=dados_pagamento.get('date_approved'),
                 payment_type=dados_pagamento['payment_type'],

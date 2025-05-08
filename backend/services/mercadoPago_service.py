@@ -8,6 +8,8 @@ load_dotenv()
 
 def get_mercado_sdk():
         access_token = os.getenv("MERCADO_PAGO_ACCESS_TOKEN_TEST")
+        print("Access Token:", os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST'))
+
         if not access_token:
             raise RuntimeError("Variavel ACCess token nao definida")
         return mercadopago.SDK(access_token)
@@ -47,6 +49,7 @@ class CreditCardPayment(PaymentStrategy):
        
         if result.get("status") == "approved":
             payment = Payment(
+                payment_id=result.get("id"),
                 total_value=result.get("transaction_amount"),
                 payment_date=result.get("date_approved"),  # vem em ISO8601
                 payment_type="crédito",  # pois estamos usando cartão
@@ -63,7 +66,8 @@ class CreditCardPayment(PaymentStrategy):
     
 class DebitCardPayment(PaymentStrategy):
     def create_payment(self, data):
-        payment_data = { 
+        payment_data = {
+            "payment_id": data['id'], 
             "transaction_amount": float(data["total"]),
             "token": data["card_token"],
             "description": data.get("description", "Compra com cartão de débito"),
@@ -83,6 +87,7 @@ class DebitCardPayment(PaymentStrategy):
        
         if result.get("status") == "approved":
             payment = Payment(
+                payment_id=result.get("id"),
                 total_value=result.get("transaction_amount"),
                 payment_date=result.get("date_approved"),  # vem em ISO8601
                 payment_type="débito",  # pois estamos usando cartão

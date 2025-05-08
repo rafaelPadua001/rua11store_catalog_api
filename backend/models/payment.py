@@ -5,7 +5,8 @@ from datetime import datetime
 from controllers.stockController import StockController
 
 class Payment:
-    def __init__(self, total_value, payment_date, payment_type, cpf, email, status, usuario_id, products, address=None):
+    def __init__(self, payment_id, total_value, payment_date, payment_type, cpf, email, status, usuario_id, products, address=None):
+        self.payment_id = payment_id,
         self.total_value = total_value
         self.payment_date = payment_date or datetime.now().isoformat()
         self.payment_type = payment_type
@@ -42,9 +43,10 @@ class Payment:
 
                 # Inserir pagamento
                 cursor.execute("""
-                    INSERT INTO payments (total_value, payment_date, payment_type, cpf, email, status, usuario_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO payments (payment_id, total_value, payment_date, payment_type, cpf, email, status, usuario_id)
+                    VALUES (? ,?, ?, ?, ?, ?, ?, ?)
                 """, (
+                    self.payment_id,
                     self.total_value,
                     self.payment_date,
                     self.payment_type,
