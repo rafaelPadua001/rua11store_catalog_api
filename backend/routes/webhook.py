@@ -9,7 +9,7 @@ def handle_webhook():
 
     if data and 'type' in data and data['type'] == 'payment':
         payment_id = data.get('data', {}).get('id')
-
+        print(data)
         return jsonify({
             'status': 'success',
             'message': f'Webhook received for payment ID: {payment_id}'
