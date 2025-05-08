@@ -25,18 +25,13 @@ def handle_webhook():
                 print(f"Payment {payment_id} approved.")
                 pass
 
-            with app.test_client() as client:
-                res = client.post('/webhook', json=fake_payload)
-                print(res.status_code)
-                print(res.get_json())
-
-            # return jsonify({
-            #     'status': 'success',
-            #     'message': f'Webhook processed for payment ID: {payment_id}',
-            #     'status': status,
-            #     'external_reference': external_reference,
-            #     'transaction_amount': transaction_amount
-            # }), 200
+            return jsonify({
+                'status': 'success',
+                'message': f'Webhook processed for payment ID: {payment_id}',
+                'status': status,
+                'external_reference': external_reference,
+                'transaction_amount': transaction_amount
+            }), 200
 
         
     return jsonify({
