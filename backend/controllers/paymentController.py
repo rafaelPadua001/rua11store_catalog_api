@@ -1,5 +1,9 @@
 from models.payment import Payment
 from models.delivery import Delivery;
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class PaymentController:
     def processar_pagamento(dados_pagamento):
@@ -37,3 +41,48 @@ class PaymentController:
             return {'message': 'Pagamento salvo com sucesso.'}, 201
         except Exception as e:
             return {'error': str(e)}, 500
+        
+    def get_payment(payment_id):
+        try:
+            url = f"https://api.mercadopago.com/v1/payments/{payment_id}"
+            headers = {  
+                "Authorization": f"Bearer {os.getenv('MERCADOPAGO_ACCESS_TOKEN')}"
+            }
+
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                return response.json()
+                #payment_data = response.json()
+                # payment = Payment(
+                #     id=payment_data['id'],
+                #     status=payment_data['status'],
+                #     total_value=payment_data['transaction_amount'],
+                #     payment_date=payment_data.get('date_approved'),
+                #     payment_type=payment_data['payment_type'],
+                #     email=payment_data.get('payer', {}).get('email'),
+                #     cpf=payment_data.get('payer', {}).get('identification', {}).get('number'),
+                #     usuario_id=payment_data.get('metadata', {}).get('usuario_id'),
+                #     produtos=payment_data.get('metadata', {}).get('produtos')
+                # )
+                # return payment
+            else:
+                print(f"Erro ao buscar pagamento: {response.status_code} - {response.text}")
+                return None
+            payment = Payment.get_payment_by_id(payment_id)
+            if payment:
+                return {
+                    'status': 200,
+                    'message': 'Pagamento encontrado com sucesso.',
+                    'payment': payment
+                }, 200
+            else:
+                return {
+                    'status': 404,
+                    'message': 'Pagamento não encontrado.'
+                }, 404
+        except Exception as e:
+            return {
+                'status': 500,
+                'message': 'Erro interno ao buscar pagamento.',
+                'error': str(e)
+            }, 500

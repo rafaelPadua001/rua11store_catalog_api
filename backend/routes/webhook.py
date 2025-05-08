@@ -1,4 +1,5 @@
 from flask import Flask, Blueprint, request, jsonify
+from controllers.paymentController import PaymentController
 
 webhook_bp = Blueprint('webhook', __name__)
 
@@ -9,12 +10,30 @@ def handle_webhook():
 
     if data and 'type' in data and data['type'] == 'payment':
         payment_id = data.get('data', {}).get('id')
+        payment = PaymentController.get_payment(payment_id)
 
-        return jsonify({
-            'status': 'success',
-            'message': f'Webhook received for payment ID: {payment_id}'
-        }), 200
-    
+        if payment:
+            status = payment.get('status') 
+            external_reference = payment.get('external_reference')
+            transaction_amount = payment.get('transaction_amount')
+
+            print(f"Payment ID: {payment_id}")
+            print(f"Status: {status}")  
+
+            if status == 'approved':
+                # Process the payment as approved
+                print(f"Payment {payment_id} approved.")
+                pass
+
+            return jsonify({
+                'status': 'success',
+                'message': f'Webhook processed for payment ID: {payment_id}',
+                'status': status,
+                'external_reference': external_reference,
+                'transaction_amount': transaction_amount
+            }), 200
+
+        
     return jsonify({
         'status': 'error',
         'message': 'Invalid webhook data'
