@@ -59,3 +59,12 @@ def update_payment_status(payment_id):
         return jsonify({
             "error": str(e)
         }), 500
+    
+@payment_bp.route("/payment/chargeback/<int:payment_id>", methods=["POST"])
+def chargeback_payment(payment_id):
+    payment_data = PaymentController.payment_chargeback(payment_id)
+   
+    if payment_data:
+        return jsonify(payment_data)
+    else:
+        return jsonify({"error": "Pagamento não encontrado"}), 404
