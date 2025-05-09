@@ -68,3 +68,18 @@ def chargeback_payment(payment_id):
         return jsonify(payment_data)
     else:
         return jsonify({"error": "Pagamento não encontrado"}), 404
+
+@payment_bp.route("/payment/refund/<int:payment_id>", methods=["POST"])
+def refund_payment(payment_id):
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Dados não fornecidos."}), 400
+    
+   
+    payment_data = PaymentController.payment_refund(payment_id, data)
+   
+    if payment_data:
+        return jsonify(payment_data)
+    else:
+        return jsonify({"error": "Pagamento não encontrado"}), 404

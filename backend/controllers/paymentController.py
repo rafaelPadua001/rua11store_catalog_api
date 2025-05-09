@@ -150,3 +150,16 @@ class PaymentController:
                 return {"error": payment.text}, payment.status_code
         else:
             return {"error": "Resposta inválida da API."}, 500
+
+    @staticmethod    
+    def payment_refund(payment_id, data):
+        payload = {
+            "amount": data.get('amount')  # Certifique-se de passar o valor correto para o reembolso
+        }
+        payment = Payment.refund_payment_mercado_pago(payment_id, payload)
+        print(payment)
+        # Verifique se o retorno da função é um dicionário de erro
+        if isinstance(payment, dict) and "error" in payment:
+            # Se for um erro, retorna a mensagem de erro
+            return {"error": payment["error"]}, 400
+        # Se for uma resposta de sucesso, verifica o status_code

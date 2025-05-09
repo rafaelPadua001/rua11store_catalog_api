@@ -98,9 +98,10 @@
 
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="grey darken-1" text @click="closeDetailsDialog">Cancel</v-btn>
                         <v-btn color="primary" text @click="updatePayment">update</v-btn>
                         <v-btn color="primary" text @click="chargebackPayment">chargeback</v-btn>
+                        <v-btn color="primary" text @click="refundPayment">refund</v-btn>
+                        <v-btn color="grey darken-1" text @click="closeDetailsDialog">Cancel</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -280,6 +281,31 @@ export default {
             api.post(`/payments/payment/chargeback/${this.selectedItem.payment_id}`)
                 .then(response => {
                     console.log("Chargeback successful:", response.data);
+                    this.loadPayments();
+                    this.closeDetailsDialog();
+                })
+                .catch(error => {
+                    console.error("Error processing chargeback:", error);
+                });
+        },
+        refundPayment() {
+            let amount = this.editableFields.amount;
+
+            // Garantir que seja um valor positivo
+            let amountInCents = Math.abs(amount) * 100;
+
+            // Arredondar para evitar precisão excessiva
+            amountInCents = Math.round(amountInCents);
+
+            console.log(amountInCents);  // Agora deve ser um 
+            const updatedPayment = {
+                ...this.paymentDetails,
+                amount: amountInCents,
+                status: this.editableFields.status,
+                created: this.editableFields.created,
+            };
+            api.post(`/payments/payment/refund/${this.selectedItem.payment_id}`, updatedPayment)
+                .then(response => {
                     this.loadPayments();
                     this.closeDetailsDialog();
                 })
