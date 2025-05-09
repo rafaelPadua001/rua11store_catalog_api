@@ -1,13 +1,13 @@
 <template>
     <v-row justify="center">
-        <v-col cols="12" md="8" lg="8" xl="6">
+        <v-col cols="12" sm="12" md="10" lg="10" xl="10">
             <v-card class="pa-4">
                 <v-card-title class="d-flex justify-center">
                     <h1 class="text-h5">Payments Management</h1>
                 </v-card-title>
 
                 <v-card-actions class="d-flex justify-end mb-4">
-                    <v-btn color="primary" @click="newProduct" disabled>
+                    <v-btn color="primary" disabled>
                         <v-icon left>mdi-plus</v-icon>
                         Add Product
                     </v-btn>
@@ -136,30 +136,21 @@ export default {
                 status: '',
                 created: '',
             },
-            defaultProduct: {
-                id: null,
-                payment_type: "",
-                category_id: null,
-                subcategory_id: null,
-                image: null,
-                description: "",
-                price: 0,
-                quantity: 1,
-                width: 1,
-                length: 1,
-            },
+
             payments: [],
             //categories: [],
             headers: [
-                { text: "ID", value: "id" },
-                { text: "Payment Type", value: "paymentType" },
-                { text: "Total Value", value: "totalValue", align: "right" },
-                { text: "Status", value: "status" },
-                { text: "Payment Date", value: "paymentDate" },
-                { text: "Email", value: "userEmail" },
-                { text: "User Id", value: "userId" },
-                { text: "Actions", value: "actions", width: "120px", align: "center", sortable: false },
+                { title: "Id", key: "id" },
+                { title: "Payment Id", key: "paymentId" },
+                { title: "Payment Type", key: "paymentType" },
+                { title: "Total Value", key: "totalValue", align: "end" },
+                { title: "Status", key: "status" },
+                { title: "Payment Date", key: "paymentDate" },
+                { title: "Email", key: "userEmail" },
+                { title: "User Id", key: "userId" },
+                { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
             ],
+
 
         };
     },
@@ -183,13 +174,13 @@ export default {
     computed: {
         formattedPrice: {
             get() {
-                return this.editedPayments.price !== null && this.editedPayments.price !== undefined
+                return this.editedPayments.totalValue !== null && this.editedPayments.totalValue !== undefined
                     ? Number(this.editedPayments.price).toFixed(2).replace(".", ",") // Garante sempre 2 casas decimais
                     : "";
             },
             set(value) {
                 let numericValue = parseFloat(value.replace(/[^0-9,]/g, "").replace(",", "."));
-                this.editedPayments.price = isNaN(numericValue) ? 0.00 : parseFloat(numericValue.toFixed(2)); // Mantém como número
+                this.editedPayments.totalValue = isNaN(numericValue) ? 0.00 : parseFloat(numericValue.toFixed(2)); // Mantém como número
             }
         }
 
@@ -201,40 +192,35 @@ export default {
     methods: {
         async loadPayments() {
             this.loading = true;
-            try {
-                const response = await api.get("/payments/get-all");
-                console.log(response);
-
-                // Verificar se a resposta contém a chave 'payments' e se é um array
-                if (response.data && Array.isArray(response.data.payments)) {
-                    this.payments = response.data.payments.map(payment => {
-                        return {
+            api.get("/payments/get-all")
+                .then((response) => {
+                    if (response.data && response.data.payments) {
+                        this.payments = response.data.payments.map((payment, index) => ({
                             id: payment.id,
-                            totalValue: payment.total_value,
+                            paymentId: payment.payment_id,
                             paymentType: payment.payment_type,
-                            payment_id: payment.payment_id,
+                            totalValue: payment.total_value,
                             status: payment.status,
                             paymentDate: payment.payment_date,
                             userEmail: payment.email,
-                            //userCpf: payment.cpf,
-                            userId: payment.usuario_id
-                        };
-                    });
-                    console.log(this.payments);
-                } else {
-                    console.error("Resposta não contém um array de pagamentos:", response.data);
-                }
-            } catch (error) {
-                console.error("Error loading payments:", error);
-            } finally {
-                this.loading = false;
-            }
+                            userId: payment.usuario_id,
+                        }));
+                    } else {
+                        this.payments = [];
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erro ao carregar pagamentos:", error);
+                })
+                .finally(() => {
+                    this.loading = false;
+                });
         },
         async openDetailsDialog(item) {
             this.selectedItem = item;
             this.detailsDialog = true;
             try {
-                const response = await api.get(`/payments/payment/${item.payment_id}`)
+                const response = await api.get(`/payments/payment/${this.selectedItem.paymentId}`)
                 this.paymentDetails = response.data;
             }
             catch (error) {
@@ -267,7 +253,7 @@ export default {
                 created: this.editableFields.created,
             };
 
-            api.put(`/payments/payment/update-status/${this.selectedItem.payment_id}`, updatedPayment)
+            api.put(`/payments/payment/update-status/${this.selectedItem.paymentId}`, updatedPayment)
                 .then(response => {
                     console.log("Payment updated successfully:", response.data);
                     this.loadPayments();
@@ -278,7 +264,7 @@ export default {
                 });
         },
         chargebackPayment() {
-            api.post(`/payments/payment/chargeback/${this.selectedItem.payment_id}`)
+            api.post(`/payments/payment/chargeback/${this.selectedItem.paymentId}`)
                 .then(response => {
                     console.log("Chargeback successful:", response.data);
                     this.loadPayments();
@@ -304,7 +290,7 @@ export default {
                 status: this.editableFields.status,
                 created: this.editableFields.created,
             };
-            api.post(`/payments/payment/refund/${this.selectedItem.payment_id}`, updatedPayment)
+            api.post(`/payments/payment/refund/${this.selectedItem.paymentId}`, updatedPayment)
                 .then(response => {
                     this.loadPayments();
                     this.closeDetailsDialog();
