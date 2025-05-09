@@ -109,23 +109,57 @@ class PaymentController:
     
     @staticmethod
     def update_payment_data(payment_id, data):
-        token = os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')  # Novo token, se necessário
-    
-        url = f"https://api.mercadopago.com/v1/payments/{payment_id}"
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json"
-        }
-        
         payload = {
-            "status": data.get("status"),  # Supondo que data contenha o status
-            #"date_of_expiration": data.get('created'),
+            "status": data.get("status"),  
             "transaction_amount": data.get("amount"),
         }
 
-        response = requests.put(url, json=payload, headers=headers)
+        payment = Payment.fetch_from_mercado_pago(payment_id, payload)
+       
 
-        if response.status_code == 200:
-            return response.json()  # Retorna o pagamento atualizado
+        
+        if isinstance(payment, dict) and "error" in payment:
+            
+            return {"error": payment["error"]}, 400
+
+        
+        if isinstance(payment, requests.Response):
+            if payment.status_code == 200:
+                return payment.json() 
+            else:
+                return {"error": payment.text}, payment.status_code
         else:
-            return {"error": response.text}, response.status_code
+            return {"error": "Resposta inválida da API."}, 500
+
+
+    @staticmethod
+    def payment_chargeback(payment_id):
+        payment = Payment.payment_chargeback_mercado_pago(payment_id)
+
+        print(payment)
+        # Verifique se o retorno da função é um dicionário de erro
+        if isinstance(payment, dict) and "error" in payment:
+            # Se for um erro, retorna a mensagem de erro
+            return {"error": payment["error"]}, 400
+
+        # Se for uma resposta de sucesso, verifica o status_code
+        if isinstance(payment, requests.Response):
+            if payment.status_code == 200:
+                return payment.json()  # Retorna o pagamento atualizado
+            else:
+                return {"error": payment.text}, payment.status_code
+        else:
+            return {"error": "Resposta inválida da API."}, 500
+
+    @staticmethod    
+    def payment_refund(payment_id, data):
+        payload = {
+            "amount": data.get('amount')  # Certifique-se de passar o valor correto para o reembolso
+        }
+        payment = Payment.refund_payment_mercado_pago(payment_id, payload)
+        print(payment)
+        # Verifique se o retorno da função é um dicionário de erro
+        if isinstance(payment, dict) and "error" in payment:
+            # Se for um erro, retorna a mensagem de erro
+            return {"error": payment["error"]}, 400
+        # Se for uma resposta de sucesso, verifica o status_code

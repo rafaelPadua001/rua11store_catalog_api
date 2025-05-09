@@ -3,6 +3,7 @@ from datetime import datetime
 from controllers.stockController import StockController
 import requests
 import os
+import uuid
 
 
 class Payment:
@@ -188,6 +189,7 @@ class Payment:
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
         }
+        
         try:
             if data:
                 # Atualização do pagamento (PUT)
@@ -196,6 +198,41 @@ class Payment:
                 # Consulta do pagamento (GET)
                 response = requests.get(url, headers=headers)
 
+            # Verifica se a resposta foi bem-sucedida
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise Exception(f"Erro {response.status_code}: {response.text}")
+        except Exception as e:
+            # Retorna o erro de forma que a função sempre retorne um dicionário
+            return {"error": str(e)}
+        
+    def payment_chargeback_mercado_pago(payment_id):
+        token = os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')
+        url = f"https://api.mercadopago.com/v1/payments/chargebacks/{payment_id}"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise Exception(f"Erro {response.status_code}: {response.text}")
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def refund_payment_mercado_pago(payment_id, data):
+        token = os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')
+        url = f"https://api.mercadopago.com/v1/payments/{payment_id}/refunds"                 
+        headers = { 
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "X-Idempotency-Key": str(uuid.uuid4())
+        }      
+        try:
+            response = requests.post(url, headers=headers, json=data)
             if response.status_code == 200:
                 return response.json()
             else:
