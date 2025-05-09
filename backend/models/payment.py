@@ -1,8 +1,9 @@
 import sqlite3
-from models.delivery import Delivery
-from models.order import Order
 from datetime import datetime
 from controllers.stockController import StockController
+import requests
+import os
+
 
 class Payment:
     def __init__(self, payment_id, total_value, payment_date, payment_type, cpf, email, status, usuario_id, products, address=None):
@@ -177,3 +178,28 @@ class Payment:
         except Exception as e:
             print(f"Erro ao atualizar status: {e}")
             return False
+        
+    @staticmethod
+    def fetch_from_mercado_pago(payment_id, data=None):
+        token = os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')
+        
+        url = f"https://api.mercadopago.com/v1/payments/{payment_id}"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        try:
+            if data:
+                # Atualização do pagamento (PUT)
+                response = requests.put(url, headers=headers, json=data)
+            else:
+                # Consulta do pagamento (GET)
+                response = requests.get(url, headers=headers)
+
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise Exception(f"Erro {response.status_code}: {response.text}")
+        except Exception as e:
+            return {"error": str(e)}
+        

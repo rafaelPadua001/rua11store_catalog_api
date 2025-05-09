@@ -43,10 +43,10 @@ class CreditCardPayment(PaymentStrategy):
         }
         }
         response = sdk.payment().create(payment_data)
-        # print(response)
+       
 
         result = response['response']
-       
+        
         if result.get("status") in ["approved", "pending", "in_process", "in_mediation", "rejected"]:
             payment = Payment(
                 payment_id=result.get("id"),
