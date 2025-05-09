@@ -25,7 +25,7 @@ class PaymentStrategy(ABC):
 
 class CreditCardPayment(PaymentStrategy):
     def create_payment(self, data):
-        print(data)
+        
         payment_data = {
             "transaction_amount": float(data["total"]),
             "token": data["card_token"],
@@ -47,7 +47,7 @@ class CreditCardPayment(PaymentStrategy):
 
         result = response['response']
        
-        if result.get("status") in ["approved", "pending", "in_process"]:
+        if result.get("status") in ["approved", "pending", "in_process", "in_mediation", "rejected"]:
             payment = Payment(
                 payment_id=result.get("id"),
                 total_value=result.get("transaction_amount"),
@@ -62,6 +62,14 @@ class CreditCardPayment(PaymentStrategy):
             )
             
             payment.save()
+
+            if result.get("status") == "rejected":
+                return{
+                    "status": 400,
+                    "message": "Pagamento não aprovado. Verifique os dados do cartão ou use outro método.",
+                    "error": result.get("status_detail")
+                }
+            
         return response['response']
     
 class DebitCardPayment(PaymentStrategy):
