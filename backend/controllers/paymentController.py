@@ -93,3 +93,39 @@ class PaymentController:
                 return {"error": f"Pagamento {payment_id} não encontrado."}, 404
         except Exception as e:
             return {"error": str(e)}, 500
+
+    def get_payment_details(payment_id):
+        payment = Payment.fetch_from_mercado_pago(payment_id)
+        if payment:
+            return {
+                "id": payment.get("id"),
+                "status": payment.get("status"),
+                "amount": payment.get("transaction_amount"),
+                "payer_email": payment.get("payer", {}).get("email"),
+                "method": payment.get("payment_method_id"),
+                "created": payment.get("date_created"),
+            }
+        return None
+    
+    @staticmethod
+    def update_payment_data(payment_id, data):
+        token = os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')  # Novo token, se necessário
+    
+        url = f"https://api.mercadopago.com/v1/payments/{payment_id}"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "status": data.get("status"),  # Supondo que data contenha o status
+            #"date_of_expiration": data.get('created'),
+            "transaction_amount": data.get("amount"),
+        }
+
+        response = requests.put(url, json=payload, headers=headers)
+
+        if response.status_code == 200:
+            return response.json()  # Retorna o pagamento atualizado
+        else:
+            return {"error": response.text}, response.status_code
