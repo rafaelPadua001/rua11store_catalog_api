@@ -3,7 +3,8 @@ import sqlite3
 class Product:
     def __init__(self, id=None, name=None, description=None, price=None, 
                  category_id=None, subcategory_id=None, image_path=None, 
-                 quantity=1, width=None, height=None, weight=None, length=None, user_id=None):
+                 quantity=1, width=None, height=None, weight=None, length=None,
+                stock_quantity=None, user_id=None):
         self.id = id
         self.name = name
         self.description = description
@@ -16,7 +17,8 @@ class Product:
         self.height = height
         self.weight = weight
         self.length = length
-        self.user_id = user_id  
+        self.user_id = user_id 
+        self.stock_quantity = stock_quantity
 
     @staticmethod
     def get_db_connection():
@@ -128,7 +130,13 @@ class Product:
         conn = Product.get_db_connection()
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM products")
+            cursor.execute(""" 
+                SELECT 
+                    products.*,
+                    stock.product_quantity
+                FROM products
+                JOIN stock ON stock.id_product = products.id;
+            """)
             return [Product._create_from_row(row) for row in cursor.fetchall()]
         except sqlite3.Error as e:
             print(f"Erro ao buscar produtos: {str(e)}")
@@ -181,6 +189,7 @@ class Product:
 
     @staticmethod
     def _create_from_row(row):
+       
         """Cria uma instância de Product a partir de uma linha do banco de dados"""
         if row is None:
             return None
@@ -197,7 +206,8 @@ class Product:
             height=row['height'],
             weight=row['weight'],
             length=row['length'],
-            user_id=row['user_id']
+            user_id=row['user_id'],
+            stock_quantity=row['product_quantity']
         )
 
     def to_dict(self):
@@ -215,5 +225,6 @@ class Product:
             "height": self.height,
             "weight": self.weight,
             "length": self.length,
-            "user_id": self.user_id
+            "user_id": self.user_id,
+            "stock_quantity": self.stock_quantity
         }
