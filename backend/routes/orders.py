@@ -8,6 +8,15 @@ def get_orders():
     orders = Order.get_all()
     return jsonify([orders])
 
+@orders_bp.route('/get-order/<user_id>', methods=['GET'])
+def get_order_by_userId(user_id):
+    user_id = user_id.lstrip('/')
+    order = Order.get_order_by_userId(user_id)
+    if order:
+        return jsonify(order)
+    else:
+        return jsonify({'message': 'Pedido não encontrado'}), 404
+
 @orders_bp.route('/create-orders', methods=['POST'])
 def create_order():
     data = request.get_json()
