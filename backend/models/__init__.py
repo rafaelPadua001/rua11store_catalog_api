@@ -4,6 +4,7 @@ from .category import Category
 from .stock import Stock
 from .payment import Payment
 from .delivery import Delivery
+from .order import Order
 __all__ = [
     'UserProfile',
     'Product',
@@ -11,4 +12,5 @@ __all__ = [
     'Stock',
     'Payment',
     'Delivery',
+    'Order',
 ]

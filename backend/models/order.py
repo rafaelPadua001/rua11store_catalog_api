@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+# from controllers.orderController import orderController
 
 
 class Order:
@@ -102,6 +103,91 @@ class Order:
             "items": self.items  # já é uma lista de dicionários
         }
 
+
+        
+   
+    def get_order_by_userId(user_id):
+        try:
+            print(f"Buscando pedidos para o usuário com ID: {user_id}")  # Log para verificar o user_id
+            conn = Order.get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    o.id AS order_id,
+                    o.user_id,
+                    o.payment_id,
+                    o.shipment_info,
+                    o.total_amount AS order_total,
+                    o.order_date,
+                    o.status,
+                    oi.id AS item_id,
+                    oi.product_id,
+                    oi.quantity,
+                    oi.unit_price,
+                    oi.total_price,
+                    p.name AS product_name,
+                    p.description AS product_description,
+                    p.price AS product_price,
+                    p.image_path AS product_image
+                FROM 
+                    orders o
+                JOIN 
+                    order_items oi ON o.id = oi.order_id
+                JOIN
+                    products p ON oi.product_id = p.id
+                WHERE
+                    o.user_id = ?
+                ORDER BY 
+                    o.id DESC
+            """, (user_id,))
+
+            results = cursor.fetchall()
+            
+            conn.close()
+
+            if results:
+               
+                orders = {}
+                for row in results:
+                    order_id = row[0]
+
+                    
+                    if order_id not in orders:
+                        orders[order_id] = {
+                            'order_id': row[0],
+                            'user_id': row[1],
+                            'payment_id': row[2],
+                            'shipment_info': row[3],
+                            'order_total': row[4],
+                            'order_date': row[5],
+                            'status': row[6],
+                            'items': []
+                        }
+
+                   
+                    orders[order_id]['items'].append({
+                        'item_id': row[7],
+                        'product_id': row[8],
+                        'quantity': row[9],
+                        'unit_price': row[10],
+                        'total_price': row[11],
+                        'product_name': row[12],
+                        'product_description': row[13],
+                        'product_price': row[14],
+                        'product_image': row[15]
+                    })
+
+                return list(orders.values())
+            else:
+                return None
+
+        except Exception as e:
+            print(f"Erro ao buscar os pedidos e itens: {str(e)}")  # Log para capturar erro
+            raise Exception(f"Erro ao buscar os pedidos e itens: {str(e)}")
+
+
+
+    
 
     def save(self):
         try:
