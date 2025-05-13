@@ -155,3 +155,34 @@ class Delivery:
             conn.rollback()
         finally:
             conn.close()
+
+    def update(shipment_data):
+        print('Shipment ', shipment_data)
+        try:
+            conn = Delivery.get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute( cursor.execute("""
+                UPDATE delivery SET
+                    status = ?,
+                    service_status = ?,
+                    state_abbr = ?,
+                    company_name = ?,
+                    tracking_link = ?
+                WHERE melhorenvio_id = ?
+            """, (
+                shipment_data['status'],
+                shipment_data['service_status'],
+                shipment_data['state_abbr'],
+                shipment_data['company_name'],
+                shipment_data['tracking_link'],
+                shipment_data['melhorenvio_id']
+            )))
+
+            conn.commit()
+            conn.close()
+
+            print(f"Delivery {melhorenvio_id} atualizado com sucesso")
+            return True
+        except Exception as e:
+            print(f'Erro ao atualizar entrega: ${e}')
+            return False

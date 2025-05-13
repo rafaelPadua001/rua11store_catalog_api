@@ -1,6 +1,7 @@
 import os
 import requests
 import sqlite3
+from models.delivery import Delivery
 
 class MelhorEnvioService:
     def __init__(self):
@@ -108,7 +109,7 @@ class MelhorEnvioService:
             return {"error": "Erro ao criar etiqueta", "exception": str(e)}, 500
 
     def update_delivery_with_shipment_id(self, data, shipment_data):
-        print('Merdaaaa', data['id'], shipment_data)
+        
         # Aqui, você deve escrever a lógica para atualizar a tabela 'delivery'
         # Exemplo: Atualizar as colunas 'melhorenvio_id' e 'order_id'
         
