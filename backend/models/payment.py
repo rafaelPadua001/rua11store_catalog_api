@@ -106,7 +106,7 @@ class Payment:
                         VALUES (?, ?, ?, ?, ?)
                     """, (
                         order_id,
-                        product['id'],
+                        product_id,
                         quantity,
                         price,
                         self.total_value
