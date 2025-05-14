@@ -42,7 +42,7 @@
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
                         <!-- Ícone de criar etiqueta -->
-                        <v-icon small @click.stop="createTag(item)">
+                        <v-icon small @click.stop="shipmentCreate(item)">
                             mdi-cart
                         </v-icon>
 
@@ -203,20 +203,19 @@ export default {
                         complement: delivery.complement,
                         city: delivery.city,
                         state: delivery.state,
-                        zip_code: delivery.zip_code,
+                        zip_code: delivery.zip_code.replace(/\D/g, ''),
                         bairro: delivery.bairro,
                         country: delivery.country,
                         phone: delivery.phone,
                         price: delivery.total_value,
                         delivery_id: delivery.delivery_id,
                         email: delivery.email,
-                        product_name: delivery.product_name,
-                        product_price: delivery.product_price,
+                        products: delivery.products,
                         height: delivery.height,
                         width: delivery.width,
                         length: delivery.length,
                         weight: delivery.weight,
-                        cpf: delivery.cpf,
+                        cpf: delivery.cpf.replace(/\D/g, ''),
                         melhorenvio_id: delivery.melhorenvio_id,
                         order_id: delivery.order_id
                         //   email: delivery.userEmail,
@@ -237,9 +236,9 @@ export default {
         //     // Implemente aqui a lógica para buscar o nome da categoria baseado no categoryId
         //     return "Categoria Exemplo"; // Exemplo de retorno
         // },
-        async createTag(item) {
+        async shipmentCreate(item) {
             try {
-                const response = await api.post('/melhorEnvio/createTag', item);
+                const response = await api.post('/melhorEnvio/shipmentCreate', item);
 
                 // Exibindo a resposta no console. Normalmente, a resposta está em response.data
                 console.log('Resposta da API:', response.data); // Isso é geralmente a parte importante

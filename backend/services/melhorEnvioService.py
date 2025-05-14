@@ -1,6 +1,7 @@
 import os
 import requests
 import sqlite3
+from models.delivery import Delivery
 
 class MelhorEnvioService:
     def __init__(self):
@@ -57,17 +58,25 @@ class MelhorEnvioService:
             if e.response is not None:
                 print("Resposta da API:", e.response.text)
 
-    def create_tag(self, data, delivery_id=None):
-        # print(f"Dados recebidos para criar etiqueta: {data}")
+    def create_shipment(self, data, delivery_id=None):
+        print(f"Dados recebidos para criar etiqueta: {data}")
 
         # Campos obrigatórios
         required_fields = [
             "recipient_name", "phone", "email", "zip_code", "street", "number",
-            "city", "state", "product_name", "product_price", "height", "width", "length", "weight"
+            "city", "state", "height", "width", "length", "weight"
         ]
-        
-        # Verificando se todos os campos obrigatórios estão presentes
+
         missing_fields = [field for field in required_fields if field not in data]
+
+        # Verificando se há ao menos um produto válido
+        products = data.get("products", [])
+        if not products or not all("name" in p and "price" in p and "quantity" in p for p in products):
+            missing_fields.append("products válidos (com 'name', 'price', 'quantity')")
+
+        if missing_fields:
+            return {"error": f"Campos obrigatórios ausentes: {', '.join(missing_fields)}"}, 400
+
         if missing_fields:
             return {"error": f"Campos obrigatórios ausentes: {', '.join(missing_fields)}"}, 400
 
@@ -90,17 +99,17 @@ class MelhorEnvioService:
 
         try:
             # Criando o envio (cart)
-            shipment_data = self.create_shipment(shipment_payload)
-            shipment_id = shipment_data["id"]
+            # shipment_data = self.create_shipment(shipment_payload)
+            # shipment_id = shipment_data["id"]
             # print(f"ID do envio criado: {shipment_id}")
            
             # Atualizando a tabela 'delivery' com o ID do envio criado
            
-            update = self.update_delivery_with_shipment_id(data, shipment_data)
+            #update = self.update_delivery_with_shipment_id(data, shipment_data)
 
             return {
                 "message": "Envio criado com sucesso. Aguarde pagamento.",
-                "shipment": shipment_data
+                "shipment": shipment_payload
             }, 200
 
         except requests.exceptions.RequestException as e:
@@ -108,7 +117,7 @@ class MelhorEnvioService:
             return {"error": "Erro ao criar etiqueta", "exception": str(e)}, 500
 
     def update_delivery_with_shipment_id(self, data, shipment_data):
-        print('Merdaaaa', data['id'], shipment_data)
+        
         # Aqui, você deve escrever a lógica para atualizar a tabela 'delivery'
         # Exemplo: Atualizar as colunas 'melhorenvio_id' e 'order_id'
         
@@ -166,11 +175,15 @@ class MelhorEnvioService:
                 "state_abbr": data["state"],  # Estado do destinatário
                 "document": str(cpf_cnpj) if cpf_cnpj else ""  # Passando o CPF diretamente (como string)
             },
-            "products": [{
-                "name": data["product_name"],  # Nome do produto
-                "quantity": 1,  # Quantidade do produto
-                "unitary_value": data["product_price"]  # Preço unitário do produto
-            }],
+           "products": [
+                {
+                    "name": p["name"],
+                    "quantity": p.get("quantity", 1),
+                    "unitary_value": p["price"]
+                }
+                for p in data.get("products", []) if "name" in p and "price" in p
+            ],
+
             "volumes": [{
                 "height": data["height"],  # Altura do volume
                 "width": data["width"],  # Largura do volume
@@ -233,9 +246,9 @@ class MelhorEnvioService:
 
 
 
-    def create_shipment(self, shipment_payload):
-        url = f"{self.baseUrl}/me/cart"
-        return self.make_request(url, "post", shipment_payload)
+    # def create_shipment(self, shipment_payload):
+    #     url = f"{self.baseUrl}/me/cart"
+    #     return self.make_request(url, "post", shipment_payload)
 
     def checkout_cart(self):
         url = f"{self.baseUrl}/cart/checkout"

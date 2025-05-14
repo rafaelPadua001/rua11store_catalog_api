@@ -66,58 +66,71 @@ class Delivery:
         cursor.execute("""
             SELECT 
                 d.*, 
+                p.id AS payment_id,
                 p.email, 
+                p.cpf,
                 pp.product_name, 
-                pp.product_price, 
-                p.cpf  
+                pp.product_price,
+                pp.product_quantity
             FROM delivery d
-            LEFT JOIN (
-                SELECT usuario_id, id AS payment_id, email, cpf
-                FROM payments
-                GROUP BY usuario_id
-            ) p ON d.user_id = p.usuario_id 
-            LEFT JOIN payments_product pp ON pp.payment_id = p.payment_id
-            """)
+            LEFT JOIN payments p ON d.user_id = p.usuario_id
+            LEFT JOIN payments_product pp ON pp.payment_id = p.id
+        """)
         rows = cursor.fetchall()
         conn.close()
 
-        deliveries = []
+        deliveries_dict = {}
+
         for row in rows:
-            delivery = Delivery(
-                row['id'],
-                row['product_id'],   
-                row['user_id'],
-                row['recipient_name'],
-                row['street'],
-                row['number'],
-                row['complement'],
-                row['city'],
-                row['state'],
-                row['zip_code'],
-                row['country'],
-                row['phone'],
-                row['bairro'],
-                row['total_value'],
-                row['delivery_id'],
-                row['width'],  
-                row['height'],  
-                row['length'],  
-                row['weight'],
-                row['cpf'],
-                row['melhorenvio_id'],
-                row['order_id']
-            )
+            delivery_id = row['id']
 
-            delivery_dict = delivery.to_dict()
-            delivery_dict['email'] = row['email']
-            delivery_dict['product_name'] = row['product_name']
-            delivery_dict['product_price'] = row['product_price']
-            delivery_dict['cpf'] = row['cpf']
-            delivery_dict['melhorenvio_id'] = row['melhorenvio_id']
-            delivery_dict['order_id'] = row['order_id']
-            deliveries.append(delivery_dict)
+            if delivery_id not in deliveries_dict:
+                # Cria o objeto e dicionário da entrega
+                delivery = Delivery(
+                    row['id'],
+                    row['product_id'],   
+                    row['user_id'],
+                    row['recipient_name'],
+                    row['street'],
+                    row['number'],
+                    row['complement'],
+                    row['city'],
+                    row['state'],
+                    row['zip_code'],
+                    row['country'],
+                    row['phone'],
+                    row['bairro'],
+                    row['total_value'],
+                    row['delivery_id'],
+                    row['width'],  
+                    row['height'],  
+                    row['length'],  
+                    row['weight'],
+                    row['cpf'],
+                    row['melhorenvio_id'],
+                    row['order_id']
+                )
 
-        return deliveries
+                delivery_dict = delivery.to_dict()
+                delivery_dict['email'] = row['email']
+                delivery_dict['cpf'] = row['cpf']
+                delivery_dict['melhorenvio_id'] = row['melhorenvio_id']
+                delivery_dict['order_id'] = row['order_id']
+                delivery_dict['products'] = []  # Aqui armazenaremos todos os produtos
+
+                deliveries_dict[delivery_id] = delivery_dict
+
+            # Adiciona o produto à lista se existir
+            if row['product_name'] and row['product_price'] is not None:
+                deliveries_dict[delivery_id]['products'].append({
+                    'name': row['product_name'],
+                    'price': row['product_price'],
+                    'quantity': row['product_quantity'] or 1
+                })
+
+        # Retorna apenas os valores únicos (com lista de produtos agregada)
+        return list(deliveries_dict.values())
+
 
     def save(self):
         conn = sqlite3.connect('database.db')
@@ -155,3 +168,34 @@ class Delivery:
             conn.rollback()
         finally:
             conn.close()
+
+    def update(shipment_data):
+        print('Shipment ', shipment_data)
+        try:
+            conn = Delivery.get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute( cursor.execute("""
+                UPDATE delivery SET
+                    status = ?,
+                    service_status = ?,
+                    state_abbr = ?,
+                    company_name = ?,
+                    tracking_link = ?
+                WHERE melhorenvio_id = ?
+            """, (
+                shipment_data['status'],
+                shipment_data['service_status'],
+                shipment_data['state_abbr'],
+                shipment_data['company_name'],
+                shipment_data['tracking_link'],
+                shipment_data['melhorenvio_id']
+            )))
+
+            conn.commit()
+            conn.close()
+
+            print(f"Delivery {melhorenvio_id} atualizado com sucesso")
+            return True
+        except Exception as e:
+            print(f'Erro ao atualizar entrega: ${e}')
+            return False
