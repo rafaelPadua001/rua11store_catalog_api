@@ -79,7 +79,7 @@ def checkItemInCart(id):
 @melhorenvio_bp.route('shipmentCheckout', methods=["POST"])
 def shipmentCheckout():
     data = request.get_json()
-    print('Data', data)
+    
     try:
         service = MelhorEnvioService()
         result, status_code = service.checkout_shipment(data)
