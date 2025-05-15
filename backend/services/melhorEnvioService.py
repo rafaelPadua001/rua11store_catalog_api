@@ -99,13 +99,13 @@ class MelhorEnvioService:
 
         try:
             # Criando o envio (cart)
-            # shipment_data = self.create_shipment(shipment_payload)
-            # shipment_id = shipment_data["id"]
-            # print(f"ID do envio criado: {shipment_id}")
+            shipment_data = self.create_shipment_item(shipment_payload)
+            shipment_id = shipment_data["id"]
+            print(f"ID do envio criado: {shipment_id}")
            
             # Atualizando a tabela 'delivery' com o ID do envio criado
            
-            #update = self.update_delivery_with_shipment_id(data, shipment_data)
+            update = self.update_delivery_with_shipment_id(data, shipment_data)
 
             return {
                 "message": "Envio criado com sucesso. Aguarde pagamento.",
@@ -156,10 +156,10 @@ class MelhorEnvioService:
             "service": "2",  # Exemplo de código do serviço
             "from": {
                 "name": "Rua11Store",  # Exemplo de nome do remetente
-                "phone": "6199051731",  # Telefone do remetente
-                "email": "email@dominio.com",  # Email do remetente
-                "postal_code": "73080180",  # CEP do remetente
-                "address": "QMS 11",  # Endereço do remetente
+                "phone": "+556199051731",  # Telefone do remetente
+                "email": "rafael.f.p.faria@hotmail.com",  # Email do remetente
+                "postal_code": "73082180",  # CEP do remetente
+                "address": "QMS 19",  # Endereço do remetente
                 "number": "19",  # Número do endereço do remetente
                 "city": "Brasília",  # Cidade do remetente
                 "state_abbr": "DF"  # Estado do remetente
@@ -246,31 +246,34 @@ class MelhorEnvioService:
 
 
 
-    # def create_shipment(self, shipment_payload):
-    #     url = f"{self.baseUrl}/me/cart"
-    #     return self.make_request(url, "post", shipment_payload)
+    def create_shipment_item(self, shipment_payload):
+        url = f"{self.baseUrl}/me/cart"
+        return self.make_request(url, "post", shipment_payload)
 
     def checkout_cart(self):
         url = f"{self.baseUrl}/cart/checkout"
         return self.make_request(url, "post")
 
     def checkout_shipment(self, data):
-        melhorenvio_id = data['melhorenvio_id']
+        if 'item' not in data or 'melhorenvio_id' not in data['item']:
+            return {"error": "'melhorenvio_id' é obrigatório no corpo da requisição."}, 400
 
-
+        melhorenvio_id = data['item']['melhorenvio_id']
+        print(melhorenvio_id)
         url = f"{self.baseUrl}/me/shipment/checkout"
         payload = {"shipments": [melhorenvio_id]}
-
-
+        
+        # Verifique a resposta completa
         item_data = self.make_request(url, "post", payload)
-       
+        print('Resposta da requisição:', item_data)  # Adicione isso para ver a resposta completa
+
         if item_data:
             print('Item encontrado no carrinho:', item_data)
             return {"status": "success", "data": item_data}, 200
         else:
             print('Erro na requisição ou dados não encontrados.')
             return {"status": "not_found"}, 404
-        
+     
     def generate_label(self, data):
         print(data)
         melhorenvio_id = data['melhorenvio_id']
