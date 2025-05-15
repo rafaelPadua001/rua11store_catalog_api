@@ -111,7 +111,7 @@ class Payment:
                         price,
                         self.total_value
                     ))
-
+               
                 # Se há endereço, criar uma entrega
                 if self.address:
                     for product in self.products:
@@ -125,6 +125,7 @@ class Payment:
                         """, (
                             product['id'],
                             self.usuario_id,
+                            self.addrss.get('product_id'),
                             self.address.get('recipient_name', ''),
                             self.address.get('street', ''),
                             self.address.get('number', ''),

@@ -40,7 +40,7 @@ class PaymentController:
                     phone=address_data.get('phone')
                 )
                
-                delivery.create()
+                # delivery.save()
             return {'message': 'Pagamento salvo com sucesso.'}, 201
         except Exception as e:
             return {'error': str(e)}, 500
