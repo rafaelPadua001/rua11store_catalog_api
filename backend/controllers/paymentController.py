@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import requests
 from models.payment import Payment
+import uuid
 
 load_dotenv()
 
@@ -40,16 +41,18 @@ class PaymentController:
                     phone=address_data.get('phone')
                 )
                
-                # delivery.save()
+                delivery.save()
             return {'message': 'Pagamento salvo com sucesso.'}, 201
         except Exception as e:
             return {'error': str(e)}, 500
         
     def get_payment(payment_id):
+
         try:
             url = f"https://api.mercadopago.com/v1/payments/{payment_id}"
             headers = {  
-                "Authorization": f"Bearer {os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')}"
+                "Authorization": f"Bearer {os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')}",
+              
             }
 
             response = requests.get(url, headers=headers)

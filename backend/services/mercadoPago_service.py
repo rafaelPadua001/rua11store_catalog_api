@@ -3,6 +3,8 @@ import os
 from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 from models.payment import Payment
+import uuid
+import requests
 
 load_dotenv()
 
@@ -25,34 +27,67 @@ class PaymentStrategy(ABC):
 
 class CreditCardPayment(PaymentStrategy):
     def create_payment(self, data):
-        
+        url = "https://api.mercadopago.com/v1/payments"
+        headers = {
+            "X-Idempotency-Key": str(uuid.uuid4()),
+            "Authorization": f"Bearer TEST-2446436736709243-040921-fed94a5bb0191a0e1903980cdd8485a4-171906724",
+            "Content-Type": "application/json"
+        }
+
         payment_data = {
             "transaction_amount": float(data["total"]),
             "token": data["card_token"],
             "description": data.get("description", "Compra com cartão de crédito"),
             "installments": int(data["installments"]),
-            "payment_method_id": "visa",  # ou "master", "amex", etc.
+            "payment_method_id": data.get("payment_method_id", "visa"),
+            "capture": True,
+            "external_reference": f"pedido_{uuid.uuid4()}",
             "payer": {
-            "email": data["payer_email"],  # Certifique-se de que o e-mail está vindo corretamente
-           # "first_name": data.get("first_name", "Nome"),  # Nome do pagador
-           # "last_name": data.get("last_name", "Sobrenome"),  # Sobrenome do pagador
-            "identification": {
-                "type": "CPF",  # Pode ser "CPF" ou "CNPJ", dependendo do tipo de documento
-                "number": data["payer_cpf"]  # CPF do pagador (certifique-se de ter essa informação)
+                "email": data["payer_email"],
+                "identification": {
+                    "type": "CPF",
+                    "number": data["payer_cpf"]
+                },
+                "entity_type": "individual",
+                "type": "customer"
+            },
+            "additional_info": {
+                "items": [
+                    {
+                        "id": item.get("id", "SKU123"),
+                        "title": item.get("title", "Produto"),
+                        "description": item.get("description", "Produto comprado"),
+                        "category_id": item.get("category", "services"),
+                        "quantity": item.get("quantity", 1),
+                        "unit_price": float(item.get("unit_price", data["total"]))  # fallback para valor total
+                    }
+                    for item in data.get("products", [])
+                ],
+                "payer": {
+                    "first_name": data.get("payer_first_name", "Test"),
+                    "last_name": data.get("payer_last_name", "User"),
+                    "phone": {
+                        "area_code": data.get("area_code", "11"),
+                        "number": data.get("phone_number", "999999999")
+                    },
+                    "address": {
+                        "zip_code": data.get("zip_code", "00000-000"),
+                        "street_name": data.get("street_name", "Rua Exemplo"),
+                        "street_number": data.get("street_number", 123)
+                    }
+                }
             }
         }
-        }
-        response = sdk.payment().create(payment_data)
-       
 
-        result = response['response']
-        
-        if result.get("status") in ["approved", "pending", "in_process", "in_mediation", "rejected"]:
+        response = requests.post(url, headers=headers, json=payment_data)
+        result = response.json()
+
+        if response.status_code == 201:
             payment = Payment(
                 payment_id=result.get("id"),
                 total_value=result.get("transaction_amount"),
-                payment_date=result.get("date_approved"),  # vem em ISO8601
-                payment_type="crédito",  # pois estamos usando cartão
+                payment_date=result.get("date_approved"),
+                payment_type="crédito",
                 cpf=data["payer_cpf"],
                 email=data["payer_email"],
                 status=result["status"],
@@ -60,17 +95,24 @@ class CreditCardPayment(PaymentStrategy):
                 products=data["products"],
                 address=data.get("address")
             )
-            
             payment.save()
 
             if result.get("status") == "rejected":
-                return{
+                return {
                     "status": 400,
                     "message": "Pagamento não aprovado. Verifique os dados do cartão ou use outro método.",
                     "error": result.get("status_detail")
                 }
-            
-        return response['response']
+
+            return result
+
+        return {
+            "status": response.status_code,
+            "message": "Erro ao criar pagamento.",
+            "error": result
+        }
+
+
     
 class DebitCardPayment(PaymentStrategy):
     def create_payment(self, data):
