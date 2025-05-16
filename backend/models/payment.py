@@ -74,7 +74,7 @@ class Payment:
                             total_value, delivery_id, width, height, length, weight
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
-                        product['id'],
+                        product['product_id'],
                         self.usuario_id,
                         self.address.get('recipient_name', ''),
                         self.address.get('street', ''),
