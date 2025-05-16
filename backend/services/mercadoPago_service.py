@@ -30,7 +30,7 @@ class CreditCardPayment(PaymentStrategy):
         url = "https://api.mercadopago.com/v1/payments"
         headers = {
             "X-Idempotency-Key": str(uuid.uuid4()),
-            "Authorization": f"Bearer TEST-2446436736709243-040921-fed94a5bb0191a0e1903980cdd8485a4-171906724",
+            "Authorization": f"Bearer {os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')}",
             "Content-Type": "application/json"
         }
 

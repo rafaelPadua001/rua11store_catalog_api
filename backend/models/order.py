@@ -4,10 +4,11 @@ from datetime import datetime
 
 
 class Order:
-    def __init__(self, id, user_id, payment_id, shipment_info, order_date, items , total_amount, status=None):
+    def __init__(self, id, user_id, payment_id, delivery_id, shipment_info, order_date, items , total_amount, status=None):
         self.id = id
         self.user_id = user_id
         self.payment_id = payment_id
+        self.delivery_id = delivery_id,
         self.shipment_info = shipment_info
         self.order_date = order_date
         self.status = status
@@ -96,6 +97,7 @@ class Order:
             "id": self.id,
             "user_id": self.user_id,
             "payment_id": self.payment_id,
+            "delivery_id": self.delivery_id,
             "shipment_info": self.shipment_info,
             "order_date": self.order_date,
             "status": self.status,

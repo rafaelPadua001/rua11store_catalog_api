@@ -37,9 +37,10 @@ class Payment:
             rows = cursor.fetchall()
         return [dict(row) for row in rows]
 
+    
     def save(self):
         conn = self.get_db_connection()
-     
+
         try:
             with conn:
                 cursor = conn.cursor()
@@ -59,30 +60,72 @@ class Payment:
                     self.usuario_id
                 ))
 
-                conn.commit()
-                
-                id = cursor.lastrowid
+                payment_id = cursor.lastrowid
 
-                cursor.execute(""" 
-                    INSERT INTO orders(user_id, payment_id, shipment_info, total_amount, order_date)
-                            VALUES(?, ?, ?, ?, datetime('now'))
-                """,( self.usuario_id,
-                    id,
+                delivery_id = None
+
+                # Se há endereço, criar uma entrega
+                if self.address and self.products:
+                    product = self.products[0]  # Apenas um produto para referenciar a entrega
+                    cursor.execute("""
+                        INSERT INTO delivery (
+                            product_id, user_id, recipient_name, street, number,
+                            complement, city, state, zip_code, country, phone, bairro,
+                            total_value, delivery_id, width, height, length, weight
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        product['id'],
+                        self.usuario_id,
+                        self.address.get('recipient_name', ''),
+                        self.address.get('street', ''),
+                        self.address.get('number', ''),
+                        self.address.get('complement', ''),
+                        self.address.get('city', ''),
+                        self.address.get('state', ''),
+                        self.address.get('zip_code', ''),
+                        self.address.get('country', ''),
+                        self.address.get('phone', ''),
+                        self.address.get('bairro', ''),
+                        self.address.get('total_value', 0),
+                        self.address.get('delivery_id', ''),
+                        product.get('width', 0),
+                        product.get('height', 0),
+                        product.get('length', 0),
+                        product.get('weight', 0)
+                    ))
+
+                    # Pegue o delivery_id gerado
+                    delivery_id = cursor.lastrowid
+
+                # Atualiza estoque
+                for product in self.products:
+                    product_id = product.get('id') if isinstance(product.get('id'), int) else product.get('product_id')
+                    quantity = int(product.get('quantity', 1))
+                    stock_quantity = StockController.update_stock_quantity(product_id, quantity, conn=conn)
+                    if 'error' in stock_quantity:
+                        print(f"Erro ao atualizar o estoque para o produto {product_id}: {stock_quantity['error']}")
+
+                # Inserir a ordem (orders)
+                cursor.execute("""
+                    INSERT INTO orders(user_id, payment_id, delivery_id, shipment_info, total_amount, order_date)
+                    VALUES (?, ?, ?, ?, ?, datetime('now'))
+                """, (
+                    self.usuario_id,
+                    payment_id,
+                    delivery_id,
                     self.address.get('zip_code', '') if self.address else '',
                     self.total_value
                 ))
 
                 order_id = cursor.lastrowid
 
-                # Inserir os produtos do pagamento
+                # Inserir os produtos do pagamento e order_items COM order_id válido
                 for product in self.products:
                     if 'id' not in product:
                         print("Erro: 'id' não encontrado no produto:", product)
                         continue
                     product_id = product.get('id') if isinstance(product.get('id'), int) else product.get('product_id')
 
-                    
-                    
                     product_name = product.get('name') or product.get('product_name')
                     if not product_name:
                         raise ValueError("Nome do produto ausente")
@@ -94,13 +137,13 @@ class Payment:
                         INSERT INTO payments_product(payment_id, product_id, product_name, product_quantity, product_price)
                         VALUES (?, ?, ?, ?, ?)
                     """, (
-                        id,
+                        payment_id,
                         product_id,
                         product_name,
                         quantity,
                         price
                     ))
-                       # order_items
+
                     cursor.execute("""
                         INSERT INTO order_items (order_id, product_id, quantity, unit_price, total_price)
                         VALUES (?, ?, ?, ?, ?)
@@ -109,48 +152,9 @@ class Payment:
                         product_id,
                         quantity,
                         price,
-                        self.total_value
+                        price * quantity
                     ))
-               
-                # Se há endereço, criar uma entrega
-                if self.address:
-                    for product in self.products:
-                        
-                        cursor.execute("""
-                            INSERT INTO delivery (
-                                product_id, user_id, recipient_name, street, number,
-                                complement, city, state, zip_code, country, phone, bairro,
-                                total_value, delivery_id, width, height, length, weight
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """, (
-                            product['id'],
-                            self.usuario_id,
-                            self.address.get('product_id'),
-                            self.address.get('recipient_name', ''),
-                            self.address.get('street', ''),
-                            self.address.get('number', ''),
-                            self.address.get('complement', ''),
-                            self.address.get('city', ''),
-                            self.address.get('state', ''),
-                            self.address.get('zip_code', ''),
-                            self.address.get('country', ''),
-                            self.address.get('phone', ''),
-                            self.address.get('bairro', ''),
-                            self.address.get('total_value', 0),
-                            self.address.get('delivery_id', ''),
-                            product.get('width', 0),
-                            product.get('height', 0),
-                            product.get('length', 0),
-                            product.get('weight', 0)
-                        ))
-                        
-                    for product in self.products:
-                        
-                        product_id = product.get('id') if isinstance(product.get('id'), int) else product.get('product_id')
-                        
-                        stock_quantity = StockController.update_stock_quantity(product_id, quantity, conn=conn)
-                        if 'error' in stock_quantity:
-                            print(f"Erro ao atualizar o estoque para o produto {product_id}: {stock_quantity['error']}")
+
         except sqlite3.Error as e:
             print(f"Erro ao salvar o pagamento: {e}")
             conn.rollback()
