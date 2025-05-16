@@ -34,6 +34,7 @@ class Order:
                 o.id AS order_id,
                 o.user_id,
                 o.payment_id,
+                o.delivery_id,
                 o.shipment_info,
                 o.total_amount AS order_total,
                 o.order_date,
@@ -69,6 +70,7 @@ class Order:
                     id=row['order_id'],
                     user_id=row['user_id'],
                     payment_id=row['payment_id'],
+                    delivery_id=row['delivery_id'],
                     shipment_info=row['shipment_info'],
                     order_date=row['order_date'],
                     total_amount=row['order_total'],
@@ -80,6 +82,7 @@ class Order:
             orders[order_id].items.append({
                 "item_id": row['item_id'],
                 "product_id": row['product_id'],
+                "delivery_id": row['delivery_id'],
                 "quantity": row['quantity'],
                 "unit_price": row['unit_price'],
                 "total_price": row['total_price'],
