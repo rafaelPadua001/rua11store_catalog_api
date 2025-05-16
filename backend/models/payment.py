@@ -125,7 +125,7 @@ class Payment:
                         """, (
                             product['id'],
                             self.usuario_id,
-                            self.addrss.get('product_id'),
+                            self.address.get('product_id'),
                             self.address.get('recipient_name', ''),
                             self.address.get('street', ''),
                             self.address.get('number', ''),
