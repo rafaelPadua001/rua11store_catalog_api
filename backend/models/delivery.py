@@ -65,16 +65,63 @@ class Delivery:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT 
-                d.*, 
-                p.id AS payment_id,
-                p.email, 
-                p.cpf,
-                pp.product_name, 
-                pp.product_price,
-                pp.product_quantity
-            FROM delivery d
-            LEFT JOIN payments p ON d.user_id = p.usuario_id
-            LEFT JOIN payments_product pp ON pp.payment_id = p.id
+                    d.id AS id,
+                    d.recipient_name,
+                    d.complement AS complement,
+                    d.street,
+                    d.number,
+                    d.city,
+                    d.state,
+                    d.zip_code,
+                    d.country,
+                    d.phone,
+                    d.bairro,
+                    d.total_value AS total_value,
+                    d.width,
+                    d.height,
+                    d.length,
+                    d.weight,
+                    d.melhorenvio_id,
+
+                    o.id AS order_id,
+                    o.user_id,
+                    o.payment_id,
+                    o.delivery_id,
+                    o.shipment_info,
+                    o.total_amount AS order_total,
+                    o.order_date,
+                    o.status,
+
+                    pay.id AS payment_id,
+                    pay.cpf AS cpf,
+                    pay.email AS email,
+                    
+
+                    oi.id AS item_id,
+                    oi.product_id,
+                    oi.quantity,
+                    oi.unit_price,
+                    oi.total_price,
+
+                    p.name AS product_name,
+                    p.description AS product_description,
+                    p.image_path AS product_image
+                    
+
+                FROM 
+                    delivery d
+                JOIN
+                    orders o ON d.id = o.delivery_id
+                JOIN 
+                    order_items oi ON o.id = oi.order_id
+                JOIN
+                    products p ON oi.product_id = p.id
+                JOIN
+                    payments AS pay ON o.payment_id = pay.id
+
+                ORDER BY 
+                    d.id DESC;
+
         """)
         rows = cursor.fetchall()
         conn.close()
@@ -84,49 +131,48 @@ class Delivery:
         for row in rows:
             delivery_id = row['id']
 
+            # Se ainda não adicionamos esse delivery, criamos a entrada
             if delivery_id not in deliveries_dict:
-                # Cria o objeto e dicionário da entrega
-                delivery = Delivery(
-                    row['id'],
-                    row['product_id'],   
-                    row['user_id'],
-                    row['recipient_name'],
-                    row['street'],
-                    row['number'],
-                    row['complement'],
-                    row['city'],
-                    row['state'],
-                    row['zip_code'],
-                    row['country'],
-                    row['phone'],
-                    row['bairro'],
-                    row['total_value'],
-                    row['delivery_id'],
-                    row['width'],  
-                    row['height'],  
-                    row['length'],  
-                    row['weight'],
-                    row['cpf'],
-                    row['melhorenvio_id'],
-                    row['order_id']
-                )
-
-                delivery_dict = delivery.to_dict()
-                delivery_dict['email'] = row['email']
-                delivery_dict['cpf'] = row['cpf']
-                delivery_dict['melhorenvio_id'] = row['melhorenvio_id']
-                delivery_dict['order_id'] = row['order_id']
-                delivery_dict['products'] = []  # Aqui armazenaremos todos os produtos
+                delivery_dict = {
+                    'id': delivery_id,
+                    'recipient_name': row['recipient_name'],
+                    'street': row['street'],
+                    'number': row['number'],
+                    'complement': row['complement'],
+                    'city': row['city'],
+                    'state': row['state'],
+                    'zip_code': row['zip_code'],
+                    'country': row['country'],
+                    'phone': row['phone'],
+                    'bairro': row['bairro'],
+                    'total_value': row['total_value'],
+                    'width': row['width'],
+                    'height': row['height'],
+                    'length': row['length'],
+                    'weight': row['weight'],
+                    'melhorenvio_id': row['melhorenvio_id'],
+                    'order_id': row['order_id'],
+                    'user_id': row['user_id'],
+                    'payment_id': row['payment_id'],
+                    'cpf': row['cpf'],
+                    'email': row['email'],
+                    'order_total': row['order_total'],
+                    'order_date': row['order_date'],
+                    'status': row['status'],
+                    'products': []  # importante inicializar apenas uma vez
+                }
 
                 deliveries_dict[delivery_id] = delivery_dict
 
-            # Adiciona o produto à lista se existir
-            if row['product_name'] and row['product_price'] is not None:
-                deliveries_dict[delivery_id]['products'].append({
-                    'name': row['product_name'],
-                    'price': row['product_price'],
-                    'quantity': row['product_quantity'] or 1
-                })
+            # Sempre adiciona o produto
+            deliveries_dict[delivery_id]['products'].append({
+                'product_id': row['product_id'],
+                'name': row['product_name'],
+                'description': row['product_description'],
+                'image': row['product_image'],
+                'price': row['unit_price'],
+                'quantity': row['quantity'] or 1
+            })
 
         # Retorna apenas os valores únicos (com lista de produtos agregada)
         return list(deliveries_dict.values())

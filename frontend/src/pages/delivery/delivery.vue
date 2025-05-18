@@ -39,6 +39,7 @@
                         <span v-else>Sem Categoria</span>
                     </template>
 
+
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
                          <!-- Botão de buscar item no carrinho -->
@@ -74,41 +75,38 @@
                 <v-dialog v-model="dialogCheckItemCart" max-width="600px">
                     <v-card>
                         <v-card-title>
-                            <span class="headline">Detalhes do Produto</span>
+                            <span class="headline">Detalhes da Entrega</span>
                         </v-card-title>
 
+                       
+                        <v-spacer></v-spacer>
+
                         <v-card-subtitle>
-                            <!-- {{ this.shipment}} -->
                             <v-row>
-                                <!-- <v-col cols="12" sm="6">
-                                    <strong>Total de Produtos:</strong> {{ shipment[shipment.length - 1].products.length
-                                    }}
-                                </v-col> -->
+                                <v-col cols="8" sm="3">
+                                   <strong>Id:</strong> {{ cartItems.data.id}}
+                                </v-col>
+                               
                             </v-row>
-                            <!-- <v-row v-for="(shipmentItem, index) in shipment" :key="index">
-                                <v-col cols="12" sm="6" v-for="item in shipmentItem.products" :key="item.name">
-                                    <strong>Nome do Produto:</strong> {{ item.name }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Serviço:</strong> {{ shipmentItem.service }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Remetente:</strong> {{ shipmentItem.from.name }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Destinatário:</strong> {{ shipmentItem.to.name }}
-                                </v-col>
-                            </v-row> -->
-
-                        </v-card-subtitle>
-
-                        <v-card-subtitle>
                             <v-row>
+                                <v-col cols="8" sm="3">
+                                   <strong>Order Id:</strong> {{ cartItems.data.protocol}}
+                                </v-col>
+                            </v-row>
+
+                            <v-divider></v-divider>
+                            <v-spacer></v-spacer>
+                            
+                            <v-row>
+                                
                                 <v-col cols="12" sm="6">
-                                    <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
+                                   <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <strong>Endereço:</strong> {{ cartItems.data.to.address }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>CEP:</strong> {{ cartItems.data.to.postal_code }}
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <strong>Cidade:</strong> {{ cartItems.data.to.city }}
@@ -116,11 +114,50 @@
                                 <v-col cols="12" sm="6">
                                     <strong>Estado:</strong> {{ cartItems.data.to.state_abbr }}
                                 </v-col>
+                              
                                 <v-col cols="12" sm="6">
                                     <strong>Telefone:</strong> {{ cartItems.data.to.phone }}
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <strong>Email:</strong> {{ cartItems.data.to.email }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Status:</strong>
+                                    <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{ cartItems.data.status }}</strong> 
+                                    <strong v-else> {{ cartItems.data.status }}</strong> 
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Delivery max: </strong>
+                                    <strong> {{ cartItems.data.delivery_max }} dias uteis</strong> 
+                                    
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Format: </strong>
+                                    <strong> {{ cartItems.data.format }} </strong> 
+                                    
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Price: </strong>
+                                    <strong> {{ cartItems.data.price }} </strong> 
+                                    
+                                </v-col>
+                            </v-row>
+
+                            <v-row>
+                                <v-col>
+                                    <v-list>
+                                        <strong>Itens: ({{cartItems.data.products.length}})</strong>
+                                        <v-divider></v-divider>
+                                        <v-list-item 
+                                            v-for="(product ,index) in cartItems.data.products"
+                                            :key="index"
+                                        >
+                                            <v-list-item-content>
+                                                <v-list-item-title>{{ product.name }}</v-list-item-title>
+                                                <v-list-item-subtitle>Quantitdade: {{product.quantity}} - Preço: {{ product.unitary_value }}</v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-list>
                                 </v-col>
                             </v-row>
                         </v-card-subtitle>
@@ -280,7 +317,7 @@ export default {
                     // this.$toast.success('O item está no carrinho');
                     //window.alert('O item está no carrinho');
                     this.cartItems = response.data;
-
+                    this.shipment.push(this.cartItems);
                     this.dialogCheckItemCart = true;
                 } else {
                     this.$toast.info('O item não está no carrinho');
