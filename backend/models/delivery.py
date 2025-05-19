@@ -82,8 +82,9 @@ class Delivery:
                     d.length,
                     d.weight,
                     d.melhorenvio_id,
+                    d.order_id AS order_id,
 
-                    o.id AS order_id,
+                    o.id,
                     o.user_id,
                     o.payment_id,
                     o.delivery_id,

@@ -2,6 +2,7 @@ import os
 import requests
 import sqlite3
 from models.delivery import Delivery
+import json
 
 class MelhorEnvioService:
     def __init__(self):
@@ -191,12 +192,14 @@ class MelhorEnvioService:
                 "weight": data["weight"]  # Peso do volume
             }]
         }
-
+    
     def make_request(self, url, method, payload=None):
+        
         headers = {
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "User-Agent": "Rua11Store (rafael.f.p.fariadk@gmail.com)"
         }
 
         try:
@@ -254,18 +257,25 @@ class MelhorEnvioService:
         url = f"{self.baseUrl}/cart/checkout"
         return self.make_request(url, "post")
 
-    def checkout_shipment(self, data):
-        if 'item' not in data or 'melhorenvio_id' not in data['item']:
-            return {"error": "'melhorenvio_id' é obrigatório no corpo da requisição."}, 400
 
-        melhorenvio_id = data['item']['melhorenvio_id']
-        print(melhorenvio_id)
+    def checkout_shipment(self, data):
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                return {"status": "error", "message": "JSON inválido"}, 400
+
+        order_id = data.get('item', {}).get('order_id')
+
+        if not order_id:
+            print('order_id não encontrado!')
+            return {"status": "error", "message": "order_id ausente"}, 400
+
         url = f"{self.baseUrl}/me/shipment/checkout"
-        payload = {"shipments": [melhorenvio_id]}
+        payload = {"orders": [order_id]}
         
-        # Verifique a resposta completa
         item_data = self.make_request(url, "post", payload)
-        print('Resposta da requisição:', item_data)  # Adicione isso para ver a resposta completa
+        print('Resposta da requisição:', item_data)
 
         if item_data:
             print('Item encontrado no carrinho:', item_data)
@@ -273,6 +283,7 @@ class MelhorEnvioService:
         else:
             print('Erro na requisição ou dados não encontrados.')
             return {"status": "not_found"}, 404
+
      
     def generate_label(self, data):
         print(data)
