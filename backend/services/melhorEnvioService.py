@@ -196,12 +196,12 @@ class MelhorEnvioService:
     def make_request(self, url, method, payload=None):
         
         headers = {
+            "Accept": "application/json",
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "Rua11Store (rafael.f.p.fariadk@gmail.com)"
+            "User-Agent": "Rua11Store (rafael.f.p.faria@hotmail.com)"
         }
-
+       
         try:
             # Realiza a requisição de acordo com o método
             if method.lower() == "post":
@@ -221,7 +221,7 @@ class MelhorEnvioService:
                 # Se o status for 204 (sem conteúdo), não há resposta no corpo
                 if response.status_code == 204:
                     print("Resposta da API está vazia.")
-                    return {"status": "success"}  # Retorna um status de sucesso, mesmo sem corpo
+                    return None, {"status": "success"}  # Retorna um status de sucesso, mesmo sem corpo
 
                 # Verifica se a resposta não está vazia para outros status
                 if response.text.strip():  # Verifica se o corpo da resposta não está vazio
@@ -261,18 +261,19 @@ class MelhorEnvioService:
     def checkout_shipment(self, data):
         if isinstance(data, str):
             try:
+               
                 data = json.loads(data)
             except json.JSONDecodeError:
                 return {"status": "error", "message": "JSON inválido"}, 400
 
-        order_id = data.get('item', {}).get('order_id')
+        melhorenvio_id = data.get('item', {}).get('melhorenvio_id')
 
-        if not order_id:
+        if not melhorenvio_id:
             print('order_id não encontrado!')
             return {"status": "error", "message": "order_id ausente"}, 400
 
         url = f"{self.baseUrl}/me/shipment/checkout"
-        payload = {"orders": [order_id]}
+        payload = {"orders": [melhorenvio_id]}
         
         item_data = self.make_request(url, "post", payload)
         print('Resposta da requisição:', item_data)
@@ -284,13 +285,46 @@ class MelhorEnvioService:
             print('Erro na requisição ou dados não encontrados.')
             return {"status": "not_found"}, 404
 
+    def print_label(self, data):
+        melhorenvio_id = data.get('melhorenvio_id')
+        if not melhorenvio_id:
+            return {"error": "melhorenvio_id não informado"}, 400
+
+        url = f"{self.baseUrl}/me/shipment/print"  # corrigi a URL
+
+        payload = {"orders": [melhorenvio_id]}
+
+        response = self.make_request(url, "post", payload)
+
+        # aqui você pode tratar a resposta conforme o formato que make_request retorna
+        return response
+
      
     def generate_label(self, data):
-        print(data)
-        melhorenvio_id = data['melhorenvio_id']
+        melhorenvio_id = data.get('melhorenvio_id')
+        if not melhorenvio_id:
+            return {"error": "melhorenvio_id não informado"}, 400
 
         url = f"{self.baseUrl}/me/shipment/generate"
-        return self.make_request(url, "post", {"shipments": [melhorenvio_id]})
+        payload = {"orders": [melhorenvio_id]}
+
+        response = self.make_request(url, "post", payload)
+        
+        # Exemplo: espera-se que response seja um dict
+        # com a chave "url" contendo o link para o PDF da etiqueta
+        if "url" in response:
+            pdf_url = response["url"]
+
+            # Baixa o PDF da URL
+            pdf_response = requests.get(pdf_url)
+            if pdf_response.status_code == 200 and 'application/pdf' in pdf_response.headers.get('Content-Type', ''):
+                return pdf_response.content, 200
+            else:
+                return None, pdf_response.status_code
+        else:
+            # Pode conter erro na resposta
+            return None, 500
+
 
     def is_valid_cpf(self, cpf):
         # Lógica simples para validar CPF (pode ser melhorado)
@@ -305,12 +339,10 @@ class MelhorEnvioService:
         return True  # Pode adicionar a verificação do algoritmo de CNPJ aqui
     
     def checkItemCart(self, data):
-        # print('Dados recebidos:', data)
         melhorenvio_id = data['melhorenvio_id']
-
+        
         url = f"{self.baseUrl}/me/cart/{melhorenvio_id}"
-        # print(url)
-
+       
         item_data = self.make_request(url, "get")
 
         if item_data:
@@ -321,17 +353,40 @@ class MelhorEnvioService:
             return {"status": "not_found"}, 404
 
     def pdfTag(self, data):
-        melhorenvio_id = data['melhorenvio_id']
-        url = f"{self.baseUrl}/me/shipment/print?shipments[]=<melhorenvio_id>"
-        # payload = {"shipments": [melhorenvio_id]}
+        melhorenvio_id = data.get('melhorenvio_id')
+        if not melhorenvio_id:
+            return {"error": "melhorenvio_id não fornecido"}, 400
 
-        response = requests.post(url, headers=self.headers)
+        url = f"{self.baseUrl}/me/imprimir/zpl/pdf/{melhorenvio_id}"
+        headers = self.headers.copy()
+        headers["Accept"] = "application/json"
 
+        response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            return response.content
+            content_type = response.headers.get('Content-Type', '')
+            if 'application/json' in content_type:
+                try:
+                    pdf_urls = response.json()
+                except ValueError:
+                    return {"error": "Erro ao parsear JSON"}, 500
+
+                if not pdf_urls or not isinstance(pdf_urls, list):
+                    return {"error": "Nenhuma URL de PDF encontrada"}, 404
+
+                pdf_url = pdf_urls[0]
+                pdf_response = requests.get(pdf_url)
+                if pdf_response.status_code == 200:
+                    if 'application/pdf' in pdf_response.headers.get('Content-Type', ''):
+                        return Response(pdf_response.content, mimetype='application/pdf')
+                    else:
+                        return {"error": "Conteúdo não é PDF"}, 415
+                else:
+                    return {"error": "Falha ao baixar PDF"}, pdf_response.status_code
+            else:
+                return {"error": "Resposta não é JSON"}, 415
         else:
-            print(f"Erro ao gerar PDF: {response.status_code} - {response.text}")
-            return None
+            return {"error": "Erro na requisição à API do Melhor Envio"}, response.status_code
+
         
     def deleteItemCart(self, data):
         print(data)

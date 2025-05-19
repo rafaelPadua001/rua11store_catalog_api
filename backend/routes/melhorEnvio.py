@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from services.melhorEnvioService import MelhorEnvioService
 import os;
 from flask_cors import cross_origin
@@ -87,6 +87,16 @@ def shipmentCheckout():
     except Exception as e:
         print('Error', str(e))
         return jsonify({"error": "Erro ao consultar item"}), 500
+    
+
+@melhorenvio_bp.route('/shipmentPrint', methods=['POST'])
+def shipment_print():
+    data = request.get_json()
+    service = MelhorEnvioService()
+    response = service.print_label(data)  # retorna só um dict
+
+    # Retorna JSON com status 200 OK
+    return jsonify(response), 200
 
 
 @melhorenvio_bp.route('/shipmentGenerate', methods=["POST"])
@@ -95,23 +105,18 @@ def shipmentGenerate():
 
     try:
         service = MelhorEnvioService()
-        result, status_code = service.generate_label(data)
-        return jsonify(result), status_code
+        result = service.generate_label(data)
+        return jsonify(result), 200
     except Exception as e:
         print('Error', str(e))
         return jsonify({"error": "Erro ao gerar remessa"}), 500
     
 @melhorenvio_bp.route('/pdfTag', methods=["POST"])
-def payTag():
-    data = request.get_json()
+def pdf_tag_route():
+    data = request.get_json(force=True)
+    service = MelhorEnvioService()  # ✅ Instanciando a classe corretamente
+    return service.pdfTag(data)    # Agora sempre retorna um Response válido
 
-    try:
-        service = MelhorEnvioService()
-        result, status_code = service.pdfTag(data)
-        return jsonify(result), status_code
-    except Exception as e:
-        print('Error', str(e))
-        return jsonify({"error": "Erro ao pagar etiqueta"}), 500
     
 @melhorenvio_bp.route('/deleteItemCart', methods=["DELETE", "OPTIONS"])
 @cross_origin()  # Habilita CORS para essa rota
