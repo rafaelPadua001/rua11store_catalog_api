@@ -42,30 +42,34 @@
 
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
-                         <!-- Botão de buscar item no carrinho -->
-                        
+                        <!-- Botão de buscar item no carrinho -->
+
                         <!-- Ícone de criar envio -->
                         <v-icon small @click.stop="shipmentCreate(item)">
                             mdi-cart
                         </v-icon>
-                         <!-- Botão de compra de etiqueta no carrinho -->
-                         <v-icon small @click.stop="shipmentCheckout(item)">
-                            mdi-check
-                        </v-icon>
+
 
                         <v-icon :disabled="!isCheckitemButton" small @click.stop="checkItemInCart(item)">
                             mdi-file-search
                         </v-icon>
 
-
-                       <v-icon small @click.stop="shipmentGenerate(item)">
+                        <!-- Botão de compra de etiqueta no carrinho -->
+                        <v-icon small @click.stop="shipmentCheckout(item)">
+                            mdi-check
+                        </v-icon>
+                        <v-icon small @click.stop="shipmentGenerate(item)">
                             mdi-bookmark
                         </v-icon>
-
-                        <!-- Ícone de criar etiqueta -->
-                        <v-icon small @click.stop="pdfTag(item)">
+                        <v-icon small @click.stop="shipmentPrint(item)">
                             mdi-file-pdf-box
                         </v-icon>
+
+
+                        <!-- Ícone de criar etiqueta -->
+                        <!-- <v-icon small @click.stop="pdfTag(item)">
+                            mdi-file-pdf-box
+                        </v-icon> -->
                         <!-- Ícone de deletar produto -->
                         <v-icon small @click.stop="deleteItemCart(item)">
                             mdi-delete
@@ -79,29 +83,29 @@
                             <span class="headline">Detalhes da Entrega</span>
                         </v-card-title>
 
-                       
+
                         <v-spacer></v-spacer>
 
                         <v-card-subtitle>
                             <v-row>
                                 <v-col cols="8" sm="3">
-                                   <strong>Id:</strong> {{ cartItems.data.id}}
+                                    <strong>Id:</strong> {{ cartItems.data.id }}
                                 </v-col>
-                               
+
                             </v-row>
                             <v-row>
                                 <v-col cols="8" sm="3">
-                                   <strong>Order Id:</strong> {{ cartItems.data.protocol}}
+                                    <strong>Order Id:</strong> {{ cartItems.data.protocol }}
                                 </v-col>
                             </v-row>
 
                             <v-divider></v-divider>
                             <v-spacer></v-spacer>
-                            
+
                             <v-row>
-                                
+
                                 <v-col cols="12" sm="6">
-                                   <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
+                                    <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <strong>Endereço:</strong> {{ cartItems.data.to.address }}
@@ -115,7 +119,7 @@
                                 <v-col cols="12" sm="6">
                                     <strong>Estado:</strong> {{ cartItems.data.to.state_abbr }}
                                 </v-col>
-                              
+
                                 <v-col cols="12" sm="6">
                                     <strong>Telefone:</strong> {{ cartItems.data.to.phone }}
                                 </v-col>
@@ -124,38 +128,38 @@
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <strong>Status:</strong>
-                                    <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{ cartItems.data.status }}</strong> 
-                                    <strong v-else> {{ cartItems.data.status }}</strong> 
+                                    <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{
+                                        cartItems.data.status
+                                        }}</strong>
+                                    <strong v-else> {{ cartItems.data.status }}</strong>
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <strong>Delivery max: </strong>
-                                    <strong> {{ cartItems.data.delivery_max }} dias uteis</strong> 
-                                    
+                                    <strong> {{ cartItems.data.delivery_max }} dias uteis</strong>
+
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <strong>Format: </strong>
-                                    <strong> {{ cartItems.data.format }} </strong> 
-                                    
+                                    <strong> {{ cartItems.data.format }} </strong>
+
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <strong>Price: </strong>
-                                    <strong> {{ cartItems.data.price }} </strong> 
-                                    
+                                    <strong> {{ cartItems.data.price }} </strong>
+
                                 </v-col>
                             </v-row>
 
                             <v-row>
                                 <v-col>
                                     <v-list>
-                                        <strong>Itens: ({{cartItems.data.products.length}})</strong>
+                                        <strong>Itens: ({{ cartItems.data.products.length }})</strong>
                                         <v-divider></v-divider>
-                                        <v-list-item 
-                                            v-for="(product ,index) in cartItems.data.products"
-                                            :key="index"
-                                        >
+                                        <v-list-item v-for="(product, index) in cartItems.data.products" :key="index">
                                             <v-list-item-content>
                                                 <v-list-item-title>{{ product.name }}</v-list-item-title>
-                                                <v-list-item-subtitle>Quantitdade: {{product.quantity}} - Preço: {{ product.unitary_value }}</v-list-item-subtitle>
+                                                <v-list-item-subtitle>Quantitdade: {{ product.quantity }} - Preço: {{
+                                                    product.unitary_value }}</v-list-item-subtitle>
                                             </v-list-item-content>
                                         </v-list-item>
                                     </v-list>
@@ -165,7 +169,7 @@
 
                         <v-card-actions>
                             <!-- Botão de compra de etiqueta no carrinho -->
-                            
+
                             <v-btn color="green" text @click="dialogCheckItemCart = false">Close</v-btn>
                         </v-card-actions>
                     </v-card>
@@ -328,11 +332,11 @@ export default {
                 // Verifique se o erro contém a propriedade response
                 if (error.response) {
                     window.alert('item não encontrado no carrinho:', error.response.data);
-                   // this.$toast.error('Erro ao verificar item no carrinho');
+                    // this.$toast.error('Erro ao verificar item no carrinho');
                 } else {
                     // Se não houver response, logue o erro simples
                     console.log('Erro desconhecido:', error);
-                   // this.$toast.error('Erro desconhecido');
+                    // this.$toast.error('Erro desconhecido');
                 }
             }
         },
@@ -349,7 +353,7 @@ export default {
 
                 if (response.status === 200 && response.data && response.data.status === 'success') {
                     // this.$toast.success('O item está no carrinho');
-                    //window.alert('O item está no carrinho');
+                    window.alert('O item está no carrinho');
                     this.cartItems = response.data;
 
                     this.dialogCheckItemCart = true;
@@ -362,7 +366,7 @@ export default {
                 // Verifique se o erro contém a propriedade response
                 if (error.response) {
                     window.alert('item não encontrado no carrinho:', error.response.data);
-                  //  this.$toast.error('Erro ao verificar item no carrinho');
+                    //  this.$toast.error('Erro ao verificar item no carrinho');
                 } else {
                     // Se não houver response, logue o erro simples
                     console.log('Erro desconhecido:', error);
@@ -370,6 +374,37 @@ export default {
                 }
             }
         },
+        async shipmentPrint(item) {
+            try {
+                const response = await api.post(`/melhorEnvio/shipmentPrint`, {
+                    melhorenvio_id: item.melhorenvio_id
+                }, {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.status === 200) {
+                    const urlEtiqueta = response.data.url;  // pega a URL da etiqueta da resposta
+                    if (urlEtiqueta) {
+                        // Abre a etiqueta em nova aba
+                        window.open(urlEtiqueta, '_blank');
+                    } else if (response.data.error) {
+                        window.alert('Erro: ' + response.data.error);
+                    } else {
+                        window.alert('Etiqueta não disponível');
+                    }
+                } else {
+                    window.alert('Falha ao gerar etiqueta');
+                }
+            } catch (error) {
+                if (error.response && error.response.data) {
+                    window.alert('Erro: ' + (error.response.data.error || 'Erro desconhecido'));
+                } else {
+                    window.alert('Erro desconhecido');
+                    console.error(error);
+                }
+            }
+        },
+
         async shipmentGenerate(item) {
             console.log(item);
             try {
@@ -381,9 +416,9 @@ export default {
                     }
                 });
 
-                if (response.status === 200 && response.data && response.data.status === 'success') {
+                if (response.status === 200 || response.status === 204 || response.status == true) {
                     //this.$toast.success('O item está no carrinho');
-                    //window.alert('O item está no carrinho');
+                    window.alert('O item está no carrinho');
                     // this.cartItems = response.data;
 
                     //this.dialogCheckItemCart = true;
@@ -405,22 +440,26 @@ export default {
         },
         async pdfTag(item) {
             try {
-                const response = await api.post('melhorEnvio/pdfTag', {
-                    melhorenvio_id: item.melhorenvio_id
-                });
+                const response = await api.post('melhorEnvio/pdfTag',
+                    { melhorenvio_id: item.order_id },
+                    { headers: { 'Content-Type': 'application/json' } }
+                );
+                console.log('Resposta da API:', response.data);
 
-                if (response.data && response.data.status == 'success') {
-                    window.alert('Etiqueta paga com sucesso');
+                const pdfUrls = response.data; // isso deve ser um array
+                if (pdfUrls && pdfUrls.length > 0) {
+                    const pdfUrl = pdfUrls[0];
+                    console.log('URL do PDF:', pdfUrl);
+
+                    window.open(pdfUrl, '_blank'); // abre em nova aba
+                } else {
+                    window.alert('Nenhuma URL de PDF recebida.');
                 }
-                else {
-                    window.alert('Erro ao pagar a etiqueta');
-                }
-            }
-            catch (error) {
-                console.log('Erro ao pagar a etiqueta:', error);
-                // this.$toast.error('Erro ao pagar a etiqueta');
+            } catch (error) {
+                window.alert('Erro ao buscar PDF: ' + error);
             }
         },
+
         async deleteItemCart(item) {
             console.log(item);
             try {
