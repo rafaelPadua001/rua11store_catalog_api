@@ -52,6 +52,7 @@
                          <v-icon small @click.stop="shipmentCheckout(item)">
                             mdi-check
                         </v-icon>
+
                         <v-icon :disabled="!isCheckitemButton" small @click.stop="checkItemInCart(item)">
                             mdi-file-search
                         </v-icon>
@@ -336,7 +337,7 @@ export default {
             }
         },
         async shipmentCheckout(item) {
-            console.log(item);
+            console.log(item.products);
             try {
                 const response = await api.post(`/melhorEnvio/shipmentCheckout`, {
                     item: item
