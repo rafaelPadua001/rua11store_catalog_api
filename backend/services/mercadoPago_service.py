@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from models.payment import Payment
 import uuid
 import requests
+import re
 
 load_dotenv()
 
@@ -115,42 +116,70 @@ class CreditCardPayment(PaymentStrategy):
 
     
 class DebitCardPayment(PaymentStrategy):
-    def create_payment(self, data):
-        payment_data = {
-            "payment_id": data['id'], 
-            "transaction_amount": float(data["total"]),
-            "token": data["card_token"],
-            "description": data.get("description", "Compra com cartão de débito"),
-            "installments": 1,
-            #"payment_method_id": "Debin_transfer",
-            "payer": {
-                "email": data["payer_email"],
-                "identification": {
-                    "type": "CPF",
-                    "number": data["payer_cpf"]
-                }
-            }
+   def create_payment(self, data):
+    cpf_limpo = re.sub(r'\D', '', data["payer_cpf"])
+
+    url = "https://api.mercadopago.com/v1/payments"
+    headers = {
+        "X-Idempotency-Key": str(uuid.uuid4()),
+        "Authorization": f"Bearer {os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')}",  # use TEST token
+        "Content-Type": "application/json"
+    }
+
+    payment_data = {
+        "transaction_amount": float(data["total"]),
+        "token": data["card_token"],
+        "description": data.get("description", "Compra com cartão de crédito"),
+        "installments": int(data["installments"]),  # 1 se for débito simulado
+        "payment_method_id": data.get("payment_method_id", "visa"),  # "visa", "master", etc
+        "payer": {
+            "email": data["payer_email"],
+            "identification": {
+                "type": "CPF",
+                "number": cpf_limpo
+            },
+            "entity_type": "individual",
+            "type": "customer"
         }
-        response = sdk.payment().create(payment_data)
-         
-        result = response['response']
-       
-        if result.get("status") == "approved":
-            payment = Payment(
-                payment_id=result.get("id"),
-                total_value=result.get("transaction_amount"),
-                payment_date=result.get("date_approved"),  # vem em ISO8601
-                payment_type="débito",  # pois estamos usando cartão
-                cpf=data["payer_cpf"],
-                email=data["payer_email"],
-                status=result["status"],
-                usuario_id=data["userId"],
-                products=data["products"],
-                address=data.get("address")
-            )
-            
-            payment.save()
-        return response['response']
+    }
+
+    print("➡️ Enviando dados para pagamento Mercado Pago:")
+    print(payment_data)
+
+    response = requests.post(url, headers=headers, json=payment_data)
+    result = response.json()
+
+    if response.status_code == 201:
+        # pagamento aprovado
+        payment = Payment(
+            payment_id=result.get("id"),
+            total_value=result.get("transaction_amount"),
+            payment_date=result.get("date_approved"),
+            payment_type="crédito",  # trocado para refletir o teste
+            cpf=cpf_limpo,
+            email=data["payer_email"],
+            status=result["status"],
+            usuario_id=data["userId"],
+            products=data["products"],
+            address=data.get("address")
+        )
+        payment.save()
+
+        if result.get("status") == "rejected":
+            return {
+                "status": 400,
+                "message": "Pagamento não aprovado. Verifique os dados do cartão ou use outro método.",
+                "error": result.get("status_detail")
+            }
+
+        return result
+
+    # Falha
+    return {
+        "status": response.status_code,
+        "message": "Erro ao criar pagamento.",
+        "error": result
+    }
 
 class PixPayment(PaymentStrategy):
     def create_payment(self, data):
