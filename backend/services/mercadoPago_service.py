@@ -6,6 +6,7 @@ from models.payment import Payment
 import uuid
 import requests
 import re
+from datetime import datetime
 
 load_dotenv()
 
@@ -184,13 +185,11 @@ class DebitCardPayment(PaymentStrategy):
 class PixPayment(PaymentStrategy):
     def create_payment(self, data):
         payment_data = {
-            "transaction_amount": float(data["amount"]),
+            "transaction_amount": float(data["total"]),
             "description": data.get("description", "Pagamento via Pix"),
             "payment_method_id": "pix",
             "payer": {
                 "email": data["payer_email"],
-                "first_name": data["payer_first_name"],
-                "last_name": data["payer_last_name"],
                 "identification": {
                     "type": "CPF",
                     "number": data["payer_cpf"]
@@ -205,4 +204,36 @@ class PixPayment(PaymentStrategy):
                 }
             }
         }
-        return sdk.payment().create(payment_data)['response']
+
+        response = sdk.payment().create(payment_data)['response']
+
+        pix_info = {
+            "id": response.get("id"),
+            "status": response.get("status"),
+            "status_detail": response.get("status_detail"),
+            "qr_code": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code"),
+            "qr_code_base64": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64")
+        }
+
+        # Aqui: criar um objeto do seu model de pagamento
+        payment = Payment(
+            payment_id=pix_info["id"],
+            status=pix_info["status"],
+          #  status_detail=pix_info["status_detail"],
+            #qr_code=pix_info["qr_code"],
+            #qr_code_base64=pix_info["qr_code_base64"],
+            total_value=payment_data["transaction_amount"],
+            #payer_email=data["payer_email"],
+            #description=payment_data["description"],
+            payment_date=datetime.now(),
+            payment_type="pix",
+            cpf=data["payer_cpf"],
+            email=data["payer_email"],
+            usuario_id=data["userId"],
+            products=data["products"],
+        )
+
+        # Salva no banco
+        payment.save()
+
+        return pix_info
