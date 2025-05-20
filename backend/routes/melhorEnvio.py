@@ -114,10 +114,21 @@ def shipmentGenerate():
 @melhorenvio_bp.route('/pdfTag', methods=["POST"])
 def pdf_tag_route():
     data = request.get_json(force=True)
-    service = MelhorEnvioService()  # ✅ Instanciando a classe corretamente
-    return service.pdfTag(data)    # Agora sempre retorna um Response válido
+    service = MelhorEnvioService()  
+    return service.pdfTag(data)   
 
-    
+@melhorenvio_bp.route('/shipmentTracking', methods=["POST"])
+def shipmentTracking():
+    data = request.get_json()
+    print(data)
+    try:
+        service = MelhorEnvioService()
+        result = service.tracking(data)
+        return jsonify(result), 200
+    except Exception as e:
+        print("Error", str(e))
+        return jsonify({'error': 'Error ao fazer tracking'})
+
 @melhorenvio_bp.route('/deleteItemCart', methods=["DELETE", "OPTIONS"])
 @cross_origin()  # Habilita CORS para essa rota
 def deleteItemCart():

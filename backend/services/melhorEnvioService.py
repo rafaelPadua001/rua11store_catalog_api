@@ -246,9 +246,7 @@ class MelhorEnvioService:
             # Captura outros erros inesperados
             print(f"Erro inesperado: {e}")
         return None  # Retorna None em caso de exceção genérica
-
-
-
+    
     def create_shipment_item(self, shipment_payload):
         url = f"{self.baseUrl}/me/cart"
         return self.make_request(url, "post", shipment_payload)
@@ -387,6 +385,18 @@ class MelhorEnvioService:
         else:
             return {"error": "Erro na requisição à API do Melhor Envio"}, response.status_code
 
+    def tracking(self, data):
+        print(data)
+        melhorenvio_id = data.get('order_id')
+        if not melhorenvio_id:
+            return {"error": "melhorenvio_id não informado"}, 400
+
+        url = f"{self.baseUrl}/me/shipment/tracking"
+        payload = {"orders": [melhorenvio_id]}
+
+        response = self.make_request(url, "post", payload)
+
+        return response
         
     def deleteItemCart(self, data):
         print(data)

@@ -133,21 +133,25 @@ class Order:
                     p.name AS product_name,
                     p.description AS product_description,
                     p.price AS product_price,
-                    p.image_path AS product_image
+                    p.image_path AS product_image,
+                    d.melhorenvio_id AS delivery_id
                 FROM 
                     orders o
                 JOIN 
                     order_items oi ON o.id = oi.order_id
                 JOIN
                     products p ON oi.product_id = p.id
+                JOIN 
+                    delivery d ON o.delivery_id = d.id  
                 WHERE
                     o.user_id = ?
                 ORDER BY 
                     o.id DESC
+
             """, (user_id,))
 
             results = cursor.fetchall()
-            
+            print(results)
             conn.close()
 
             if results:
@@ -166,6 +170,7 @@ class Order:
                             'order_total': row[4],
                             'order_date': row[5],
                             'status': row[6],
+                            'delivery_id': row[16],
                             'items': []
                         }
 
@@ -179,9 +184,10 @@ class Order:
                         'product_name': row[12],
                         'product_description': row[13],
                         'product_price': row[14],
-                        'product_image': row[15]
+                        'product_image': row[15],
+                        
                     })
-
+                    print(orders)
                 return list(orders.values())
             else:
                 return None
