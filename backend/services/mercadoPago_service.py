@@ -231,6 +231,7 @@ class PixPayment(PaymentStrategy):
             email=data["payer_email"],
             usuario_id=data["userId"],
             products=data["products"],
+            address=data.get("address")
         )
 
         # Salva no banco
