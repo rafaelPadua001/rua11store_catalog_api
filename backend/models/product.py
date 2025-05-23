@@ -49,7 +49,7 @@ class Product:
                     INSERT INTO products (name, description, price, category_id, 
                                         subcategory_id, image_path, quantity, width,
                                 height, weight, length, user_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?, ?)
                 """, (self.name, self.description, self.price, self.category_id, 
                       self.subcategory_id, self.image_path, self.quantity, self.width,
                         self.height, self.weight, self.length, self.user_id))

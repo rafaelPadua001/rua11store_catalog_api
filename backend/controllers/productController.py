@@ -89,7 +89,7 @@ class ProductController:
                 "product_widht": novo_produto.width,
                 "product_height": novo_produto.height,
                 "product_weight": novo_produto.weight,
-                "product_length": novo_produto.lenght,
+                "product_length": novo_produto.length,
                 "variations": None,
             }
             Stock.create(stock_data)
