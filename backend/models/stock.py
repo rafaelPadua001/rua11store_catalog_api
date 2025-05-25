@@ -48,7 +48,10 @@ class Stock:
     @staticmethod
     def get_all():
         """Busca todos os itens do estoque"""
-        query = "SELECT * FROM stock"
+        query = """SELECT stock.*, products.image_path
+                FROM stock
+                JOIN products ON stock.id_product = products.id
+        """
         conn = Stock.get_db_connection()
         cursor = conn.cursor()
         cursor.execute(query)

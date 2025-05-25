@@ -1,6 +1,6 @@
 <template>
     <v-row justify="center">
-        <v-col cols="12" md="8" lg="8" xl="6">
+        <v-col cols="12" md="10" lg="8" xl="6">
             <v-card class="pa-4">
                 <v-card-title class="d-flex justify-center">
                     <h1 class="text-h5">Stock Management</h1>
@@ -10,21 +10,21 @@
                 <v-data-table :headers="headers" :items="stocks" :items-per-page="10" class="elevation-1" item-key="id"
                     fixed-header height="500" :loading="loading" loading-text="Loading stock...">
 
-                    <template v-slot:item.image="{ item }">
-                        <v-img v-if="item.image" :src="item.image" alt="Product Image" contain :width="70" :height="70"
+                    <template v-slot:item.image_path="{ item }">
+                        <v-img v-if="item.image_path" :src="getProductImage(item.image_path) " alt="Product Image" contain :width="70" :height="70" 
                             class="rounded-lg"></v-img>
                         <span v-else>No Image</span>
                     </template>
 
                     <template v-slot:item.actions="{ item }">
-                        <v-icon small @click.stop="deleteStock(item.id)">
+                        <v-icon small @click.stop="deleteStock(item.id)" color="error">
                             mdi-delete
                         </v-icon>
                     </template>
                 </v-data-table>
             </v-card>
 
-            <v-dialog v-model="productDialog" max-width="500px">
+            <v-dialog v-model="stockDialog" max-width="500px">
                 <v-card>
                     <v-card-title class="headline">{{ formTitle }}</v-card-title>
                     <v-card-text>
@@ -70,10 +70,12 @@ export default {
             editedStock: { id: null, name: "", quantity: 1 },
             stocks: [],
             headers: [
-                { text: "Product Name", value: "product_name" },
-                { text: "Quantity", value: "product_quantity" },
-                { text: "Price", value: "product_price" },
-                { text: "Actions", value: "actions", sortable: false },
+                { title: "Product Image", key: "image_path", sortable: false  },
+                { title: "Product Name", key: "product_name" },
+                { title: "Variations", key: "variations" },
+                { title: "Quantity", key: "product_quantity" },
+                { title: "Price", key: "product_price" },
+                { title: "Actions", key: "actions", sortable: false },
             ],
         };
     },
@@ -91,6 +93,40 @@ export default {
             } finally {
                 this.loading = false;
             }
+        },
+        getProductImage(imagePath, productId = null) {
+            // Imagem padrão se não houver caminho
+            if (!imagePath) return "https://via.placeholder.com/300";
+
+            // Se já for URL completa (http ou https)
+            if (imagePath.startsWith('http')) {
+                return imagePath.replace('http://', 'https://'); // Força HTTPS
+            }
+
+            // Define a base URL conforme o ambiente
+            const baseUrl = window.location.hostname === 'localhost'
+                ? 'http://localhost:5000'
+                : 'https://rua11storecatalogapi-production.up.railway.app';
+
+            // Extrai o nome do arquivo (última parte do caminho)
+            const filename = imagePath.split('/').pop();
+
+            // Obtém o nome do produto de forma segura
+            let productName = 'produto';
+
+            // Se tiver productId, busca na lista de produtos
+            if (productId) {
+                const product = this.products.find(p => p.id === productId);
+                if (product?.name) {
+                    productName = product.name.replace(/\s+/g, '_').toLowerCase();
+                }
+            }
+            // Se estiver editando, usa o editedProduct
+            else if (this.editedProduct?.name) {
+                productName = this.editedProduct.name.replace(/\s+/g, '_').toLowerCase();
+            }
+
+            return `${baseUrl}/${imagePath}`;
         },
         async deleteStock(id) {
             if (!confirm("Are you sure you want to delete this product?")) return;
