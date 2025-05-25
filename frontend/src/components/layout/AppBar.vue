@@ -9,7 +9,7 @@
     </v-btn>
   </v-app-bar>
 
-  <v-navigation-drawer v-model="drawer" temporary>
+  <v-navigation-drawer v-model="drawer" class="bg-purple-darken-3" theme="dark" temporary>
     <v-list>
       <v-list-item>
         <v-list-item-title class="text-h6">Menu</v-list-item-title>
