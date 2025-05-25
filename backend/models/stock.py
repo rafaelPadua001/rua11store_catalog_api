@@ -156,3 +156,15 @@ class Stock:
         deleted = cursor.rowcount > 0
         conn.close()
         return deleted
+    
+    @staticmethod
+    def delete_by_productId(product_id):
+        """Remove um item do estoque"""
+        query = "DELETE FROM stock WHERE id_product = ?"
+        conn = Stock.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (product_id,))
+        conn.commit()
+        deleted = cursor.rowcount > 0
+        conn.close()
+        return deleted

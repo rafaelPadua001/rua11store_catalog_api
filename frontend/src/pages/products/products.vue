@@ -1,6 +1,6 @@
 <template>
     <v-row justify="center">
-        <v-col cols="12" md="8" lg="8" xl="6">
+        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
             <v-card class="pa-4">
                 <v-card-title class="d-flex justify-center">
                     <h1 class="text-h5">Products Management</h1>
@@ -40,10 +40,10 @@
 
                     <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
-                        <v-icon small class="mr-2" @click.stop="editProduct(item)">
+                        <v-icon small color="primary" @click.stop="editProduct(item)">
                             mdi-pencil
                         </v-icon>
-                        <v-icon small @click.stop="deleteProduct(item.id)">
+                        <v-icon small color="error" @click.stop="deleteProduct(item.id)">
                             mdi-delete
                         </v-icon>
                     </template>
@@ -77,7 +77,7 @@
 
                                 <v-col cols="12">
                                     <v-file-input v-model="editedProduct.image" label="Product Image" outlined
-                                        dense></v-file-input>
+                                       show-size dense></v-file-input>
                                 </v-col>
 
                                 <v-col cols="12">
@@ -95,21 +95,21 @@
                                         outlined dense></v-text-field>
                                 </v-col>
 
-                                <v-col cols="4">
+                                <v-col cols="6">
                                     <v-text-field v-model="editedProduct.width" label="width(cm)" type="number" outlined
                                         dense></v-text-field>
                                 </v-col>
-                                <v-col cols="4">
+                                <v-col cols="6">
                                     <v-text-field v-model="editedProduct.height" label="Height (cm)" type="number"
                                         outlined dense></v-text-field>
                                 </v-col>
 
-                                <v-col cols="4">
+                                <v-col cols="6">
                                     <v-text-field v-model="editedProduct.weight" label="Weight (kg)" type="number"
                                         outlined dense></v-text-field>
                                 </v-col>
 
-                                <v-col cols="4">
+                                <v-col cols="6">
                                     <v-text-field v-model="editedProduct.length" label="length (cm)" type="number"
                                         outlined dense></v-text-field>
                                 </v-col>
@@ -162,13 +162,13 @@ export default {
             categories: [],
             headers: [
                 // { text: "ID", value: "id", width: "20px", align: "center" },
-                { text: "Image", value: "image", width: "700px", align: "center", sortable: false },
-                { text: "Product Name", value: "name", width: "250px" },
-                { text: "Product Description", value: "description", width: "250px" },
-                { text: "Category", value: "category", width: "200px" },
-                { text: "Price", value: "price", width: "120px", align: "right" },
-                { text: "Quantity", value: "quantity", width: "120px", align: "right" },
-                { text: "Actions", value: "actions", width: "120px", align: "center", sortable: false },
+                { title: "Image", key: "image", width: "700px", align: "center", sortable: false },
+                { title: "Product Name", key: "name", width: "250px" },
+                { title: "Product Description", key: "description", width: "250px" },
+                { title: "Category", key: "category", width: "200px" },
+                { title: "Price", key: "price", width: "120px", align: "right" },
+                { title: "Quantity", key: "quantity", width: "120px", align: "right" },
+                { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
             ],
         };
     },
