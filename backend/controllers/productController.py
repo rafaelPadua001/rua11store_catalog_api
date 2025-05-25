@@ -127,7 +127,7 @@ class ProductController:
             product.update(name, description, price, category_id, subcategory_id, quantity, width, height, weight, length, imagem_path)
             stock_data = {
                 "id_product": product.id,
-                "user_id": product.user_id,
+                "user_id": user_id,
                 "category_id": product.category_id,
                 "product_name": product.name,
                 "product_price": float(product.price),
@@ -160,7 +160,7 @@ class ProductController:
 
         try:
             try:
-                Stock.delete_by_product(product.id)
+                Stock.delete_by_productId(product.id)
             except Exception as e:
                 print(f'Erro ao excliur do estoque: {str(e)}')    
             
