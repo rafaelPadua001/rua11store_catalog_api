@@ -18,6 +18,7 @@
       <v-divider></v-divider>
       <div v-if="isAuthenticated">
         <v-list-item link @click="goToDashboard" prepend-icon="mdi-home" title="Dashboard"></v-list-item>
+        <v-list-item link @click="goToPages" prepend-icon="mdi-file-document" title="Pages"></v-list-item>
         <v-list-item link @click="goToCategories" prepend-icon="mdi-inbox" title="Categories"></v-list-item>
         <v-list-item link @click="goToProducts" prepend-icon="mdi-cart" title="Products"></v-list-item>
         <v-list-item link @click="goToStock" prepend-icon="mdi-finance" title="Stock"></v-list-item>
@@ -65,6 +66,10 @@ const goToDashboard = () => {
   router.push('/authenticator/dashboard');
 };
 
+const goToPages = () => {
+  drawer.value = false;
+  router.push('/menagementPage/pages');
+}
 const goToCategories = () => {
   drawer.value = false;
   router.push('/categories/categories')
