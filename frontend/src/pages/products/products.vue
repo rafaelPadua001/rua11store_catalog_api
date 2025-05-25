@@ -162,7 +162,7 @@ export default {
             categories: [],
             headers: [
                 // { text: "ID", value: "id", width: "20px", align: "center" },
-                { title: "Image", key: "image", width: "700px", align: "center", sortable: false },
+                { title: "Image", key: "image", sortable: false },
                 { title: "Product Name", key: "name", width: "250px" },
                 { title: "Product Description", key: "description", width: "250px" },
                 { title: "Category", key: "category", width: "200px" },
