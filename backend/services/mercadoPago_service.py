@@ -15,7 +15,7 @@ def get_mercado_sdk():
        # print("Access Token:", os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST'))
 
         if not access_token:
-            raise RuntimeError("Variavel ACCess token nao definida")
+            raise RuntimeError("Variavel Access token nao definida")
         return mercadopago.SDK(access_token)
 
 sdk = get_mercado_sdk()

@@ -1,9 +1,9 @@
 <template>
   <v-row justify="center">
-    <v-col cols="12" md="10" lg="8" xl="6">
+    <v-col cols="12" md="12" lg="8" xl="6">
       <v-card class="pa-4">
         <v-card-title class="d-flex justify-center">
-          <h1 class="text-h4">Categories Management</h1>
+          <h1 class="text-h5">Categories Management</h1>
         </v-card-title>
 
         <v-card-actions class="d-flex justify-end mb-4">
@@ -38,10 +38,10 @@
           </template>
 
           <template v-slot:item.actions="{ item }">
-            <v-icon small class="mr-2" @click.stop="editItem(item)">
+            <v-icon small color="primary" @click.stop="editItem(item)">
               mdi-pencil
             </v-icon>
-            <v-icon small @click.stop="deleteItem(item)">
+            <v-icon small color="error" @click.stop="deleteItem(item)">
               mdi-delete
             </v-icon>
           </template>
@@ -100,13 +100,13 @@ export default {
       defaultItem: { id: null, name: '', is_subcategory: false, parent_id: null },
       headers: [
         // { text: 'ID', value: 'id', width: '80px', align: 'center' },
-        { text: 'Name', value: 'name', width: '250px' },
-        { text: 'Type', value: 'type', width: '150px', align: 'center' },
-        { text: 'Actions', value: 'actions', width: '120px', align: 'center', sortable: false }
+        { title: 'Name', key: 'name', width: '250px' },
+        { title: 'Type', key: 'type', width: '150px', align: 'center' },
+        { title: 'Actions', key: 'actions', width: '120px', align: 'center', sortable: false }
       ],
       categoryTypes: [
-        { text: 'Main Category', value: false },
-        { text: 'Subcategory', value: true }
+        { title: 'Main Category', key: false },
+        { title: 'Subcategory', key: true }
       ],
       categories: []
     };
