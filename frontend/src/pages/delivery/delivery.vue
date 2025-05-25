@@ -1,6 +1,6 @@
 <template>
     <v-row justify="center">
-        <v-col cols="12" md="12" lg="10" xl="10" sm="12">
+        <v-col cols="12" md="12" lg="12" xl="12">
             <v-card class="pa-4">
                 <v-card-title class="d-flex justify-center">
                     <h1 class="text-h5">Delivery Management</h1>
@@ -23,21 +23,7 @@
                         <span v-else>Sem Imagem</span>
                     </template>
 
-                    <!-- Exibe a descrição do produto -->
-                    <template v-slot:item.description="{ item }">
-                        <span v-if="item.description && item.description.length > 100">
-                            {{ item.description.substring(0, 38) }}...
-                        </span>
-                        <span v-else>
-                            {{ item.description }}
-                        </span>
-                    </template>
-
-                    <!-- Exibe a categoria -->
-                    <template v-slot:item.category="{ item }">
-                        <span v-if="item && item.category_id">{{ getCategoryName(item.category_id) }}</span>
-                        <span v-else>Sem Categoria</span>
-                    </template>
+                  
 
 
                     <!-- Exibe os ícones de ações -->
@@ -199,22 +185,23 @@ export default {
             cartItems: [],
             shipment: [],
             headers: [
-                { text: "ID", value: "id" },
-                { text: "User ID", value: "user_id" },
-                { text: "Recipient Name", value: "recipient_name" },
-                { text: "Street", value: "street", align: "right" },
-                { text: "number", value: "number" },
-                { text: "complement", value: "complement" },
-                { text: "city", value: "city" },
-                { text: "state", value: "state" },
-                { text: "zipcode", value: "zip_code" },
-                { text: "bairro", value: "bairro" },
-                { text: "country", value: "country" },
-                { text: "phone", value: "phone" },
-                { text: "Email", value: "userEmail" },
-                { text: "Price", value: "price" },
-                // { text: "Delivery", value: "delivery_id" },
-                { text: "Actions", value: "actions", width: "120px", align: "center", sortable: false },
+                { title: "ID", key:"id" },
+                { title: "User ID", key:"user_id" },
+                { title: "Recipient Name", key:"recipient_name" },
+                { title: "Street", key: "street", align: "right" },
+                { title: "Number", key: "number" },
+                { title: "Complement", key: "complement" },
+                { title: "City", key: "city" },
+                { title: "State", key: "state" },
+                { title: "Postal Code", key: "zip_code" },
+                { title: "Bairro", key: "bairro" },
+                { title: "Country", key: "country" },
+                { title: "Phone", key: "phone" },
+                { title: "Email", key: "email" },
+                { title: "Price", key: "price" },
+                { title: "Status", key:"status" },
+                // { title: "Delivery", key: "delivery_id" },
+                { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
             ],
             isPaymentButtonPayTagDisabled: true,
             isCheckitemButton: true,
@@ -265,7 +252,9 @@ export default {
                         weight: delivery.weight,
                         cpf: delivery.cpf.replace(/\D/g, ''),
                         melhorenvio_id: delivery.melhorenvio_id,
-                        order_id: delivery.order_id
+                        order_id: delivery.order_id,
+                        user_id: delivery.user_id,
+                        status: delivery.status,
                         //   email: delivery.userEmail,
 
                     }));
