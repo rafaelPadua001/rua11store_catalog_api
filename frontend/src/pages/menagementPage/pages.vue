@@ -24,9 +24,11 @@
                     </template>
 
                     <template v-slot:item.actions="{ item }">
-                        <v-btn :to="`/menagementPage/pageView/${item.id}`" color="primary" small>
-                            Ver Página
+                        <v-btn :to="`/menagementPage/pageView/${item.id}`" color="primary" icon small class="ma-0 pa-0"
+                            style="width: 32px; height: 32px;">
+                            <v-icon size="20">mdi-eye</v-icon>
                         </v-btn>
+
                         <v-icon small color="primary" @click.stop="editPage(item)">
                             mdi-pencil
                         </v-icon>
@@ -51,21 +53,24 @@
                                     <v-text-field v-model="editedPage.title" label="Título" required />
 
                                     <!-- <v-textarea v-model="editedPage.content" label="Conteúdo" required /> -->
-                                <!-- TOOLBAR -->
-    <div class="mb-2">
-      <v-btn small @click="editor.chain().focus().toggleBold().run()" :color="editor.isActive('bold') ? 'primary' : ''">
-        Bold
-      </v-btn>
-      <v-btn small @click="editor.chain().focus().toggleItalic().run()" :color="editor.isActive('italic') ? 'primary' : ''">
-        Italic
-      </v-btn>
-      <v-btn small @click="editor.chain().focus().toggleBulletList().run()" :color="editor.isActive('bulletList') ? 'primary' : ''">
-        Lista
-      </v-btn>
-    </div>
+                                    <!-- TOOLBAR -->
+                                    <div class="mb-2">
+                                        <v-btn small @click="editor.chain().focus().toggleBold().run()"
+                                            :color="editor.isActive('bold') ? 'primary' : ''">
+                                            Bold
+                                        </v-btn>
+                                        <v-btn small @click="editor.chain().focus().toggleItalic().run()"
+                                            :color="editor.isActive('italic') ? 'primary' : ''">
+                                            Italic
+                                        </v-btn>
+                                        <v-btn small @click="editor.chain().focus().toggleBulletList().run()"
+                                            :color="editor.isActive('bulletList') ? 'primary' : ''">
+                                            Lista
+                                        </v-btn>
+                                    </div>
 
-    <!-- EDITOR -->
-    <editor-content :editor="editor" class="editor-content" />
+                                    <!-- EDITOR -->
+                                    <editor-content :editor="editor" class="editor-content" />
                                 </v-form>
                             </v-container>
                         </v-card-subtitle>
@@ -137,8 +142,8 @@ export default {
     },
     watch: {
         editedPage: {
-            handler(newVal){
-                if(this.editor && newVal?.content !== undefined){
+            handler(newVal) {
+                if (this.editor && newVal?.content !== undefined) {
                     this.editor.commands.setContent(newVal.content || '<p></p>');
                 }
             }
@@ -162,8 +167,8 @@ export default {
             this.page = await res.json();
         }
     },
-    beforeUnmount(){
-        if(this.editor){
+    beforeUnmount() {
+        if (this.editor) {
             this.editor.destroy();
         }
     },
@@ -259,9 +264,9 @@ export default {
 
 <style scoped>
 .editor-content {
-  border: 1px solid #ccc;
-  padding: 1rem;
-  min-height: 200px;
-  border-radius: 4px;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    min-height: 200px;
+    border-radius: 4px;
 }
 </style>
