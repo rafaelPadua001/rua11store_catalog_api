@@ -11,6 +11,7 @@ from routes.delivery import delivery_bp
 from routes.orders import orders_bp
 from routes.webhook import webhook_bp
 from routes.email import email_bp
+from routes.seo import seo_bp
 
 def register_routes(app):
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -25,3 +26,4 @@ def register_routes(app):
     app.register_blueprint(orders_bp, url_prefix='/order')
     app.register_blueprint(webhook_bp, url_prefix='/webhook')
     app.register_blueprint(email_bp, url_prefix='/email')
+    app.register_blueprint(seo_bp, url_prefix='/seo')
