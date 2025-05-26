@@ -7,7 +7,10 @@
       </div>
 
       <v-alert v-else type="error" v-if="loadFailed">Página não encontrada.</v-alert>
-      <v-progress-circular v-else indeterminate />
+      <div class="text-center" background v-else>
+        <v-progress-circular  indeterminate />
+      </div>
+      
     </v-responsive>
   </v-container>
 </template>
