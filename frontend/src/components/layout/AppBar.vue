@@ -26,6 +26,7 @@
         <v-list-item link @click="goToDelivery" prepend-icon="mdi-moped" title="Delivery"></v-list-item>
         <v-list-item link @click="goToOrders" prepend-icon="mdi-package" title="Orders"></v-list-item>
         <v-list-item link @click="goToProfile" prepend-icon="mdi-account" title="Profile"></v-list-item>
+        <v-list-item link @click="goToSeo" prepend-icon="mdi-web" title="SEO"></v-list-item>
         <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
       </div>
 
@@ -108,6 +109,11 @@ const goToOrders = () => {
 const goToProfile = async () => {
   drawer.value = false;
   router.push('/authenticator/profile')
+}
+
+const goToSeo = async () => {
+  drawer.value = false;
+  router.push('/seo/seo')
 }
 
 const logout = async () => {

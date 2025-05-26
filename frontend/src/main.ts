@@ -1,19 +1,19 @@
-/**
- * main.ts
- *
- * Bootstraps Vuetify and other plugins then mounts the App`
- */
+// main.ts
+
+import { createApp } from 'vue'
+import App from './App.vue'
 
 // Plugins
 import { registerPlugins } from '@/plugins'
 
-// Components
-import App from './App.vue'
-
-// Composables
-import { createApp } from 'vue'
+// Importando o head manager
+import { createHead } from '@vueuse/head'
 
 const app = createApp(App)
+
+// Cria o gerenciador de head
+const head = createHead()
+app.use(head)
 
 registerPlugins(app)
 
