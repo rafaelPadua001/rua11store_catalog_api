@@ -8,20 +8,20 @@
         <div class="mt-2 mb-4 d-flex justify-center">
           <v-button-group divided>
             <v-btn color="black" class="outline" size="small" href="https://example.com/download-ios-app.apk"
-              target="_blank" variant="text">
-              <v-icon class="mr-2" size="small">mdi-apple</v-icon>
-              Baixar App iOS
+              target="_blank" variant="text" disabled>
+              <v-icon class="mr-2" size="large">mdi-apple</v-icon>
+              App iOS
             </v-btn>
 
             <v-btn color="black" class="outline" size="small" href="https://example.com/download-android-app.apk"
               target="_blank" variant="text">
-              <v-icon class="mr-2" size="small">mdi-android</v-icon>
-              Baixar App Android
+              <v-icon class="mr-2" size="large">mdi-android</v-icon>
+              App Android
             </v-btn>
 
             <v-btn color="primary" size="small" href="https://rua11store-web.vercel.app/" target="_blank"
               variant="text">
-              <v-icon class="mr-2" size="small">mdi-store</v-icon>
+              <v-icon class="mr-2" size="large">mdi-store</v-icon>
               Loja Online
             </v-btn>
           </v-button-group>
