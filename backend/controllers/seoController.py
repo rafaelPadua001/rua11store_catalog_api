@@ -28,7 +28,7 @@ class SeoController:
     
     @staticmethod
     def save_seo(seo: Seo):
-        route_id = seo.get('route', {}).get('id')  # Ou 'name', 'id', etc.
+        route_id = seo.get('route')
 
         db = SeoController.get_db_connection()
         db.execute(
@@ -38,13 +38,34 @@ class SeoController:
         db.commit()
 
     @staticmethod
-    def update_seo(seo_id, seo: Seo):
+    def update_seo(seo_id: int, seo: Seo):
+        print(seo)
+        og_image = seo['ogImage']
+        if isinstance(og_image, dict):
+            og_image = og_image.get('url', '')
+
         db = SeoController.get_db_connection()
         db.execute(
-            "UPDATE seo_pages SET route = ?, title = ?, description = ?, keywords = ?, og_title = ?, og_description = ?, og_image = ? WHERE id = ?",
-            (seo['route'], seo['metaTitle'], seo['metaDescription'], seo['metaKeywords'], seo['ogTitle'], seo['ogDescription'], seo['ogImage'], seo_id)
+            """
+            UPDATE seo_pages
+            SET route = ?, title = ?, description = ?, keywords = ?,
+                og_title = ?, og_description = ?, og_image = ?
+            WHERE id = ?
+            """,
+            (
+                seo.get('route', ''),
+                seo.get('metaTitle', ''),
+                seo.get('metaDescription', ''),
+                seo.get('metaKeywords', ''),
+                seo.get('ogTitle', ''),
+                seo.get('ogDescription', ''),
+                og_image,
+                seo_id
+            )
         )
         db.commit()
+
+
 
     @staticmethod
     def delete_seo(seo_id):

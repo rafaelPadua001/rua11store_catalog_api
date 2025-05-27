@@ -29,9 +29,14 @@ def create_seo():
 
 @seo_bp.route("/seo/<int:seo_id>", methods=["PUT"])
 def update_seo(seo_id):
+    data = request.get_json()
     if not request.is_json:
         return jsonify({'error': 'Content-Type must be application/json'}), 415
-    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    if not isinstance(data, dict):
+        return jsonify({"error": "Data must be a JSON object"}), 400
 
     SeoController.update_seo(seo_id, data)
     return jsonify({'message': 'SEO item updated', "seo": data}), 200

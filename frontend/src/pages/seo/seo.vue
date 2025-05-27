@@ -45,7 +45,7 @@
                             <v-container>
                                 <v-form @submit.prevent="saveSeo">
                                     <v-select v-model="editedSeo.route" :items="pages" item-text="name"
-                                        item-value="route" label="Rota da Página" required return-object="false" />
+                                        item-value="id" label="Rota da Página" required :return-object="false" />
 
                                     <v-text-field v-model="editedSeo.metaTitle" label="Título da Página" required />
                                     <v-textarea v-model="editedSeo.metaDescription" label="Meta Descrição" required />
