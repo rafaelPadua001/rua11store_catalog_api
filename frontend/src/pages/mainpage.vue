@@ -18,17 +18,13 @@
 import { ref, onMounted, watch } from 'vue'
 import { useHead } from '@vueuse/head'
 import axios from 'axios'
+import { useSeo } from '../useSeo'
 
 const pageTitle = ref('')
 const pageContent = ref('')
 const loadFailed = ref(false)
 
-const metaTitle = ref('')
-const metaDescription = ref('')
-const metaKeywords = ref('')
-const ogTitle = ref('')
-const ogDescription = ref('')
-const ogImage = ref('')
+
 
 const api = axios.create({
   baseURL:
@@ -38,18 +34,9 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// 🧠 Bind reativo com useHead
-useHead({
-  title: metaTitle,
-  meta: [
-    { name: 'description', content: metaDescription },
-    { name: 'keywords', content: metaKeywords },
-    { property: 'og:title', content: ogTitle },
-    { property: 'og:description', content: ogDescription },
-    { property: 'og:image', content: ogImage },
-  ],
+const { setSeo } = useSeo()
 
-})
+
 
 async function loadComponentFromAPI() {
   try {
@@ -72,14 +59,8 @@ async function loadSeoFromAPI(pageId: number) {
   try {
     const response = await api.get(`/seo/seo/${pageId}`)
     const seoData = response.data.seo
-    
 
-    metaTitle.value = seoData.metaTitle || ''
-    metaDescription.value = seoData.metaDescription || ''
-    metaKeywords.value = seoData.metaKeywords || ''
-    ogTitle.value = seoData.ogTitle || ''
-    ogDescription.value = seoData.ogDescription || ''
-    ogImage.value = seoData.ogImage || ''
+    setSeo(seoData)  // atualiza SEO via composable
   } catch (error) {
     console.error('Erro ao buscar SEO:', error)
   }
