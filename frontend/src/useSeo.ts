@@ -21,12 +21,16 @@ export function useSeo() {
   })
 
   function setSeo(data: any) {
+      const baseURL = window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
+    : 'https://rua11storecatalogapi-production.up.railway.app'
+
     metaTitle.value = data.metaTitle || ''
     metaDescription.value = data.metaDescription || ''
     metaKeywords.value = data.metaKeywords || ''
     ogTitle.value = data.ogTitle || ''
     ogDescription.value = data.ogDescription || ''
-    ogImage.value = data.ogImage || ''
+    ogImage.value =  ogImage.value = data.ogImage ? `${baseURL}/${data.ogImage}` : ''
   }
 
   return { setSeo }
