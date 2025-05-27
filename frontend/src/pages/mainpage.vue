@@ -4,6 +4,30 @@
       <div v-if="!loadFailed && pageContent" class="text-center" background>
         <h1 class="text-h3 font-weight-bold">{{ pageTitle }}</h1>
         <div v-html="pageContent" class="text-body-2 font-weight-light mb-n1"></div>
+
+         <div class="mt-2 mb-4">
+          <v-btn
+            color="black"
+            class="ma-2 outline"
+            x-large
+            href="https://example.com/download-app.apk"
+            target="_blank"
+            variant="outlined"
+          >
+            Baixar App Android
+          </v-btn>
+
+          <v-btn
+            color="primary"
+            class="ma-2"
+            x-large
+            href="https://rua11store-web.vercel.app/"
+            target="_blank"
+            variant="outlined"
+          >
+            Acessar Loja Online
+          </v-btn>
+        </div>
       </div>
 
       <v-alert v-else type="error" v-if="loadFailed">Página não encontrada.</v-alert>
