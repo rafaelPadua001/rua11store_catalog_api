@@ -23,6 +23,10 @@
                         <span>{{ item.metaDescription }}</span>
                     </template>
 
+                    <template v-slot:item.ogImage="{ item }">
+                        <v-img :src="getImageUrl(item.ogImage)" max-height="50" max-width="50" contain class="rounded" v-if="item.ogImage"/>
+                        <span v-else class="grey--text text--darken-1">N/A</span>
+                    </template>
                     <template v-slot:item.actions="{ item }">
                         <v-icon small color="primary" @click.stop="editSeo(item)">
                             mdi-pencil
@@ -44,8 +48,8 @@
                         <v-card-subtitle>
                             <v-container>
                                 <v-form @submit.prevent="saveSeo">
-                                    <v-select v-model="editedSeo.route" :items="pages" item-text="name"
-                                        item-value="route" label="Rota da Página" required return-object="false" />
+                                    <v-select v-model="editedSeo.route" :items="pages" item-text="name" item-value="id"
+                                        label="Rota da Página" required :return-object="false" />
 
                                     <v-text-field v-model="editedSeo.metaTitle" label="Título da Página" required />
                                     <v-textarea v-model="editedSeo.metaDescription" label="Meta Descrição" required />
@@ -54,26 +58,9 @@
                                     <v-text-field v-model="editedSeo.ogTitle" label="OG: Título para Redes Sociais" />
                                     <v-textarea v-model="editedSeo.ogDescription"
                                         label="OG: Descrição para Redes Sociais" />
-                                    <v-text-field v-model="editedSeo.ogImage" label="OG: URL da Imagem" />
+                                    <v-file-input v-model="editedSeo.ogImage" label="OG: Imagem" accept="image/*"
+                                        prepend-icon="mdi-image" @change="handleOgImage" />
 
-                                    <!-- TOOLBAR (opcional, pode remover se não usar editor) -->
-                                    <!-- <div class="mb-2">
-        <v-btn small @click="editor.chain().focus().toggleBold().run()"
-          :color="editor.isActive('bold') ? 'primary' : ''">
-          Bold
-        </v-btn>
-        <v-btn small @click="editor.chain().focus().toggleItalic().run()"
-          :color="editor.isActive('italic') ? 'primary' : ''">
-          Italic
-        </v-btn>
-        <v-btn small @click="editor.chain().focus().toggleBulletList().run()"
-          :color="editor.isActive('bulletList') ? 'primary' : ''">
-          Lista
-        </v-btn>
-      </div> -->
-
-                                    <!-- EDITOR (opcional, pode ser removido se não usar conteúdo HTML) -->
-                                    <!-- <editor-content :editor="editor" class="editor-content" /> -->
                                 </v-form>
                             </v-container>
                         </v-card-subtitle>
@@ -83,13 +70,9 @@
                             <v-btn color="grey darken-1" text @click="close">Cancel</v-btn>
                             <v-btn color="primary" text @click="saveSeo">Save</v-btn>
                         </v-card-actions>
-
-
                     </v-card>
                 </v-dialog>
             </v-card>
-
-
         </v-col>
     </v-row>
 </template>
@@ -153,9 +136,7 @@ export default {
                 ogImage: "",
                 content: "",
             }
-
         };
-
     },
     watch: {
         editedSeo: {
@@ -177,9 +158,8 @@ export default {
             deep: true
         }
     },
-
     // computed: {
-    //    
+      
     // },
     async created() {
         this.loadpages();
@@ -271,37 +251,52 @@ export default {
 
                 if (!token) return this.$router.push('/login');
 
+                const formData = new FormData();
+
+                formData.append('route', this.editedSeo.route);
+                formData.append('metaTitle', this.editedSeo.metaTitle);
+                formData.append('metaDescription', this.editedSeo.metaDescription);
+                formData.append('metaKeywords', this.editedSeo.metaKeywords);
+                formData.append('ogTitle', this.editedSeo.ogTitle);
+                formData.append('ogDescription', this.editedSeo.ogDescription);
+
+                // Se for um arquivo (do v-file-input), adicione diretamente
+                if (this.editedSeo.ogImage instanceof File) {
+                    formData.append('ogImage', this.editedSeo.ogImage);
+                } else if (typeof this.editedSeo.ogImage === 'string') {
+                    // Se for uma string (URL já existente), envie como campo separado
+                    formData.append('ogImageUrl', this.editedSeo.ogImage);
+                }
+
                 const config = {
                     headers: {
                         'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'multipart/form-data'  // importante para envio de arquivos
                     }
                 };
+
                 let response;
                 if (this.editedIndex === -1) {
-                    response = await api.post('/seo/seo', {
-                        route: this.editedSeo.route,
-                        metaTitle: this.editedSeo.metaTitle,
-                        metaDescription: this.editedSeo.metaDescription,
-                        metaKeywords: this.editedSeo.metaKeywords,
-                        ogTitle: this.editedSeo.ogTitle,
-                        ogDescription: this.editedSeo.ogDescription,
-                        ogImage: this.editedSeo.ogImage
-                    }, config);
+                    response = await api.post('/seo/seo', formData, config);
                     this.seo.push(response.data.seo);
-                    this.loading = false;
-                    this.close();
                 } else {
-                    response = await api.put(`/seo/seo/${this.editedSeo.id}`, this.editedSeo, config);
+                    response = await api.post(`/seo/seoUpdate/${this.editedSeo.id}`, formData, config);
                     Object.assign(this.seo[this.editedIndex], response.data.seo);
-                    this.loading = false;
-                    this.close();
                 }
-                return this.close();
+
+                this.loading = false;
+                this.close();
             } catch (error) {
                 console.error("Error saving SEO:", error);
+                this.loading = false;
             }
         },
+         getImageUrl(path){
+        const baseUrl = window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://rua11storecatalogapi-production.up.railway.app";
+        return `${baseUrl}/${path}`; 
+       },
         async deleteSeo(seoId) {
             if (!confirm("Tem certeza que deseja remover este item de SEO permanentemente ?")) return;
 
