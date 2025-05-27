@@ -19,6 +19,13 @@ class SeoController:
 
         return seo_items
     
+    def get_seo_by_id(seo_id):
+        db = SeoController.get_db_connection()
+        row = db.execute("SELECT * FROM seo_pages WHERE route = ?", (seo_id,)).fetchone()
+        if row:
+            return Seo.from_row(row)
+        return None
+    
     @staticmethod
     def save_seo(seo: Seo):
         route_id = seo.get('route', {}).get('id')  # Ou 'name', 'id', etc.

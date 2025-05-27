@@ -19,6 +19,7 @@
       <div v-if="isAuthenticated">
         <v-list-item link @click="goToDashboard" prepend-icon="mdi-home" title="Dashboard"></v-list-item>
         <v-list-item link @click="goToPages" prepend-icon="mdi-file-document" title="Pages"></v-list-item>
+        <v-list-item link @click="goToSeo" prepend-icon="mdi-web" title="SEO"></v-list-item>
         <v-list-item link @click="goToCategories" prepend-icon="mdi-inbox" title="Categories"></v-list-item>
         <v-list-item link @click="goToProducts" prepend-icon="mdi-cart" title="Products"></v-list-item>
         <v-list-item link @click="goToStock" prepend-icon="mdi-finance" title="Stock"></v-list-item>
@@ -26,7 +27,6 @@
         <v-list-item link @click="goToDelivery" prepend-icon="mdi-moped" title="Delivery"></v-list-item>
         <v-list-item link @click="goToOrders" prepend-icon="mdi-package" title="Orders"></v-list-item>
         <v-list-item link @click="goToProfile" prepend-icon="mdi-account" title="Profile"></v-list-item>
-        <v-list-item link @click="goToSeo" prepend-icon="mdi-web" title="SEO"></v-list-item>
         <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
       </div>
 
