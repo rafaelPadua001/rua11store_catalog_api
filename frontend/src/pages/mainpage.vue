@@ -5,28 +5,26 @@
         <h1 class="text-h3 font-weight-bold">{{ pageTitle }}</h1>
         <div v-html="pageContent" class="text-body-2 font-weight-light mb-n1"></div>
 
-         <div class="mt-2 mb-4">
-          <v-btn
-            color="black"
-            class="ma-2 outline"
-            x-large
-            href="https://example.com/download-app.apk"
-            target="_blank"
-            variant="outlined"
-          >
-            Baixar App Android
-          </v-btn>
+        <div class="mt-2 mb-4 d-flex justify-center">
+          <v-button-group divided>
+            <v-btn color="black" class="outline" size="small" href="https://example.com/download-ios-app.apk"
+              target="_blank" variant="text">
+              <v-icon class="mr-2" size="small">mdi-apple</v-icon>
+              Baixar App iOS
+            </v-btn>
 
-          <v-btn
-            color="primary"
-            class="ma-2"
-            x-large
-            href="https://rua11store-web.vercel.app/"
-            target="_blank"
-            variant="outlined"
-          >
-            Acessar Loja Online
-          </v-btn>
+            <v-btn color="black" class="outline" size="small" href="https://example.com/download-android-app.apk"
+              target="_blank" variant="text">
+              <v-icon class="mr-2" size="small">mdi-android</v-icon>
+              Baixar App Android
+            </v-btn>
+
+            <v-btn color="primary" size="small" href="https://rua11store-web.vercel.app/" target="_blank"
+              variant="text">
+              <v-icon class="mr-2" size="small">mdi-store</v-icon>
+              Loja Online
+            </v-btn>
+          </v-button-group>
         </div>
       </div>
 
