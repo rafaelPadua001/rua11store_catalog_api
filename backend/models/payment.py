@@ -1,4 +1,5 @@
 import sqlite3
+from flask import session
 from datetime import datetime
 from controllers.stockController import StockController
 import requests
@@ -126,7 +127,7 @@ class Payment:
                 notification_data = {
                     'message': f"Novo pedido recebido: #{order_id}",
                     'order_id': order_id,
-                    'user_id': self.usuario_id
+                    'user_id': session.get('user_id')
                 }
 
                 # Emitindo para todos os clientes conectados

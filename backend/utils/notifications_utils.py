@@ -24,6 +24,7 @@ def create_notification(user_id, message):
     socketio.emit('new_notification', {'message': message})
 
 def get_unread_notifications(user_id):
+    print(user_id)
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
