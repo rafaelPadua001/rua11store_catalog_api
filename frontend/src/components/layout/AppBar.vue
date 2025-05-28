@@ -4,7 +4,34 @@
     <v-app-bar-title>Rua11Store</v-app-bar-title>
 
     <v-spacer></v-spacer>
-    <v-btn icon @click="goToHome">
+
+    <v-menu offset-y close-on-content-click :nudge-y="20" content-class="custom-menu">
+      <template #activator="{ props }">
+        <v-btn icon v-bind="props" @click="showNotifications">
+          <v-icon>mdi-bell</v-icon>
+          <div v-if="hasNewNotifications" class="red-dot"></div>
+        </v-btn>
+      </template>
+
+      <v-list>
+        <v-list-item v-for="(notification, index) in notifications" :key="index">
+          <v-list-item-title>
+            <v-card>
+              <v-card-text>{{ notification.message }}</v-card-text>
+              <v-card-actions>
+                <v-btn text @click="notification.show = false">Fechar</v-btn>
+                <v-btn text @click="notification.show = false">Ver</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-list-item-title>
+        </v-list-item>
+        <v-list-item v-if="notifications.length === 0">
+          <v-list-item-title class="text-grey">Sem notificações</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+
+    <v-btn icon @click="navigateTo('/')">
       <v-icon>mdi-domain</v-icon>
     </v-btn>
   </v-app-bar>
@@ -16,104 +43,145 @@
       </v-list-item>
 
       <v-divider></v-divider>
+
       <div v-if="isAuthenticated">
-        <v-list-item link @click="goToDashboard" prepend-icon="mdi-home" title="Dashboard"></v-list-item>
-        <v-list-item link @click="goToPages" prepend-icon="mdi-file-document" title="Pages"></v-list-item>
-        <v-list-item link @click="goToSeo" prepend-icon="mdi-web" title="SEO"></v-list-item>
-        <v-list-item link @click="goToCategories" prepend-icon="mdi-inbox" title="Categories"></v-list-item>
-        <v-list-item link @click="goToProducts" prepend-icon="mdi-cart" title="Products"></v-list-item>
-        <v-list-item link @click="goToStock" prepend-icon="mdi-finance" title="Stock"></v-list-item>
-        <v-list-item link @click="goToPayments" prepend-icon="mdi-wallet" title="Payments"></v-list-item>
-        <v-list-item link @click="goToDelivery" prepend-icon="mdi-moped" title="Delivery"></v-list-item>
-        <v-list-item link @click="goToOrders" prepend-icon="mdi-package" title="Orders"></v-list-item>
-        <v-list-item link @click="goToProfile" prepend-icon="mdi-account" title="Profile"></v-list-item>
+        <v-list-item link @click="navigateTo('/authenticator/dashboard')" prepend-icon="mdi-home"
+          title="Dashboard"></v-list-item>
+        <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
+          title="Pages"></v-list-item>
+        <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
+        <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
+          title="Categories"></v-list-item>
+        <v-list-item link @click="navigateTo('/products/products')" prepend-icon="mdi-cart"
+          title="Products"></v-list-item>
+        <v-list-item link @click="navigateTo('/stock/stock')" prepend-icon="mdi-finance" title="Stock"></v-list-item>
+        <v-list-item link @click="navigateTo('/payments/payments')" prepend-icon="mdi-wallet"
+          title="Payments"></v-list-item>
+        <v-list-item link @click="navigateTo('/delivery/delivery')" prepend-icon="mdi-moped"
+          title="Delivery"></v-list-item>
+        <v-list-item link @click="navigateTo('/orders/orders')" prepend-icon="mdi-package" title="Orders"></v-list-item>
+        <v-list-item link @click="navigateTo('/authenticator/profile')" prepend-icon="mdi-account"
+          title="Profile"></v-list-item>
         <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
       </div>
 
       <div v-else>
-        <v-list-item link @click="goToHome" prepend-icon="mdi-home" title="Home"></v-list-item>
-        <v-list-item link @click="goToLogin" prepend-icon="mdi-login" title="Login"></v-list-item>
+        <v-list-item link @click="navigateTo('/')" prepend-icon="mdi-home" title="Home"></v-list-item>
+        <v-list-item link @click="navigateTo('/authenticator/login')" prepend-icon="mdi-login"
+          title="Login"></v-list-item>
       </div>
     </v-list>
   </v-navigation-drawer>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, inject, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from "axios";
+import axios from 'axios';
 
 const drawer = ref(false);
 const router = useRouter();
 const isAuthenticated = ref(false);
+const notifications = inject('notifications', ref([]));
+const hasNewNotifications = inject('hasNewNotifications', ref(true));
 
-// Verifica autenticação ao carregar e quando o token muda
 const checkAuth = () => {
   isAuthenticated.value = !!localStorage.getItem('user_token');
 };
 
+// Função para extrair user_id do JWT, caso não esteja salvo no localStorage
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
 onMounted(() => {
   checkAuth();
-  window.addEventListener("storage", checkAuth);
+  window.addEventListener('storage', checkAuth);
 });
 
-const goToHome = () => {
-  drawer.value = false;
-  router.push('/');
+onUnmounted(() => {
+  window.removeEventListener('storage', checkAuth);
+});
+
+const showNotifications = () => {
+  hasNewNotifications.value = false;
+  fetchNotifications();
 };
 
-const goToDashboard = () => {
+const navigateTo = (path) => {
   drawer.value = false;
-  router.push('/authenticator/dashboard');
+  router.push(path);
 };
 
-const goToPages = () => {
-  drawer.value = false;
-  router.push('/menagementPage/pages');
-}
-const goToCategories = () => {
-  drawer.value = false;
-  router.push('/categories/categories')
-}
+const api = axios.create({
+  baseURL:
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://rua11storecatalogapi-production.up.railway.app",
+  headers: { "Content-Type": "application/json" },
+});
 
-const goToLogin = () => {
-  drawer.value = false;
-  router.push('/authenticator/login');
-};
+const fetchNotifications = async () => {
+  const token = localStorage.getItem('user_token');
 
-const goToProducts = () => {
-  drawer.value = false;
-  router.push('/products/products')
-};
+  if (!token) {
+    console.warn("Usuário não autenticado, não é possível buscar notificações.");
+    return;
+  }
 
-const goToStock = () => {
-  drawer.value = false;
-  router.push('/stock/stock')
-}
+  // Pega user_id do localStorage ou extrai do token JWT
+  let userId = localStorage.getItem('user_id');
+  if (!userId) {
+    const payload = parseJwt(token);
+    userId = payload?.user_id || payload?.sub || null;
+    if (userId) {
+      localStorage.setItem('user_id', userId);
+    }
+  }
 
-const goToPayments = () => {
-  drawer.value = false;
-  router.push('/payments/payments')
-}
+  if (!userId) {
+    console.warn("User ID não encontrado, não é possível buscar notificações.");
+    return;
+  }
 
-const goToDelivery = () => {
-  drawer.value = false;
-  router.push('/delivery/delivery')
-}
+  try {
+    const response = await api.get(`/notifications/notifications/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      params: {
+        order_by: 'created_at',
+        order: 'asc',  // ou 'desc'
+      },
+    });
 
-const goToOrders = () => {
-  drawer.value = false;
-  router.push('/orders/orders')
-}
 
-const goToProfile = async () => {
-  drawer.value = false;
-  router.push('/authenticator/profile')
-}
+    const fetched = response.data.notifications || response.data;
 
-const goToSeo = async () => {
-  drawer.value = false;
-  router.push('/seo/seo')
+    // Só adiciona notificações novas para evitar duplicatas
+    const existingMessages = notifications.value.map(n => n.message);
+
+    fetched.forEach(n => {
+      if (!existingMessages.includes(n.message)) {
+        notifications.value.push({ message: n.message, show: false });
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao buscar notificações:', error.response?.data || error.message);
+  }
 }
 
 const logout = async () => {
@@ -121,7 +189,7 @@ const logout = async () => {
 
   if (!token) {
     alert("Você já está deslogado.");
-    router.push('/authenticator/login');
+    navigateTo('/authenticator/login');
     return;
   }
 
@@ -139,20 +207,41 @@ const logout = async () => {
 
     if (response.status === 200) {
       localStorage.removeItem('user_token');
-      window.dispatchEvent(new Event("storage")); // Dispara evento para atualizar `isAuthenticated`
+      localStorage.removeItem('user_id');
+      window.dispatchEvent(new Event('storage'));
       alert('Logout realizado com sucesso!');
-      router.push('/authenticator/login');
+      navigateTo('/authenticator/login');
     }
   } catch (error) {
     console.error('Erro no logout:', error.response?.data || error.message);
 
     if (error.response?.status === 401 || error.response?.status === 422) {
       localStorage.removeItem('user_token');
-      window.dispatchEvent(new Event("storage"));
+      localStorage.removeItem('user_id');
+      window.dispatchEvent(new Event('storage'));
     }
 
-    router.push('/authenticator/login');
+    navigateTo('/authenticator/login');
   }
 };
-
 </script>
+
+<style scoped>
+.custom-menu {
+  margin-top: 10px !important;
+  /* Ajusta a distância vertical */
+  max-height: 400px;
+  /* Limita altura para facilitar scroll, se precisar */
+}
+
+.red-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  z-index: 10;
+}
+</style>

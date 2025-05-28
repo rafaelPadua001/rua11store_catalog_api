@@ -33,6 +33,7 @@ interface Notification {
 
 const notifications = ref<Notification[]>([])
 
+
 let socket: Socket
 
 function onSnackbarClose(index: number, isVisible: boolean) {
@@ -40,6 +41,10 @@ function onSnackbarClose(index: number, isVisible: boolean) {
     notifications.value.splice(index, 1)
   }
 }
+const hasNewNotifications = ref(false)
+
+provide('hasNewNotifications', hasNewNotifications)
+provide('notifications', notifications) // ← aqui
 
 onMounted(() => {
   socket = io('http://localhost:5000', { transports: ['websocket'] })
@@ -51,6 +56,7 @@ onMounted(() => {
   socket.on('new_notification', (data: { message: string }) => {
     //console.log('Notificação recebida:', data)
     notifications.value.push({ message: data.message, show: true })
+    hasNewNotifications.value = true
   })
 
   socket.on('disconnect', () => {

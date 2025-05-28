@@ -1,14 +1,31 @@
 from flask import Blueprint, request, jsonify
 from flask_socketio import emit
 from utils.notifications_utils import create_notification, get_unread_notifications, mark_notification_as_read
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 
 notification_bp = Blueprint('notifications', __name__)
 connected_users = {}
 socketio = None  # variável global para usar socketio
 
-@notification_bp.route('/notifications/<int:user_id>', methods=['GET'])
+@notification_bp.route('/notifications/<int:user_id>', methods=['GET', 'OPTIONS'])
 def get_notifications(user_id):
-    return jsonify(get_unread_notifications(user_id))
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    verify_jwt_in_request()
+    token_user_id = get_jwt_identity()
+
+    print(f"token_user_id={token_user_id} (type={type(token_user_id)}), user_id={user_id} (type={type(user_id)})")
+
+    if token_user_id != str(user_id):
+        print("Unauthorized access attempt")
+        return jsonify({"error": "Unauthorized"}), 403
+
+
+    print("Authorized!")
+    notifications = get_unread_notifications(user_id)
+    return jsonify(notifications)
+
 
 @notification_bp.route('/notifications/read/<int:notification_id>', methods=['POST'])
 def read_notification(notification_id):
