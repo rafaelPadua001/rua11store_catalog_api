@@ -4,7 +4,7 @@ from controllers.stockController import StockController
 import requests
 import os
 import uuid
-import extensions
+from extensions import socketio
 
 
 class Payment:
@@ -120,6 +120,18 @@ class Payment:
                 ))
 
                 order_id = cursor.lastrowid
+
+                #send notify
+                # Após criar a order (order_id gerado)
+                notification_data = {
+                    'message': f"Novo pedido recebido: #{order_id}",
+                    'order_id': order_id,
+                    'user_id': self.usuario_id
+                }
+
+                # Emitindo para todos os clientes conectados
+                socketio.emit('new_notification', notification_data)
+
 
                 # Inserir os produtos do pagamento e order_items COM order_id válido
                 for product in self.products:
