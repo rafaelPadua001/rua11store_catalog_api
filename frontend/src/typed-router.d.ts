@@ -28,6 +28,7 @@ declare module 'vue-router/auto-routes' {
     '/mainpage': RouteRecordInfo<'/mainpage', '/mainpage', Record<never, never>, Record<never, never>>,
     '/menagementPage/pages': RouteRecordInfo<'/menagementPage/pages', '/menagementPage/pages', Record<never, never>, Record<never, never>>,
     '/menagementPage/pageView/[id]': RouteRecordInfo<'/menagementPage/pageView/[id]', '/menagementPage/pageView/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/notifications/notify': RouteRecordInfo<'/notifications/notify', '/notifications/notify', Record<never, never>, Record<never, never>>,
     '/orders/orders': RouteRecordInfo<'/orders/orders', '/orders/orders', Record<never, never>, Record<never, never>>,
     '/payments/payments': RouteRecordInfo<'/payments/payments', '/payments/payments', Record<never, never>, Record<never, never>>,
     '/products/products': RouteRecordInfo<'/products/products', '/products/products', Record<never, never>, Record<never, never>>,
