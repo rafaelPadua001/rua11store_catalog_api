@@ -53,7 +53,7 @@ onMounted(() => {
     //console.log('Socket conectado:', socket.id)
   })
 
-  socket.on('new_notification', (data: { message: string }) => {
+  socket.on('new_notification', (data) => {
     //console.log('Notificação recebida:', data)
     notifications.value.push({ message: data.message, show: true })
     hasNewNotifications.value = true

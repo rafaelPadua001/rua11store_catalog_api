@@ -5,7 +5,7 @@
 
     <v-spacer></v-spacer>
 
-    <v-menu offset-y close-on-content-click :nudge-y="20" content-class="custom-menu">
+    <v-menu offset-y :nudge-y="20" content-class="custom-menu">
       <template #activator="{ props }">
         <v-btn icon v-bind="props" @click="showNotifications">
           <v-icon>mdi-bell</v-icon>
@@ -13,14 +13,17 @@
         </v-btn>
       </template>
 
+
       <v-list>
         <v-list-item v-for="(notification, index) in notifications" :key="index">
           <v-list-item-title>
-            <v-card>
+            <v-card @click="markAsRead(notification.id)">
               <v-card-text>{{ notification.message }}</v-card-text>
               <v-card-actions>
-                <v-btn text @click="notification.show = false">Fechar</v-btn>
-                <v-btn text @click="notification.show = false">Ver</v-btn>
+                <!-- <v-btn text @click="notification.show = true">Ver</v-btn> -->
+                <v-btn text @click="markAsRead(notification.id)">Marcar</v-btn>
+                <!-- <v-btn text @click="notification.show = false">Fechar</v-btn> -->
+
               </v-card-actions>
             </v-card>
           </v-list-item-title>
@@ -30,7 +33,9 @@
         </v-list-item>
       </v-list>
     </v-menu>
-
+    <v-snackbar v-model="snackbar.show" :timeout="3000" color="success">
+      {{ snackbar.text }}
+    </v-snackbar>
     <v-btn icon @click="navigateTo('/')">
       <v-icon>mdi-domain</v-icon>
     </v-btn>
@@ -84,6 +89,12 @@ const router = useRouter();
 const isAuthenticated = ref(false);
 const notifications = inject('notifications', ref([]));
 const hasNewNotifications = inject('hasNewNotifications', ref(true));
+
+const snackbar = ref({
+  show: false,
+  text: '',
+});
+
 
 const checkAuth = () => {
   isAuthenticated.value = !!localStorage.getItem('user_token');
@@ -176,13 +187,44 @@ const fetchNotifications = async () => {
 
     fetched.forEach(n => {
       if (!existingMessages.includes(n.message)) {
-        notifications.value.push({ message: n.message, show: false });
+        notifications.value.push({ id: n.id, message: n.message, show: false });
       }
     });
   } catch (error) {
     console.error('Erro ao buscar notificações:', error.response?.data || error.message);
   }
 }
+
+const markAsRead = async (notificationId) => {
+  const token = localStorage.getItem('user_token');
+
+  if (!token) {
+    console.warn("Usuário não autenticado, não é possível marcar notificações como lidas.");
+    return;
+  }
+
+  try {
+    await api.post(`/notifications/notifications/read/${notificationId}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Encontra e remove a notificação do array
+    const index = notifications.value.findIndex(n => n.id === notificationId);
+    if (index !== -1) {
+      snackbar.value.text = 'Notificação marcada como lida com sucesso!';
+      snackbar.value.show = true;
+      notifications.value.splice(index, 1); // remove do array
+    }
+  } catch (error) {
+    console.error('Erro ao marcar notificação como lida:', error.response?.data || error.message);
+    snackbar.value.text = 'Erro ao marcar notificação como lida.';
+    snackbar.value.show = true;
+  }
+};
+
 
 const logout = async () => {
   const token = localStorage.getItem('user_token');

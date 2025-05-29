@@ -1,11 +1,14 @@
 import sqlite3
-from flask import session
 from datetime import datetime
 from controllers.stockController import StockController
 import requests
 import os
 import uuid
 from extensions import socketio
+from flask import session
+from utils.notifications_utils import create_notification
+import extensions
+
 
 
 class Payment:
@@ -24,7 +27,7 @@ class Payment:
     @staticmethod
     def get_db_connection():
         """Cria uma nova conexão com o banco de dados"""
-        conn = sqlite3.connect('database.db', timeout=30.0)  # 10 segundos de timeout
+        conn = sqlite3.connect('database.db', timeout=60.0)  # 10 segundos de timeout
         conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
         return conn
     
@@ -124,14 +127,27 @@ class Payment:
 
                 #send notify
                 # Após criar a order (order_id gerado)
-                notification_data = {
+                # notification_data = {
+                #     'message': f"Novo pedido recebido: #{order_id}",
+                #     'order_id': order_id,
+                #     'user_id': self.usuario_id
+                # }
+
+                create_notification(
+                   # user_id=session.get('user_id'),
+                    message=f"Novo pedido recebido: #{order_id}",
+                    #order_id=order_id
+                    is_global=True,
+                    conn=conn
+                )
+
+                # Emitir notificação via socket
+                socketio.emit('new_notification', {
                     'message': f"Novo pedido recebido: #{order_id}",
                     'order_id': order_id,
-                    'user_id': session.get('user_id')
-                }
-
-                # Emitindo para todos os clientes conectados
-                socketio.emit('new_notification', notification_data)
+                    'is_global': True,
+                    #'user_id': session.get('user_id')
+                })
 
 
                 # Inserir os produtos do pagamento e order_items COM order_id válido
