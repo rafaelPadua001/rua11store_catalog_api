@@ -11,14 +11,14 @@ from controllers.emailController import EmailController
 from extensions import socketio, mail, email_controller  # ← pegar de extensions
 from routes.notification import notification_bp, register_socketio_events
 
-
+load_dotenv()
 app = Flask(__name__, static_folder="uploads", static_url_path="/uploads")
 app.config.from_object(Config)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 bcrypt = Bcrypt(app)
 
-app.config["JWT_SECRET_KEY"] = "headers"
+app.config["JWT_SECRET_KEY"] = "headers"     
 jwt = JWTManager(app)
 
 # Banco de dados
@@ -34,7 +34,7 @@ socketio.init_app(app)
 register_socketio_events(socketio)
 
 # E-mail
-load_dotenv()
+
 app.config.update(
     MAIL_SERVER=os.getenv('MAIL_SERVER'),
     MAIL_PORT=int(os.getenv('MAIL_PORT')),
