@@ -12,9 +12,11 @@
                         Add Product
                     </v-btn>
                 </v-card-actions> -->
+                
 
                 <v-data-table :headers="headers" :items="orders" :items-per-page="10" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading deliveries...">
+                    
                     <!-- Exibe imagens de produtos -->
                     <!-- <template v-slot:item.image="{ item }">
                         <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
@@ -54,9 +56,10 @@
                 </v-data-table>
 
                 <v-dialog v-model="dialogCheckItems" max-width="600px">
+                   
                     <v-card>
                         <v-card-title>
-                            <span class="headline">Detalhes do Produto</span>
+                            <span class="headline">Detalhes do Pedido</span>
                         </v-card-title>
                         
 
@@ -141,14 +144,15 @@ export default {
             orders: [],
             selectedOrderItems: [],
             headers: [
-                { text: "ID", value: "id" },
-                { text: "User ID", value: "user_id" },
-                { text: "Payment ID", value: "payment_id" },
-                { text: "shipment info", value: "shipment_info" },
-                { text: "Order date", value: "order_date" },
-                { text: "status", value: "status" },
-                { text: "Total amount", value: "total_amount" },
-                { text: "Actions", value: "actions", width: "120px", align: "center", sortable: false },
+                { title: "ID", key: "id" },
+                { title: "User ID", key: "user_id" },
+                { title: "Payment ID", key: "payment_id" },
+                { title: "Delivery ID", key: "delivery_id" },
+                { title: "shipment info", key: "shipment_info" },
+                { title: "Order date", key: "order_date" },
+                { title: "status", key: "status" },
+                { title: "Total amount", key: "total_amount" },
+                { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
             ],
             isPaymentButtonPayTagDisabled: true,
             dialogCheckItems: false,
@@ -184,6 +188,7 @@ export default {
                         order_date: order.order_date,
                         status: order.status,
                         total_amount: order.total_amount,
+                        delivery_id:  Array.isArray(order.delivery_id) ? order.delivery_id[0] : order.delivery_id,
                         items: order.items
 
                     }));
