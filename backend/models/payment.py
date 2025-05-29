@@ -135,7 +135,7 @@ class Payment:
 
                 create_notification(
                    # user_id=session.get('user_id'),
-                    message=f"Novo pedido recebido: #{order_id}",
+                    message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
                     #order_id=order_id
                     is_global=True,
                     conn=conn
@@ -143,7 +143,7 @@ class Payment:
 
                 # Emitir notificação via socket
                 socketio.emit('new_notification', {
-                    'message': f"Novo pedido recebido: #{order_id}",
+                    'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
                     'order_id': order_id,
                     'is_global': True,
                     #'user_id': session.get('user_id')
