@@ -1,0 +1,138 @@
+from flask import Blueprint, request, jsonify, session, current_app, send_from_directory
+from controllers.couponController import CouponController
+import os
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from werkzeug.utils import secure_filename
+
+coupon_bp = Blueprint('coupon', __name__)
+
+@coupon_bp.route('/coupons', methods=['GET'])
+@jwt_required()
+def get_coupons():
+    #user_id = get_jwt_identity()
+    coupon_controller = CouponController()
+    try:
+        coupons = coupon_controller.get_all_coupons()
+        coupons_dict = [coupon.to_dict() for coupon in coupons]
+        return jsonify(coupons_dict)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
+@coupon_bp.route('/create_coupon', methods=['POST', 'OPTIONS'])
+@jwt_required()
+def create_coupon():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    user_id = get_jwt_identity()
+
+    client_id = request.form.get('client_id')
+    title = request.form.get('title')
+    code = request.form.get('code')
+    discount = request.form.get('discount')
+    start_date = request.form.get('start_date')
+    end_date = request.form.get('end_date')
+    image = request.files.get('image')
+
+    image_path = None
+    if image and image.filename:
+        filename = secure_filename(image.filename)
+        image_folder = os.path.join(current_app.root_path, 'uploads/coupons')
+        os.makedirs(image_folder, exist_ok=True)
+        full_path = os.path.join(image_folder, filename)
+        image.save(full_path)
+        image_path = f'/uploads/coupons/{filename}'
+
+    coupon_controller = CouponController()
+    try:
+        coupon = coupon_controller.create_coupon(
+            user_id=user_id,
+            client_id=client_id,
+            title=title,
+            code=code,
+            discount=discount,
+            start_date=start_date,
+            end_date=end_date,
+            image_path=image_path
+        )
+        return jsonify({
+            'message': 'Cupom criado com sucesso!',
+            'coupon': coupon.to_dict()
+        }), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+    
+@coupon_bp.route('/<int:coupon_id>', methods=['PUT'])
+@jwt_required()
+def update_coupon(coupon_id):
+    from flask import request  # <--- Garante que a variável request está definida
+    user_id = get_jwt_identity()
+    coupon_controller = CouponController()
+
+    try:
+        # Pode ser request.form (form-data) ou request.get_json() (JSON)
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form
+
+        client_id = data.get('client_id')
+        title = data.get('title')
+        code = data.get('code')
+        discount = data.get('discount')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+
+        # Converte types se necessário
+        discount = float(discount) if discount else 0.0
+
+        image_file = request.files.get('image')
+        image_path = None
+
+        if image_file:
+            filename = secure_filename(image_file.filename)
+            upload_dir = os.path.join(os.getcwd(), 'uploads')
+            os.makedirs(upload_dir, exist_ok=True)
+            image_path = os.path.join(upload_dir, filename)
+            image_file.save(image_path)
+
+        coupon = coupon_controller.update_coupon(
+            coupon_id,
+            user_id,
+            client_id,
+            title,
+            code,
+            discount,
+            start_date,
+            end_date,
+            image_path
+        )
+
+        if not coupon:
+            return jsonify({'error': 'Cupom não encontrado.'}), 404
+
+        return jsonify(coupon), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
+
+@coupon_bp.route('/uploads/<path:filename>')
+def serve_uploads(filename):
+    uploads_dir = os.path.join(os.path.dirname(__file__), '..', 'uploads')
+    return send_from_directory(uploads_dir, filename)
+
+@coupon_bp.route('/<int:coupon_id>', methods=['DELETE'])
+@jwt_required()
+def delete_coupon(coupon_id):
+    coupon_controller = CouponController()
+    try:
+        success = coupon_controller.delete_coupon(coupon_id)
+        if success:
+            return jsonify({'message': 'Cupom deletado com sucesso!'}), 200
+        else:
+            return jsonify({'error': 'Cupom não encontrado.'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
