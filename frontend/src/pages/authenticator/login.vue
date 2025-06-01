@@ -93,12 +93,15 @@ const login = async () => {
     if (valid) {
         loading.value = true; // Ativa o loading no botão
         try {
-            const response = await axios.post('https://rua11storecatalogapi-production.up.railway.app/auth/login', {
+            // const response = await axios.post('https://rua11storecatalogapi-production.up.railway.app/auth/login', {
+            //     email: email.value,
+            //     password: password.value,
+            // });
+
+            const response = await axios.post('http://localhost:5000/auth/login', {
                 email: email.value,
                 password: password.value,
             });
-
-
             if (response.data.message == "Login realizado com sucesso!") {
                 localStorage.setItem('user_token', response.data.token)
                 window.dispatchEvent(new Event("storage"));

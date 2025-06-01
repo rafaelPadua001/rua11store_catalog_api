@@ -270,7 +270,7 @@ def login():
         return jsonify({"error": "Senha incorreta"}), 401
     
     # Gerar o token JWT - Certifique-se de que o user_id seja uma string
-    token = create_access_token(identity=(user[0])) 
+    token = create_access_token(identity=str(user[0])) 
 
     return jsonify({"message": "Login realizado com sucesso!", "token": token}), 200
 

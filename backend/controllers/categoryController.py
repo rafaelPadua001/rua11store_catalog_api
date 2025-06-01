@@ -22,11 +22,11 @@ class CategoryController:
     @staticmethod
     def create_category():
         try:
-            print("Verificando JWT...")
+            
             verify_jwt_in_request()  # Isso garante que o JWT seja verificado antes de acessar o conteúdo
-            current_user_id = get_jwt_identity()  # Esperando um ID do usuário
+            current_user_id = int(get_jwt_identity())  # Esperando um ID do usuário
 
-            print(f"Usuário autenticado: {current_user_id}")  # Verifique o que está sendo retornado
+            # print(f"Usuário autenticado: {current_user_id}")  # Verifique o que está sendo retornado
 
             if not current_user_id:
                 return jsonify({"error": "Usuário não autenticado ou dados inválidos no JWT"}), 401
@@ -49,7 +49,7 @@ class CategoryController:
             if parent_id:
                 parent = Category.get_by_id(parent_id)
                 if not parent:
-                    return jsonify({"error": "Categoria pai não encontrada"}), 404
+                    parent_id = False  # Se a categoria pai não existir, não atribui parent_id
                 if parent.is_subcategory:
                     return jsonify({"error": "Hierarquia inválida"}), 400
             

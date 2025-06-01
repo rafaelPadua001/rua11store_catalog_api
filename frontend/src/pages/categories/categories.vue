@@ -167,26 +167,33 @@ export default {
       this.editedItem = { ...item };
       this.dialog = true;
     },
-    async save() {
-      try {
-        const token = localStorage.getItem('user_token');
-        console.log(token);
-        if (!token) return this.$router.push('/login');
+   async save() {
+  try {
+    const token = localStorage.getItem('user_token');
+    
+    if (!token) return this.$router.push('/login');
 
-        const config = { headers: { 'Authorization': `Bearer ${token}` } };
-        let response;
-        if (this.editedIndex === -1) {
-          response = await api.post('/categories/', this.editedItem, config);
-          this.categories.push(response.data.category);
-        } else {
-          response = await api.put(`/categories/${this.editedItem.id}`, this.editedItem, config);
-          Object.assign(this.categories[this.editedIndex], response.data.category);
-        }
-        this.close();
-      } catch (error) {
-        console.error("Error saving category:", error);
-      }
-    },
+    const config = { headers: { 'Authorization': `Bearer ${token}` } };
+    
+    
+    let payload = { ...this.editedItem };
+    if (typeof payload.is_subcategory === 'object' && payload.is_subcategory !== null) {
+      payload.is_subcategory = payload.is_subcategory.key;
+    }
+
+    let response;
+    if (this.editedIndex === -1) {
+      response = await api.post('/categories/', payload, config);
+      this.categories.push(response.data.category);
+    } else {
+      response = await api.put(`/categories/${this.editedItem.id}`, payload, config);
+      Object.assign(this.categories[this.editedIndex], response.data.category);
+    }
+    this.close();
+  } catch (error) {
+    console.error("Error saving category:", error.response?.data || error.message);
+  }
+},
     async deleteItem(item) {
       if (!confirm('Are you sure you want to delete this item?')) return;
       try {
