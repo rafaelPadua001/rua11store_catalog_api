@@ -117,8 +117,6 @@ def update_coupon(coupon_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-
-
 @coupon_bp.route('/uploads/<path:filename>')
 def serve_uploads(filename):
     uploads_dir = os.path.join(os.path.dirname(__file__), '..', 'uploads')
@@ -138,6 +136,24 @@ def get_coupons_by_user(user_id):
         coupons = coupon_controller.get_coupons_by_user(user_id)
       
         return jsonify(coupons), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+    
+@coupon_bp.route('/delete-coupons-by-client/<string:coupon_id>', methods=['DELETE'])
+def delete_coupons_by_client(coupon_id):
+    user_id = request.args.get('userId')
+
+    if not user_id:
+        return jsonify({'error': 'user_id é obrigatório.'}), 400
+    
+    coupon_controller = CouponController()
+    try:
+        success = coupon_controller.delete_coupons_by_client(coupon_id, user_id)
+
+        if success:
+            return jsonify({'message': 'Cupons deletados com sucesso!'}), 200
+        else:
+            return jsonify({'error': 'Nenhum cupom encontrado para este cliente.'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 400
  
