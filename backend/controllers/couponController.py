@@ -21,6 +21,33 @@ class CouponController:
         conn.close()
         return [Coupon.from_row(row) for row in rows]
 
+    def get_coupons_by_user(self, user_id):
+        
+        conn = self.get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM coupons_user WHERE client_id = ?', (user_id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [dict(row) for row in rows]
+
+
+    @staticmethod
+    def from_user_row(row):
+        return {
+            'id': row['id'],
+            'client_id': row['client_id'],
+            'coupon_id': row['coupon_id'],
+            'title': row['title'],
+            'code': row['code'],
+            'discount': row['discount'],
+            'start_date': row['start_date'],
+            'end_date': row['end_date'],
+            'created_at': row['created_at']
+        }
+
+
+    
+
     def create_coupon(self, user_id, client_id, title, code, discount, start_date, end_date, image_path=None):
         now = datetime.utcnow().isoformat()
         conn = self.get_db_connection()
