@@ -45,9 +45,6 @@ class CouponController:
             'created_at': row['created_at']
         }
 
-
-    
-
     def create_coupon(self, user_id, client_id, title, code, discount, start_date, end_date, image_path=None):
         now = datetime.utcnow().isoformat()
         conn = self.get_db_connection()
@@ -184,6 +181,27 @@ class CouponController:
         conn.close()
 
         return dict(new_coupon), 201
+    
+    def delete_coupons_by_client(self, coupon_id, user_id):
+        conn = self.get_db_connection()
+        cursor = conn.cursor()
+        try:
+            # Verifica se o cupom existe e pertence ao usuário
+            cursor.execute(
+                "SELECT * FROM coupons_user WHERE id = ? AND client_id = ?",
+                (coupon_id, user_id)
+            )
+            coupon = cursor.fetchone()
+
+            if coupon is None:
+                return False
+
+            # Deleta o cupom
+            cursor.execute("DELETE FROM coupons_user WHERE id = ?", (coupon_id,))
+            conn.commit()
+            return True
+        finally:
+            conn.close()
         
     def delete_coupon(self, coupon_id):
         conn = self.get_db_connection()
