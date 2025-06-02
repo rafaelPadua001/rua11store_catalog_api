@@ -130,16 +130,6 @@ def pick_up_coupon():
     data = request.get_json()
     
     return CouponController.pick_up_coupon_by_client_id(data)
-
-@coupon_bp.route('/get-coupons/<string:user_id>', methods=['GET'])
-def get_coupons_by_user(user_id):
-    coupon_controller = CouponController()
-    try:
-        coupons = coupon_controller.get_coupons_by_user(user_id)
-      
-        return jsonify(coupons), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
  
 @coupon_bp.route('/<int:coupon_id>', methods=['DELETE'])
 @jwt_required()
