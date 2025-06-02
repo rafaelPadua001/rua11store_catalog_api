@@ -7,7 +7,7 @@
 
     <div class="d-flex align-center justify-start ga-2 flex-wrap flex-grow-1 py-3 text-disabled " color="surface-light">
       <v-btn v-for="link in items" :key="link.title" :text="link.name" variant="text" rounded size="x-small"
-        class="social-link-btn"></v-btn>
+        class="social-link-btn" @click="navigateToPage(link)"></v-btn>
 
     </div>
 
@@ -76,6 +76,14 @@ const social_links = [
     href: 'https://rua11store.com',
   }
 ]
+
+const navigateToPage = (link: PageItem) => {
+  if (link.name === 'Home Page') {
+    window.location.href = '/';
+  } else {
+    window.location.href = `/menagementPage/pageView/${link.id}`;
+  }
+}
 </script>
 
 <style scoped lang="sass">
