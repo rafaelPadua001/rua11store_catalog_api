@@ -13,12 +13,17 @@
 
 <script>
 import axios from "axios";
+import { useSeo } from '../../../useSeo';
+
+
 const api = axios.create({
   baseURL: window.location.hostname === "localhost"
     ? "http://localhost:5000"
     : "https://rua11storecatalogapi-production.up.railway.app",
   headers: { "Content-Type": "application/json" },
 });
+
+const { setSeo } = useSeo()
 export default {
   data() {
     return {
@@ -29,6 +34,7 @@ export default {
     const pageId = this.$route.params.id;
     const response = await api.get(`/pages/pages/${pageId}`);
     this.page = response.data;
+    this.loadComponentFromAPI();
   },
   methods: {
     stripHtml(html) {
@@ -36,6 +42,34 @@ export default {
       div.innerHTML = html;
       return div.textContent || div.innerText || "";
     },
+    async loadComponentFromAPI() {
+      try {
+        const pageName = this.page.title;
+        const encodedPageName = encodeURIComponent(pageName);
+        const response = await api.get(`/pages/pages/${encodedPageName}`);
+
+        // pageTitle.value = response.data.title;
+        // pageContent.value = response.data.content;
+        // pageId = response.data.id;
+        //loadFailed.value = false;
+
+        await this.loadSeoFromAPI(response.data.id);
+
+      } catch (error) {
+        console.error('Erro ao buscar componente:', error);
+        // loadFailed.value = true;
+      }
+    },
+    async loadSeoFromAPI(pageId) {
+      try {
+        const response = await api.get(`/seo/seo/${pageId}`);
+        const seoData = response.data.seo;
+
+        setSeo(seoData);  // atualiza SEO via composable
+      } catch (error) {
+        console.error('Erro ao buscar SEO:', error);
+      }
+    }
   }
 };
 </script>
