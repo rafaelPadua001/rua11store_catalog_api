@@ -66,7 +66,7 @@ def create_coupon():
 @coupon_bp.route('/<int:coupon_id>', methods=['PUT'])
 @jwt_required()
 def update_coupon(coupon_id):
-    from flask import request  # <--- Garante que a variável request está definida
+    # from flask import request  # <--- Garante que a variável request está definida
     user_id = get_jwt_identity()
     coupon_controller = CouponController()
 
@@ -124,6 +124,13 @@ def serve_uploads(filename):
     uploads_dir = os.path.join(os.path.dirname(__file__), '..', 'uploads')
     return send_from_directory(uploads_dir, filename)
 
+
+@coupon_bp.route('/pick_up_coupon', methods=['POST'])
+def pick_up_coupon():
+    data = request.get_json()
+    
+    return CouponController.pick_up_coupon_by_client_id(data)
+ 
 @coupon_bp.route('/<int:coupon_id>', methods=['DELETE'])
 @jwt_required()
 def delete_coupon(coupon_id):

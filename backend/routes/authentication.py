@@ -121,7 +121,7 @@ def register():
         conn.commit()
         
         # Gera token JWT - Certifique-se de que o user_id seja uma string
-        access_token = create_access_token(identity=str(user_id))  # Converte user_id para string
+        access_token = create_access_token(identity=int(user_id))  # Converte user_id para string
         
         return jsonify({
             "message": "Registro concluído com sucesso",
