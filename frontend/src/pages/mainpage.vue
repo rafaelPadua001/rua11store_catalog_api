@@ -6,7 +6,7 @@
         <div v-html="pageContent" class="text-body-2 font-weight-light mb-n1"></div>
 
         <div class="mt-2 mb-4 d-flex justify-center">
-          <v-button-group divided>
+          <v-item-group divided>
             <v-btn color="black" class="outline" size="small" href="https://example.com/download-ios-app.apk"
               target="_blank" variant="text" disabled>
               <v-icon class="mr-2" size="large">mdi-apple</v-icon>
@@ -24,8 +24,9 @@
               <v-icon class="mr-2" size="large">mdi-store</v-icon>
               Loja Online
             </v-btn>
-          </v-button-group>
+          </v-item-group>
         </div>
+
       </div>
 
       <v-alert v-else type="error" v-if="loadFailed">Página não encontrada.</v-alert>
@@ -33,8 +34,22 @@
         <v-progress-circular indeterminate />
       </div>
     </v-responsive>
+    <v-btn
+  color="deep-purple"
+  dark
+  class="whatsapp-btn"
+  href="https://wa.me/5511999999999"
+  target="_blank"
+  elevation="10"
+  icon
+>
+  <v-icon size="28">mdi-whatsapp</v-icon>
+</v-btn>
+
   </v-container>
+
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
@@ -92,3 +107,21 @@ onMounted(() => {
   loadComponentFromAPI()
 })
 </script>
+
+<style scoped>
+.whatsapp-btn {
+  position: fixed;
+  bottom: 50px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  min-width: 56px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+</style>
+
