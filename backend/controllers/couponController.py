@@ -105,7 +105,59 @@ class CouponController:
             'updated_at': row['updated_at']
     }
 
-       
+    @staticmethod
+    def pick_up_coupon_by_client_id(data):
+        client_id = data.get('client_id')
+        coupon_title = data.get('coupon_title')
+        
+        if not client_id or not coupon_title:
+            return {'error': 'client_id e coupon_title são obrigatórios.'}, 400
+        
+        conn = CouponController.get_db_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Busca o cupom pelo título
+        cursor.execute('SELECT * FROM coupons WHERE title = ?', (coupon_title,))
+        coupon = cursor.fetchone()
+        if not coupon:
+            conn.close()
+            return {'error': 'Cupom não encontrado.'}, 404
+        
+        coupon_id = coupon['id']
+
+        # Verifica se já existe o cupom para esse cliente
+        cursor.execute('SELECT * FROM coupons_user WHERE client_id = ? AND coupon_id = ?', (client_id, coupon_id))
+        existing = cursor.fetchone()
+        if existing:
+            conn.close()
+            return dict(existing), 200
+
+        now = datetime.utcnow().isoformat()
+
+        # Insere o cupom para o cliente
+        cursor.execute('''
+            INSERT INTO coupons_user (client_id, coupon_id, title, code, discount, start_date, end_date, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            client_id,
+            coupon_id,
+            coupon['title'],
+            coupon['code'],
+            coupon['discount'],
+            coupon['start_date'],
+            coupon['end_date'],
+            now,
+        ))
+        conn.commit()
+
+        new_id = cursor.lastrowid
+        cursor.execute('SELECT * FROM coupons_user WHERE id = ?', (new_id,))
+        new_coupon = cursor.fetchone()
+        conn.close()
+
+        return dict(new_coupon), 201
+        
     def delete_coupon(self, coupon_id):
         conn = self.get_db_connection()
         cursor = conn.cursor()
