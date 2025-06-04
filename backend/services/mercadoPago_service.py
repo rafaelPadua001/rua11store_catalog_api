@@ -29,6 +29,9 @@ class PaymentStrategy(ABC):
 
 class CreditCardPayment(PaymentStrategy):
     def create_payment(self, data):
+        coupon_amount = float(data.get("coupon_amount", 0))
+        coupon_code = data.get("coupon_code")
+
         url = "https://api.mercadopago.com/v1/payments"
         headers = {
             "X-Idempotency-Key": str(uuid.uuid4()),
@@ -52,6 +55,10 @@ class CreditCardPayment(PaymentStrategy):
                 },
                 "entity_type": "individual",
                 "type": "customer"
+            },
+            "metadata": {
+                "coupon_code": coupon_code,
+                "coupon_amount": coupon_amount,
             },
             "additional_info": {
                 "items": [
@@ -79,6 +86,7 @@ class CreditCardPayment(PaymentStrategy):
                     }
                 }
             }
+            
         }
 
         response = requests.post(url, headers=headers, json=payment_data)
@@ -95,7 +103,9 @@ class CreditCardPayment(PaymentStrategy):
                 status=result["status"],
                 usuario_id=data["userId"],
                 products=data["products"],
-                address=data.get("address")
+                address=data.get("address"),
+                coupon_code=coupon_code,
+                coupon_amount=coupon_amount
             )
             payment.save()
 
