@@ -22,7 +22,6 @@ class CouponController:
         return [Coupon.from_row(row) for row in rows]
 
     def get_coupons_by_user(self, user_id):
-        
         conn = self.get_db_connection()
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM coupons_user WHERE client_id = ?', (user_id,))

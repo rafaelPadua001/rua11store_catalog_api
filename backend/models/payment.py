@@ -12,7 +12,20 @@ import extensions
 
 
 class Payment:
-    def __init__(self, payment_id, total_value, payment_date, payment_type, cpf, email, status, usuario_id, products, address=None):
+    def __init__(
+            self,
+            payment_id,
+            total_value,
+            payment_date,
+            payment_type,
+            cpf, email,
+            status,
+            usuario_id,
+            products,
+            address=None,
+            coupon_code=None,
+            coupon_amount=None
+        ):
         self.payment_id = payment_id
         self.total_value = total_value
         self.payment_date = payment_date or datetime.now().isoformat()
@@ -23,6 +36,8 @@ class Payment:
         self.usuario_id = usuario_id
         self.products = products
         self.address = address
+        self.coupon_code = coupon_code
+        self.coupon_amount = coupon_amount
     
     @staticmethod
     def get_db_connection():
@@ -46,15 +61,15 @@ class Payment:
     def save(self):
         conn = self.get_db_connection()
         # email_controller = EmailController(mail)
-
         try:
             with conn:
                 cursor = conn.cursor()
 
                 # Inserir pagamento
                 cursor.execute("""
-                    INSERT INTO payments (payment_id, total_value, payment_date, payment_type, cpf, email, status, usuario_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO payments 
+                    (payment_id, total_value, payment_date, payment_type, cpf, email, status, usuario_id, coupon_code, coupon_amount)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     self.payment_id,
                     self.total_value,
@@ -63,7 +78,9 @@ class Payment:
                     self.cpf,
                     self.email,
                     self.status,
-                    self.usuario_id
+                    self.usuario_id,
+                    getattr(self, 'coupon_code', None),
+                    getattr(self, 'coupon_amount', None),
                 ))
 
                 payment_id = cursor.lastrowid
