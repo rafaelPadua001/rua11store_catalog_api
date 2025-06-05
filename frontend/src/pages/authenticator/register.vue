@@ -132,7 +132,7 @@ const register = async () => {
         console.log("Email:", email.value);
         console.log("Senha:", password.value);
         try {
-            const response = await axios.post('https://rua11storecatalogapi-production.up.railway.app/auth/register', {
+            const response = await axios.post('https://rua11store-catalog-api.onrender.com/auth/register', {
                 name: name.value,
                 birthDate: birthDate.value,
                 email: email.value,
