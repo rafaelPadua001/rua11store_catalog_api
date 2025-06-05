@@ -23,7 +23,7 @@ export function useSeo() {
   function setSeo(data: any) {
       const baseURL = window.location.hostname === 'localhost'
     ? 'http://localhost:5000'
-    : 'https://rua11storecatalogapi-production.up.railway.app'
+    : 'https://rua11store-catalog-api.onrender.com'
 
     metaTitle.value = data.metaTitle || ''
     metaDescription.value = data.metaDescription || ''
