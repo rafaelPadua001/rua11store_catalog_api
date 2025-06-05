@@ -294,7 +294,7 @@ export default {
          getImageUrl(path){
         const baseUrl = window.location.hostname === "localhost"
             ? "http://localhost:5000"
-            : "https://rua11storecatalogapi-production.up.railway.app";
+            : "https://rua11store-catalog-api.onrender.com";
         return `${baseUrl}/${path}`; 
        },
         async deleteSeo(seoId) {
