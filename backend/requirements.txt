@@ -7,6 +7,7 @@ flask-cors==5.0.1
 Flask-JWT-Extended==4.7.1
 Flask-Mail==0.10.0
 Flask-SQLAlchemy==3.1.1
+flask-socketio
 idna==3.10
 itsdangerous==2.2.0
 Jinja2==3.1.6
