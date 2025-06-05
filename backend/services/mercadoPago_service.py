@@ -129,6 +129,8 @@ class CreditCardPayment(PaymentStrategy):
 class DebitCardPayment(PaymentStrategy):
    def create_payment(self, data):
     cpf_limpo = re.sub(r'\D', '', data["payer_cpf"])
+    coupon_amount = float(data.get("coupon_amount", 0))
+    coupon_code = data.get("coupon_code")
 
     url = "https://api.mercadopago.com/v1/payments"
     headers = {
@@ -151,7 +153,12 @@ class DebitCardPayment(PaymentStrategy):
             },
             "entity_type": "individual",
             "type": "customer"
-        }
+        },
+        "metadata": {
+            "coupon_code": coupon_code,
+            "coupon_amount": coupon_amount,
+        },
+        
     }
 
     print("➡️ Enviando dados para pagamento Mercado Pago:")
@@ -172,7 +179,9 @@ class DebitCardPayment(PaymentStrategy):
             status=result["status"],
             usuario_id=data["userId"],
             products=data["products"],
-            address=data.get("address")
+            address=data.get("address"),
+            coupon_code=coupon_code,
+            coupon_amount=coupon_amount
         )
         payment.save()
 
@@ -194,6 +203,8 @@ class DebitCardPayment(PaymentStrategy):
 
 class PixPayment(PaymentStrategy):
     def create_payment(self, data):
+        coupon_amount = float(data.get("coupon_amount", 0))
+        coupon_code = data.get("coupon_code")
         payment_data = {
             "transaction_amount": float(data["total"]),
             "description": data.get("description", "Pagamento via Pix"),
@@ -212,7 +223,11 @@ class PixPayment(PaymentStrategy):
                     "city": "Osasco",
                     "federal_unit": "SP"
                 }
-            }
+            },
+            "metadata": {
+                "coupon_code": coupon_code,
+                "coupon_amount": coupon_amount,
+            },
         }
 
         response = sdk.payment().create(payment_data)['response']
@@ -241,7 +256,9 @@ class PixPayment(PaymentStrategy):
             email=data["payer_email"],
             usuario_id=data["userId"],
             products=data["products"],
-            address=data.get("address")
+            address=data.get("address"),
+            coupon_code=coupon_code,
+            coupon_amount=coupon_amount
         )
 
         # Salva no banco
