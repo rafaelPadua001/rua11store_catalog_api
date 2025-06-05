@@ -93,7 +93,7 @@ const api = axios.create({
     baseURL:
         window.location.hostname === "localhost"
             ? "http://localhost:5000"
-            : "https://rua11storecatalogapi-production.up.railway.app",
+            : "https://rua11store-catalog-api.onrender.com",
     headers: { "Content-Type": "application/json" },
 });
 
@@ -224,7 +224,7 @@ export default {
 
             const baseUrl = window.location.hostname === 'localhost'
                 ? 'http://localhost:5000'
-                : 'https://rua11storecatalogapi-production.up.railway.app';
+                : 'https://rua11store-catalog-api.onrender.com';
 
             let path = imagePath.startsWith('/') ? imagePath : '/' + imagePath;
             return `${baseUrl}${path}`;

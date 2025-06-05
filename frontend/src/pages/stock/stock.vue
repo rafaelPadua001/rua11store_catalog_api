@@ -57,7 +57,7 @@ import axios from "axios";
 const api = axios.create({
     baseURL: window.location.hostname === "localhost"
         ? "http://localhost:5000"
-        : "https://rua11storecatalogapi-production.up.railway.app",
+        : "https://rua11store-catalog-api.onrender.com",
     headers: { "Content-Type": "application/json" },
 });
 
@@ -106,7 +106,7 @@ export default {
             // Define a base URL conforme o ambiente
             const baseUrl = window.location.hostname === 'localhost'
                 ? 'http://localhost:5000'
-                : 'https://rua11storecatalogapi-production.up.railway.app';
+                : 'https://rua11store-catalog-api.onrender.com';
 
             // Extrai o nome do arquivo (última parte do caminho)
             const filename = imagePath.split('/').pop();
