@@ -105,7 +105,7 @@
                                 </v-col>
 
                                 <v-col cols="6">
-                                    <v-text-field v-model="editedProduct.weight" label="Weight (kg)" type="number"
+                                    <v-text-field v-model="formattedWeight" label="Weight (kg)" type="text"
                                         outlined dense></v-text-field>
                                 </v-col>
 
@@ -168,6 +168,7 @@ export default {
                 { title: "Category", key: "category", width: "200px" },
                 { title: "Price", key: "price", width: "120px", align: "right" },
                 { title: "Quantity", key: "quantity", width: "120px", align: "right" },
+                { title: "Weight", key: "weight", width: "120px", align: "right" },
                 { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
             ],
         };
@@ -191,7 +192,23 @@ export default {
             },
             set(value) {
                 let numericValue = parseFloat(value.replace(/[^0-9,]/g, "").replace(",", "."));
-                this.editedProduct.price = isNaN(numericValue) ? 0.00 : parseFloat(numericValue.toFixed(2)); // Mantém como número
+                this.editedProduct.price = isNaN(numericValue) ? "0.00" : numericValue.toFixed(2); // Mantém como número
+            }
+        },
+        formattedWeight: {
+            get(){
+                if(this.editedProduct.weight == null || this.editedProduct.weight == 'undefined') return "";
+
+                return Number(this.editedProduct.weight).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+            },
+            set(value){
+                 const cleaned = value.toString().replace(",", ".").replace(/[^0-9.]/g, "");
+                const parsed = parseFloat(cleaned);
+                this.editedProduct.weight = isNaN(parsed) ? 0 : parseFloat(parsed.toFixed(2));
+
             }
         }
 
@@ -246,7 +263,7 @@ export default {
                 const formData = new FormData();
                 formData.append("name", this.editedProduct.name || ""); // Evita erro
                 formData.append("description", this.editedProduct.description || "");
-                formData.append("price", this.editedProduct.price || 0);
+                formData.append("price", this.editedProduct.price || "0.00");
                 formData.append("category_id", this.editedProduct.category_id || "");
                 formData.append("subcategory_id", this.editedProduct.subcategory_id || "");
                 formData.append("quantity", this.editedProduct.quantity || 1);
