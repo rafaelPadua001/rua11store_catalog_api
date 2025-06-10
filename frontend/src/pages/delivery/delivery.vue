@@ -183,7 +183,7 @@ export default {
             loading: false,
             deliveries: [],
             cartItems: [],
-            checkItemEnable: {},
+            checkItemEnabled: {},
             shipment: [],
             headers: [
                 { title: "ID", key:"id" },
@@ -207,6 +207,7 @@ export default {
             isPaymentButtonPayTagDisabled: true,
             isCheckitemButton: true,
             dialogCheckItemCart: false,
+            
         };
     },
     computed: {
@@ -270,37 +271,35 @@ export default {
                 this.loading = false;
             }
         },
-        async shipmentCreate(item) {
-            try {
-                const response = await api.post('/melhorEnvio/shipmentCreate', item);
+       async shipmentCreate(item) {
+    try {
+        const response = await api.post('/melhorEnvio/shipmentCreate', item);
+        console.log('Resposta da API:', response.data);
 
-                // Exibindo a resposta no console. Normalmente, a resposta está em response.data
-                console.log('Resposta da API:', response.data); // Isso é geralmente a parte importante
+        if (response.data.message === 'Envio criado com sucesso. Aguarde pagamento.') {
+            const shipmentId = response.data.shipment_id;
 
-                if (response.data.message == 'Envio criado com sucesso. Aguarde pagamento.') {
-                    item.melhorenvio_id = response.data.shipment.melhorenvio_id;
+            // Forçando reatividade (Vue 2)
+          item.melhorenvio_id = shipmentId;
 
-                    this.isPaymentButtonPayTagDisabled = false;
-                    this.isCheckitemButton = true;
-                    window.location.reload();
-                     
-                    // this.$toast.success('Etiqueta enviada com sucesso');
-                    return this.shipment = [...this.shipment, response.data.shipment];
-                    
-                }
-                else {
-                    window.alert('Algo deu errado. Por favor, tente novamente.');
-                    //this.$toast.error('Algo deu errado. Por favor, tente novamente.');
-                }
-                // Exibe uma mensagem de sucesso
-                console.log('success');
-                //this.$toast.success('Etiqueta enviada com sucesso');
 
-            } catch (error) {
-                console.log('Erro no envio:', error);
-                //   this.$toast.error('Erro ao enviar os dados para o backend');
-            }
-        },
+            this.isPaymentButtonPayTagDisabled = false;
+            this.isCheckitemButton = true;
+            
+            // Atualizando a lista de envios, se necessário
+           this.shipment = [...this.shipment];
+
+
+            // Nenhum reload necessário
+            return window.alert('item adicionado ao carrinho do melhor envio');
+        } else {
+            window.alert('Algo deu errado. Por favor, tente novamente.');
+        }
+    } catch (error) {
+        console.log('Erro no envio:', error);
+    }
+},
+
         async checkItemInCart(item) {
             try {
                 const response = await api.post(`/melhorEnvio/checkItemInCart/${item.id}`, {
