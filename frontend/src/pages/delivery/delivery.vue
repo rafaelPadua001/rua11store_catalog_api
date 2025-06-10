@@ -23,7 +23,7 @@
                         <span v-else>Sem Imagem</span>
                     </template>
 
-                  
+
 
 
                     <!-- Exibe os ícones de ações -->
@@ -116,7 +116,7 @@
                                     <strong>Status:</strong>
                                     <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{
                                         cartItems.data.status
-                                        }}</strong>
+                                    }}</strong>
                                     <strong v-else> {{ cartItems.data.status }}</strong>
                                 </v-col>
                                 <v-col cols="12" sm="6">
@@ -186,9 +186,9 @@ export default {
             checkItemEnabled: {},
             shipment: [],
             headers: [
-                { title: "ID", key:"id" },
-                { title: "User ID", key:"user_id" },
-                { title: "Recipient Name", key:"recipient_name" },
+                { title: "ID", key: "id" },
+                { title: "User ID", key: "user_id" },
+                { title: "Recipient Name", key: "recipient_name" },
                 { title: "Street", key: "street", align: "right" },
                 { title: "Number", key: "number" },
                 { title: "Complement", key: "complement" },
@@ -200,14 +200,14 @@ export default {
                 { title: "Phone", key: "phone" },
                 { title: "Email", key: "email" },
                 { title: "Price", key: "price" },
-                { title: "Status", key:"status" },
+                { title: "Status", key: "status" },
                 // { title: "Delivery", key: "delivery_id" },
                 { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
             ],
             isPaymentButtonPayTagDisabled: true,
             isCheckitemButton: true,
             dialogCheckItemCart: false,
-            
+
         };
     },
     computed: {
@@ -271,34 +271,34 @@ export default {
                 this.loading = false;
             }
         },
-       async shipmentCreate(item) {
-    try {
-        const response = await api.post('/melhorEnvio/shipmentCreate', item);
-        console.log('Resposta da API:', response.data);
+        async shipmentCreate(item) {
+            try {
+                const response = await api.post('/melhorEnvio/shipmentCreate', item);
+                // console.log('Resposta da API:', response.data);
 
-        if (response.data.message === 'Envio criado com sucesso. Aguarde pagamento.') {
-            const shipmentId = response.data.shipment_id;
+                if (response.data.message === 'Envio criado com sucesso. Aguarde pagamento.') {
+                    const shipmentId = response.data.shipment_id;
 
-            // Forçando reatividade (Vue 2)
-          item.melhorenvio_id = shipmentId;
-
-
-            this.isPaymentButtonPayTagDisabled = false;
-            this.isCheckitemButton = true;
-            
-            // Atualizando a lista de envios, se necessário
-           this.shipment = [...this.shipment];
+                    // Forçando reatividade (Vue 2)
+                    item.melhorenvio_id = shipmentId;
 
 
-            // Nenhum reload necessário
-            return window.alert('item adicionado ao carrinho do melhor envio');
-        } else {
-            window.alert('Algo deu errado. Por favor, tente novamente.');
-        }
-    } catch (error) {
-        console.log('Erro no envio:', error);
-    }
-},
+                    this.isPaymentButtonPayTagDisabled = false;
+                    this.isCheckitemButton = true;
+
+                    // Atualizando a lista de envios, se necessário
+                    this.shipment = [...this.shipment];
+
+
+                    // Nenhum reload necessário
+                    return window.alert('item adicionado ao carrinho do melhor envio');
+                } else {
+                    window.alert('Algo deu errado. Por favor, tente novamente.');
+                }
+            } catch (error) {
+                console.log('Erro no envio:', error);
+            }
+        },
 
         async checkItemInCart(item) {
             try {
@@ -316,7 +316,7 @@ export default {
                     this.cartItems = response.data;
                     this.dialogCheckItemCart = true;
                     return this.shipment.push(this.cartItems);
-                    
+
                 } else {
                     // this.$toast.info('O item não está no carrinho');
                     window.alert('O item não está no carrinho');
@@ -453,7 +453,7 @@ export default {
         },
 
         async deleteItemCart(item) {
-           
+
             try {
                 const response = await api.delete('melhorEnvio/deleteItemCart', {
                     data: { melhorenvio_id: item.melhorenvio_id }
@@ -469,13 +469,13 @@ export default {
             }
             catch (error) {
                 if (error.response) {
-                     if (error.response.status === 404) {
-            window.alert('Item já não estava no carrinho (404). Atualizando lista local.');
-            this.cartItems = this.cartItems.filter(cartItem => cartItem.melhorenvio_id !== item.melhorenvio_id);
-        } else {
-            window.alert('Erro ao deletar o item:', error.response.data);
-        }
-                  
+                    if (error.response.status === 404) {
+                        window.alert('Item já não estava no carrinho (404). Atualizando lista local.');
+                        this.cartItems = this.cartItems.filter(cartItem => cartItem.melhorenvio_id !== item.melhorenvio_id);
+                    } else {
+                        window.alert('Erro ao deletar o item:', error.response.data);
+                    }
+
                     //  this.$toast.error('Erro ao verificar item no carrinho');
                 }
                 else {
