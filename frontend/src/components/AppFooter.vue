@@ -73,11 +73,11 @@ const social_links = [
     icon: 'mdi-facebook',
     href: 'https://rua11store.com',
   },
-  {
-    title: 'Rua11Store Whatsapp',
-    icon: 'mdi-whatsapp',
-    href: 'https://rua11store.com',
-  }
+  // {
+  //   title: 'Rua11Store Whatsapp',
+  //   icon: 'mdi-whatsapp',
+  //   href: 'https://rua11store.com',
+  // }
 ]
 
 const navigateToPage = (link: PageItem) => {
