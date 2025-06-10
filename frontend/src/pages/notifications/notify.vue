@@ -31,7 +31,7 @@ export default {
   },
   methods: {
     async fetchUnread() {
-      const res = await fetch(`http://localhost:5000/api/notifications/${this.userId}`)
+      const res = await fetch(`https://rua11store-catalog-api-lbp7.onrender.com/api/notifications/${this.userId}`)
       const data = await res.json()
       this.unreadCount = data.length
     },
@@ -41,7 +41,7 @@ export default {
     }
   },
   mounted() {
-    this.socket = io('http://localhost:5000')
+    this.socket = io('https://rua11store-catalog-api-lbp7.onrender.com')
     this.socket.emit('auth', { user_id: this.userId })
 
     this.socket.on(`notification_${this.userId}`, (data) => {

@@ -67,7 +67,7 @@ const api = axios.create({
   baseURL:
     window.location.hostname === 'localhost'
       ? 'http://localhost:5000'
-      : 'https://rua11store-catalog-api.onrender.com/',
+      : 'https://rua11store-catalog-api-lbp7.onrender.com/',
   headers: { 'Content-Type': 'application/json' },
 })
 

@@ -47,7 +47,7 @@ provide('hasNewNotifications', hasNewNotifications)
 provide('notifications', notifications) // ← aqui
 
 onMounted(() => {
-  socket = io('https://rua11store-catalog-api.onrender.com', { transports: ['websocket'] })
+  socket = io('https://rua11store-catalog-api-lbp7.onrender.com', { transports: ['websocket'] })
 
   socket.on('connect', () => {
     //console.log('Socket conectado:', socket.id)
