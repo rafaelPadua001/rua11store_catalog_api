@@ -93,7 +93,7 @@ const login = async () => {
     if (valid) {
         loading.value = true; // Ativa o loading no botão
         try {
-            const response = await axios.post('https://rua11store-catalog-api.onrender.com/auth/login', {
+            const response = await axios.post('https://rua11store-catalog-api-lbp7.onrender.com/auth/login', {
                 email: email.value,
                 password: password.value,
             });
