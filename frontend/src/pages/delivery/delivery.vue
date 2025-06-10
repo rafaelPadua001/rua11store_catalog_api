@@ -183,6 +183,7 @@ export default {
             loading: false,
             deliveries: [],
             cartItems: [],
+            checkItemEnable: {},
             shipment: [],
             headers: [
                 { title: "ID", key:"id" },
@@ -277,12 +278,15 @@ export default {
                 console.log('Resposta da API:', response.data); // Isso é geralmente a parte importante
 
                 if (response.data.message == 'Envio criado com sucesso. Aguarde pagamento.') {
+                    item.melhorenvio_id = response.data.shipment.melhorenvio_id;
+
                     this.isPaymentButtonPayTagDisabled = false;
                     this.isCheckitemButton = true;
+                    window.location.reload();
+                     
                     // this.$toast.success('Etiqueta enviada com sucesso');
-                    this.shipment.push(response.data.shipment);
-                    console.log(this.shipment);
-                    window.alert('Envio criado com sucesso')
+                    return this.shipment = [...this.shipment, response.data.shipment];
+                    
                 }
                 else {
                     window.alert('Algo deu errado. Por favor, tente novamente.');
@@ -311,10 +315,12 @@ export default {
                     // this.$toast.success('O item está no carrinho');
                     //window.alert('O item está no carrinho');
                     this.cartItems = response.data;
-                    this.shipment.push(this.cartItems);
                     this.dialogCheckItemCart = true;
+                    return this.shipment.push(this.cartItems);
+                    
                 } else {
-                    this.$toast.info('O item não está no carrinho');
+                    // this.$toast.info('O item não está no carrinho');
+                    window.alert('O item não está no carrinho');
                 }
 
             } catch (error) {
@@ -330,7 +336,6 @@ export default {
             }
         },
         async shipmentCheckout(item) {
-            console.log(item.products);
             try {
                 const response = await api.post(`/melhorEnvio/shipmentCheckout`, {
                     item: item
@@ -343,9 +348,8 @@ export default {
                 if (response.status === 200 && response.data && response.data.status === 'success') {
                     // this.$toast.success('O item está no carrinho');
                     window.alert('O item está no carrinho');
-                    this.cartItems = response.data;
-
                     this.dialogCheckItemCart = true;
+                    return this.cartItems.push(response.data);
                 } else {
                     //this.$toast.info('O item não está no carrinho');
                     window.alert('O item não está no carrinho');
@@ -408,7 +412,7 @@ export default {
                 if (response.status === 200 || response.status === 204 || response.status == true) {
                     //this.$toast.success('O item está no carrinho');
                     window.alert('O item está no carrinho');
-                    // this.cartItems = response.data;
+                    return this.cartItems.push(response.data);
 
                     //this.dialogCheckItemCart = true;
                     console.log('Resposta da API:', response.data);
@@ -450,15 +454,15 @@ export default {
         },
 
         async deleteItemCart(item) {
-            console.log(item);
+           
             try {
                 const response = await api.delete('melhorEnvio/deleteItemCart', {
                     data: { melhorenvio_id: item.melhorenvio_id }
                 });
                 console.log(response)
-                if (response.data && response.data.status == 'success' || response.status == 204) {
+                if ((response.data && response.data.status == 'success') || response.status == 204) {
                     window.alert('Item deletado com sucesso');
-                    this.cartItems = this.cartItems.filter(cartItem => cartItem.id !== item.id);
+                    return this.cartItems = this.cartItems.filter(cartItem => cartItem.melhorenvio_id !== item.melhorenvio_id);
                 }
                 else {
                     window.alert('Erro ao deletar o item');
@@ -466,7 +470,13 @@ export default {
             }
             catch (error) {
                 if (error.response) {
-                    window.alert('item não encontrado no carrinho:', error.response.data);
+                     if (error.response.status === 404) {
+            window.alert('Item já não estava no carrinho (404). Atualizando lista local.');
+            this.cartItems = this.cartItems.filter(cartItem => cartItem.melhorenvio_id !== item.melhorenvio_id);
+        } else {
+            window.alert('Erro ao deletar o item:', error.response.data);
+        }
+                  
                     //  this.$toast.error('Erro ao verificar item no carrinho');
                 }
                 else {

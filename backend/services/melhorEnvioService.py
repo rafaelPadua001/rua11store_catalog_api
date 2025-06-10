@@ -405,8 +405,9 @@ class MelhorEnvioService:
         url = f"{self.baseUrl}/me/cart/{melhorenvio_id}"
 
         # Realiza a requisição de delete
-        response = self.make_request(url, "delete")
-        print(response)
+        raw_response, response = self.make_request(url, "delete")
+        print("Resposta bruta:", raw_response)
+        print("Resposta da API:", response)
 
         # Verifica a resposta da requisição
         if response is None:
