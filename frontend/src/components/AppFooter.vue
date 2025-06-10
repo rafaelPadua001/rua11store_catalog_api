@@ -21,6 +21,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 interface PageItem {
   id: string;
@@ -79,9 +82,9 @@ const social_links = [
 
 const navigateToPage = (link: PageItem) => {
   if (link.name === 'Home Page') {
-    window.location.href = '/';
+    router.push('/')
   } else {
-    window.location.href = `/menagementPage/pageView/${link.id}`;
+    router.push(`/menagementPage/pageView/${link.id}`);
   }
 }
 </script>
