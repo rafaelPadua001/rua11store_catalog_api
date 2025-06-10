@@ -110,7 +110,8 @@ class MelhorEnvioService:
 
             return {
                 "message": "Envio criado com sucesso. Aguarde pagamento.",
-                "shipment": shipment_payload
+                "shipment": shipment_payload,
+                "shipment_id": shipment_id
             }, 200
 
         except requests.exceptions.RequestException as e:
