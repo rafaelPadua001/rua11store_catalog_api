@@ -31,12 +31,31 @@ export default {
     };
   },
   async created() {
-    const pageId = this.$route.params.id;
-    const response = await api.get(`/pages/pages/${pageId}`);
-    this.page = response.data;
-    this.loadComponentFromAPI();
+    await this.loadPage();
+  },
+  watch: {
+    '$route.params.id': {
+      immediate: false,
+      handler: async function (newId, oldId) {
+        if (newId !== oldId) {
+          await this.loadPage();
+        }
+      }
+    }
   },
   methods: {
+    async loadPage() {
+      const pageId = this.$route.params.id;
+      try {
+        const response = await api.get(`/pages/pages/${pageId}`);
+        this.page = response.data;
+        await this.loadComponentFromAPI();
+      } catch (error) {
+        console.log('Erro ao buscar página');
+      }
+
+    },
+
     stripHtml(html) {
       const div = document.createElement('div');
       div.innerHTML = html;
