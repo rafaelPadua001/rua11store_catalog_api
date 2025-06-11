@@ -103,10 +103,13 @@ def update_coupon(coupon_id):
 
         if image_file:
             filename = secure_filename(image_file.filename)
-            upload_dir = os.path.join(os.getcwd(), 'uploads')
+            upload_dir = os.path.join(os.getcwd(), 'uploads/coupons')
             os.makedirs(upload_dir, exist_ok=True)
-            image_path = os.path.join(upload_dir, filename)
-            image_file.save(image_path)
+            full_image_path = os.path.join(upload_dir, filename)
+            image_file.save(full_image_path)
+
+            # Mas grava no banco só o caminho relativo
+            image_path = f'/uploads/coupons/{filename}'
 
         coupon = coupon_controller.update_coupon(
             coupon_id,
