@@ -1,3 +1,5 @@
+import eventlet
+eventlet.monkey_patch()
 from flask import Flask
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
@@ -10,6 +12,7 @@ import os
 from controllers.emailController import EmailController
 from extensions import socketio, mail, email_controller  # ← pegar de extensions
 from routes.notification import notification_bp, register_socketio_events
+
 
 load_dotenv()
 app = Flask(__name__, static_folder="uploads", static_url_path="/uploads")
@@ -30,6 +33,7 @@ with app.app_context():
 register_routes(app)
 
 # SocketIO
+
 socketio.init_app(app)
 register_socketio_events(socketio)
 
