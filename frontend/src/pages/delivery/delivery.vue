@@ -1,6 +1,6 @@
 <template>
     <v-row justify="center">
-        <v-col cols="12" md="12" lg="12" xl="12">
+        <v-col cols="12" md="12" lg="10" xl="10" sm="12">
             <v-card class="pa-4">
                 <v-card-title class="d-flex justify-center">
                     <h1 class="text-h5">Delivery Management</h1>
