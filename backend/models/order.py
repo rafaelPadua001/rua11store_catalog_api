@@ -50,9 +50,9 @@ class Order:
                 p.image_path as product_image       
             FROM 
                 orders o
-            JOIN 
+            INNER JOIN 
                 order_items oi ON o.id = oi.order_id
-            JOIN
+            LEFT JOIN
                 products p ON oi.product_id = p.id
             ORDER BY 
                 o.id DESC
