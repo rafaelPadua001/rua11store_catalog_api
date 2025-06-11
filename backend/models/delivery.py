@@ -111,17 +111,19 @@ class Delivery:
 
                 FROM 
                     delivery d
-                JOIN
+                INNER JOIN
                     orders o ON d.id = o.delivery_id
-                JOIN 
+                LEFT JOIN 
                     order_items oi ON o.id = oi.order_id
-                JOIN
+                LEFT JOIN
                     products p ON oi.product_id = p.id
-                JOIN
+                LEFT JOIN
                     payments AS pay ON o.payment_id = pay.id
 
                 ORDER BY 
                     d.id DESC;
+
+
 
         """)
         rows = cursor.fetchall()
