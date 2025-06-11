@@ -31,7 +31,7 @@ export default {
   },
   methods: {
     async fetchUnread() {
-      const res = await fetch(`https://rua11store-catalog-api-lbp7.onrender.com/api/notifications/${this.userId}`)
+      const res = await fetch(`https://rua11store-catalog-api-lbp7.onrender.com/notifications/${this.userId}`)
       const data = await res.json()
       this.unreadCount = data.length
     },
