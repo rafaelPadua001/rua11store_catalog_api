@@ -102,13 +102,16 @@ export default {
         return {
             loading: false,
             headers: [
-                { text: "ID", value: "id" },
-                { text: "Título", value: "title" },
-                { text: "Código", value: "code" },
-                { text: "Desconto", value: "discount" },
-                { text: "Cliente ID", value: "client_id" },
-                { text: "Imagem", value: "image_path" },
-                { text: "Ações", value: "actions", sortable: false }
+                { title: "ID", key: "id" },
+                { title: "Imagem", key: "image_path" },
+                { title: "Título", key: "title" },
+                { title: "Código", key: "code" },
+                { title: "Desconto", key: "discount" },
+                { title: "Cliente ID", key: "client_id" },
+                { title: "Init Date", key: "start_date" },
+                { title: "End Date", key: "end_date" },
+                { title: "Ações", key: "actions", sortable: false }
+                
             ],
             couponDialog: false,
             coupons: [],
