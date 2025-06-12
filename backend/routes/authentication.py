@@ -10,6 +10,7 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 import os
 from flask import send_from_directory
+from flask_sqlalchemy import SQLAlchemy
 
 
 # Criando o Blueprint para autenticação
@@ -36,9 +37,13 @@ CORS(
 # Configuração do JWTManager
 jwt = JWTManager()
 
+db = SQLAlchemy()
+
 # Função para criar a conexão com o banco de dados
-def create_connection():
-    return sqlite3.connect("database.db")
+def create_connection(app):
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
 
 # Função para verificar se o token está na blocklist
 @jwt.token_in_blocklist_loader
@@ -224,7 +229,7 @@ def upload_avatar():
 
     #update url avatar on database
     user_id = get_jwt_identity()
-    avatar_url = f'https://rua11storecatalogapi-production.up.railway.app/{file_path}' #public url
+    avatar_url = f'https://rua11store-catalog-api-lbp7.onrender.com/{file_path}' #public url
 
     #update on database
     conn = create_connection()

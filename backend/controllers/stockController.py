@@ -17,7 +17,8 @@ class StockController:
     @staticmethod
     def get_stock():
         stocks = Stock.get_all()
-        stocks_list = [dict(row) for row in stocks]  
+        stocks_list = [row.to_dict() for row in stocks]  # CERTO
+ 
         return jsonify(stocks_list), 200
 
     @staticmethod
