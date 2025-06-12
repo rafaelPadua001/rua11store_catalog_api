@@ -13,12 +13,29 @@ from controllers.emailController import EmailController
 from extensions import socketio, mail, email_controller  # ← pegar de extensions
 from routes.notification import notification_bp, register_socketio_events
 from flask_sqlalchemy import SQLAlchemy
-
+import socket
+import re
 
 load_dotenv()
 app = Flask(__name__, static_folder="uploads", static_url_path="/uploads")
 app.config.from_object(Config)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL").replace('postgresql://', 'postgresql+psycopg2://')
+raw_db_url = os.getenv("DATABASE_URL")
+
+if raw_db_url.startswith("postgresql://"):
+    raw_db_url = raw_db_url.replace("postgresql://", "postgresql+psycopg2://")
+
+    match = re.match(r"(postgresql\+psycopg2://[^@:]+:[^@]+@)([^:/]+)(:\d+/.+)", raw_db_url)
+    if match:
+        prefix, host, suffix = match.groups()
+        try:
+            ipv4 = socket.gethostbyname(host)
+            raw_db_url = f"{prefix}{ipv4}{suffix}"
+            print(f"Conectando ao banco via IPv4: {ipv4}")
+        except socket.gaierror:
+            print(f"Não foi possível resolver o host {host} para IPv4, mantendo o original.")
+
+# ATENÇÃO: aqui a variável raw_db_url já está modificada ou não, mas nunca será None
+app.config['SQLALCHEMY_DATABASE_URI'] = raw_db_url
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
