@@ -95,7 +95,7 @@ export default {
             }
         },
         getProductImage(imagePath, productId = null) {
-            window.alert('oi');
+            
             // Imagem padrão se não houver caminho
             if (!imagePath) return "https://via.placeholder.com/300";
 
