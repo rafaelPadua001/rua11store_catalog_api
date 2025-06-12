@@ -5,6 +5,7 @@ from database import db
 from models.product import Product
 from models.stock import Stock
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
+from decimal import Decimal, ROUND_HALF_UP
 
 class ProductController:
     UPLOAD_FOLDER = "uploads/product_images"
@@ -43,19 +44,21 @@ class ProductController:
     @staticmethod
     @jwt_required()
     def adicionar_produto():
+        raw_price = request.form.get("price", "0.00")
+        price_decimal = Decimal(raw_price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         name = request.form.get("name")
         description = request.form.get("description")
-        price = request.form.get("price")
-        category_id = request.form.get("category_id")
-        subcategory_id = request.form.get("subcategory_id")
-        quantity = request.form.get("quantity", 1)
+        price = float(price_decimal)
+        category_id = int(request.form.get("category_id", 0))
+        subcategory_id = int(request.form.get("subcategory_id", 0))
+        quantity = int(request.form.get("quantity", 1))
         imagem = request.files.get("imagem")
         product_name = ProductController.formatar_nome(name) if name else "produto_sem_nome"
         imagem_path = ProductController.upload_imagem(imagem, product_name) if imagem else None
-        width = request.form.get('width')
-        height = request.form.get('height')
-        weight = request.form.get('weight')
-        length = request.form.get('length')
+        width = float(request.form.get("width", 0))
+        height = float(request.form.get("height", 0))
+        weight = float(request.form.get("weight", 0))
+        length = float(request.form.get("length", 0))
 
         user_id = get_jwt_identity()
         if not user_id:
@@ -84,12 +87,12 @@ class ProductController:
                 "user_id": novo_produto.user_id,
                 "category_id": novo_produto.category_id,
                 "product_name": novo_produto.name,
-                "product_price": novo_produto.price,
+                "product_price": float(novo_produto.price),
                 "product_quantity": novo_produto.quantity,
-                "product_widht": novo_produto.width,
-                "product_height": novo_produto.height,
-                "product_weight": novo_produto.weight,
-                "product_length": novo_produto.length,
+                # "product_width": novo_produto.width,
+                # "product_height": novo_produto.height,
+                # "product_weight": novo_produto.weight,
+                # "product_length": novo_produto.length,
                 "variations": None,
             }
             Stock.create(stock_data)
@@ -124,7 +127,20 @@ class ProductController:
         imagem_path = ProductController.upload_imagem(imagem, name) if imagem else product.image_path
 
         try:
-            product.update(name, description, price, category_id, subcategory_id, quantity, width, height, weight, length, imagem_path)
+            product.update(
+            name=name,
+            description=description,
+            price=price,
+            category_id=category_id,
+            subcategory_id=subcategory_id,
+            quantity=quantity,
+            width=width,
+            height=height,
+            weight=weight,
+            length=length,
+            image_path=imagem_path
+        )
+
             stock_data = {
                 "id_product": product.id,
                 "user_id": user_id,

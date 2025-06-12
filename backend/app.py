@@ -12,11 +12,17 @@ import os
 from controllers.emailController import EmailController
 from extensions import socketio, mail, email_controller  # ← pegar de extensions
 from routes.notification import notification_bp, register_socketio_events
+from flask_sqlalchemy import SQLAlchemy
 
 
 load_dotenv()
 app = Flask(__name__, static_folder="uploads", static_url_path="/uploads")
 app.config.from_object(Config)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 bcrypt = Bcrypt(app)

@@ -9,9 +9,9 @@
 
                 <v-data-table :headers="headers" :items="stocks" :items-per-page="10" class="elevation-1" item-key="id"
                     fixed-header height="500" :loading="loading" loading-text="Loading stock...">
-
+                
                     <template v-slot:item.image_path="{ item }">
-                        <v-img v-if="item.image_path" :src="getProductImage(item.image_path) " alt="Product Image" contain :width="70" :height="70" 
+                        <v-img v-if="item.product.image_path" :src="getProductImage(item.product.image_path) " alt="Product Image" contain :width="70" :height="70" 
                             class="rounded-lg"></v-img>
                         <span v-else>No Image</span>
                     </template>
@@ -95,6 +95,7 @@ export default {
             }
         },
         getProductImage(imagePath, productId = null) {
+            window.alert('oi');
             // Imagem padrão se não houver caminho
             if (!imagePath) return "https://via.placeholder.com/300";
 
@@ -125,7 +126,7 @@ export default {
             else if (this.editedProduct?.name) {
                 productName = this.editedProduct.name.replace(/\s+/g, '_').toLowerCase();
             }
-
+            console.log(`${baseUrl}/${imagePath}`);
             return `${baseUrl}/${imagePath}`;
         },
         async deleteStock(id) {
