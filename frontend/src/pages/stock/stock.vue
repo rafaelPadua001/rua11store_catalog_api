@@ -126,7 +126,7 @@ export default {
             else if (this.editedProduct?.name) {
                 productName = this.editedProduct.name.replace(/\s+/g, '_').toLowerCase();
             }
-            console.log(`${baseUrl}/${imagePath}`);
+           
             return `${baseUrl}/${imagePath}`;
         },
         async deleteStock(id) {

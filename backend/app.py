@@ -1,5 +1,5 @@
-import eventlet
-eventlet.monkey_patch()
+# import eventlet
+# eventlet.monkey_patch()
 from flask import Flask
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
@@ -18,7 +18,7 @@ from flask_sqlalchemy import SQLAlchemy
 load_dotenv()
 app = Flask(__name__, static_folder="uploads", static_url_path="/uploads")
 app.config.from_object(Config)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL").replace('postgresql://', 'postgresql+psycopg2://')
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
