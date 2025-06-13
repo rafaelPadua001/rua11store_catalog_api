@@ -13,7 +13,7 @@ from flask import send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from models.user import User
 from models.userProfile import ProfileModel
-
+from database import db
 
 
 # Criando o Blueprint para autenticação
@@ -40,7 +40,7 @@ CORS(
 # Configuração do JWTManager
 jwt = JWTManager()
 
-db = SQLAlchemy()
+
 
 # Função para criar a conexão com o banco de dados
 def create_connection(app):
