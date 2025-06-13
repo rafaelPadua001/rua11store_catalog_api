@@ -63,93 +63,41 @@ def check_if_token_in_blocklist(jwt_header, jwt_payload):
 @auth_bp.route('/register', methods=["POST"])
 def register():
     data = request.json
-    print("Dados recebidos no registro:", data)  # Log para depuração
-
-    # Extração dos dados
     email = data.get('email')
     password = data.get('password')
-    name = data.get('name')          # Nome completo (para tabela users)
-    birth_date = data.get('birthDate')  # Data de nascimento (para tabela users)
-    #username = data.get('username')  # Nome de usuário único (para tabela profiles)
-    avatar_url = data.get('avatarUrl', '')  # Opcional
+    name = data.get('name')
+    birth_date = data.get('birthDate')
+    avatar_url = data.get('avatarUrl', '')
 
-    # Validação dos campos obrigatórios
-    required_fields = {
-        'email': email,
-        'password': password,
-        'name': name,
-        'birthDate': birth_date,
-        #'username': username
-    }
-    
-    missing_fields = [field for field, value in required_fields.items() if not value]
-    if missing_fields:
-        return jsonify({
-            "error": "Campos obrigatórios faltando",
-            "missing_fields": missing_fields
-        }), 400
+    if not all([email, password, name, birth_date]):
+        return jsonify({"error": "Campos obrigatórios faltando"}), 400
 
-    # Verificar se o e-mail ou o nome de usuário já existem
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
-    existing_user = cursor.fetchone()
-    if existing_user:
+    # Verifica se usuário existe
+    if User.query.filter_by(email=email).first():
         return jsonify({"error": "E-mail já está em uso"}), 400
-    
-    cursor.execute('SELECT id FROM profiles WHERE username = ?', (name,))
-    existing_username = cursor.fetchone()
-    if existing_username:
+
+    if Profile.query.filter_by(username=name).first():
         return jsonify({"error": "Nome de usuário já existe"}), 400
 
-    # Criptografia da senha
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+    
+    user = User(email=email, password=hashed_password, name=name, birth_date=birth_date)
+    db.session.add(user)
+    db.session.commit()
 
-    try:
-        cursor.execute('BEGIN TRANSACTION')
-        
-        # 1. Insere na tabela users (com name e birth_date)
-        cursor.execute(
-            'INSERT INTO users (email, password, name, birth_date) VALUES (?, ?, ?, ?)',
-            (email, hashed_password, name, birth_date)
-        )
-        user_id = cursor.lastrowid
-        
-        # 2. Insere na tabela profiles
-        cursor.execute(
-            '''INSERT INTO profiles 
-               (user_id, username, full_name, birth_date, avatar_url) 
-               VALUES (?, ?, ?, ?, ?)''',
-            (user_id, name, name, birth_date, avatar_url)
-        )
-        
-        conn.commit()
-        
-        # Gera token JWT - Certifique-se de que o user_id seja uma string
-        access_token = create_access_token(identity=int(user_id))  # Converte user_id para string
-        
-        return jsonify({
-            "message": "Registro concluído com sucesso",
-            "access_token": access_token,
-            "user_id": user_id,
-            "username": name
-        }), 201
-        
-    except sqlite3.IntegrityError as e:
-        conn.rollback()
-        if 'email' in str(e):
-            return jsonify({"error": "E-mail já está em uso"}), 400
-        elif 'username' in str(e):
-            return jsonify({"error": "Nome de usuário já existe"}), 400
-        return jsonify({"error": f"Erro de banco de dados: {str(e)}"}), 400
-        
-    except Exception as e:
-        conn.rollback()
-        print("Erro durante o registro:", str(e))
-        return jsonify({"error": "Erro interno no servidor"}), 500
-        
-    finally:
-        conn.close()
+    profile = Profile(user_id=user.id, username=name, full_name=name, birth_date=birth_date, avatar_url=avatar_url)
+    db.session.add(profile)
+    db.session.commit()
+
+    access_token = create_access_token(identity=user.id)
+
+    return jsonify({
+        "message": "Registro concluído com sucesso",
+        "access_token": access_token,
+        "user_id": user.id,
+        "username": name
+    }), 201
+
         
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()

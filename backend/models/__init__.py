@@ -6,6 +6,7 @@ from .stock import Stock
 from .payment import Payment
 from .delivery import Delivery
 from .order import Order
+from .user import User
 __all__ = [
     'UserProfile',
     'Page',
