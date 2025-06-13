@@ -70,7 +70,7 @@ def register():
     password = data.get('password')
     name = data.get('name')          # Nome completo (para tabela users)
     birth_date = data.get('birthDate')  # Data de nascimento (para tabela users)
-    username = data.get('username')  # Nome de usuário único (para tabela profiles)
+    #username = data.get('username')  # Nome de usuário único (para tabela profiles)
     avatar_url = data.get('avatarUrl', '')  # Opcional
 
     # Validação dos campos obrigatórios
@@ -79,7 +79,7 @@ def register():
         'password': password,
         'name': name,
         'birthDate': birth_date,
-        'username': username
+        #'username': username
     }
     
     missing_fields = [field for field, value in required_fields.items() if not value]
@@ -97,7 +97,7 @@ def register():
     if existing_user:
         return jsonify({"error": "E-mail já está em uso"}), 400
     
-    cursor.execute('SELECT id FROM profiles WHERE username = ?', (username,))
+    cursor.execute('SELECT id FROM profiles WHERE username = ?', (name,))
     existing_username = cursor.fetchone()
     if existing_username:
         return jsonify({"error": "Nome de usuário já existe"}), 400
@@ -120,7 +120,7 @@ def register():
             '''INSERT INTO profiles 
                (user_id, username, full_name, birth_date, avatar_url) 
                VALUES (?, ?, ?, ?, ?)''',
-            (user_id, username, name, birth_date, avatar_url)
+            (user_id, name, name, birth_date, avatar_url)
         )
         
         conn.commit()
@@ -132,7 +132,7 @@ def register():
             "message": "Registro concluído com sucesso",
             "access_token": access_token,
             "user_id": user_id,
-            "username": username
+            "username": name
         }), 201
         
     except sqlite3.IntegrityError as e:
