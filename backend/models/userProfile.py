@@ -52,7 +52,7 @@ class ProfileModel(db.Model):
     birth_date = Column(Date, nullable=False)
     avatar_url = Column(String(255))
 
-    user = relationship('User', back_populates='profiles')
+    user = relationship('User', back_populates='profile')
 
 
 
