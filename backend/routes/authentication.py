@@ -88,7 +88,7 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    profile = UserProfile(user_id=user.id, username=name, full_name=name, birth_date=birth_date, avatar_url=avatar_url)
+    profile = UserProfile(user_id=user.id, username=name, full_name=name, birth_date=birth_date, avatar_url=avatar_url,  email=email)
     db.session.add(profile)
     db.session.commit()
 
