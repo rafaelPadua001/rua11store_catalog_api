@@ -44,7 +44,7 @@ class ProfileModel(db.Model):
     user = relationship('User', back_populates='profile')
 
 
-
+    User.profile = relationship(UserProfile, back_populates="user", uselist=False)
 
 
 # Método equivalente a get_by_user_id, usando SQLAlchemy
