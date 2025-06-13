@@ -7,4 +7,4 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
     name = db.Column(db.String, nullable=False)
     birth_date = db.Column(db.Date, nullable=False)
-    profiles = db.relationship('ProfileModel', backref='user', uselist=False)
+    profiles = db.relationship('ProfileModel', back_populates='user', uselist=False)
