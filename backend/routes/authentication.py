@@ -79,7 +79,7 @@ def register():
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "E-mail já está em uso"}), 400
 
-    if ProfileModel.query.filter_by(username=name).first():
+    if UserProfile.query.filter_by(username=name).first():
         return jsonify({"error": "Nome de usuário já existe"}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
@@ -88,7 +88,7 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    profile = ProfileModel(user_id=user.id, username=name, full_name=name, birth_date=birth_date, avatar_url=avatar_url,  email=email)
+    profile = UserProfile(user_id=user.id, username=name, full_name=name, birth_date=birth_date, avatar_url=avatar_url)
     db.session.add(profile)
     db.session.commit()
 
