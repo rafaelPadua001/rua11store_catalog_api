@@ -12,7 +12,7 @@ import os
 from flask import send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from models.user import User
-from models.userProfile import UserProfile
+from models.userProfile import ProfileModel
 
 
 
@@ -79,7 +79,7 @@ def register():
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "E-mail já está em uso"}), 400
 
-    if UserProfile.query.filter_by(username=name).first():
+    if ProfileModel.query.filter_by(username=name).first():
         return jsonify({"error": "Nome de usuário já existe"}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
