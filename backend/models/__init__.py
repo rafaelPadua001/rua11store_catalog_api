@@ -16,4 +16,5 @@ __all__ = [
     'Payment',
     'Delivery',
     'Order',
+    'User'
 ]
