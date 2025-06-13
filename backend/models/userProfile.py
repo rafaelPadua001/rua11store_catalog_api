@@ -30,23 +30,6 @@ class UserProfile:
         self.avatar_url = avatar_url
         self.name = name if name else full_name
 
-
-class ProfileModel(db.Model):
-    __tablename__ = 'profiles'
-
-    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
-    username = Column(String(150), nullable=False, unique=True)
-    full_name = Column(String(200), nullable=False)
-    birth_date = Column(Date, nullable=False)
-    avatar_url = Column(String(255))
-
-    user = relationship('UserModel', back_populates='profile')
-
-
-
-
-
-# Método equivalente a get_by_user_id, usando SQLAlchemy
 def get_user_profile_by_user_id(session: Session, user_id) -> Optional[UserProfile]:
     try:
         user_id = int(user_id) if isinstance(user_id, str) else user_id
