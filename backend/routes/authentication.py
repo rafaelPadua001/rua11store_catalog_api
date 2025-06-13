@@ -213,19 +213,21 @@ def login():
     conn = create_connection()
     cursor = conn.cursor()
 
-    # Buscar o usuário no banco de dados
-    cursor.execute('SELECT id, name, email, password FROM users WHERE email = ?', (email,))
+    # Note o uso de %s para placeholders no psycopg2
+    cursor.execute('SELECT id, name, email, password FROM users WHERE email = %s', (email,))
     user = cursor.fetchone()
 
     if user is None:
         return jsonify({"error": "Usuário não encontrado"}), 404
     
-    # Verificar se a senha está correta
-    if not bcrypt.check_password_hash(user[3], password):
+    # Verificar se a senha está correta (assumindo que 'user[3]' é a hash)
+    if not bcrypt.checkpw(password.encode('utf-8'), user[3].encode('utf-8')):
         return jsonify({"error": "Senha incorreta"}), 401
     
-    # Gerar o token JWT - Certifique-se de que o user_id seja uma string
-    token = create_access_token(identity=str(user[0])) 
+    token = create_access_token(identity=str(user[0]))
+
+    cursor.close()
+    conn.close()
 
     return jsonify({"message": "Login realizado com sucesso!", "token": token}), 200
 
