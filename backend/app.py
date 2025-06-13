@@ -18,8 +18,7 @@ from dotenv import load_dotenv
 import os
 import socket
 import re
-import socket
-print("DNS Test:", socket.getaddrinfo("db.hhcxfuapawyhpnkpowkx.supabase.co", 5432))
+
 
 # Carrega variáveis do .env
 load_dotenv()
