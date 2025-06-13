@@ -11,6 +11,8 @@ from werkzeug.utils import secure_filename
 import os
 from flask import send_from_directory
 from flask_sqlalchemy import SQLAlchemy
+from models.user import User
+
 
 
 # Criando o Blueprint para autenticação
