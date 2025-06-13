@@ -12,7 +12,6 @@ import os
 from flask import send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from models.user import User
-from models.userProfile import ProfileModel
 from database import db
 
 
