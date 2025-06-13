@@ -6,7 +6,7 @@ from database import db # sua instância do SQLAlchemy
 from models.user import User # ajuste o caminho conforme necessário
 
 
-class UserProfile:
+class UserProfile(db.Model):
     def __init__(self, user_id: int, username: str, full_name: str,
                  birth_date: date, email: str,
                  avatar_url: Optional[str] = None,
