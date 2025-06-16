@@ -16,10 +16,12 @@ class Order(db.Model):
     order_date = Column(DateTime, default=datetime.utcnow)
     status = Column(String, nullable=True)
 
-    items = relationship("OrderItem", back_populates="order")
-    delivery = relationship("Delivery", back_populates="orders")
-    order_items = relationship('OrderItem', back_populates='order')
-    
+    items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
+    delivery = relationship('Delivery', back_populates='order', uselist=False)
+
+
+    # order_items = relationship('OrderItem', back_populates='order')
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -27,15 +29,15 @@ class Order(db.Model):
             "payment_id": self.payment_id,
             "delivery_id": self.delivery_id,
             "shipment_info": self.shipment_info,
-            "order_date": self.order_date,
+            "order_date": self.order_date.isoformat() if self.order_date else None,
             "status": self.status,
             "total_amount": self.total_amount,
             "items": [item.to_dict() for item in self.items]
         }
 
     @staticmethod
-    def get_all(session: Session):
-        orders = session.query(Order).order_by(Order.id.desc()).all()
+    def get_all():
+        orders = db.session.query(Order).order_by(Order.id.desc()).all()
         return [order.to_dict() for order in orders]
 
     @staticmethod

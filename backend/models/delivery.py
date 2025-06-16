@@ -4,6 +4,7 @@ from database import db  # ou o local correto da sua instância SQLAlchemy
 from models.order import Order
 from models.orderItem import OrderItem
 from models.product import Product
+
 class Delivery(db.Model):
     __tablename__ = 'delivery'
 
@@ -28,9 +29,10 @@ class Delivery(db.Model):
     weight = Column(Float)
     cpf = Column(String(20))
     melhorenvio_id = Column(String(100), unique=True)
-    order_id = Column(Integer, ForeignKey('orders.id'))
-
+    order_id = Column(Integer, ForeignKey('orders.id'), unique=True)  # Unique se for um para um
     order = relationship('Order', back_populates='delivery')
+
+
 
     def to_dict(self):
         return {
