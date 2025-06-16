@@ -1,34 +1,44 @@
-import sqlite3
 from datetime import datetime
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from extensions import socketio
 from controllers.stockController import StockController
+from flask import session
+from utils.notifications_utils import create_notification
 import requests
 import os
 import uuid
-from extensions import socketio
-from flask import session
-from utils.notifications_utils import create_notification
 import extensions
+from models.delivery import Delivery  # se você tiver essa model
+from models.order import Order
+from database import db 
+from models.orderItem import OrderItem
+from models.paymentProduct import PaymentProduct
 
 
+class Payment(db.Model):
+    __tablename__ = 'payments'
 
-class Payment:
-    def __init__(
-            self,
-            payment_id,
-            total_value,
-            payment_date,
-            payment_type,
-            cpf, email,
-            status,
-            usuario_id,
-            products,
-            address=None,
-            coupon_code=None,
-            coupon_amount=None
-        ):
+    payment_id = Column(String, primary_key=True)
+    total_value = Column(Float, nullable=False)
+    payment_date = Column(DateTime, default=datetime.utcnow)
+    payment_type = Column(String)
+    cpf = Column(String)
+    email = Column(String)
+    status = Column(String)
+    usuario_id = Column(Integer, nullable=False)
+    coupon_code = Column(String, nullable=True)
+    coupon_amount = Column(Float, nullable=True)
+
+    # Relacionamentos (opcional)
+    # orders = relationship("Order", back_populates="payment")
+
+    def __init__(self, payment_id, total_value, payment_date, payment_type,
+                 cpf, email, status, usuario_id, products,
+                 address=None, coupon_code=None, coupon_amount=None):
         self.payment_id = payment_id
         self.total_value = total_value
-        self.payment_date = payment_date or datetime.now().isoformat()
+        self.payment_date = payment_date or datetime.now()
         self.payment_type = payment_type
         self.cpf = cpf
         self.email = email
@@ -38,206 +48,149 @@ class Payment:
         self.address = address
         self.coupon_code = coupon_code
         self.coupon_amount = coupon_amount
-    
-    @staticmethod
-    def get_db_connection():
-        """Cria uma nova conexão com o banco de dados"""
-        conn = sqlite3.connect('database.db', timeout=60.0)  # 10 segundos de timeout
-        conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
-        return conn
-    
+
     @staticmethod
     def get_all_payments():
-        conn = Payment.get_db_connection()
-        with conn:
-            cursor = conn.cursor()
-            cursor.execute(""" 
-                SELECT * FROM payments ORDER BY payment_date DESC
-            """)
-            rows = cursor.fetchall()
-        return [dict(row) for row in rows]
+        payments = Payment.query.order_by(Payment.payment_date.desc()).all()
+        return [p.as_dict() for p in payments]
 
-    
+    def as_dict(self):
+        return {
+            'payment_id': self.payment_id,
+            'total_value': self.total_value,
+            'payment_date': self.payment_date.isoformat(),
+            'payment_type': self.payment_type,
+            'cpf': self.cpf,
+            'email': self.email,
+            'status': self.status,
+            'usuario_id': self.usuario_id,
+            'coupon_code': self.coupon_code,
+            'coupon_amount': self.coupon_amount
+        }
+
     def save(self):
-        conn = self.get_db_connection()
-        # email_controller = EmailController(mail)
+     
+
         try:
-            with conn:
-                cursor = conn.cursor()
+            db.session.add(self)
+            db.session.flush()  # Garante que o pagamento esteja no banco
 
-                # Inserir pagamento
-                cursor.execute("""
-                    INSERT INTO payments 
-                    (payment_id, total_value, payment_date, payment_type, cpf, email, status, usuario_id, coupon_code, coupon_amount)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    self.payment_id,
-                    self.total_value,
-                    self.payment_date,
-                    self.payment_type,
-                    self.cpf,
-                    self.email,
-                    self.status,
-                    self.usuario_id,
-                    getattr(self, 'coupon_code', None),
-                    getattr(self, 'coupon_amount', None),
-                ))
+            payment_id = self.payment_id
+            delivery_id = None
 
-                payment_id = cursor.lastrowid
-
-                delivery_id = None
-
-                # Se há endereço, criar uma entrega
-                if self.address and self.products:
-                    product = self.products[0]  # Apenas um produto para referenciar a entrega
-                    cursor.execute("""
-                        INSERT INTO delivery (
-                            product_id, user_id, recipient_name, street, number,
-                            complement, city, state, zip_code, country, phone, bairro,
-                            total_value, delivery_id, width, height, length, weight
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (
-                        product['product_id'],
-                        self.usuario_id,
-                        self.address.get('recipient_name', ''),
-                        self.address.get('street', ''),
-                        self.address.get('number', ''),
-                        self.address.get('complement', ''),
-                        self.address.get('city', ''),
-                        self.address.get('state', ''),
-                        self.address.get('zip_code', ''),
-                        self.address.get('country', ''),
-                        self.address.get('phone', ''),
-                        self.address.get('bairro', ''),
-                        self.address.get('total_value', 0),
-                        self.address.get('delivery_id', ''),
-                        product.get('width', 0),
-                        product.get('height', 0),
-                        product.get('length', 0),
-                        product.get('weight', 0)
-                    ))
-
-                    # Pegue o delivery_id gerado
-                    delivery_id = cursor.lastrowid
-
-                # Atualiza estoque
-                for product in self.products:
-                    product_id = product.get('id') if isinstance(product.get('id'), int) else product.get('product_id')
-                    quantity = int(product.get('quantity', 1))
-                    stock_quantity = StockController.update_stock_quantity(product_id, quantity, conn=conn)
-                    if 'error' in stock_quantity:
-                        print(f"Erro ao atualizar o estoque para o produto {product_id}: {stock_quantity['error']}")
-
-                # Inserir a ordem (orders)
-                cursor.execute("""
-                    INSERT INTO orders(user_id, payment_id, delivery_id, shipment_info, total_amount, order_date)
-                    VALUES (?, ?, ?, ?, ?, datetime('now'))
-                """, (
-                    self.usuario_id,
-                    payment_id,
-                    delivery_id,
-                    self.address.get('zip_code', '') if self.address else '',
-                    self.total_value
-                ))
-
-                order_id = cursor.lastrowid
-
-                #send notify
-                # Após criar a order (order_id gerado)
-                # notification_data = {
-                #     'message': f"Novo pedido recebido: #{order_id}",
-                #     'order_id': order_id,
-                #     'user_id': self.usuario_id
-                # }
-
-                create_notification(
-                   # user_id=session.get('user_id'),
-                    message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                    #order_id=order_id
-                    is_global=True,
-                    conn=conn
+            if self.address and self.products:
+                product = self.products[0]
+                delivery = Delivery(
+                    product_id=product['product_id'],
+                    user_id=self.usuario_id,
+                    recipient_name=self.address.get('recipient_name', ''),
+                    street=self.address.get('street', ''),
+                    number=self.address.get('number', ''),
+                    complement=self.address.get('complement', ''),
+                    city=self.address.get('city', ''),
+                    state=self.address.get('state', ''),
+                    zip_code=self.address.get('zip_code', ''),
+                    country=self.address.get('country', ''),
+                    phone=self.address.get('phone', ''),
+                    bairro=self.address.get('bairro', ''),
+                    total_value=self.address.get('total_value', 0),
+                    delivery_id=self.address.get('delivery_id', ''),
+                    width=product.get('width', 0),
+                    height=product.get('height', 0),
+                    length=product.get('length', 0),
+                    weight=product.get('weight', 0)
                 )
+                db.session.add(delivery)
+                db.session.flush()
+                delivery_id = delivery.id
 
-                # Emitir notificação via socket
-                socketio.emit('new_notification', {
-                    'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                    'order_id': order_id,
-                    'is_global': True,
-                    #'user_id': session.get('user_id')
-                })
+            for product in self.products:
+                product_id = product.get('id') or product.get('product_id')
+                quantity = int(product.get('quantity', 1))
+                result = StockController.update_stock_quantity(product_id, quantity)
+                if 'error' in result:
+                    print(f"Erro ao atualizar o estoque para {product_id}: {result['error']}")
 
+            order = Order(
+                user_id=self.usuario_id,
+                payment_id=payment_id,
+                delivery_id=delivery_id,
+                shipment_info=self.address.get('zip_code', '') if self.address else '',
+                total_amount=self.total_value,
+                order_date=datetime.utcnow()
+            )
+            db.session.add(order)
+            db.session.flush()
+            order_id = order.id
 
-                # Inserir os produtos do pagamento e order_items COM order_id válido
-                for product in self.products:
-                    if 'id' not in product:
-                        print("Erro: 'id' não encontrado no produto:", product)
-                        continue
-                    product_id = product.get('id') if isinstance(product.get('id'), int) else product.get('product_id')
+            create_notification(
+                message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+                is_global=True,
+                conn=db.session  # SQLAlchemy session
+            )
 
-                    product_name = product.get('name') or product.get('product_name')
-                    if not product_name:
-                        raise ValueError("Nome do produto ausente")
+            socketio.emit('new_notification', {
+                'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+                'order_id': order_id,
+                'is_global': True
+            })
 
-                    price = float(product.get('price', 0))
-                    quantity = int(product.get('quantity', 1))
+            for product in self.products:
+                if 'id' not in product:
+                    print("Erro: 'id' não encontrado no produto:", product)
+                    continue
 
-                    cursor.execute("""
-                        INSERT INTO payments_product(payment_id, product_id, product_name, product_quantity, product_price)
-                        VALUES (?, ?, ?, ?, ?)
-                    """, (
-                        payment_id,
-                        product_id,
-                        product_name,
-                        quantity,
-                        price
-                    ))
+                product_id = product.get('id') or product.get('product_id')
+                product_name = product.get('name') or product.get('product_name')
+                price = float(product.get('price', 0))
+                quantity = int(product.get('quantity', 1))
 
-                    cursor.execute("""
-                        INSERT INTO order_items (order_id, product_id, quantity, unit_price, total_price)
-                        VALUES (?, ?, ?, ?, ?)
-                    """, (
-                        order_id,
-                        product_id,
-                        quantity,
-                        price,
-                        price * quantity
-                    ))
-                try:
-                    if extensions.email_controller is None:
-                        raise Exception("email_controller não está inicializado!")
-                    extensions.email_controller.send_email(
-                        subject= f"Rua11Store Confirmação de pedido n°: {order_id}",
-                        recipients=[self.email],
-                        body="Seu pedido foi recebido com sucesso!",
-                        html= f"<p>Olá! Seu pedido n°: <b>{order_id}</b><br>"
-                                f"Status do pedido: <b>{self.status}</b><br>"
-                                f"Estamos separando seu pedido para envio.<br>"
-                                f"Valor total: <b>R${self.total_value:.2f}</b>.<br><br>"
-                                f"Atenciosamente,<br>Rua11Store.</p>"
-                    )
-                except Exception as e:
-                    print(f'Erro ao enviar e-mail: {e}')
-        except sqlite3.Error as e:
+                payment_product = PaymentProduct(
+                    payment_id=payment_id,
+                    product_id=product_id,
+                    product_name=product_name,
+                    product_quantity=quantity,
+                    product_price=price
+                )
+                db.session.add(payment_product)
+
+                order_item = OrderItem(
+                    order_id=order_id,
+                    product_id=product_id,
+                    quantity=quantity,
+                    unit_price=price,
+                    total_price=price * quantity
+                )
+                db.session.add(order_item)
+
+            try:
+                if extensions.email_controller is None:
+                    raise Exception("email_controller não está inicializado!")
+                extensions.email_controller.send_email(
+                    subject=f"Rua11Store Confirmação de pedido n°: {order_id}",
+                    recipients=[self.email],
+                    body="Seu pedido foi recebido com sucesso!",
+                    html=f"<p>Olá! Seu pedido n°: <b>{order_id}</b><br>"
+                         f"Status do pedido: <b>{self.status}</b><br>"
+                         f"Estamos separando seu pedido para envio.<br>"
+                         f"Valor total: <b>R${self.total_value:.2f}</b>.<br><br>"
+                         f"Atenciosamente,<br>Rua11Store.</p>"
+                )
+            except Exception as e:
+                print(f'Erro ao enviar e-mail: {e}')
+
+            db.session.commit()
+        except Exception as e:
             print(f"Erro ao salvar o pagamento: {e}")
-            conn.rollback()
-        finally:
-            conn.close()
+            db.session.rollback()
 
     @staticmethod
     def update_status(self, payment_id, status):
         try:
-            conn = self.get_db_connection() 
-            cursor = conn.cursor()
-
-            cursor.execute(
-                "UPDATE payments SET status = ? WHERE payment_id = ?",
-                (status, payment_id)
-            )
-            conn.commit()
-            updated = cursor.rowcount
-            conn.close()
-
-            if updated:
+            payment = Payment.query.filter_by(payment_id=payment_id).first()
+            if payment:
+                payment.status = status
+                db.session.commit()
                 print(f"Status do pagamento {payment_id} atualizado para {status}.")
                 return True
             else:
@@ -245,35 +198,27 @@ class Payment:
                 return False
         except Exception as e:
             print(f"Erro ao atualizar status: {e}")
+            db.session.rollback()
             return False
-        
+
     @staticmethod
     def fetch_from_mercado_pago(payment_id, data=None):
         token = os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')
-        
         url = f"https://api.mercadopago.com/v1/payments/{payment_id}"
         headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
         }
-        
-        try:
-            if data:
-                # Atualização do pagamento (PUT)
-                response = requests.put(url, headers=headers, json=data)
-            else:
-                # Consulta do pagamento (GET)
-                response = requests.get(url, headers=headers)
 
-            # Verifica se a resposta foi bem-sucedida
+        try:
+            response = requests.put(url, headers=headers, json=data) if data else requests.get(url, headers=headers)
             if response.status_code == 200:
                 return response.json()
             else:
                 raise Exception(f"Erro {response.status_code}: {response.text}")
         except Exception as e:
-            # Retorna o erro de forma que a função sempre retorne um dicionário
             return {"error": str(e)}
-        
+
     def payment_chargeback_mercado_pago(payment_id):
         token = os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')
         url = f"https://api.mercadopago.com/v1/payments/chargebacks/{payment_id}"
@@ -289,15 +234,15 @@ class Payment:
                 raise Exception(f"Erro {response.status_code}: {response.text}")
         except Exception as e:
             return {"error": str(e)}
-    
+
     def refund_payment_mercado_pago(payment_id, data):
         token = os.getenv('MERCADO_PAGO_ACCESS_TOKEN_TEST')
-        url = f"https://api.mercadopago.com/v1/payments/{payment_id}/refunds"                 
-        headers = { 
+        url = f"https://api.mercadopago.com/v1/payments/{payment_id}/refunds"
+        headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
             "X-Idempotency-Key": str(uuid.uuid4())
-        }      
+        }
         try:
             response = requests.post(url, headers=headers, json=data)
             if response.status_code == 200:
@@ -306,4 +251,3 @@ class Payment:
                 raise Exception(f"Erro {response.status_code}: {response.text}")
         except Exception as e:
             return {"error": str(e)}
-        
