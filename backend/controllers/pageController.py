@@ -1,5 +1,5 @@
 from models.page import Page
-from extensions import db
+from database import db
 
 class PageController:
 
