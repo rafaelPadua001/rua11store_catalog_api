@@ -18,7 +18,8 @@ class Order(db.Model):
 
     items = relationship("OrderItem", back_populates="order")
     delivery = relationship("Delivery", back_populates="orders")
-
+    order_items = relationship('OrderItem', back_populates='order')
+    
     def to_dict(self):
         return {
             "id": self.id,
