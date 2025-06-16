@@ -4,11 +4,12 @@ from models.couponUser import CouponUser
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from flask import jsonify
+from database import SessionLocal
 
 
 class CouponController:
-    def __init__(self, db_session: Session):
-        self.db = db_session
+    def __init__(self):
+        self.db = SessionLocal()
 
     def get_all_coupons(self):
         coupons = self.db.query(Coupon).all()
