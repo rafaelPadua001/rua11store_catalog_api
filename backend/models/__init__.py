@@ -10,7 +10,8 @@ from .user import User
 from .tokenBlockList import TokenBlocklist
 from .paymentProduct import PaymentProduct
 from .orderItem import OrderItem
-
+from .coupon import Coupon
+from .couponUser import CouponUser
 __all__ = [
     'UserProfile',
     'Page',
@@ -23,5 +24,7 @@ __all__ = [
     'User',
     'TokeBlockList',
     'PaymentProduct',
-    'OrderItem'
+    'OrderItem',
+    'Coupon',
+    'CouponUser'
 ]

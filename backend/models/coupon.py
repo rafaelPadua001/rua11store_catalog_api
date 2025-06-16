@@ -1,19 +1,20 @@
-import sqlite3
 from datetime import datetime
+from database import db
 
-class Coupon:
-    def __init__(self, id, user_id, client_id, title, code, discount, start_date, end_date, image_path, created_at, updated_at):
-        self.id = id
-        self.user_id = user_id
-        self.client_id = client_id
-        self.title = title
-        self.code = code
-        self.discount = discount
-        self.start_date = start_date
-        self.end_date = end_date
-        self.image_path = image_path
-        self.created_at = created_at
-        self.updated_at = updated_at
+class Coupon(db.Model):
+    __tablename__ = 'coupons'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    client_id = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String, nullable=False)
+    code = db.Column(db.String, nullable=False, unique=True)
+    discount = db.Column(db.Float, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    image_path = db.Column(db.String, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def to_dict(self):
         return {
@@ -30,19 +31,18 @@ class Coupon:
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
-    
     @classmethod
-    def from_row(cls, row):
+    def from_dict(cls, data):
         return cls(
-            id=row["id"],
-            client_id=row["client_id"],
-            title=row["title"],
-            user_id=row["user_id"],
-            code=row["code"],
-            discount=row["discount"],
-            start_date=datetime.fromisoformat(row["start_date"]),
-            end_date=datetime.fromisoformat(row["end_date"]),
-            created_at=datetime.fromisoformat(row["created_at"]) if "created_at" in row and row["created_at"] else None,
-            updated_at=datetime.fromisoformat(row["updated_at"]) if "updated_at" in row and row["updated_at"] else None,
-            image_path=row["image_path"] if "image_path" in row.keys() else None
+            id=data.get("id"),
+            user_id=data["user_id"],
+            client_id=data["client_id"],
+            title=data["title"],
+            code=data["code"],
+            discount=data["discount"],
+            start_date=datetime.fromisoformat(data["start_date"]) if data.get("start_date") else None,
+            end_date=datetime.fromisoformat(data["end_date"]) if data.get("end_date") else None,
+            image_path=data.get("image_path"),
+            created_at=datetime.fromisoformat(data["created_at"]) if data.get("created_at") else None,
+            updated_at=datetime.fromisoformat(data["updated_at"]) if data.get("updated_at") else None,
         )
