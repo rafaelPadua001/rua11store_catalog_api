@@ -1,6 +1,19 @@
-class Seo:
-    def __init__(self, id, route, metaTitle, metaDescription, metaKeywords, ogTitle, ogDescription, ogImage):
-        self.id = id
+from database import db
+
+class Seo(db.Model):
+    __tablename__ = 'seo'
+
+    id = db.Column(db.Integer, primary_key=True)
+    route = db.Column(db.String(255), nullable=False, unique=True)
+    metaTitle = db.Column(db.String(255), nullable=True)
+    metaDescription = db.Column(db.Text, nullable=True)
+    metaKeywords = db.Column(db.Text, nullable=True)
+    ogTitle = db.Column(db.String(255), nullable=True)
+    ogDescription = db.Column(db.Text, nullable=True)
+    ogImage = db.Column(db.String(255), nullable=True)
+
+    def __init__(self, route, metaTitle=None, metaDescription=None, metaKeywords=None,
+                 ogTitle=None, ogDescription=None, ogImage=None):
         self.route = route
         self.metaTitle = metaTitle
         self.metaDescription = metaDescription
@@ -19,19 +32,4 @@ class Seo:
             "ogTitle": self.ogTitle,
             "ogDescription": self.ogDescription,
             "ogImage": self.ogImage
-           
         }
-
-    @classmethod
-    def from_row(cls, row):
-        return cls(
-            id=row["id"],
-            route=row["route"],
-            metaTitle=row["title"],
-            metaDescription=row["description"],
-            metaKeywords=row["keywords"],
-            ogTitle=row["og_title"],
-            ogDescription=row["og_description"],
-            ogImage=row["og_image"]
-        )
-
