@@ -19,6 +19,27 @@ class CouponController:
         return [coupon.to_dict() for coupon in user_coupons]
 
     def create_coupon(self, user_id, client_id, title, code, discount, start_date, end_date, image_path=None):
+        # Converter client_id para int ou None
+        if client_id == '' or client_id is None:
+            client_id = None
+        else:
+            try:
+                client_id = int(client_id)
+            except ValueError:
+                raise Exception("client_id inválido, deve ser um número inteiro.")
+
+        # mesmo para user_id e discount se vierem como strings
+        if user_id == '' or user_id is None:
+            raise Exception("user_id é obrigatório.")
+        else:
+            user_id = int(user_id)
+
+        try:
+            discount = float(discount)
+        except ValueError:
+            raise Exception("discount inválido, deve ser número.")
+
+        # resto do código...
         existing = self.db_session.query(Coupon).filter_by(code=code).first()
         if existing:
             raise Exception("Já existe um cupom com esse código.")
@@ -39,6 +60,7 @@ class CouponController:
         self.db_session.add(new_coupon)
         self.db_session.commit()
         return new_coupon.to_dict()
+
 
     def update_coupon(self, coupon_id, user_id, client_id, title, code, discount, start_date, end_date, image_path=None):
         coupon = self.db_session.query(Coupon).filter_by(id=coupon_id).first()
