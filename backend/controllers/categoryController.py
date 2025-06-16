@@ -32,7 +32,7 @@ class CategoryController:
                 return jsonify({"error": "Usuário não autenticado ou dados inválidos no JWT"}), 401
 
             # Buscar dados completos do usuário com a função correta
-            current_user = UserProfile.get_user_profile_by_user_id(current_user_id)
+            current_user = get_user_profile_by_user_id(current_user_id)
             if not current_user:
                 return jsonify({"error": "Usuário não encontrado"}), 404
 

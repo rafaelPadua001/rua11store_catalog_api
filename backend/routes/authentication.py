@@ -130,7 +130,7 @@ def get_profile():
 
         # 4. Buscar o perfil
         print(f"[DEBUG] Buscando perfil para user_id: {user_id}")
-        profile = UserProfile.get_user_profile_by_user_id(user_id)
+        profile = get_user_profile_by_user_id(user_id)
         
         if not profile:
             return jsonify({
