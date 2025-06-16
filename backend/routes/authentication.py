@@ -145,8 +145,8 @@ def get_profile():
             "full_name": profile.full_name,
             "birth_date": profile.birth_date,
             "avatar_url": profile.avatar_url or "" , # Garante string vazia se None
-            "name": profile.name,
-            "email": profile.email 
+            # "name": profile.name,
+            # "email": profile.email 
         }
         
         print(f"[DEBUG] Perfil encontrado: {response_data}")
