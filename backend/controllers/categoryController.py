@@ -2,6 +2,8 @@ from flask import request, jsonify
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
 from models.category import Category
 from models.userProfile import UserProfile, get_user_profile_by_user_id
+from database import db
+
 
 def validate_category_data(data):
     """Função auxiliar para validar os dados da categoria."""
@@ -32,7 +34,7 @@ class CategoryController:
                 return jsonify({"error": "Usuário não autenticado ou dados inválidos no JWT"}), 401
 
             # Buscar dados completos do usuário com a função correta
-            current_user = get_user_profile_by_user_id(current_user_id)
+            current_user = get_user_profile_by_user_id(db.session, current_user_id)
             if not current_user:
                 return jsonify({"error": "Usuário não encontrado"}), 404
 
