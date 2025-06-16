@@ -295,7 +295,7 @@ export default {
         const baseUrl = window.location.hostname === "localhost"
             ? "http://localhost:5000"
             : "https://rua11store-catalog-api-lbp7.onrender.com";
-        return `${baseUrl}/${path}`; 
+        return `${baseUrl}${path}`; 
        },
         async deleteSeo(seoId) {
             if (!confirm("Tem certeza que deseja remover este item de SEO permanentemente ?")) return;
