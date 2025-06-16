@@ -17,7 +17,8 @@ class Order(db.Model):
     status = Column(String, nullable=True)
 
     items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
-    delivery = relationship('Delivery', back_populates='order', uselist=False)
+    delivery = relationship('Delivery', back_populates='order', uselist=False, foreign_keys=[delivery_id])
+
 
 
     # order_items = relationship('OrderItem', back_populates='order')
