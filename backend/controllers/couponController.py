@@ -13,7 +13,7 @@ class CouponController:
     def get_all_coupons(self):
         coupons = self.db_session.query(Coupon).all()
         return [
-        coupon.to_dict() if hasattr(coupon, 'to_dict') else coupon
+        coupon if hasattr(coupon, 'to_dict') else coupon
         for coupon in coupons
     ]
 

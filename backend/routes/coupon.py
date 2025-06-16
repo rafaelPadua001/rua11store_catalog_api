@@ -69,7 +69,7 @@ def create_coupon():
         )
         return jsonify({
             'message': 'Cupom criado com sucesso!',
-            'coupon': coupon.to_dict()
+            'coupon': coupon
         }), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
