@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 from models.order import Order
+from database import get_session
 orders_bp = Blueprint('order', __name__)
 
 @orders_bp.route('/get-orders', methods=['GET'])
@@ -11,7 +12,8 @@ def get_orders():
 @orders_bp.route('/get-order/<user_id>', methods=['GET'])
 def get_order_by_userId(user_id):
     user_id = user_id.lstrip('/')
-    order = Order.get_by_user_id(user_id)
+    session = get_session() 
+    order = Order.get_by_user_id(session, user_id)
     if order:
         return jsonify(order)
     else:
