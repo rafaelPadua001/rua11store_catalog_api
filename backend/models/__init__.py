@@ -8,6 +8,9 @@ from .delivery import Delivery
 from .order import Order
 from .user import User
 from .tokenBlockList import TokenBlocklist
+from .paymentProduct import PaymentProduct
+from .orderItem import OrderItem
+
 __all__ = [
     'UserProfile',
     'Page',
@@ -18,5 +21,7 @@ __all__ = [
     'Delivery',
     'Order',
     'User',
-    'TokeBlockList'
+    'TokeBlockList',
+    'PaymentProduct',
+    'OrderItem'
 ]

@@ -1,24 +1,14 @@
-# models/page.py
-class Page:
-    def __init__(self, id, name, title, content):
-        self.id = id
+from database import db
+
+class Page(db.Model):
+    __tablename__ = 'pages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False, unique=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=True)
+
+    def __init__(self, name, title, content):
         self.name = name
         self.title = title
         self.content = content
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "title": self.title,
-            "content": self.content
-        }
-
-    @classmethod
-    def from_row(cls, row):
-        return cls(
-            id=row["id"],
-            name=row["name"],
-            title=row["title"],
-            content=row["content"]
-        )
