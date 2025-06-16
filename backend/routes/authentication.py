@@ -12,6 +12,7 @@ import os
 from flask import send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from models.user import User
+from models.tokenBlockList import TokenBlocklist
 from database import db
 
 
@@ -230,38 +231,22 @@ def login():
 @jwt_required()
 def logout():
     try:
-        # Obtém os dados do token JWT
         jti = get_jwt()["jti"]
         user_id = get_jwt_identity()
         
-        print(f"Revogando token {jti} para usuário {user_id}")  # Debug
+        print(f"Revogando token {jti} para usuário {user_id}")
         
-        # Adiciona à blocklist no banco de dados
-        conn = create_connection()
-        cursor = conn.cursor()
+        # Verifica se o token já está na blocklist para evitar duplicidade
+        existing = TokenBlocklist.query.filter_by(jti=jti).first()
+        if existing:
+            return jsonify({"msg": "Token já revogado"}), 400
         
-        # Verifica se a tabela existe
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS token_blocklist (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                jti TEXT NOT NULL UNIQUE,
-                user_id INTEGER NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        
-        # Insere o token revogado
-        cursor.execute(
-            "INSERT INTO token_blocklist (jti, user_id) VALUES (?, ?)",
-            (jti, user_id)
-        )
-        conn.commit()
-        conn.close()
+        revoked_token = TokenBlocklist(jti=jti, user_id=user_id)
+        db.session.add(revoked_token)
+        db.session.commit()
         
         return jsonify({"msg": "Logout realizado com sucesso"}), 200
-        
-    except sqlite3.IntegrityError:
-        return jsonify({"error": "Token já revogado"}), 400
+
     except Exception as e:
-        print(f"Erro no logout: {str(e)}")
-        return jsonify({"error": "Falha no logout"}), 500
+        print(f"Erro ao revogar token: {str(e)}")
+        return jsonify({"error": "Erro interno"}), 500
