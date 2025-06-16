@@ -1,5 +1,5 @@
 from database import db
-
+from sqlalchemy.orm import relationship, Session
 class OrderItem(db.Model):
     __tablename__ = 'order_items'
 
@@ -9,6 +9,7 @@ class OrderItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     unit_price = db.Column(db.Float, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
+    order = relationship('Order', back_populates='order_items')
 
     def __init__(self, order_id, product_id, quantity, unit_price, total_price):
         self.order_id = order_id
