@@ -12,6 +12,7 @@ import os
 from flask import send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from models.user import User
+from models.userProfile import UserProfile, get_user_profile_by_user_id
 from models.tokenBlockList import TokenBlocklist
 from database import db
 
