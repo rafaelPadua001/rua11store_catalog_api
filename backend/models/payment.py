@@ -9,7 +9,7 @@ import requests
 import os
 import uuid
 import extensions
-from models.delivery import Delivery  # se você tiver essa model
+from models.delivery import Delivery # se você tiver essa model
 from models.order import Order
 from database import db 
 from models.orderItem import OrderItem
