@@ -75,7 +75,7 @@ class CategoryController:
 
         except Exception as e:
             print(f"Erro inesperado: {str(e)}")
-            return jsonify({"error": "Erro interno"}), 500
+            return jsonify({"error": f"Erro interno: {str(e)}"}), 500
 
     # @staticmethod
     def update_category(self,category_id):
