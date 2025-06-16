@@ -200,7 +200,6 @@ def uploaded_file(filename):
     return send_from_directory('uploads/avatars', filename)
 
 
-# Rota de login
 @auth_bp.route('/login', methods=["POST"])
 def login():
     data = request.json
@@ -209,27 +208,22 @@ def login():
 
     if not email or not password:
         return jsonify({"error": "E-mail e senha são obrigatórios"}), 400
-    
-    conn = create_connection()
-    cursor = conn.cursor()
 
-    # Note o uso de %s para placeholders no psycopg2
-    cursor.execute('SELECT id, name, email, password FROM users WHERE email = %s', (email,))
-    user = cursor.fetchone()
+    # Buscar o usuário usando SQLAlchemy ORM
+    user = User.query.filter_by(email=email).first()
 
     if user is None:
         return jsonify({"error": "Usuário não encontrado"}), 404
-    
-    # Verificar se a senha está correta (assumindo que 'user[3]' é a hash)
-    if not bcrypt.checkpw(password.encode('utf-8'), user[3].encode('utf-8')):
-        return jsonify({"error": "Senha incorreta"}), 401
-    
-    token = create_access_token(identity=str(user[0]))
 
-    cursor.close()
-    conn.close()
+    # Verificar a senha
+    if not bcrypt.check_password_hash(user.password, password):
+        return jsonify({"error": "Senha incorreta"}), 401
+
+    # Criar o token JWT
+    token = create_access_token(identity=str(user.id))
 
     return jsonify({"message": "Login realizado com sucesso!", "token": token}), 200
+
 
 # Rota de logout
 @auth_bp.route('/logout', methods=['POST'])
