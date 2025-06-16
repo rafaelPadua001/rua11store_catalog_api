@@ -11,7 +11,7 @@ def get_orders():
 @orders_bp.route('/get-order/<user_id>', methods=['GET'])
 def get_order_by_userId(user_id):
     user_id = user_id.lstrip('/')
-    order = Order.get_order_by_userId(user_id)
+    order = Order.get_by_user_id(user_id)
     if order:
         return jsonify(order)
     else:
