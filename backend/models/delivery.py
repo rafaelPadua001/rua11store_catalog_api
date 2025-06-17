@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 from database import db  # ou o local correto da sua instância SQLAlchemy
 from models.order import Order
 from models.orderItem import OrderItem
 from models.product import Product
+from models.payment import Payment
 
 class Delivery(db.Model):
     __tablename__ = 'delivery'
@@ -86,15 +87,16 @@ class Delivery(db.Model):
 
     @staticmethod
     def get_all():
-     
-        from models.payment import Payment
-
         deliveries = Delivery.query \
-            .join(Order, Delivery.id == Order.delivery_id) \
-            .outerjoin(OrderItem, Order.id == OrderItem.order_id) \
-            .outerjoin(Product, OrderItem.product_id == Product.id) \
-            .outerjoin(Payment, Order.payment_id == Payment.id) \
-            .order_by(Delivery.id.desc()).all()
+        .options(
+            joinedload(Delivery.order)
+                .joinedload(Order.items)
+                .joinedload(OrderItem.product),
+            joinedload(Delivery.order)
+                .joinedload(Order.payment)
+        ) \
+        .order_by(Delivery.id.desc()) \
+        .all()
 
         deliveries_dict = {}
 
