@@ -18,7 +18,7 @@ from models.paymentProduct import PaymentProduct
 
 class Payment(db.Model):
     __tablename__ = 'payments'
-    
+    id = Column(Integer, primary_key=True, autoincrement=True)
     payment_id = Column(String, primary_key=True)
     total_value = Column(Float, nullable=False)
     payment_date = Column(DateTime, default=datetime.utcnow)
@@ -33,9 +33,10 @@ class Payment(db.Model):
     # Relacionamentos (opcional)
     # orders = relationship("Order", back_populates="payment")
 
-    def __init__(self, payment_id, total_value, payment_date, payment_type,
+    def __init__(self,id,  payment_id, total_value, payment_date, payment_type,
                  cpf, email, status, usuario_id, products,
                  address=None, coupon_code=None, coupon_amount=None):
+        self.id = id
         self.payment_id = payment_id
         self.total_value = total_value
         self.payment_date = payment_date or datetime.now()
@@ -56,6 +57,7 @@ class Payment(db.Model):
 
     def as_dict(self):
         return {
+            'id': self.id,
             'payment_id': self.payment_id,
             'total_value': self.total_value,
             'payment_date': self.payment_date.isoformat(),
