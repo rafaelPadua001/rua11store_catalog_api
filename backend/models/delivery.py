@@ -31,7 +31,7 @@ class Delivery(db.Model):
     cpf = Column(String(20))
     melhorenvio_id = Column(String(100), unique=True)
     order_id = Column(Integer, ForeignKey('orders.id'), unique=True)  # Unique se for um para um
-    order = relationship('Order', back_populates='delivery', uselist=False, foreign_keys='Order.delivery_id')
+    order = relationship('Order', back_populates='delivery', uselist=False)
 
 
 
