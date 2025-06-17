@@ -80,9 +80,9 @@ class CreditCardPayment(PaymentStrategy):
                         "number": data.get("phone_number", "999999999")
                     },
                     "address": {
-                        "zip_code": data.get("zip_code", "00000-000"),
-                        "street_name": data.get("street_name", "Rua Exemplo"),
-                        "street_number": data.get("street_number", 123)
+                        "zip_code": data.get("address", {}).get("zip_code", "00000-000"),
+                        "street_name": data.get("address", {}).get("street", "Rua Exemplo"),
+                        "street_number": data.get("address", {}).get("number", 123)
                     }
                 }
             }
