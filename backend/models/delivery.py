@@ -93,7 +93,7 @@ class Delivery(db.Model):
             .join(Order, Delivery.id == Order.delivery_id) \
             .outerjoin(OrderItem, Order.id == OrderItem.order_id) \
             .outerjoin(Product, OrderItem.product_id == Product.id) \
-            .outerjoin(Payment, Order.payment_id == Payment.id) \
+            .outerjoin(Payment, Order.payment_id == Payment.payment_id) \
             .order_by(Delivery.id.desc()).all()
 
         deliveries_dict = {}
