@@ -73,18 +73,19 @@ class Payment(db.Model):
      
 
         try:
-            db.session.add(self)
-            db.session.flush()  # Garante que o pagamento esteja no banco
-
-            payment_id = self.payment_id
-            delivery_id = None
-
             try:
                 self.usuario_id = int(self.usuario_id)
             except ValueError:
                 print(f"usuario_id inválido: {self.usuario_id}")
                 db.session.rollback()
                 return
+            db.session.add(self)
+            db.session.flush()  # Garante que o pagamento esteja no banco
+
+            payment_id = self.payment_id
+            delivery_id = None
+
+          
 
             if self.address and self.products:
                 product = self.products[0]
