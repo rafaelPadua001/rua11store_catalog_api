@@ -18,7 +18,7 @@ from models.paymentProduct import PaymentProduct
 
 class Payment(db.Model):
     __tablename__ = 'payments'
-
+    
     payment_id = Column(String, primary_key=True)
     total_value = Column(Float, nullable=False)
     payment_date = Column(DateTime, default=datetime.utcnow)
