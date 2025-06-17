@@ -33,10 +33,9 @@ class Payment(db.Model):
     # Relacionamentos (opcional)
     # orders = relationship("Order", back_populates="payment")
 
-    def __init__(self,id,  payment_id, total_value, payment_date, payment_type,
+    def __init__(self,  payment_id, total_value, payment_date, payment_type,
                  cpf, email, status, usuario_id, products,
                  address=None, coupon_code=None, coupon_amount=None):
-        self.id = id
         self.payment_id = payment_id
         self.total_value = total_value
         self.payment_date = payment_date or datetime.now()
