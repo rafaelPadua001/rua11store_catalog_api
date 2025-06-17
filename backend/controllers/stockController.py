@@ -1,100 +1,89 @@
-import sqlite3
 from flask import jsonify, request
 from models.stock import Stock
-from controllers.productController import ProductController 
-
+from controllers.productController import ProductController
+from database import db  # sua instância do SQLAlchemy
 
 class StockController:
     @staticmethod
     def create_stock():
-        data = request.get_json() 
+        data = request.get_json()
         if not data:
             return jsonify({"error": "Dados inválidos"}), 400
 
-        stock_id = Stock.create(data)
-        return jsonify({"message": "Item criado com sucesso!", "id": stock_id}), 201
+        try:
+            stock = Stock(**data)  # supõe que as chaves batem com colunas do model
+            db.session.add(stock)
+            db.session.commit()
+            return jsonify({"message": "Item criado com sucesso!", "id": stock.id}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 500
 
     @staticmethod
     def get_stock():
-        stocks = Stock.get_all()
-        stocks_list = [row.to_dict() for row in stocks]  # CERTO
- 
+        stocks = Stock.query.all()
+        stocks_list = [stock.to_dict() for stock in stocks]  # to_dict deve estar no model
         return jsonify(stocks_list), 200
 
     @staticmethod
-    def get_stock_by_id(stock_id):  
-        stock = Stock.get_by_id(stock_id)
+    def get_stock_by_id(stock_id):
+        stock = Stock.query.get(stock_id)
         if stock:
-            return jsonify(stock), 200
-        
+            return jsonify(stock.to_dict()), 200
         return jsonify({"error": "Item não encontrado!"}), 404
 
     @staticmethod
     def update_stock(stock_id):
-        data = request.get_json()  
+        data = request.get_json()
         if not data:
             return jsonify({"error": "Dados inválidos"}), 400
 
-        updated = Stock.update(stock_id, data)
-        if updated:
-            return jsonify({"message": "Item atualizado com sucesso!"}), 200 
-
-        return jsonify({"error": "Item não encontrado"}), 404
-    
-    @staticmethod
-    def update_stock_quantity(product_id, quantity, conn=None):
-        """Atualiza a quantidade de um item do estoque"""
-        should_close = False
-        if conn is None:
-            conn = Stock.get_db_connection()
-            should_close = True
+        stock = Stock.query.get(stock_id)
+        if not stock:
+            return jsonify({"error": "Item não encontrado"}), 404
 
         try:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
+            for key, value in data.items():
+                setattr(stock, key, value)
+            db.session.commit()
+            return jsonify({"message": "Item atualizado com sucesso!"}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 500
 
-            cursor.execute(""" 
-                SELECT product_quantity, id FROM stock WHERE id_product = ?
-            """, (product_id,))
-            row = cursor.fetchone()
-
-            if row is None:
-                return False
-            
-            current_quantity = row['product_quantity']
-            new_quantity = current_quantity - quantity
-
-            if new_quantity < 0:
-                return {"error": "Quantidade insuficiente em estoque"}
-
-            cursor.execute(
-                "UPDATE stock SET product_quantity = ? WHERE id = ?",
-                (new_quantity, row['id'])
-            )
-
-            return {
-                "stock_id": row['id'],
-                "old_quantity": current_quantity,
-                "new_quantity": new_quantity
-            }
-        finally:
-            if should_close:
-                conn.close()
-
-
-            
     @staticmethod
-    def delete_stock(stock_id): 
-        print(stock_id)
-        stock_item = Stock.get_by_id(stock_id)
-        if not stock_item:
-            jsonify({"error": "Item não encontrado"}), 404
+    def update_stock_quantity(product_id, quantity):
+        stock = Stock.query.filter_by(id_product=product_id).first()
+        if not stock:
+            return jsonify({"error": "Item não encontrado"}), 404
 
-        #product_id = stock_item.product_id
-        
-        deleted = Stock.delete(stock_id)
-        if deleted:
-            # ProductController.delete_product(stock_id)
-            return jsonify({"message": "Item removido com sucesso"}), 200  
-        
-        return jsonify({"error": "Item não encontrado"}), 404
+        new_quantity = stock.product_quantity - quantity
+        if new_quantity < 0:
+            return jsonify({"error": "Quantidade insuficiente em estoque"}), 400
+
+        try:
+            stock.product_quantity = new_quantity
+            db.session.commit()
+            return jsonify({
+                "stock_id": stock.id,
+                "old_quantity": stock.product_quantity + quantity,
+                "new_quantity": new_quantity
+            }), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 500
+
+    @staticmethod
+    def delete_stock(stock_id):
+        stock = Stock.query.get(stock_id)
+        if not stock:
+            return jsonify({"error": "Item não encontrado"}), 404
+
+        try:
+            db.session.delete(stock)
+            db.session.commit()
+            # ProductController.delete_product(stock.product_id) # se quiser deletar produto também
+            return jsonify({"message": "Item removido com sucesso"}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 500
