@@ -79,11 +79,18 @@ class Payment(db.Model):
             payment_id = self.payment_id
             delivery_id = None
 
+            try:
+                self.usuario_id = int(self.usuario_id)
+            except ValueError:
+                print(f"usuario_id inválido: {self.usuario_id}")
+                db.session.rollback()
+                return
+
             if self.address and self.products:
                 product = self.products[0]
                 delivery = Delivery(
                     product_id=product['product_id'],
-                    user_id=self.usuario_id,
+                    user_id=int(self.usuario_id),
                     recipient_name=self.address.get('recipient_name', ''),
                     street=self.address.get('street', ''),
                     number=self.address.get('number', ''),
@@ -113,7 +120,7 @@ class Payment(db.Model):
                     print(f"Erro ao atualizar o estoque para {product_id}: {result['error']}")
 
             order = Order(
-                user_id=self.usuario_id,
+                user_id=int(self.usuario_id),
                 payment_id=payment_id,
                 delivery_id=delivery_id,
                 shipment_info=self.address.get('zip_code', '') if self.address else '',
