@@ -9,3 +9,4 @@ class Notification(db.Model):
     message = db.Column(db.String, nullable=False)
     is_read = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_global = db.Column(db.Boolean, default=False, nullable=False)
