@@ -84,9 +84,10 @@ class CreditCardPayment(PaymentStrategy):
                         "street_name": data.get("address", {}).get("street", "Rua Exemplo"),
                         "street_number": str(data.get("address", {}).get("number", "123")),
                         "neighborhood": data.get("address", {}).get("bairro", "Centro"),
-                        "city": data.get("address", {}).get("city", "Cidade Exemplo"),
-                        "federal_unit": data.get("address", {}).get("state", "DF"),
-                        "complement": data.get("address", {}).get("complement", "")
+                        "city_name": data.get("address", {}).get("city", "Cidade Exemplo"),
+                        "state": data.get("address", {}).get("state", "DF"),
+                        "neighborhood": data.get("address", {}).get("bairro", "Bairro Exemplo"),
+                        "comment": data.get("address", {}).get("complement", "")
                     }
                 }
             }
