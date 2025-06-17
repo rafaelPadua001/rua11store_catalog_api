@@ -11,6 +11,7 @@ class OrderItem(db.Model):
     unit_price = db.Column(db.Float, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
     order = relationship('Order', back_populates='items')
+    product = relationship('Product', backref='order_items')
 
     def __init__(self, order_id, product_id, quantity, unit_price, total_price):
         self.order_id = order_id
