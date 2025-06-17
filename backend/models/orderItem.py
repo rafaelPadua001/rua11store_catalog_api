@@ -1,5 +1,6 @@
 from database import db
 from sqlalchemy.orm import relationship, Session
+
 class OrderItem(db.Model):
     __tablename__ = 'order_items'
 
@@ -17,3 +18,13 @@ class OrderItem(db.Model):
         self.quantity = quantity
         self.unit_price = unit_price
         self.total_price = total_price
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'order_id': self.order_id,
+            'product_id': self.product_id,
+            'quantity': self.quantity,
+            'unit_price': self.unit_price,
+            'total_price': self.total_price,
+        }

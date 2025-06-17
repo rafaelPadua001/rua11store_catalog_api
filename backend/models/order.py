@@ -1,14 +1,16 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship, Session
+from sqlalchemy.dialects.postgresql import UUID
 from database import db  # Supondo que você tenha Base e engine já configurados no db.py
+import uuid
 
 
 class Order(db.Model):
     __tablename__ = 'orders'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, nullable=False)
+    user_id = Column(UUID(as_uuid=True), nullable=False, default=uuid.uuid4)
     payment_id = Column(Integer, nullable=True)
     delivery_id = Column(Integer, ForeignKey('delivery.id'), nullable=True)
     shipment_info = Column(Text, nullable=True)
