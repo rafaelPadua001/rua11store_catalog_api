@@ -29,12 +29,16 @@ class Delivery(db.Model):
     length = Column(Float)
     weight = Column(Float)
     cpf = Column(String(20))
+    status = Column(String(50))
+    service_status = Column(String(50))
+    state_abbr = Column(String(10))
+    company_name = Column(String(100))
+    tracking_link = Column(String(255))
+
     melhorenvio_id = Column(String(100), unique=True)
     order_id = Column(Integer, ForeignKey('orders.id'), unique=True)  # Unique se for um para um
     order = relationship('Order', back_populates='delivery', uselist=False)
-
-
-
+    
     def to_dict(self):
         return {
             "id": self.id,
