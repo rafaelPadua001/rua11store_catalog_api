@@ -36,7 +36,7 @@ class Delivery(db.Model):
     tracking_link = Column(String(255))
 
     melhorenvio_id = Column(String(100), unique=True)
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id')) # Unique se for um para um
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id') # Unique se for um para um
     order = relationship(
     'Order',
     back_populates='delivery',
