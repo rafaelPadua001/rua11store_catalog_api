@@ -73,12 +73,6 @@ class Payment(db.Model):
 
     def save(self):
         try:
-            # try:
-            #     self.usuario_id = int(self.usuario_id)
-            # except ValueError:
-            #     print(f"usuario_id inválido: {self.usuario_id}")
-            #     db.session.rollback()
-            #     return
             db.session.add(self)
             db.session.flush()  # Garante que o pagamento esteja no banco
 
