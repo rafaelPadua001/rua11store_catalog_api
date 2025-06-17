@@ -59,7 +59,8 @@ def update_payment_status(payment_id):
         return jsonify({
             "error": str(e)
         }), 500
-    
+
+@staticmethod    
 @payment_bp.route("/payment/chargeback/<int:payment_id>", methods=["POST"])
 def chargeback_payment(payment_id):
     payment_data = PaymentController.payment_chargeback(payment_id)
@@ -69,6 +70,7 @@ def chargeback_payment(payment_id):
     else:
         return jsonify({"error": "Pagamento não encontrado"}), 404
 
+@staticmethod
 @payment_bp.route("/payment/refund/<int:payment_id>", methods=["POST"])
 def refund_payment(payment_id):
     data = request.get_json()
