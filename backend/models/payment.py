@@ -76,7 +76,7 @@ class Payment(db.Model):
             db.session.add(self)
             db.session.flush()  # Garante que o pagamento esteja no banco
 
-            payment_id = self.payment_id
+            payment_id = self.id
             delivery_id = None
 
           
