@@ -185,7 +185,7 @@ class Payment(db.Model):
             db.session.rollback()
 
     @staticmethod
-    def update_status(self, payment_id, status):
+    def update_status(payment_id, status):
         try:
             payment = Payment.query.filter_by(payment_id=payment_id).first()
             if payment:
@@ -245,7 +245,7 @@ class Payment(db.Model):
         }
         try:
             response = requests.post(url, headers=headers, json=data)
-            if response.status_code == 200:
+            if response.status_code == 201:
                 return response.json()
             else:
                 raise Exception(f"Erro {response.status_code}: {response.text}")
