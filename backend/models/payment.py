@@ -129,7 +129,7 @@ class Payment(db.Model):
             create_notification(
                 message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
                 is_global=True,
-                conn=db.session  # SQLAlchemy session
+                session=db.session
             )
 
             socketio.emit('new_notification', {

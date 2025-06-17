@@ -2,7 +2,8 @@ from models.notification import Notification
 from database import db
 from datetime import datetime
 
-def create_notification(user_id=None, message="", is_global=False):
+def create_notification(user_id=None, message="", is_global=False, session=None):
+    session = session or db.session
     try:
         notification = Notification(
             user_id=user_id,
@@ -11,11 +12,11 @@ def create_notification(user_id=None, message="", is_global=False):
             created_at=datetime.utcnow(),
             is_global=is_global
         )
-        db.session.add(notification)
-        db.session.commit()
+        session.add(notification)
+        session.commit()
     except Exception as e:
         print(f"Erro ao salvar notificação: {e}")
-        db.session.rollback()
+        session.rollback()
 
 def get_unread_notifications(user_id):
     notifications = Notification.query.filter(
