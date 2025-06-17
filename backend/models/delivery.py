@@ -37,7 +37,13 @@ class Delivery(db.Model):
 
     melhorenvio_id = Column(String(100), unique=True)
     order_id = Column(Integer, ForeignKey('orders.id'), unique=True)  # Unique se for um para um
-    order = relationship('Order', back_populates='delivery', uselist=False)
+    order = relationship(
+    'Order',
+    back_populates='delivery',
+    uselist=False,
+    foreign_keys=[order_id]  # aqui é o campo da tabela Delivery que faz o link
+)
+
     
     def to_dict(self):
         return {
