@@ -73,19 +73,23 @@ class CreditCardPayment(PaymentStrategy):
                     for item in data.get("products", [])
                 ],
                 "payer": {
-                    "first_name": data.get("payer_first_name", "Test"),
-                    "last_name": data.get("payer_last_name", "User"),
-                    "phone": {
-                        "area_code": data.get("area_code", "11"),
-                        "number": data.get("phone_number", "999999999")
-                    },
-                    "address": {
-                        "zip_code": data.get("address", {}).get("zip_code", "00000-000"),
-                        "street_name": data.get("address", {}).get("street", "Rua Exemplo"),
-                        "street_number": data.get("address", {}).get("number", 123)
-                    }
+                "first_name": data.get("payer_first_name", "Test"),
+                "last_name": data.get("payer_last_name", "User"),
+                "phone": {
+                    "area_code": data.get("area_code", "11"),
+                    "number": data.get("phone_number", "999999999")
+                },
+                "address": {
+                    "zip_code": data.get("address", {}).get("zip_code", "00000-000"),
+                    "street_name": data.get("address", {}).get("street", "Rua Exemplo"),
+                    "street_number": data.get("address", {}).get("number", 123),
+                    "city_name": data.get("address", {}).get("city", "Cidade Exemplo"),  # Ajustado
+                    "state": data.get("address", {}).get("federal_unit", "Estado Exemplo"),  # Ajustado
+                    "neighborhood": data.get("address", {}).get("bairro", "Bairro Exemplo"),  # talvez mesmo nome
+                    "comment": data.get("address", {}).get("complement", ""),  # Ajustado
                 }
             }
+        }
             
         }
 
