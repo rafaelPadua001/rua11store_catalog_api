@@ -11,7 +11,7 @@ class Order(db.Model):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(UUID(as_uuid=True), nullable=False, default=uuid.uuid4)
-    payment_id = Column(Integer, nullable=True)
+    payment_id = db.Column(db.Integer, db.ForeignKey('payments.id'))
     delivery_id = Column(Integer, ForeignKey('delivery.id'), nullable=True)
     shipment_info = Column(Text, nullable=True)
     total_amount = Column(Float, nullable=False)
@@ -20,6 +20,7 @@ class Order(db.Model):
 
     items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
     delivery = relationship('Delivery', back_populates='order', uselist=False, foreign_keys=[delivery_id])
+    payment = relationship('Payment', backref='order', uselist=False)
 
 
 
