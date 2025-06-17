@@ -64,11 +64,11 @@ class CreditCardPayment(PaymentStrategy):
                 "items": [
                     {
                         "id": item.get("id", "SKU123"),
-                        "title": item.get("title", "Produto"),
+                        "title": item.get("product_name", "Produto"),
                         "description": item.get("description", "Produto comprado"),
-                        "category_id": item.get("category", "services"),
+                        "category_id": str(item.get("category", "services")),
                         "quantity": item.get("quantity", 1),
-                        "unit_price": float(item.get("unit_price", data["total"]))  # fallback para valor total
+                        "unit_price": float(item.get("price", data["total"]))  # fallback para valor total
                     }
                     for item in data.get("products", [])
                 ],
@@ -80,9 +80,13 @@ class CreditCardPayment(PaymentStrategy):
                         "number": data.get("phone_number", "999999999")
                     },
                     "address": {
-                        "zip_code": data.get("zip_code", "00000-000"),
-                        "street_name": data.get("street_name", "Rua Exemplo"),
-                        "street_number": data.get("street_number", 123)
+                        "zip_code": data.get("address", {}).get("zip_code", "00000-000"),
+                        "street_name": data.get("address", {}).get("street", "Rua Exemplo"),
+                        "street_number": str(data.get("address", {}).get("number", "123")),
+                        "neighborhood": data.get("address", {}).get("bairro", "Centro"),
+                        "city": data.get("address", {}).get("city", "Cidade Exemplo"),
+                        "federal_unit": data.get("address", {}).get("state", "DF"),
+                        "complement": data.get("address", {}).get("complement", "")
                     }
                 }
             }
@@ -98,7 +102,7 @@ class CreditCardPayment(PaymentStrategy):
                 total_value=result.get("transaction_amount"),
                 payment_date=result.get("date_approved"),
                 payment_type="crédito",
-                cpf=data["payer_cpf"],
+                cpf=data["payer_cpf"].replace(".", "").replace("-", "").strip(),
                 email=data["payer_email"],
                 status=result["status"],
                 usuario_id=data["userId"],
