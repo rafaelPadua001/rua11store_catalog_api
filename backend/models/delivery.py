@@ -4,7 +4,7 @@ from database import db  # ou o local correto da sua instância SQLAlchemy
 from models.order import Order
 from models.orderItem import OrderItem
 from models.product import Product
-from models.payment import Payment
+
 
 class Delivery(db.Model):
     __tablename__ = 'delivery'
@@ -87,6 +87,7 @@ class Delivery(db.Model):
 
     @staticmethod
     def get_all():
+        from models.payment import Payment
         deliveries = Delivery.query \
         .options(
             joinedload(Delivery.order)
