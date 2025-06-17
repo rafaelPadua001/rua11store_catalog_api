@@ -28,7 +28,7 @@ class Delivery(db.Model):
     height = Column(Float)
     length = Column(Float)
     weight = Column(Float)
-    cpf = Column(String(20))
+    # cpf = Column(String(20))
     melhorenvio_id = Column(String(100), unique=True)
     order_id = Column(Integer, ForeignKey('orders.id'), unique=True)  # Unique se for um para um
     order = relationship('Order', back_populates='delivery', uselist=False, foreign_keys='Order.delivery_id')
@@ -56,7 +56,7 @@ class Delivery(db.Model):
             "height": self.height,
             "length": self.length,
             "weight": self.weight,
-            "cpf": self.cpf,
+           # "cpf": self.cpf,
             "melhorenvio_id": self.melhorenvio_id,
             "order_id": self.order_id
         }
