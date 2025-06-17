@@ -43,7 +43,12 @@ class Order(db.Model):
 
     @staticmethod
     def get_by_user_id(user_id):
-        orders = db.session.query(Order).filter_by(user_id=user_id).order_by(Order.id.desc()).all()
+        try:
+            user_id_int = int(user_id)
+        except ValueError:
+            return None  # Ou talvez lançar um HTTP 400 se quiser validar entrada errada
+
+        orders = db.session.query(Order).filter_by(user_id=user_id_int).order_by(Order.id.desc()).all()
         return [order.to_dict() for order in orders] if orders else None
 
     def save(self, session: Session):
