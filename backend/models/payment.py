@@ -14,6 +14,8 @@ from models.order import Order
 from database import db 
 from models.orderItem import OrderItem
 from models.paymentProduct import PaymentProduct
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 
 class Payment(db.Model):
@@ -26,7 +28,7 @@ class Payment(db.Model):
     cpf = Column(String)
     email = Column(String)
     status = Column(String)
-    usuario_id = Column(Integer, nullable=False)
+    usuario_id = db.Column(UUID(as_uuid=True), nullable=False, default=uuid.uuid4)
     coupon_code = Column(String, nullable=True)
     coupon_amount = Column(Float, nullable=True)
 
@@ -70,15 +72,13 @@ class Payment(db.Model):
         }
 
     def save(self):
-     
-
         try:
-            try:
-                self.usuario_id = int(self.usuario_id)
-            except ValueError:
-                print(f"usuario_id inválido: {self.usuario_id}")
-                db.session.rollback()
-                return
+            # try:
+            #     self.usuario_id = int(self.usuario_id)
+            # except ValueError:
+            #     print(f"usuario_id inválido: {self.usuario_id}")
+            #     db.session.rollback()
+            #     return
             db.session.add(self)
             db.session.flush()  # Garante que o pagamento esteja no banco
 
