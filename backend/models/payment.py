@@ -19,7 +19,7 @@ from models.paymentProduct import PaymentProduct
 class Payment(db.Model):
     __tablename__ = 'payments'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    payment_id = Column(String, primary_key=True)
+    payment_id = Column(String, unique=True, nullable=False) 
     total_value = Column(Float, nullable=False)
     payment_date = Column(DateTime, default=datetime.utcnow)
     payment_type = Column(String)
