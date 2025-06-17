@@ -41,7 +41,7 @@ class MelhorEnvioService:
                 "postal_code": zipcode_destiny
             },
             "products": products,
-            "services": [],  # get all carrier
+            "services": "",  # get all carrier
             "options": {
                 "receipt": False,
                 "own_hand": False,
