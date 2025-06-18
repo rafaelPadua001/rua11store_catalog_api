@@ -95,6 +95,6 @@ class Product(db.Model):
             "height": self.height,
             "weight": self.weight,
             "length": self.length,
-            "quantity": self.quantity,
             "user_id": self.user_id
         }
+
