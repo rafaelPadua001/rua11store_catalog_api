@@ -116,7 +116,7 @@
                                     <strong>Status:</strong>
                                     <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{
                                         cartItems.data.status
-                                        }}</strong>
+                                    }}</strong>
                                     <strong v-else> {{ cartItems.data.status }}</strong>
                                 </v-col>
                                 <v-col cols="12" sm="6">
@@ -281,11 +281,13 @@ export default {
 
                     if (firstOrder.products && firstOrder.products.length > 0) {
                         // Mapeando os produtos no formato que a API espera
-                        item.products = firstOrder.products.map(product => ({
-                            name: product.name,
-                            price: product.price,
-                            quantity: product.quantity
-                        }));
+                        item.products = item.orders.flatMap(order =>
+                            order.products.map(product => ({
+                                name: product.name,
+                                price: product.price,
+                                quantity: product.quantity
+                            }))
+                        );
                     }
                 }
 
