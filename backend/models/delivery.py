@@ -124,10 +124,10 @@ class Delivery(db.Model):
                 'order_total': None,
                 'order_date': None,
                 'status': None,
-                'products': []
+                'products': [],
+                'orders': []  # <<< ESSENCIAL
             }
 
-            
             orders = Order.query.filter(Order.delivery_id == d.id).all()
             for order in orders:
                 order_data = {
@@ -153,3 +153,5 @@ class Delivery(db.Model):
                     })
 
                 deliveries_dict[d.id]['orders'].append(order_data)
+
+        return list(deliveries_dict.values())
