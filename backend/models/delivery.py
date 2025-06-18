@@ -61,7 +61,7 @@ class Delivery(db.Model):
             "height": self.height,
             "length": self.length,
             "weight": self.weight,
-           # "cpf": self.cpf,
+            "cpf": self.cpf,
             "melhorenvio_id": self.melhorenvio_id,
             "order_id": self.order_id
         }
