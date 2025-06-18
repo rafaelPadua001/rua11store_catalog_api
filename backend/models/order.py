@@ -21,7 +21,8 @@ class Order(db.Model):
     items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
     delivery = db.relationship('Delivery', primaryjoin="Order.id==foreign(Delivery.order_id)", backref='order', uselist=False)
     
-    payment = relationship('Payment', backref='order', uselist=False)
+    payment = relationship('Payment', back_populates='orders', uselist=False)
+
 
 
 
