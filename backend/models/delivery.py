@@ -90,80 +90,80 @@ class Delivery(db.Model):
             print(f"Erro ao atualizar entrega: {e}")
             return False
 
-   @staticmethod
-def get_all():
-    deliveries = Delivery.query.order_by(Delivery.id.desc()).all()
+    @staticmethod
+    def get_all():
+        deliveries = Delivery.query.order_by(Delivery.id.desc()).all()
 
-    deliveries_dict = {}
+        deliveries_dict = {}
 
-    for d in deliveries:
-        print(f"Delivery ID {d.id} - Width: {d.width} | Weight: {d.weight}")
-        deliveries_dict[d.id] = {
-            'id': d.id,
-            'recipient_name': d.recipient_name,
-            'street': d.street,
-            'number': d.number,
-            'complement': d.complement,
-            'city': d.city,
-            'state': d.state,
-            'zip_code': d.zip_code,
-            'country': d.country,
-            'phone': d.phone,
-            'bairro': d.bairro,
-            'total_value': d.total_value,
-            'width': d.width,
-            'height': d.height,
-            'length': d.length,
-            'weight': d.weight,
-            'melhorenvio_id': d.melhorenvio_id,
-            'order_id': d.order_id,  # string, não relacionamento
-            'user_id': None,
-            'payment_id': None,
-            'cpf': None,
-            'email': None,
-            'order_total': None,
-            'order_date': None,
-            'status': None,
-            'products': [],
-            'orders': []  # <<< ESSENCIAL
-        }
-
-        orders = Order.query.filter(Order.delivery_id == d.id).options(db.joinedload(Order.payment)).all()
-
-        # Se houver pedidos, pega o primeiro para preencher os campos principais da entrega
-        if orders:
-            first_order = orders[0]
-            deliveries_dict[d.id]['user_id'] = first_order.user_id
-            deliveries_dict[d.id]['payment_id'] = first_order.payment_id
-            deliveries_dict[d.id]['cpf'] = first_order.payment.cpf if first_order.payment else None
-            deliveries_dict[d.id]['email'] = first_order.payment.email if first_order.payment else None
-            deliveries_dict[d.id]['order_total'] = first_order.total_amount
-            deliveries_dict[d.id]['order_date'] = first_order.order_date.isoformat() if first_order.order_date else None
-            deliveries_dict[d.id]['status'] = first_order.status
-
-        for order in orders:
-            order_data = {
-                'order_id': order.id,
-                'user_id': order.user_id,
-                'payment_id': order.payment_id,
-                'order_total': order.total_amount,
-                'order_date': order.order_date.isoformat() if order.order_date else None,
-                'cpf': order.payment.cpf if order.payment else None,
-                'email': order.payment.email if order.payment else None,
-                'status': order.status,
-                'products': []
+        for d in deliveries:
+            print(f"Delivery ID {d.id} - Width: {d.width} | Weight: {d.weight}")
+            deliveries_dict[d.id] = {
+                'id': d.id,
+                'recipient_name': d.recipient_name,
+                'street': d.street,
+                'number': d.number,
+                'complement': d.complement,
+                'city': d.city,
+                'state': d.state,
+                'zip_code': d.zip_code,
+                'country': d.country,
+                'phone': d.phone,
+                'bairro': d.bairro,
+                'total_value': d.total_value,
+                'width': d.width,
+                'height': d.height,
+                'length': d.length,
+                'weight': d.weight,
+                'melhorenvio_id': d.melhorenvio_id,
+                'order_id': d.order_id,  # string, não relacionamento
+                'user_id': None,
+                'payment_id': None,
+                'cpf': None,
+                'email': None,
+                'order_total': None,
+                'order_date': None,
+                'status': None,
+                'products': [],
+                'orders': []  # <<< ESSENCIAL
             }
 
-            for item in order.items:
-                order_data['products'].append({
-                    'product_id': item.product_id,
-                    'name': item.product.name if item.product else None,
-                    'description': item.product.description if item.product else None,
-                    'image': item.product.image_path if item.product else None,
-                    'price': item.unit_price,
-                    'quantity': item.quantity
-                })
+            orders = Order.query.filter(Order.delivery_id == d.id).options(db.joinedload(Order.payment)).all()
 
-            deliveries_dict[d.id]['orders'].append(order_data)
+            # Se houver pedidos, pega o primeiro para preencher os campos principais da entrega
+            if orders:
+                first_order = orders[0]
+                deliveries_dict[d.id]['user_id'] = first_order.user_id
+                deliveries_dict[d.id]['payment_id'] = first_order.payment_id
+                deliveries_dict[d.id]['cpf'] = first_order.payment.cpf if first_order.payment else None
+                deliveries_dict[d.id]['email'] = first_order.payment.email if first_order.payment else None
+                deliveries_dict[d.id]['order_total'] = first_order.total_amount
+                deliveries_dict[d.id]['order_date'] = first_order.order_date.isoformat() if first_order.order_date else None
+                deliveries_dict[d.id]['status'] = first_order.status
 
-    return list(deliveries_dict.values())
+            for order in orders:
+                order_data = {
+                    'order_id': order.id,
+                    'user_id': order.user_id,
+                    'payment_id': order.payment_id,
+                    'order_total': order.total_amount,
+                    'order_date': order.order_date.isoformat() if order.order_date else None,
+                    'cpf': order.payment.cpf if order.payment else None,
+                    'email': order.payment.email if order.payment else None,
+                    'status': order.status,
+                    'products': []
+                }
+
+                for item in order.items:
+                    order_data['products'].append({
+                        'product_id': item.product_id,
+                        'name': item.product.name if item.product else None,
+                        'description': item.product.description if item.product else None,
+                        'image': item.product.image_path if item.product else None,
+                        'price': item.unit_price,
+                        'quantity': item.quantity
+                    })
+
+                deliveries_dict[d.id]['orders'].append(order_data)
+
+        return list(deliveries_dict.values())
