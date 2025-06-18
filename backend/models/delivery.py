@@ -142,7 +142,8 @@ class Delivery(db.Model):
                 if order.payment:
                     deliveries_dict[d.id]['cpf'] = order.payment.cpf
                     deliveries_dict[d.id]['email'] = order.payment.email
-            
+                    deliveries_dict[d.status]['status'] = order.payment.status
+                    
                 for item in order.items:
                     deliveries_dict[d.id]['products'].append({
                         'product_id': item.product_id,
