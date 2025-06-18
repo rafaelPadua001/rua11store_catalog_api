@@ -19,12 +19,7 @@ class Order(db.Model):
     status = Column(String, nullable=True)
 
     items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
-    delivery = relationship(
-        'Delivery',
-        back_populates='order',
-        uselist=False,
-        foreign_keys='Delivery.order_id'  # <-- Importante: dizer qual campo do outro lado referencia
-    )
+    delivery = db.relationship('Delivery', primaryjoin="Order.id==foreign(Delivery.order_id)", backref='order', uselist=False)
     
     payment = relationship('Payment', backref='order', uselist=False)
 
