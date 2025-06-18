@@ -33,7 +33,8 @@ class Payment(db.Model):
     coupon_amount = Column(Float, nullable=True)
 
     # Relacionamentos (opcional)
-    # orders = relationship("Order", back_populates="payment")
+    orders = relationship('Order', back_populates='payment')
+
 
     def __init__(self,  payment_id, total_value, payment_date, payment_type,
                  cpf, email, status, usuario_id, products,
