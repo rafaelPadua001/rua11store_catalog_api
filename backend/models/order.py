@@ -19,10 +19,10 @@ class Order(db.Model):
     status = Column(String, nullable=True)
 
     items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
+    #product = relationship('Product') 
     delivery = db.relationship('Delivery', primaryjoin="Order.id==foreign(Delivery.order_id)", backref='order', uselist=False)
-    
     payment = relationship('Payment', back_populates='orders', uselist=False)
-
+    
 
 
 
@@ -38,7 +38,16 @@ class Order(db.Model):
             "order_date": self.order_date.isoformat() if self.order_date else None,
             "status": self.status,
             "total_amount": self.total_amount,
-            "items": [item.to_dict() for item in self.items]
+            'products': [
+                {
+                    'name': item.product.name,
+                    'description': item.product.description,
+                    'quantity': item.quantity,
+                    'unit_price': item.product.price,
+                    'total_price': item.total_price
+                }
+                for item in self.items if item.product  # Para garantir que o relacionamento existe
+            ]
         }
 
     @staticmethod
