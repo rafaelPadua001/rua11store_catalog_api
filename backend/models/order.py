@@ -12,7 +12,7 @@ class Order(db.Model):
     id = Column(Integer, primary_key=True)
     user_id = Column(UUID(as_uuid=True), nullable=False, default=uuid.uuid4)
     payment_id = db.Column(db.Integer, db.ForeignKey('payments.id'))
-    delivery_id = Column(Integer, ForeignKey('delivery.id'), nullable=True)
+    delivery_id = Column(Integer, ForeignKey('delivery.id'))
     shipment_info = Column(Text, nullable=True)
     total_amount = Column(Float, nullable=False)
     order_date = Column(DateTime, default=datetime.utcnow)
