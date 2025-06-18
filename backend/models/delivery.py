@@ -127,11 +127,9 @@ class Delivery(db.Model):
                 'products': []
             }
 
-            # Aqui você poderia tentar buscar Order se quiser e se fizer sentido
-            # mas só funciona se conseguir mapear o d.order_id para o Order.id
-
+            
             # Exemplo (não vai funcionar se tipos não baterem):
-            order = Order.query.filter(Order.delivery_id == d.id).first()
+            order = Order.query.filter(Order.delivery_id == d.id).all()
             if order:
                 deliveries_dict[d.id]['user_id'] = order.user_id
                 deliveries_dict[d.id]['payment_id'] = order.payment_id
