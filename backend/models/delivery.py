@@ -129,7 +129,6 @@ class Delivery(db.Model):
             }
 
             orders = Order.query.filter(Order.delivery_id == d.id).options(db.joinedload(Order.payment)).all()
-
             for order in orders:
                 order_data = {
                     'order_id': order.id,
@@ -139,7 +138,7 @@ class Delivery(db.Model):
                     'order_date': order.order_date,
                     'cpf': order.payment.cpf if order.payment else None,
                     'email': order.payment.email if order.payment else None,
-                    'status': order.status,
+                    'status': order.status,  # <<< Puxando status da tabela orders
                     'products': []
                 }
 
@@ -154,5 +153,6 @@ class Delivery(db.Model):
                     })
 
                 deliveries_dict[d.id]['orders'].append(order_data)
+
 
         return list(deliveries_dict.values())
