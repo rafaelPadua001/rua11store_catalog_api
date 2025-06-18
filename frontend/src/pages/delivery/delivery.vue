@@ -281,12 +281,19 @@ export default {
             item.orders.forEach(order => {
                 if (order.products && order.products.length > 0) {
                     order.products.forEach(product => {
-                        if (product.name && typeof product.price === 'number' && typeof product.quantity === 'number') {
+                        // Checa se name, price e quantity existem
+                        if (
+                            product.name &&
+                            typeof product.price === 'number' &&
+                            typeof product.quantity === 'number'
+                        ) {
                             allProducts.push({
                                 name: product.name,
                                 price: product.price,
                                 quantity: product.quantity
                             });
+                        } else {
+                            console.warn('Produto inválido ignorado:', product);
                         }
                     });
                 }
@@ -309,9 +316,6 @@ export default {
             this.isPaymentButtonPayTagDisabled = false;
             this.isCheckitemButton = true;
 
-            // Se quiser adicionar o item no array de envios
-            // this.shipment.push(item);
-
             window.alert('Item adicionado ao carrinho do Melhor Envio');
         } else {
             window.alert('Algo deu errado. Por favor, tente novamente.');
@@ -321,6 +325,7 @@ export default {
         window.alert('Erro ao criar envio. Detalhes no console.');
     }
 },
+
 
         async checkItemInCart(item) {
             try {
