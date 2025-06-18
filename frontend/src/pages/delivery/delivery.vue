@@ -272,58 +272,55 @@ export default {
             }
         },
         async shipmentCreate(item) {
-            try {
-                console.log('Item antes:', item);
+    try {
+        console.log('Item antes:', item);
 
-                // Montar o array 'products' com os campos obrigatórios
-                let allProducts = [];
+        let allProducts = [];
 
-                if (item.orders && item.orders.length > 0) {
-                    item.orders.forEach(order => {
-                        if (order.products && order.products.length > 0) {
-                            order.products.forEach(product => {
-                                // Só inclui se os campos obrigatórios existirem
-                                if (product.name && product.price !== null && product.quantity !== null) {
-                                    allProducts.push({
-                                        name: product.name,
-                                        price: product.price,
-                                        quantity: product.quantity
-                                    });
-                                }
+        if (item.orders && item.orders.length > 0) {
+            item.orders.forEach(order => {
+                if (order.products && order.products.length > 0) {
+                    order.products.forEach(product => {
+                        if (product.name && typeof product.price === 'number' && typeof product.quantity === 'number') {
+                            allProducts.push({
+                                name: product.name,
+                                price: product.price,
+                                quantity: product.quantity
                             });
                         }
                     });
                 }
+            });
+        }
 
-                if (allProducts.length === 0) {
-                    console.error('Nenhum produto válido encontrado.');
-                    return window.alert('Erro: Nenhum produto com name, price e quantity encontrado.');
-                }
+        if (allProducts.length === 0) {
+            return window.alert('Erro: Nenhum produto com name, price e quantity válido encontrado.');
+        }
 
-                // Adiciona ao item antes do envio
-                item.products = allProducts;
+        item.products = allProducts;
 
-                console.log('Payload final antes do envio:', item);
+        console.log('Payload final antes do envio:', item);
 
-                const response = await api.post('/melhorEnvio/shipmentCreate', item);
+        const response = await api.post('/melhorEnvio/shipmentCreate', item);
 
-                if (response.data.message === 'Envio criado com sucesso. Aguarde pagamento.') {
-                    const shipmentId = response.data.shipment_id;
-                    item.melhorenvio_id = shipmentId;
+        if (response.data.message === 'Envio criado com sucesso. Aguarde pagamento.') {
+            item.melhorenvio_id = response.data.shipment_id;
 
-                    this.isPaymentButtonPayTagDisabled = false;
-                    this.isCheckitemButton = true;
-                    this.shipment = [...this.shipment];
+            this.isPaymentButtonPayTagDisabled = false;
+            this.isCheckitemButton = true;
 
-                    return window.alert('Item adicionado ao carrinho do Melhor Envio');
-                } else {
-                    window.alert('Algo deu errado. Por favor, tente novamente.');
-                }
-            } catch (error) {
-                console.log('Erro ao criar envio:', error.response ? error.response.data : error);
-                window.alert('Erro ao criar envio. Detalhes no console.');
-            }
-        },
+            // Se quiser adicionar o item no array de envios
+            // this.shipment.push(item);
+
+            window.alert('Item adicionado ao carrinho do Melhor Envio');
+        } else {
+            window.alert('Algo deu errado. Por favor, tente novamente.');
+        }
+    } catch (error) {
+        console.error('Erro ao criar envio:', error.response?.data || error.message || error);
+        window.alert('Erro ao criar envio. Detalhes no console.');
+    }
+},
 
         async checkItemInCart(item) {
             try {
