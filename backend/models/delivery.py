@@ -139,7 +139,7 @@ class Delivery(db.Model):
                     'order_date': order.order_date,
                     'cpf': order.payment.cpf if order.payment else None,
                     'email': order.payment.email if order.payment else None,
-                    'status': order.payment.status if order.payment else None,
+                    'status': order.status,
                     'products': []
                 }
 
