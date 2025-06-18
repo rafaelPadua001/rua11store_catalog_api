@@ -92,60 +92,64 @@ class Delivery(db.Model):
 
     @staticmethod
     def get_all():
-        from models.payment import Payment
-        deliveries = Delivery.query \
-        .options(
-            joinedload(Delivery.order)
-                .joinedload(Order.items)
-                .joinedload(OrderItem.product),
-            joinedload(Delivery.order)
-                .joinedload(Order.payment)
-        ) \
-        .order_by(Delivery.id.desc()) \
-        .all()
+        deliveries = Delivery.query.order_by(Delivery.id.desc()).all()
 
         deliveries_dict = {}
 
         for d in deliveries:
-            if d.id not in deliveries_dict:
-                deliveries_dict[d.id] = {
-                    'id': d.id,
-                    'recipient_name': d.recipient_name,
-                    'street': d.street,
-                    'number': d.number,
-                    'complement': d.complement,
-                    'city': d.city,
-                    'state': d.state,
-                    'zip_code': d.zip_code,
-                    'country': d.country,
-                    'phone': d.phone,
-                    'bairro': d.bairro,
-                    'total_value': d.total_value,
-                    'width': d.width,
-                    'height': d.height,
-                    'length': d.length,
-                    'weight': d.weight,
-                    'melhorenvio_id': d.melhorenvio_id,
-                    'order_id': d.order.id if d.order else None,
-                    'user_id': d.order.user_id if d.order else None,
-                    'payment_id': d.order.payment_id if d.order else None,
-                    'cpf': d.order.payment.cpf if d.order and d.order.payment else None,
-                    'email': d.order.payment.email if d.order and d.order.payment else None,
-                    'order_total': d.order.total_amount if d.order else None,
-                    'order_date': d.order.order_date if d.order else None,
-                    'status': d.order.status if d.order else None,
-                    'products': []
-                }
+            deliveries_dict[d.id] = {
+                'id': d.id,
+                'recipient_name': d.recipient_name,
+                'street': d.street,
+                'number': d.number,
+                'complement': d.complement,
+                'city': d.city,
+                'state': d.state,
+                'zip_code': d.zip_code,
+                'country': d.country,
+                'phone': d.phone,
+                'bairro': d.bairro,
+                'total_value': d.total_value,
+                'width': d.width,
+                'height': d.height,
+                'length': d.length,
+                'weight': d.weight,
+                'melhorenvio_id': d.melhorenvio_id,
+                'order_id': d.order_id,  # string, não relacionamento
+                'user_id': None,
+                'payment_id': None,
+                'cpf': None,
+                'email': None,
+                'order_total': None,
+                'order_date': None,
+                'status': None,
+                'products': []
+            }
 
-            if d.order and d.order.items:
-                for item in d.order.items:
-                    deliveries_dict[d.id]['products'].append({
-                        'product_id': item.product_id,
-                        'name': item.product.name if item.product else None,
-                        'description': item.product.description if item.product else None,
-                        'image': item.product.image_path if item.product else None,
-                        'price': item.unit_price,
-                        'quantity': item.quantity
-                    })
+            # Aqui você poderia tentar buscar Order se quiser e se fizer sentido
+            # mas só funciona se conseguir mapear o d.order_id para o Order.id
+
+            # Exemplo (não vai funcionar se tipos não baterem):
+            # order = Order.query.filter(Order.id == d.order_id).first()
+            # if order:
+            #     deliveries_dict[d.id]['user_id'] = order.user_id
+            #     deliveries_dict[d.id]['payment_id'] = order.payment_id
+            #     deliveries_dict[d.id]['order_total'] = order.total_amount
+            #     deliveries_dict[d.id]['order_date'] = order.order_date
+            #     deliveries_dict[d.id]['status'] = order.status
+            #
+            #     if order.payment:
+            #         deliveries_dict[d.id]['cpf'] = order.payment.cpf
+            #         deliveries_dict[d.id]['email'] = order.payment.email
+            #
+            #     for item in order.items:
+            #         deliveries_dict[d.id]['products'].append({
+            #             'product_id': item.product_id,
+            #             'name': item.product.name if item.product else None,
+            #             'description': item.product.description if item.product else None,
+            #             'image': item.product.image_path if item.product else None,
+            #             'price': item.unit_price,
+            #             'quantity': item.quantity
+            #         })
 
         return list(deliveries_dict.values())
