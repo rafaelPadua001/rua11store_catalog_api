@@ -36,14 +36,8 @@ class Delivery(db.Model):
     tracking_link = Column(String(255))
 
     melhorenvio_id = Column(String(100), unique=True)
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'))
-    # Unique se for um para um
-    order = relationship(
-    'Order',
-    back_populates='delivery',
-    uselist=False,
-    foreign_keys=[order_id]  # aqui é o campo da tabela Delivery que faz o link
-)
+    order_id = Column(String(100))
+  
 
     
     def to_dict(self):
@@ -67,7 +61,7 @@ class Delivery(db.Model):
             "height": self.height,
             "length": self.length,
             "weight": self.weight,
-           # "cpf": self.cpf,
+            "cpf": self.cpf,
             "melhorenvio_id": self.melhorenvio_id,
             "order_id": self.order_id
         }
