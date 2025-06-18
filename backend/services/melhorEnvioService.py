@@ -3,6 +3,7 @@ import requests
 import sqlite3
 from models.delivery import Delivery
 import json
+import traceback
 
 class MelhorEnvioService:
     def __init__(self):
@@ -115,8 +116,9 @@ class MelhorEnvioService:
             }, 200
 
         except requests.exceptions.RequestException as e:
-            print(f"Erro na requisição: {e}")
-            return {"error": "Erro ao criar etiqueta", "exception": str(e)}, 500
+            print(f"Erro ao criar etiqueta: {e}")
+            traceback.print_exc()
+            return {"error": "Erro ao criar etiquetas", "exception": str(e)}, 500
 
     def update_delivery_with_shipment_id(self, data, shipment_data):
         
