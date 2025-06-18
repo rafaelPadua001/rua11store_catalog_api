@@ -273,26 +273,37 @@ export default {
         },
         async shipmentCreate(item) {
             try {
-                console.log(item);
+                console.log('Item antes:', item);
+
+                // Se houver pelo menos um order com produtos
+                if (item.orders && item.orders.length > 0) {
+                    const firstOrder = item.orders[0];
+
+                    if (firstOrder.products && firstOrder.products.length > 0) {
+                        // Mapeando os produtos no formato que a API espera
+                        item.products = item.orders.flatMap(order =>
+                            order.products.map(product => ({
+                                name: product.name,
+                                price: product.price,
+                                quantity: product.quantity
+                            }))
+                        );
+                    }
+                }
+
+                console.log('Item final com products:', item);
+
                 const response = await api.post('/melhorEnvio/shipmentCreate', item);
-                // console.log('Resposta da API:', response.data);
 
                 if (response.data.message === 'Envio criado com sucesso. Aguarde pagamento.') {
                     const shipmentId = response.data.shipment_id;
-
-                    // Forçando reatividade (Vue 2)
                     item.melhorenvio_id = shipmentId;
-
 
                     this.isPaymentButtonPayTagDisabled = false;
                     this.isCheckitemButton = true;
-
-                    // Atualizando a lista de envios, se necessário
                     this.shipment = [...this.shipment];
 
-
-                    // Nenhum reload necessário
-                    return window.alert('item adicionado ao carrinho do melhor envio');
+                    return window.alert('Item adicionado ao carrinho do Melhor Envio');
                 } else {
                     window.alert('Algo deu errado. Por favor, tente novamente.');
                 }
