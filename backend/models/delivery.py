@@ -128,7 +128,8 @@ class Delivery(db.Model):
                 'orders': []  # <<< ESSENCIAL
             }
 
-            orders = Order.query.filter(Order.delivery_id == d.id).all()
+            orders = Order.query.filter(Order.delivery_id == d.id).options(db.joinedload(Order.payment)).all()
+
             for order in orders:
                 order_data = {
                     'order_id': order.id,
