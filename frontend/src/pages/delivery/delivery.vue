@@ -252,7 +252,7 @@ export default {
                         width: delivery.width,
                         length: delivery.length,
                         weight: delivery.weight,
-                        //cpf: delivery.cpf.replace(/\D/g, ''),
+                        cpf: delivery.cpf.replace(/\D/g, ''),
                         melhorenvio_id: delivery.melhorenvio_id,
                         order_id: delivery.order_id,
                         user_id: delivery.user_id,
