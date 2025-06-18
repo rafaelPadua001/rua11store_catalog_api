@@ -116,7 +116,7 @@
                                     <strong>Status:</strong>
                                     <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{
                                         cartItems.data.status
-                                    }}</strong>
+                                        }}</strong>
                                     <strong v-else> {{ cartItems.data.status }}</strong>
                                 </v-col>
                                 <v-col cols="12" sm="6">
@@ -275,23 +275,35 @@ export default {
             try {
                 console.log('Item antes:', item);
 
-                // Se houver pelo menos um order com produtos
-                if (item.orders && item.orders.length > 0) {
-                    const firstOrder = item.orders[0];
+                // Montar o array 'products' com os campos obrigatórios
+                let allProducts = [];
 
-                    if (firstOrder.products && firstOrder.products.length > 0) {
-                        // Mapeando os produtos no formato que a API espera
-                        item.products = item.orders.flatMap(order =>
-                            order.products.map(product => ({
-                                name: product.name,
-                                price: product.price,
-                                quantity: product.quantity
-                            }))
-                        );
-                    }
+                if (item.orders && item.orders.length > 0) {
+                    item.orders.forEach(order => {
+                        if (order.products && order.products.length > 0) {
+                            order.products.forEach(product => {
+                                // Só inclui se os campos obrigatórios existirem
+                                if (product.name && product.price !== null && product.quantity !== null) {
+                                    allProducts.push({
+                                        name: product.name,
+                                        price: product.price,
+                                        quantity: product.quantity
+                                    });
+                                }
+                            });
+                        }
+                    });
                 }
 
-                console.log('Item final com products:', item);
+                if (allProducts.length === 0) {
+                    console.error('Nenhum produto válido encontrado.');
+                    return window.alert('Erro: Nenhum produto com name, price e quantity encontrado.');
+                }
+
+                // Adiciona ao item antes do envio
+                item.products = allProducts;
+
+                console.log('Payload final antes do envio:', item);
 
                 const response = await api.post('/melhorEnvio/shipmentCreate', item);
 
@@ -308,7 +320,8 @@ export default {
                     window.alert('Algo deu errado. Por favor, tente novamente.');
                 }
             } catch (error) {
-                console.log('Erro no envio:', error);
+                console.log('Erro ao criar envio:', error.response ? error.response.data : error);
+                window.alert('Erro ao criar envio. Detalhes no console.');
             }
         },
 
