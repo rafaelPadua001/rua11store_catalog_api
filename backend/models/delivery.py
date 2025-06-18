@@ -31,8 +31,8 @@ class Delivery(db.Model):
     #cpf = Column(String(20))
     #status = Column(String(50))
     #service_status = Column(String(50))
-    state_abbr = Column(String(10))
-    company_name = Column(String(100))
+    #state_abbr = Column(String(10))
+    #company_name = Column(String(100))
     tracking_link = Column(String(255))
 
     melhorenvio_id = Column(String(100), unique=True)
