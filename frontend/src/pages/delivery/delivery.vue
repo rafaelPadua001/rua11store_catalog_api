@@ -15,6 +15,7 @@
 
                 <v-data-table :headers="headers" :items="deliveries" :items-per-page="10" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading deliveries...">
+
                     <!-- Exibe imagens de produtos -->
                     <template v-slot:item.image="{ item }">
                         <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
@@ -28,8 +29,7 @@
 
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
-                        <!-- Botão de buscar item no carrinho -->
-
+                    
                         <!-- Ícone de criar envio -->
                         <v-icon small @click.stop="shipmentCreate(item)">
                             mdi-cart
@@ -116,7 +116,7 @@
                                     <strong>Status:</strong>
                                     <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{
                                         cartItems.data.status
-                                        }}</strong>
+                                    }}</strong>
                                     <strong v-else> {{ cartItems.data.status }}</strong>
                                 </v-col>
                                 <v-col cols="12" sm="6">
@@ -169,6 +169,7 @@
 
 <script>
 import axios from "axios";
+import { toRaw } from 'vue';
 
 const api = axios.create({
     baseURL: window.location.hostname === "localhost"
@@ -231,35 +232,46 @@ export default {
             this.loading = true;
             try {
                 const response = await api.get("delivery/deliveries");
+                console.log(response.data);
                 if (response.data && Array.isArray(response.data)) {
-                    this.deliveries = response.data.flat().map(delivery => ({
-                        id: delivery.id,
-                        recipient_name: delivery.recipient_name,
-                        street: delivery.street,
-                        number: delivery.number,
-                        complement: delivery.complement,
-                        city: delivery.city,
-                        state: delivery.state,
-                        zip_code: delivery.zip_code.replace(/\D/g, ''),
-                        bairro: delivery.bairro,
-                        country: delivery.country,
-                        phone: delivery.phone,
-                        price: delivery.total_value,
-                        delivery_id: delivery.delivery_id,
-                        email: delivery.email,
-                        products: delivery.products,
-                        height: delivery.height,
-                        width: delivery.width,
-                        length: delivery.length,
-                        weight: delivery.weight,
-                        cpf: delivery.cpf,
-                        melhorenvio_id: delivery.melhorenvio_id,
-                        order_id: delivery.order_id,
-                        user_id: delivery.user_id,
-                        status: delivery.status,
-                        //   email: delivery.userEmail,
+                    this.deliveries = response.data.flat().map(delivery => {
+                        // Extrair todos os produtos de todos os orders da entrega
+                        let allProducts = [];
+                        if (delivery.orders && Array.isArray(delivery.orders)) {
+                            delivery.orders.forEach(order => {
+                                if (order.products && Array.isArray(order.products)) {
+                                    allProducts = allProducts.concat(order.products);
+                                }
+                            });
+                        }
 
-                    }));
+                        return {
+                            id: delivery.id,
+                            recipient_name: delivery.recipient_name,
+                            street: delivery.street,
+                            number: delivery.number,
+                            complement: delivery.complement,
+                            city: delivery.city,
+                            state: delivery.state,
+                            zip_code: delivery.zip_code ? delivery.zip_code.replace(/\D/g, '') : '',
+                            bairro: delivery.bairro,
+                            country: delivery.country,
+                            phone: delivery.phone,
+                            price: delivery.total_value,
+                            delivery_id: delivery.delivery_id,
+                            email: delivery.email,
+                            products: allProducts,  // produtos agrupados de todos os orders
+                            height: delivery.height,
+                            width: delivery.width,
+                            length: delivery.length,
+                            weight: delivery.weight,
+                            cpf: delivery.cpf,
+                            melhorenvio_id: delivery.melhorenvio_id,
+                            order_id: delivery.order_id,
+                            user_id: delivery.user_id,
+                            status: delivery.status,
+                        };
+                    });
 
                     console.log(response.data);
                 } else {
@@ -272,16 +284,13 @@ export default {
             }
         },
         async shipmentCreate(item) {
-    try {
-        console.log('Item antes:', item);
+            try {
+                console.log('Item antes:', toRaw(item.products));  // mostra o array puro de produtos
 
-        let allProducts = [];
+                let allProducts = [];
 
-        if (item.orders && item.orders.length > 0) {
-            item.orders.forEach(order => {
-                if (order.products && order.products.length > 0) {
-                    order.products.forEach(product => {
-                        // Checa se name, price e quantity existem
+                if (item.products && item.products.length > 0) {
+                    item.products.forEach(product => {
                         if (
                             product.name &&
                             typeof product.price === 'number' &&
@@ -297,34 +306,32 @@ export default {
                         }
                     });
                 }
-            });
-        }
 
-        if (allProducts.length === 0) {
-            return window.alert('Erro: Nenhum produto com name, price e quantity válido encontrado.');
-        }
+                if (allProducts.length === 0) {
+                    return window.alert('Erro: Nenhum produto com name, price e quantity válido encontrado.');
+                }
 
-        item.products = allProducts;
+                item.products = allProducts;
 
-        console.log('Payload final antes do envio:', item);
+                console.log('Payload final antes do envio:', toRaw(item));
 
-        const response = await api.post('/melhorEnvio/shipmentCreate', item);
+                const response = await api.post('/melhorEnvio/shipmentCreate', item);
 
-        if (response.data.message === 'Envio criado com sucesso. Aguarde pagamento.') {
-            item.melhorenvio_id = response.data.shipment_id;
+                if (response.data.message === 'Envio criado com sucesso. Aguarde pagamento.') {
+                    item.melhorenvio_id = response.data.shipment_id;
 
-            this.isPaymentButtonPayTagDisabled = false;
-            this.isCheckitemButton = true;
+                    this.isPaymentButtonPayTagDisabled = false;
+                    this.isCheckitemButton = true;
 
-            window.alert('Item adicionado ao carrinho do Melhor Envio');
-        } else {
-            window.alert('Algo deu errado. Por favor, tente novamente.');
-        }
-    } catch (error) {
-        console.error('Erro ao criar envio:', error.response?.data || error.message || error);
-        window.alert('Erro ao criar envio. Detalhes no console.');
-    }
-},
+                    window.alert('Item adicionado ao carrinho do Melhor Envio');
+                } else {
+                    window.alert('Algo deu errado. Por favor, tente novamente.');
+                }
+            } catch (error) {
+                console.error('Erro ao criar envio:', error.response?.data || error.message || error);
+                window.alert('Erro ao criar envio. Detalhes no console.');
+            }
+        },
 
 
         async checkItemInCart(item) {
