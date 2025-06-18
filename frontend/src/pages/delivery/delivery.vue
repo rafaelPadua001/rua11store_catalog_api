@@ -273,6 +273,7 @@ export default {
         },
         async shipmentCreate(item) {
             try {
+                console.log(item);
                 const response = await api.post('/melhorEnvio/shipmentCreate', item);
                 // console.log('Resposta da API:', response.data);
 

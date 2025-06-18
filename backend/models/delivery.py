@@ -57,10 +57,10 @@ class Delivery(db.Model):
             "bairro": self.bairro,
             "total_value": self.total_value,
             "delivery_id": self.delivery_id,
-            "width": self.width,
-            "height": self.height,
-            "length": self.length,
-            "weight": self.weight,
+            "width": float(self.width) if self.width is not None else None,
+            "height": float(self.height) if self.height is not None else None,
+            "length": float(self.length) if self.length is not None else None,
+            "weight": float(self.weight) if self.weight is not None else None,
             #"cpf": self.cpf,
             "melhorenvio_id": self.melhorenvio_id,
             "order_id": self.order_id
@@ -97,6 +97,7 @@ class Delivery(db.Model):
         deliveries_dict = {}
 
         for d in deliveries:
+            print(f"Delivery ID {d.id} - Width: {d.width} | Weight: {d.weight}")
             deliveries_dict[d.id] = {
                 'id': d.id,
                 'recipient_name': d.recipient_name,
