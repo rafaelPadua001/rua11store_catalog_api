@@ -136,7 +136,7 @@ class Delivery(db.Model):
                 deliveries_dict[d.id]['payment_id'] = order.payment_id
                 deliveries_dict[d.id]['order_total'] = order.total_amount
                 deliveries_dict[d.id]['order_date'] = order.order_date
-                deliveries_dict[d.id]['status'] = order.status
+                
             
                 if order.payment:
                     deliveries_dict[d.id]['cpf'] = order.payment.cpf
