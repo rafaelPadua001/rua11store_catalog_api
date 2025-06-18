@@ -128,22 +128,22 @@ class Delivery(db.Model):
             }
 
             
-            # Exemplo (não vai funcionar se tipos não baterem):
-            order = Order.query.filter(Order.delivery_id == d.id).all()
-            if order:
-                deliveries_dict[d.id]['user_id'] = order.user_id
-                deliveries_dict[d.id]['payment_id'] = order.payment_id
-                deliveries_dict[d.id]['order_total'] = order.total_amount
-                deliveries_dict[d.id]['order_date'] = order.order_date
-                
-            
-                if order.payment:
-                    deliveries_dict[d.id]['cpf'] = order.payment.cpf
-                    deliveries_dict[d.id]['email'] = order.payment.email
-                    deliveries_dict[d.id]['status'] = order.payment.status
+            orders = Order.query.filter(Order.delivery_id == d.id).all()
+            for order in orders:
+                order_data = {
+                    'order_id': order.id,
+                    'user_id': order.user_id,
+                    'payment_id': order.payment_id,
+                    'order_total': order.total_amount,
+                    'order_date': order.order_date,
+                    'cpf': order.payment.cpf if order.payment else None,
+                    'email': order.payment.email if order.payment else None,
+                    'status': order.payment.status if order.payment else None,
+                    'products': []
+                }
 
                 for item in order.items:
-                    deliveries_dict[d.id]['products'].append({
+                    order_data['products'].append({
                         'product_id': item.product_id,
                         'name': item.product.name if item.product else None,
                         'description': item.product.description if item.product else None,
@@ -152,4 +152,4 @@ class Delivery(db.Model):
                         'quantity': item.quantity
                     })
 
-        return list(deliveries_dict.values())
+                deliveries_dict[d.id]['orders'].append(order_data)
