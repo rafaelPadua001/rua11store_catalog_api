@@ -117,6 +117,7 @@ class Payment(db.Model):
                 if 'error' in result:
                     print(f"Erro ao atualizar o estoque para {product_id}: {result['error']}")
 
+            print(self.status)
             order = Order(
                 user_id=uuid.UUID(str(self.usuario_id)),
                 payment_id=payment_id,
