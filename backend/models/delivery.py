@@ -28,7 +28,7 @@ class Delivery(db.Model):
     height = Column(Float)
     length = Column(Float)
     weight = Column(Float)
-    cpf = Column(String(20))
+    #cpf = Column(String(20))
     status = Column(String(50))
     service_status = Column(String(50))
     state_abbr = Column(String(10))
@@ -61,7 +61,7 @@ class Delivery(db.Model):
             "height": self.height,
             "length": self.length,
             "weight": self.weight,
-            "cpf": self.cpf,
+            #"cpf": self.cpf,
             "melhorenvio_id": self.melhorenvio_id,
             "order_id": self.order_id
         }
@@ -130,26 +130,26 @@ class Delivery(db.Model):
             # mas só funciona se conseguir mapear o d.order_id para o Order.id
 
             # Exemplo (não vai funcionar se tipos não baterem):
-            # order = Order.query.filter(Order.id == d.order_id).first()
-            # if order:
-            #     deliveries_dict[d.id]['user_id'] = order.user_id
-            #     deliveries_dict[d.id]['payment_id'] = order.payment_id
-            #     deliveries_dict[d.id]['order_total'] = order.total_amount
-            #     deliveries_dict[d.id]['order_date'] = order.order_date
-            #     deliveries_dict[d.id]['status'] = order.status
-            #
-            #     if order.payment:
-            #         deliveries_dict[d.id]['cpf'] = order.payment.cpf
-            #         deliveries_dict[d.id]['email'] = order.payment.email
-            #
-            #     for item in order.items:
-            #         deliveries_dict[d.id]['products'].append({
-            #             'product_id': item.product_id,
-            #             'name': item.product.name if item.product else None,
-            #             'description': item.product.description if item.product else None,
-            #             'image': item.product.image_path if item.product else None,
-            #             'price': item.unit_price,
-            #             'quantity': item.quantity
-            #         })
+            order = Order.query.filter(Order.delivery_id == d.id).first()
+            if order:
+                deliveries_dict[d.id]['user_id'] = order.user_id
+                deliveries_dict[d.id]['payment_id'] = order.payment_id
+                deliveries_dict[d.id]['order_total'] = order.total_amount
+                deliveries_dict[d.id]['order_date'] = order.order_date
+                deliveries_dict[d.id]['status'] = order.status
+            
+                if order.payment:
+                    deliveries_dict[d.id]['cpf'] = order.payment.cpf
+                    deliveries_dict[d.id]['email'] = order.payment.email
+            
+                for item in order.items:
+                    deliveries_dict[d.id]['products'].append({
+                        'product_id': item.product_id,
+                        'name': item.product.name if item.product else None,
+                        'description': item.product.description if item.product else None,
+                        'image': item.product.image_path if item.product else None,
+                        'price': item.unit_price,
+                        'quantity': item.quantity
+                    })
 
         return list(deliveries_dict.values())
