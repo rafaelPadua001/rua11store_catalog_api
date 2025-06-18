@@ -30,7 +30,7 @@ class Delivery(db.Model):
     weight = Column(Float)
     #cpf = Column(String(20))
     #status = Column(String(50))
-    service_status = Column(String(50))
+    #service_status = Column(String(50))
     state_abbr = Column(String(10))
     company_name = Column(String(100))
     tracking_link = Column(String(255))
