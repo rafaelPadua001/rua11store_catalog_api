@@ -107,6 +107,8 @@ class Payment(db.Model):
                 db.session.add(delivery)
                 db.session.flush()
                 delivery_id = delivery.id
+            else:
+                print('Endereço ou produtos ausentes. Pedido pode estar incompleto')
 
             for product in self.products:
                 product_id = product.get('id') or product.get('product_id')
@@ -115,13 +117,15 @@ class Payment(db.Model):
                 if 'error' in result:
                     print(f"Erro ao atualizar o estoque para {product_id}: {result['error']}")
 
+            print(self.status)
             order = Order(
                 user_id=uuid.UUID(str(self.usuario_id)),
                 payment_id=payment_id,
                 delivery_id=delivery_id,
                 shipment_info=self.address.get('zip_code', '') if self.address else '',
                 total_amount=self.total_value,
-                order_date=datetime.utcnow()
+                order_date=datetime.utcnow(),
+                status=self.status if hasattr(self, 'status') else 'pendente'
             )
             db.session.add(order)
             db.session.flush()
