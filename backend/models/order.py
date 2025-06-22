@@ -20,7 +20,8 @@ class Order(db.Model):
 
     items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
     #product = relationship('Product') 
-    delivery = db.relationship('Delivery', primaryjoin="Order.id==foreign(Delivery.order_id)", backref='order', uselist=False)
+    delivery = db.relationship('Delivery', backref='orders', uselist=False)
+
     payment = relationship('Payment', back_populates='orders', uselist=False)
     
 
@@ -34,6 +35,7 @@ class Order(db.Model):
             "user_id": self.user_id,
             "payment_id": self.payment_id,
             "delivery_id": self.delivery_id,
+            "melhorenvio_id": self.delivery.melhorenvio_id if self.delivery else None,
             "shipment_info": self.shipment_info,
             "order_date": self.order_date.isoformat() if self.order_date else None,
             "status": self.status,
