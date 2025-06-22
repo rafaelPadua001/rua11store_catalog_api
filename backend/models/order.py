@@ -55,17 +55,18 @@ class Order(db.Model):
         orders = db.session.query(Order).order_by(Order.id.desc()).all()
         return [order.to_dict() for order in orders]
 
-    
+
+
     @staticmethod
     def get_by_user_id(user_id):
         try:
-            user_uuid = str(UUID(user_id))  # converter para UUID, se necessário
+            user_uuid = str(UUID(user_id))  # converte para string
         except ValueError:
             return None
 
         orders = (
             db.session.query(Order)
-            .filter(Order.user_id == user_uuid_str)  # aqui usa string, não UUID object
+            .filter(Order.user_id == user_uuid)  # agora é string
             .order_by(desc(Order.id))
             .all()
         )
