@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Tex
 from sqlalchemy.orm import relationship, Session
 from sqlalchemy.dialects.postgresql import UUID
 from database import db  # Supondo que você tenha Base e engine já configurados no db.py
-import uuid
+from uuid import UUID
 
 
 class Order(db.Model):
@@ -61,18 +61,17 @@ class Order(db.Model):
     def get_by_user_id(user_id):
         print("user_id recebido:", user_id)
         try:
-            user_uuid = str(UUID(user_id))  # converte para string
+            user_uuid = uuid.UUID(user_id)
         except ValueError:
             return None
 
         orders = (
             db.session.query(Order)
-            .filter(Order.user_id == user_uuid)  # agora é string
+            .filter(Order.user_id == user_uuid)
             .order_by(desc(Order.id))
             .all()
         )
         return [order.to_dict() for order in orders]
-
 
 
     def save(self, session: Session):
