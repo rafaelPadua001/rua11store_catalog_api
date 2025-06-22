@@ -61,7 +61,7 @@ class Order(db.Model):
     def get_by_user_id(user_id):
         print("user_id recebido:", user_id)
         try:
-            user_uuid = uuid.UUID(user_id)
+            user_uuid = uuid.UUID(user_id)  # converter para objeto UUID
         except ValueError:
             return None
 
