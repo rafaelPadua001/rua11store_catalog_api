@@ -59,13 +59,13 @@ class Order(db.Model):
     @staticmethod
     def get_by_user_id(user_id):
         try:
-            user_uuid = UUID(user_id)  # converter para UUID, se necessário
+            user_uuid = str(UUID(user_id))  # converter para UUID, se necessário
         except ValueError:
             return None
 
         orders = (
             db.session.query(Order)
-            .filter(Order.user_id == user_uuid)
+            .filter(Order.user_id == user_uuid_str)  # aqui usa string, não UUID object
             .order_by(desc(Order.id))
             .all()
         )
