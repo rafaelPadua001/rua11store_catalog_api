@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, desc
 from sqlalchemy.orm import relationship, Session
-from sqlalchemy.dialects.postgresql import UUID
+
 from database import db  # Supondo que você tenha Base e engine já configurados no db.py
 from uuid import UUID
 
@@ -10,7 +10,7 @@ class Order(db.Model):
     __tablename__ = 'orders'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(UUID(as_uuid=True), nullable=False, default=uuid.uuid4)
+    user_id = Column(String(36), nullable=False, default=lambda: str(uuid.uuid4()))
     payment_id = db.Column(db.Integer, db.ForeignKey('payments.id'))
     delivery_id = Column(Integer, ForeignKey('delivery.id'))
     shipment_info = Column(Text, nullable=True)
