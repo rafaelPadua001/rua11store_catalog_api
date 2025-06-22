@@ -8,14 +8,21 @@ def get_orders():
     orders = Order.get_all()
     return jsonify([orders])
 
-@orders_bp.route('/get-order/<user_id>', methods=['GET'])
-def get_order_by_userId(user_id):
-    user_id = user_id.lstrip('/')
-    order = Order.get_by_user_id(user_id)
-    if order:
-        return jsonify(order)
-    else:
-        return jsonify({'message': 'Pedido não encontrado'}), 404
+@staticmethod
+def get_by_user_id(user_id):
+    print("user_id recebido:", user_id)
+    try:
+        user_uuid = uuid.UUID(user_id)  # converte string para UUID (objeto)
+    except ValueError:
+        return None
+
+    orders = (
+        db.session.query(Order)
+        .filter(Order.user_id == user_uuid)  # compara com objeto UUID, não string
+        .order_by(desc(Order.id))
+        .all()
+    )
+    return [order.to_dict() for order in orders]
 
 @orders_bp.route('/create-orders', methods=['POST'])
 def create_order():
