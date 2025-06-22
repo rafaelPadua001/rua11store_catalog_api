@@ -239,7 +239,7 @@ class MelhorEnvioService:
             return {"status": "success", "data": item_data}, 200
         else:
             return {"status": "not_found"}, 404
-            
+
     def generate_label(self, data):
         melhorenvio_id = data.get('melhorenvio_id')
         if not melhorenvio_id:
@@ -290,3 +290,30 @@ class MelhorEnvioService:
         else:
             print('Erro na requisição ou dados não encontrados.')
             return {"status": "not_found"}, 404
+
+    def deleteItemCart(self, data):
+        print(data)
+        melhorenvio_id = data['melhorenvio_id']
+        print(melhorenvio_id)
+        url = f"{self.baseUrl}/me/cart/{melhorenvio_id}"
+
+        # Realiza a requisição de delete
+        raw_response, response = self.make_request(url, "delete")
+        print("Resposta bruta:", raw_response)
+        print("Resposta da API:", response)
+
+        # Verifica a resposta da requisição
+        if response is None:
+            # Caso o retorno seja None (erro na requisição)
+            return {"status": "error", "message": "Erro na requisição."}, 500
+        
+        # Verifica se a resposta contém a chave 'status'
+        if response.get("status") == "success":
+            print('Item deletado com sucesso.')
+            return {"status": "success"}, 204
+        elif response.get("status") == "not_found":
+            print('Erro: item não encontrado no carrinho.')
+            return {"status": "not_found"}, 404
+        else:
+            print(f'Erro desconhecido: {response}')
+            return {"status": "error", "message": "Erro na requisição."}, 500
