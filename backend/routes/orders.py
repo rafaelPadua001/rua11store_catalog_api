@@ -12,13 +12,13 @@ def get_orders():
 def get_by_user_id(user_id):
     print("user_id recebido:", user_id)
     try:
-        user_uuid = uuid.UUID(user_id)  # converte string para UUID (objeto)
+        user_uuid = uuid.UUID(user_id)  
     except ValueError:
         return None
 
     orders = (
         db.session.query(Order)
-        .filter(Order.user_id == user_uuid)  # compara com objeto UUID, não string
+        .filter(Order.user_id == user_uuid) 
         .order_by(desc(Order.id))
         .all()
     )
