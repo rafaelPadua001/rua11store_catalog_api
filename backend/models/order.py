@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Tex
 from sqlalchemy.orm import relationship, Session
 
 from database import db  # Supondo que você tenha Base e engine já configurados no db.py
-from uuid import UUID
+import uuid  
 
 
 class Order(db.Model):
