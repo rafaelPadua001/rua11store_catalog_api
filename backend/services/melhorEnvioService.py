@@ -4,6 +4,7 @@ import sqlite3
 from models.delivery import Delivery
 import json
 import traceback
+from sqlalchemy.orm import Session
 
 class MelhorEnvioService:
     def __init__(self):
@@ -120,24 +121,18 @@ class MelhorEnvioService:
             traceback.print_exc()
             return {"error": "Erro ao criar etiquetas", "exception": str(e)}, 500
 
-    def update_delivery_with_shipment_id(self, data, shipment_data):
-        
-        # Aqui, você deve escrever a lógica para atualizar a tabela 'delivery'
-        # Exemplo: Atualizar as colunas 'melhorenvio_id' e 'order_id'
-        
+    def update_delivery_with_shipment_id(self, session: Session, data, shipment_data):
         try:
-            # Atualizando no banco de dados (ajuste conforme sua ORM ou método de acesso ao DB)
-            query = """
-            UPDATE delivery
-            SET melhorenvio_id = ?, order_id = ?
-            WHERE id = ?
-            """
-            params = (shipment_data['id'], shipment_data['protocol'], data['id'])
-
-            # Suponha que você tenha um método para executar essa query no seu banco de dados
-            self.execute_query(query, params)
-            # print(f"Delivery ID atualizado com o melhorenvio_id {shipment_data['id']} e order_id {shipment_data['protocol']}")
+            delivery = session.query(Delivery).filter_by(id=data['id']).first()
+            if delivery:
+                delivery.melhorenvio_id = shipment_data['id']
+                delivery.order_id = shipment_data['protocol']
+                session.commit()
+                # print(f"Delivery ID {data['id']} atualizado com melhorenvio_id {shipment_data['id']} e order_id {shipment_data['protocol']}")
+            else:
+                print(f"Delivery com id {data['id']} não encontrado.")
         except Exception as e:
+            session.rollback()
             print(f"Erro ao atualizar o delivery: {e}")
 
 
