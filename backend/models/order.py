@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, desc
 from sqlalchemy.orm import relationship, Session
 from sqlalchemy.dialects.postgresql import UUID
 from database import db  # Supondo que você tenha Base e engine já configurados no db.py
@@ -59,11 +59,16 @@ class Order(db.Model):
     @staticmethod
     def get_by_user_id(user_id):
         try:
-            user_id = UUID(user_id)  # Conversão segura
+            user_uuid = UUID(user_id)  # converter para UUID, se necessário
         except ValueError:
-            return None  # Ou trate como desejar: lançar exceção, logar, etc.
+            return None
 
-        orders = db.session.query(Order).filter_by(user_id=user_id).order_by(Order.id.desc()).all()
+        orders = (
+            db.session.query(Order)
+            .filter(Order.user_id == user_uuid)
+            .order_by(desc(Order.id))
+            .all()
+        )
         return [order.to_dict() for order in orders]
 
 
