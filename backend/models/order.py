@@ -59,6 +59,7 @@ class Order(db.Model):
 
     @staticmethod
     def get_by_user_id(user_id):
+        print("user_id recebido:", user_id)
         try:
             user_uuid = str(UUID(user_id))  # converte para string
         except ValueError:
