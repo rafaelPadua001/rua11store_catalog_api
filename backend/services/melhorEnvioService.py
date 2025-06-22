@@ -290,7 +290,19 @@ class MelhorEnvioService:
         else:
             print('Erro na requisição ou dados não encontrados.')
             return {"status": "not_found"}, 404
+    
+    def tracking(self, data):
+        print(data)
+        melhorenvio_id = data.get('order_id')
+        if not melhorenvio_id:
+            return {"error": "melhorenvio_id não informado"}, 400
 
+        url = f"{self.baseUrl}/me/shipment/tracking"
+        payload = {"orders": [melhorenvio_id]}
+
+        response = self.make_request(url, "post", payload)
+
+        return response
     def deleteItemCart(self, data):
         print(data)
         melhorenvio_id = data['melhorenvio_id']
