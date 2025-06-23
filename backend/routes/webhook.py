@@ -23,11 +23,11 @@ def handle_webhook():
             print(f"Payment ID: {payment_id}")
             print(f"Status: {status}")  
 
-            if status == 'approved':
-                # Process the payment as approved
-                print(f"Payment {payment_id} approved.")
+            if status in ['approved', 'in_process', 'rejected']:
+                print(f"Payment {payment_id} has status {status}.")
                 response, status_code = PaymentController.update_status_payment(payment_id, status)
                 print(response)
+
              #   pass
 
             return jsonify({
