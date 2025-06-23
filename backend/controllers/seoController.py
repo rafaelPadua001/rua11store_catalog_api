@@ -10,10 +10,13 @@ class SeoController:
 
     @staticmethod
     def get_seo_by_id(seo_id):
+        print(seo_id)
         return Seo.query.get(seo_id)
 
     @staticmethod
     def get_seo_by_route(route):
+        route = str(route)
+        print(route)
         return Seo.query.filter_by(route=route).first()
 
     @staticmethod
