@@ -11,8 +11,7 @@ def list_seo():
 
 @seo_bp.route('/seo/<int:seo_id>', methods=['GET'])
 def get_seo_by_id(seo_id):
-    seo = SeoController.get_seo_by_id(seo_id)
-
+    seo = SeoController.get_seo_by_route(seo_id)
     if  seo is None:
         return jsonify({"error": "SEO item not found"}), 404
     return jsonify({"seo": seo.to_dict()}), 200
