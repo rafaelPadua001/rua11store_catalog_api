@@ -4,8 +4,10 @@ from controllers.paymentController import PaymentController
 
 webhook_bp = Blueprint('webhook', __name__)
 
-@webhook_bp.route('/webhook', methods=['POST'])
+@webhook_bp.route('/webhook', methods=['GET','POST'])
 def handle_webhook():
+    if request.method == 'GET':
+        return "Webhook endpoint is up", 200
     data = request.get_json()
     print("Received webhook data:", data)
 
