@@ -10,7 +10,7 @@ class Delivery(db.Model):
     __tablename__ = 'delivery'
 
     id = Column(Integer, primary_key=True)
-    product_id = Column(Integer, nullable=True)
+    product_id = Column(Integer, ForeignKey('products.id', ondelete='CASCADE'), nullable=True)
     user_id = Column(Integer, nullable=False)
     recipient_name = Column(String(255))
     street = Column(String(255))
@@ -37,7 +37,7 @@ class Delivery(db.Model):
 
     melhorenvio_id = Column(String(100), unique=True)
     order_id = Column(String(100))
-  
+    product = relationship('Product', backref=db.backref('deliveries', passive_deletes=True))
 
     
     def to_dict(self):
