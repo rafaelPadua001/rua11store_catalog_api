@@ -20,7 +20,6 @@ def get_seo_by_id(seo_id):
 
 @seo_bp.route('/seo', methods=['POST'])
 def create_seo():
-    # Receber dados do formulário (exceto imagem)
     route = request.form.get('route')
     meta_title = request.form.get('metaTitle')
     meta_description = request.form.get('metaDescription')
