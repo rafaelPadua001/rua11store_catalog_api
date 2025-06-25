@@ -29,13 +29,14 @@
                         </v-col>
                     </v-row>
 
-                    <v-row justify="center" @click="goToRegister()">
+                <!--    <v-row justify="center" @click="goToRegister()">
                         <v-col cols="auto">
                             <v-btn variant="text" color="primary">
                                 Register
                             </v-btn>
                         </v-col>
                     </v-row>
+                -->
 
                     <v-row justify="center">
                         <v-col cols="auto">
