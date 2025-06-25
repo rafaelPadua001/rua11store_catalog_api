@@ -6,6 +6,8 @@ from models.product import Product
 from models.stock import Stock
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 from decimal import Decimal, ROUND_HALF_UP
+import cloudinary
+import cloudinary.uploader
 
 class ProductController:
     UPLOAD_FOLDER = "uploads/product_images"
@@ -25,11 +27,30 @@ class ProductController:
     def upload_imagem(imagem, product_name):
         if imagem and ProductController.allowed_file(imagem.filename):
             filename = secure_filename(imagem.filename)
-            product_folder = os.path.join(ProductController.UPLOAD_FOLDER, product_name)
-            os.makedirs(product_folder, exist_ok=True)
-            filepath = os.path.join(product_folder, filename)
-            imagem.save(filepath)
-            return filepath
+
+            # upload to cloudinary
+            try:
+                upload_result = cloudinary.uploader.upload(
+                    imagem,
+                    folder=f'product_images/{product_name}', #create folder to cloudinary
+                    public_id=filename.rsplit('.', 1)[0], # create name without extensions 
+                    overwrite=True,
+                    resource_type='image'
+                )
+
+                return upload_result.get("secure_url", None)
+                
+            except Exception as e:
+                print(f"Erro ao fazer upload para o Cloudinary: {str(e)}")
+                return None
+            
+
+            # upload to local storage
+            #product_folder = os.path.join(ProductController.UPLOAD_FOLDER, product_name)
+            #os.makedirs(product_folder, exist_ok=True)
+            #filepath = os.path.join(product_folder, filename)
+            #imagem.save(filepath)
+            #return filepath
         return None
 
     @staticmethod

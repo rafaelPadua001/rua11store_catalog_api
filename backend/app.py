@@ -18,6 +18,8 @@ from dotenv import load_dotenv
 import os
 import socket
 import re
+import cloudinary
+import cloudinary.uploader
 
 
 # Carrega variáveis do .env
@@ -76,6 +78,12 @@ mail.init_app(app)
 email_ctrl = EmailController(mail)
 import extensions
 extensions.email_controller = email_ctrl
+
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
 
 # Rodar servidor
 if __name__ == "__main__":
