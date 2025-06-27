@@ -8,7 +8,7 @@
             :src="logoImage"
             alt="Rua11Store logo"
             width="300"
-            height="400"
+            height="300"
             contain
             class="mb-n16 mx-auto d-block"
             ></v-img>
@@ -17,7 +17,7 @@
        <!-- <h1 class="text-h3 font-weight-bold">{{ pageTitle }}</h1> -->
        <!-- <div v-html="pageContent" class="text-body-2 font-weight-light text-center mt-0 mb-n2"></div> -->
 
-        <div class="mt-0 mb-1 d-flex justify-center">
+        <div class="mt-0 mb-16 d-flex justify-center">
           <v-item-group divided>
             <v-btn color="black" class="outline" size="small" href="https://example.com/download-ios-app.apk"
               target="_blank" variant="text" disabled>
