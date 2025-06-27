@@ -101,6 +101,7 @@ class CouponController:
         self.db_session.commit()
         return True
 
+    
     def pick_up_coupon_by_client_id(self, data):
         client_id = data.get('client_id')
         coupon_title = data.get('coupon_title')
