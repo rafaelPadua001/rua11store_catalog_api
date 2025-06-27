@@ -1,11 +1,23 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="align-center fill-height mx-auto" max-width="900">
-      <div v-if="!loadFailed && pageContent" class="text-center" background>
-        <h1 class="text-h3 font-weight-bold">{{ pageTitle }}</h1>
-        <div v-html="pageContent" class="text-body-2 font-weight-light mb-n1"></div>
+      <div v-if="!loadFailed && pageContent" class="text-center">
+        <div>
+          <v-img
+            v-if="logoImage"
+            :src="logoImage"
+            alt="Rua11Store logo"
+            width="300"
+            height="400"
+            contain
+            class="mb-n10 mx-auto d-block"
+            ></v-img>
+         
+        </div>
+       <!-- <h1 class="text-h3 font-weight-bold">{{ pageTitle }}</h1> -->
+       <!-- <div v-html="pageContent" class="text-body-2 font-weight-light text-center mt-0 mb-n2"></div> -->
 
-        <div class="mt-2 mb-4 d-flex justify-center">
+        <div class="mt-4 mb-4 d-flex justify-center">
           <v-item-group divided>
             <v-btn color="black" class="outline" size="small" href="https://example.com/download-ios-app.apk"
               target="_blank" variant="text" disabled>
@@ -56,6 +68,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useHead } from '@vueuse/head'
 import axios from 'axios'
 import { useSeo } from '../useSeo'
+import logoImage from '../assets/rua11store_logo.png'
 
 const pageTitle = ref('')
 const pageContent = ref('')
