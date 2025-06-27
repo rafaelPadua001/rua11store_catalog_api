@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from database import db  # Supondo que você tenha um arquivo database.py com a Base do SQLAlchemy
+from database import db 
+from datetime import datetime
 
 class CouponUser(db.Model):
     __tablename__ = 'coupons_user'
@@ -12,14 +13,29 @@ class CouponUser(db.Model):
     title = Column(String(255), nullable=False)
     code = Column(String(100), nullable=False)
     discount = Column(Float, nullable=False)
-    start_date = Column(String(50), nullable=False)
-    end_date = Column(String(50), nullable=False)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=False)
     created_at = Column(DateTime, nullable=False)
 
     # Relacionamento com o cupom
     coupon = relationship("Coupon", backref="coupon_users")
 
     def to_dict(self):
+        def parse_to_iso(date_value):
+            if isinstance(date_value, datetime):
+                return date_value.isoformat()
+            try:
+                # Tenta converter de string no formato RFC 2822
+                dt = datetime.strptime(date_value, '%a, %d %b %Y %H:%M:%S %Z')
+                return dt.isoformat()
+            except Exception:
+                try:
+                    # Tenta converter de string no formato ISO
+                    dt = datetime.fromisoformat(date_value)
+                    return dt.isoformat()
+                except:
+                    return str(date_value)  # Retorna como string se falhar
+
         return {
             'id': self.id,
             'client_id': self.client_id,
@@ -27,7 +43,7 @@ class CouponUser(db.Model):
             'title': self.title,
             'code': self.code,
             'discount': self.discount,
-            'start_date': self.start_date.isoformat() if self.start_date else None,
-            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'start_date': parse_to_iso(self.start_date),
+            'end_date': parse_to_iso(self.end_date),
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
