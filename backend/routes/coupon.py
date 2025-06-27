@@ -142,8 +142,8 @@ def serve_uploads(filename):
 @coupon_bp.route('/pick_up_coupon', methods=['POST'])
 def pick_up_coupon():
     data = request.get_json()
-    
-    return CouponController.pick_up_coupon_by_client_id(data)
+    controller = CouponController()
+    return controller.pick_up_coupon_by_client_id(data)
 
 @coupon_bp.route('/get-coupons/<string:user_id>', methods=['GET'])
 def get_coupons_by_user(user_id):

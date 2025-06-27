@@ -18,3 +18,16 @@ class CouponUser(db.Model):
 
     # Relacionamento com o cupom
     coupon = relationship("Coupon", backref="coupon_users")
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'client_id': self.client_id,
+            'coupon_id': self.coupon_id,
+            'title': self.title,
+            'code': self.code,
+            'discount': self.discount,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
