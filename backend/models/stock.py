@@ -1,7 +1,7 @@
 from datetime import datetime
 from database import db
 from sqlalchemy.orm import joinedload
-from models.product import Product  # Certifique-se de importar a classe Product corretamente
+
 
 class Stock(db.Model):
     __tablename__ = 'stock'

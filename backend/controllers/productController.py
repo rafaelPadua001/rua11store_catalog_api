@@ -60,7 +60,10 @@ class ProductController:
     @staticmethod
     def listar_produtos():
         products = Product.get_all()
-        return jsonify([p.to_dict() for p in products])
+        return jsonify([
+            {**item['product'].to_dict(), 'product_quantity': item['product_quantity']}
+            for item in products
+        ])
 
     @staticmethod
     @jwt_required()
