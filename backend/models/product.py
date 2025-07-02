@@ -22,6 +22,7 @@ class Product(db.Model):
     user_id = db.Column(db.Integer)
 
     stock = db.relationship('Stock', back_populates='product', uselist=False)
+    seo = db.relationship('ProductSeo', uselist=False, back_populates='product', cascade="all, delete-orphan")
 
     def save(self):
         """Salva ou atualiza o produto"""
@@ -56,24 +57,34 @@ class Product(db.Model):
     @staticmethod
     def get_all():
         try:
-            from models.stock import Stock  
+            from models.stock import Stock
+            from models.productSeo import ProductSeo
             # Faz join de Product com Stock para trazer quantidade
             results = db.session.query(
                 Product,
-                Stock.product_quantity
-            ).join(Stock, Product.id == Stock.id_product).all()
+                Stock.product_quantity,
+                ProductSeo
+            ).join(
+                Stock, Product.id == Stock.id_product
+            ).outerjoin(
+                ProductSeo, Product.id == ProductSeo.product_id
+            ).all()
 
             # results será lista de tuplas (Product, product_quantity)
             products_with_qty = []
-            for product, quantity in results:
-                # Você pode construir um dict ou objeto conforme precisar
+            for product, quantity, seo in results:
                 products_with_qty.append({
                     "product": product,
-                    "product_quantity": quantity
+                    "product_quantity": quantity,
+                    "product_seo": {
+                        "meta_title": seo.meta_title if seo else None,
+                        "meta_description": seo.meta_description if seo else None,
+                        "slug": seo.slug if seo else None,
+                        "keywords": seo.keywords if seo else None
+                    } if seo else None
                 })
 
             return products_with_qty
-
         except Exception as e:
             print(f"Erro ao buscar produtos: {e}")
             return []
@@ -104,7 +115,7 @@ class Product(db.Model):
             return []
 
     def to_dict(self):
-        return {
+        data = {
             "id": self.id,
             "name": self.name,
             "description": self.description,
@@ -117,6 +128,18 @@ class Product(db.Model):
             "height": self.height,
             "weight": self.weight,
             "length": self.length,
-            "user_id": self.user_id
+            "user_id": self.user_id,
         }
+
+        if self.seo:  # relacionamento product.seo
+            data["seo"] = {
+                "meta_title": self.seo.meta_title,
+                "meta_description": self.seo.meta_description,
+                "slug": self.seo.slug,
+                "keywords": self.seo.keywords,
+            }
+        else:
+            data["seo"] = None
+
+        return data
 

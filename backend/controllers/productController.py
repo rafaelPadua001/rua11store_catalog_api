@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from database import db
 from models.product import Product
 from models.stock import Stock
+from controllers.productSeoController import ProductSeoController
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
 from decimal import Decimal, ROUND_HALF_UP
 import cloudinary
@@ -121,6 +122,16 @@ class ProductController:
             }
             Stock.create(stock_data)
 
+            seo_data = {
+                "product_id": novo_produto.id,
+                "meta_title": request.form.get("meta_title", ""),
+                "meta_description": request.form.get("meta_description", ""),
+                "slug": request.form.get("slug", ProductController.formatar_nome(name)),
+                "keywords": request.form.get("keywords", "")
+            }
+
+            ProductSeoController.create_product_seo(seo_data)
+
             return jsonify({"mensagem": "Produto adicionado com sucesso!", "product": novo_produto.to_dict()}), 201
         except Exception as e:
             db.session.rollback()
@@ -149,6 +160,13 @@ class ProductController:
         imagem = request.files.get("imagem")
         length = request.form.get('length', product.length)
         imagem_path = ProductController.upload_imagem(imagem, name) if imagem else product.image_path
+
+        
+        # Campos de SEO
+        meta_title = request.form.get("meta_title")
+        meta_description = request.form.get("meta_description")
+        slug = request.form.get("slug")
+        keywords = request.form.get("keywords")
 
         try:
             product.update(
@@ -182,6 +200,18 @@ class ProductController:
             stock_id = Stock.get_stock_id_by_product(product.id)
             if stock_id:
                 Stock.update(stock_id, stock_data)
+
+            #update SEO if provided
+            if any([meta_title, meta_description, slug, keywords]):
+                request.form = request.form.copy()  # Ensure request.form is mutable
+
+                seo_data = {
+                    "meta_title": request.form.get("meta_title"),
+                    "meta_description": request.form.get("meta_description"),
+                    "slug": request.form.get("slug"),
+                    "keywords": request.form.get("keywords")
+                }
+                ProductSeoController.update_product_seo(product.id, seo_data)
 
             return jsonify({"mensagem": "Produto atualizado com sucesso!", "product": product.to_dict()}), 200
         except Exception as e:

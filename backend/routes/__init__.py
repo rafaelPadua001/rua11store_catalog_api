@@ -3,6 +3,7 @@ from routes.authentication import auth_bp
 from routes.pages import pages_bp
 from routes.categories import category_bp
 from routes.products import products_bp
+from routes.productsSeo import product_seo_bp
 from routes.stock import stock_bp
 from routes.melhorEnvio import melhorenvio_bp
 from routes.mercadoPago import mercadoPago_bp
@@ -20,6 +21,7 @@ def register_routes(app):
     app.register_blueprint(pages_bp, url_prefix='/pages')
     app.register_blueprint(category_bp, url_prefix='/categories')
     app.register_blueprint(products_bp, url_prefix='/products')
+    app.register_blueprint(product_seo_bp, url_prefix='/product-seo')
     app.register_blueprint(stock_bp, url_prefix='/stock')
     app.register_blueprint(melhorenvio_bp, url_prefix='/melhorEnvio')
     app.register_blueprint(mercadoPago_bp, url_prefix='/payment')
