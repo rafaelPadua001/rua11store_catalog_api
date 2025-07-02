@@ -15,6 +15,7 @@ from routes.email import email_bp
 from routes.seo import seo_bp
 from routes.notification import notification_bp
 from routes.coupon import coupon_bp
+from routes.sitemap import sitemap_bp
 
 def register_routes(app):
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -33,3 +34,4 @@ def register_routes(app):
     app.register_blueprint(seo_bp, url_prefix='/seo')
     app.register_blueprint(notification_bp, url_prefix='/notifications')
     app.register_blueprint(coupon_bp, url_prefix='/coupon')
+    app.register_blueprint(sitemap_bp, url_prefix='/sitemap')
