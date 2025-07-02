@@ -17,7 +17,8 @@ class Stock(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    product = db.relationship('Product', backref=db.backref('stocks', lazy=True))
+    product = db.relationship('Product', back_populates='stock')
+
 
     def __init__(self, id_product, user_id, category_id, product_name, product_price, product_quantity, variations=None):
         self.id_product = id_product

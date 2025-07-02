@@ -51,70 +51,121 @@
             </v-card>
 
             <!-- Modal para Adicionar/Editar Produto -->
-            <v-dialog v-model="productDialog" max-width="500px">
-                <v-card>
-                    <v-card-title class="headline">{{ formTitle }}</v-card-title>
+            <v-dialog v-model="productDialog" max-width="600" fullscreen>
+                <v-card class="pa-4 text-center">
+                    <v-toolbar flat color="transparent">
+                        <v-toolbar-title class="headline">{{ formTitle }}</v-toolbar-title>
+
+                        <v-btn icon @click="productDialog = false">
+                            <v-icon>mdi-close</v-icon>
+                        </v-btn>
+
+                    </v-toolbar>
                     <v-card-text>
-                        <v-container>
-                            <v-row>
-                          
-                                <v-col cols="12">
-                                    <v-select v-model="editedProduct.category_id" :items="mainCategories"
-                                        label="Category" item-title="name" item-text="name" item-value="id" outlined
-                                        dense></v-select>
-                                </v-col>
+                        <v-row dense>
+                            <v-subheader class="text-left">Informações Básicas</v-subheader>
+                            <v-divider class="mb-3"></v-divider>
+                            <v-col cols="12" md="4" sm="6">
+                                <v-text-field v-model="editedProduct.name" label="Product Name" outlined dense>
+                                </v-text-field>
+                            </v-col>
+                            <v-col cols="12" md="4" sm="6">
+                                <v-file-input v-model="editedProduct.image" label="Product Image" outlined show-size
+                                    dense></v-file-input>
+                            </v-col>
+                        </v-row>
 
-                                <v-col cols="12" v-if="subcategories.length">
-                                    <v-select v-model="editedProduct.subcategory_id" :items="subcategories"
-                                        label="Subcategory" item-title="name" item-text="name" item-value="id" outlined
-                                        dense></v-select>
-                                </v-col>
+                        <v-row dense>
+                            <v-subheader class="text-left">Categoria</v-subheader>
+                            <v-divider class="mb-3"></v-divider>
+                            <v-col cols="12" md="6" sm="6">
+                                <v-select v-model="editedProduct.category_id" :items="mainCategories" label="Category"
+                                    item-title="name" item-text="name" item-value="id" outlined dense></v-select>
+                            </v-col>
 
-                                <v-col cols="12">
-                                    <v-text-field v-model="editedProduct.name" label="Product Name" outlined
-                                        dense></v-text-field>
-                                </v-col>
+                            <v-col cols="12" md="6" sm="6">
+                                <v-select v-model="editedProduct.subcategory_id" :items="subcategories"
+                                    label="Subcategory" item-title="name" item-text="name" item-value="id" outlined
+                                    dense></v-select>
+                            </v-col>
 
-                                <v-col cols="12">
-                                    <v-file-input v-model="editedProduct.image" label="Product Image" outlined
-                                       show-size dense></v-file-input>
-                                </v-col>
+                        </v-row>
 
-                                <v-col cols="12">
-                                    <v-textarea v-model="editedProduct.description" label="Description" outlined
-                                        dense></v-textarea>
-                                </v-col>
+                        <v-row dense>
+                            <v-subheader class="text-left">Descrição</v-subheader>
+                            <v-divider class="mb-3"></v-divider>
+                            <v-col cols="12">
+                                <v-textarea v-model="editedProduct.description" label="Description" outlined dense>
+                                </v-textarea>
+                            </v-col>
+                        </v-row>
 
-                                <v-col cols="6">
-                                    <v-text-field v-model="formattedPrice" label="Price" outlined dense
-                                        @input="updatePrice"></v-text-field>
-                                </v-col>
+                        <v-row dense>
+                            <v-subheader class="text-left">Estoque</v-subheader>
+                            <v-divider class="mb-3"></v-divider>
+                            <v-col cols="6">
+                                <v-text-field v-model="formattedPrice" label="Price" outlined dense
+                                    @input="updatePrice"></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="editedProduct.quantity" label="Quantity" type="number" outlined
+                                    dense></v-text-field>
+                            </v-col>
+                        </v-row>
 
-                                <v-col cols="6">
-                                    <v-text-field v-model="editedProduct.quantity" label="Quantity" type="number"
-                                        outlined dense></v-text-field>
-                                </v-col>
+                        <v-row dense>
+                            <v-subheader class="text-left">Dimensões</v-subheader>
+                            <v-divider class="mb-3"></v-divider>
+                            <v-col cols="12" md="4" sm="6">
+                                <v-text-field v-model="editedProduct.width" label="width(cm)" type="number" outlined
+                                    dense></v-text-field>
+                            </v-col>
+                            <v-col cols="12" md="4" sm="6">
+                                <v-text-field v-model="editedProduct.height" label="Height (cm)" type="number" outlined
+                                    dense></v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row dense>
+                            <v-col cols="12" md="4" sm="6">
+                                <v-text-field v-model="formattedWeight" label="Weight (kg)" type="text" outlined
+                                    dense></v-text-field>
+                            </v-col>
 
-                                <v-col cols="6">
-                                    <v-text-field v-model="editedProduct.width" label="width(cm)" type="number" outlined
-                                        dense></v-text-field>
-                                </v-col>
-                                <v-col cols="6">
-                                    <v-text-field v-model="editedProduct.height" label="Height (cm)" type="number"
-                                        outlined dense></v-text-field>
-                                </v-col>
+                            <v-col cols="12" md="4" sm="6">
+                                <v-text-field v-model="editedProduct.length" label="length (cm)" type="number" outlined
+                                    dense></v-text-field>
+                            </v-col>
+                        </v-row>
 
-                                <v-col cols="6">
-                                    <v-text-field v-model="formattedWeight" label="Weight (kg)" type="text"
-                                        outlined dense></v-text-field>
-                                </v-col>
+                        <v-row dense>
+                            <v-subheader class="text-left">SEO</v-subheader>
+                            <v-col cols="12">
 
-                                <v-col cols="6">
-                                    <v-text-field v-model="editedProduct.length" label="length (cm)" type="number"
-                                        outlined dense></v-text-field>
-                                </v-col>
-                            </v-row>
-                        </v-container>
+                                <v-divider class="mb-3"></v-divider>
+                            </v-col>
+
+                            <v-col cols="12" md="6">
+                                <v-text-field v-model="editedProduct.seo.meta_title" label="Meta Title" outlined
+                                    dense></v-text-field>
+                            </v-col>
+
+                            <v-col cols="12" md="6">
+                                <v-text-field v-model="editedProduct.seo.slug" label="Slug (URL)" outlined
+                                    dense></v-text-field>
+                            </v-col>
+
+                            <v-col cols="12">
+                                <v-textarea v-model="editedProduct.seo.meta_description" label="Meta Description"
+                                    outlined dense rows="2" auto-grow></v-textarea>
+                            </v-col>
+
+                            <v-col cols="12">
+                                <v-text-field v-model="editedProduct.seo.keywords"
+                                    label="Keywords (separadas por vírgula)" outlined dense></v-text-field>
+                            </v-col>
+                        </v-row>
+
+
                     </v-card-text>
                     <v-card-actions>
                         <v-btn color="grey darken-1" text @click="close">Cancel</v-btn>
@@ -145,7 +196,30 @@ export default {
             loading: false,
             productDialog: false,
             editedIndex: -1,
-            editedProduct: null, // Inicialmente nulo para evitar erros de acesso
+
+            editedProduct: {
+                id: null,
+                name: '',
+                description: '',
+                price: '',
+                category_id: null,
+                subcategory_id: null,
+                image_path: '',
+                quantity: 0,
+                width: 0,
+                height: 0,
+                weight: 0,
+                length: 0,
+                user_id: null,
+                seo: {
+                    meta_title: '',
+                    meta_description: '',
+                    slug: '',
+                    keywords: ''
+                }
+            },
+
+            // Inicialmente nulo para evitar erros de acesso
             defaultProduct: {
                 id: null,
                 name: "",
@@ -157,6 +231,12 @@ export default {
                 quantity: 1,
                 width: 1,
                 length: 1,
+                seo: {  // <-- Aqui
+                    meta_title: '',
+                    meta_description: '',
+                    slug: '',
+                    keywords: ''
+                }
             },
             products: [],
             categories: [],
@@ -196,16 +276,16 @@ export default {
             }
         },
         formattedWeight: {
-            get(){
-                if(this.editedProduct.weight == null || this.editedProduct.weight == 'undefined') return "";
+            get() {
+                if (this.editedProduct.weight == null || this.editedProduct.weight == 'undefined') return "";
 
                 return Number(this.editedProduct.weight).toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                 });
             },
-            set(value){
-                 const cleaned = value.toString().replace(",", ".").replace(/[^0-9.]/g, "");
+            set(value) {
+                const cleaned = value.toString().replace(",", ".").replace(/[^0-9.]/g, "");
                 const parsed = parseFloat(cleaned);
                 this.editedProduct.weight = isNaN(parsed) ? 0 : parseFloat(parsed.toFixed(2));
 
@@ -242,12 +322,12 @@ export default {
             }
         },
         newProduct() {
-            this.editedProduct = { ...this.defaultProduct };
+            this.editedProduct = { ...this.defaultProduct, seo: { ...this.defaultProduct.seo } };
             this.productDialog = true;
         },
         editProduct(item) {
             this.editedIndex = this.products.findIndex((p) => p.id === item.id);
-            this.editedProduct = { ...item };
+            this.editedProduct = { ...item, seo: item.seo ? { ...item.seo } : { meta_title: "", meta_description: "", slug: "", keywords: "" } };
             this.productDialog = true;
         },
         async saveProduct() {
@@ -272,6 +352,13 @@ export default {
                 formData.append('height', this.editedProduct.height || "");
                 formData.append('weight', this.editedProduct.weight || "");
                 formData.append('length', this.editedProduct.length || "");
+                formData.append('length', this.editedProduct.length || "");
+                formData.append("meta_title", this.editedProduct.seo?.meta_title || "");
+                formData.append("meta_description", this.editedProduct.seo?.meta_description || "");
+                formData.append("slug", this.editedProduct.seo?.slug || "");
+                formData.append("keywords", this.editedProduct.seo?.keywords || "");
+
+
 
                 const config = {
                     headers: {
@@ -350,11 +437,11 @@ export default {
                 //Remove product from local list
                 this.products = this.products.filter(p => p.id !== productId);
 
-                this.$toast.success('Produto removido com sucesso');
+                console.log('Produto removido com sucesso');
             }
             catch (error) {
                 console.log("Error deleting product:", error);
-                this.$toast.error("Erro ao excluir produto");
+                //   this.$toast.error("Erro ao excluir produto");
             }
         },
         close() {

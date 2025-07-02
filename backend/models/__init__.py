@@ -1,6 +1,7 @@
 from .userProfile import UserProfile
 from .page import Page
 from .product import Product
+from .productSeo import ProductSeo
 from .category import Category
 from .stock import Stock
 from .payment import Payment
@@ -17,13 +18,14 @@ __all__ = [
     'UserProfile',
     'Page',
     'Product',
+    'ProductSeo',
     'Category',
     'Stock',
     'Payment',
     'Delivery',
     'Order',
     'User',
-    'TokeBlockList',
+    'TokenBlockList',
     'PaymentProduct',
     'OrderItem',
     'Coupon',
