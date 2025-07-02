@@ -4,6 +4,17 @@ from database import db
 
 class ProductSeoController:
     @staticmethod
+    def list_product_seo():
+        produtos_seo = db.session.query(ProductSeo).all()
+        result = []
+        for p in produtos_seo:
+            result.append({
+                'slug': p.slug,
+                # outros campos se precisar
+            })
+        return result
+    
+    @staticmethod
     def create_product_seo(data):
         required_fields = ['product_id']
         for field in required_fields:
