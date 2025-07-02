@@ -30,7 +30,7 @@ export function useSeo() {
     metaKeywords.value = data.metaKeywords || ''
     ogTitle.value = data.ogTitle || ''
     ogDescription.value = data.ogDescription || ''
-    ogImage.value =  ogImage.value = data.ogImage ? `${baseURL}/${data.ogImage}` : ''
+    ogImage.value =  ogImage.value = data.ogImage ? `${data.ogImage}` : ''
   }
 
   return { setSeo }
