@@ -7,13 +7,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const API_URL = 'https://rua11store-catalog-api-lbp7.onrender.com';
-const SITE_URL = 'https://rua11store.vercel.app';
+const SITE_URL = 'https://rua11store-catalog-api.vercel.app';
 
 async function generateSitemap() {
   try {
     const staticPages = [
       '',
+      '/',
       '/sobre'
+     
     ];
 
     const urls = staticPages.map(route => `
@@ -29,7 +31,7 @@ async function generateSitemap() {
       if (produto.slug) {
         urls.push(`
   <url>
-    <loc>${SITE_URL}/produto/${encodeURIComponent(produto.slug)}</loc>
+    <loc>${SITE_URL}/product/${encodeURIComponent(produto.slug)}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </url>`);
       }

@@ -2,17 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
-    <loc>https://rua11store.vercel.app</loc>
-    <lastmod>2025-07-02</lastmod>
+    <loc>https://rua11store-catalog-api.vercel.app</loc>
+    <lastmod>2025-07-03</lastmod>
   </url>
 
   <url>
-    <loc>https://rua11store.vercel.app/sobre</loc>
-    <lastmod>2025-07-02</lastmod>
+    <loc>https://rua11store-catalog-api.vercel.app/</loc>
+    <lastmod>2025-07-03</lastmod>
   </url>
 
   <url>
-    <loc>https://rua11store.vercel.app/produto/Teste%20SEO</loc>
-    <lastmod>2025-07-02</lastmod>
+    <loc>https://rua11store-catalog-api.vercel.app/sobre</loc>
+    <lastmod>2025-07-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://rua11store-catalog-api.vercel.app/product/papel-seda-rose-silk-king-size-35-folhas</loc>
+    <lastmod>2025-07-03</lastmod>
   </url>
 </urlset>
