@@ -280,14 +280,14 @@ export default {
                 if (this.editedProduct.weight == null || this.editedProduct.weight == 'undefined') return "";
 
                 return Number(this.editedProduct.weight).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 3,
+                    maximumFractionDigits: 3,
                 });
             },
             set(value) {
                 const cleaned = value.toString().replace(",", ".").replace(/[^0-9.]/g, "");
                 const parsed = parseFloat(cleaned);
-                this.editedProduct.weight = isNaN(parsed) ? 0 : parseFloat(parsed.toFixed(2));
+                this.editedProduct.weight = isNaN(parsed) ? 0 : parseFloat(parsed.toFixed(3));
 
             }
         }
