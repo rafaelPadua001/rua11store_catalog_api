@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rua11store-catalog-api.vercel.app/sitemap.xml
