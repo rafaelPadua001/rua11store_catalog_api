@@ -15,7 +15,7 @@ async function generateSitemap() {
       '',
       '/',
       '/sobre'
-     
+
     ];
 
     const urls = staticPages.map(route => `
@@ -31,7 +31,8 @@ async function generateSitemap() {
       if (produto.slug) {
         urls.push(`
   <url>
-    <loc>${SITE_URL}/product/${encodeURIComponent(produto.slug)}</loc>
+    <loc>${SITE_URL}/product/${encodeURI(produto.slug)}</loc>
+
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </url>`);
       }
