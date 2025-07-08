@@ -25,28 +25,28 @@
         <v-row>
             <v-col cols="12" sm="4">
                 <v-card class="pa-4">
-                    <v-card-title>Carrinhos Ativos</v-card-title>
+                    <v-card-title>🛒 Carrinhos Ativos</v-card-title>
                     <v-card-text class="text-h5 font-weight-bold">{{ carts?.length || 0 }}</v-card-text>
                 </v-card>
             </v-col>
             <v-col cols="12" sm="4">
                 <v-card class="pa-4">
-                    <v-card-title>Pedidos de Hoje</v-card-title>
+                    <v-card-title>📦 Pedidos de Hoje</v-card-title>
 
                     <v-card-text class="text-h5 font-weight-bold">{{ orders?.length || 0 }}</v-card-text>
                 </v-card>
             </v-col>
 
 
-             <v-col cols="12" sm="4">
-        <v-card class="pa-3">
-          <v-card-title>Receita Total</v-card-title>
-          <v-card-text class="text-h5 font-weight-bold">
-            R$ {{ totalRevenue.toFixed(2) }}
-          </v-card-text>
-        </v-card>
-      </v-col>
-  
+            <v-col cols="12" sm="4">
+                <v-card class="pa-3">
+                    <v-card-title>💰 Receita Total</v-card-title>
+                    <v-card-text class="text-h5 font-weight-bold">
+                        R$ {{ totalRevenue.toFixed(2) }}
+                    </v-card-text>
+                </v-card>
+            </v-col>
+
 
         </v-row>
 
@@ -71,13 +71,25 @@
         <v-row>
             <v-col cols="12">
                 <v-card class="pa-4">
-                    <v-card-title>Vendas nos ultimos 7 dias</v-card-title>
-                    <v-card-text>
-                        <p>Gráfico de exemplo...</p>
-                    </v-card-text>
+                    <v-card-title>📊 Vendas nos últimos 7 dias</v-card-title>
+                    <!-- <v-card-subtitle class="text-subtitle-1">
+                        Receita Total: <strong>R$ {{ revenueLast7Days.toFixed(2) }}</strong>
+                    </v-card-subtitle>-->
+
+                    <v-data-table :headers="ordersHeaders" :items="ordersLast7Days" class="elevation-1 mt-4"
+                        item-value="id" dense>
+                        <template #item.order_date="{ item }">
+                            {{ new Date(item.order_date).toLocaleString('pt-BR') }}
+                        </template>
+
+                        <template #item.total_amount="{ item }">
+                            R$ {{ parseFloat(item.total_amount).toFixed(2) }}
+                        </template>
+                    </v-data-table>
                 </v-card>
             </v-col>
         </v-row>
+
     </v-container>
 
 </template>
@@ -102,6 +114,13 @@ export default {
             carts: null,
             orders: [],
             ordersAll: [],
+            ordersLast7Days: [],
+            ordersHeaders: [
+                { title: 'ID', key: 'id' },
+                { title: 'Client', key: 'user_id' }, // ou ajuste conforme seu campo
+                { title: 'Value', key: 'total_amount' },
+                { title: 'Date', key: 'order_date' },
+            ],
             dateToday: this.capitalizeFirstLetter(
                 new Date().toLocaleDateString('pt-BR', {
                     weekday: 'long',
@@ -112,25 +131,30 @@ export default {
             ),
         };
     },
-   computed: {
- totalRevenue() {
-  if (!Array.isArray(this.ordersAll) || this.ordersAll.length === 0) return 0;
+    computed: {
+        totalRevenue() {
+            if (!Array.isArray(this.ordersAll) || this.ordersAll.length === 0) return 0;
 
-  const valores = this.ordersAll.map(order => {
-    const raw = order.total_amount;
-    const val = parseFloat(raw);
-    console.log(`Pedido ID ${order.id}: ${raw} -> ${val}`);
-    return isNaN(val) ? 0 : val;
-  });
+            const valores = this.ordersAll.map(order => {
+                const raw = order.total_amount;
+                const val = parseFloat(raw);
+                console.log(`Pedido ID ${order.id}: ${raw} -> ${val}`);
+                return isNaN(val) ? 0 : val;
+            });
 
-  const total = valores.reduce((sum, val) => sum + val, 0);
-  console.log("💰 Soma final:", total);
-  return total;
-}
+            const total = valores.reduce((sum, val) => sum + val, 0);
+            console.log("💰 Soma final:", total);
+            return total;
+        },
+        revenueLast7Days() {
+            if (!Array.isArray(this.ordersLast7Days)) return 0;
+            return this.ordersLast7Days.reduce((total, order) => {
+                const value = parseFloat(order.total_amount);
+                return total + (isNaN(value) ? 0 : value);
+            }, 0);
+        }
 
-  },
-   
-
+    },
     methods: {
         capitalizeFirstLetter(text) {
             return text.charAt(0).toUpperCase() + text.slice(1);
@@ -180,38 +204,48 @@ export default {
                 console.log('Erro ao carregar carrinhos:', error);
             }
         },
-       async loadorders() {
-      try {
-        const response = await api.get('/order/get-orders');
-        const orders = Array.isArray(response.data) && Array.isArray(response.data[0])
-          ? response.data[0]
-          : response.data;
+        async loadorders() {
+            try {
+                const response = await api.get('/order/get-orders');
+                const orders = Array.isArray(response.data) && Array.isArray(response.data[0])
+                    ? response.data[0]
+                    : response.data;
 
-        this.ordersAll = orders;
+                this.ordersAll = orders;
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-        this.ordersToday = orders.filter(order => {
-          const orderDate = new Date(order.order_date);
-          orderDate.setHours(0, 0, 0, 0);
-          return orderDate.getTime() === today.getTime();
-        });
+                this.ordersToday = orders.filter(order => {
+                    const orderDate = new Date(order.order_date);
+                    orderDate.setHours(0, 0, 0, 0);
+                    return orderDate.getTime() === today.getTime();
+                });
 
-        console.log('Todos os pedidos:', this.ordersAll);
-        console.log('Pedidos de hoje:', this.ordersToday);
-      } catch (error) {
-        console.log('Erro ao buscar pedidos:', error);
-      }
-    }
-  },
+                //Last 7d days orders
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(today.getDate() - 6); // today included
+                sevenDaysAgo.setHours(0, 0, 0, 0);
+
+                this.ordersLast7Days = orders.filter(order => {
+                    const orderDate = new Date(order.order_date);
+                    orderDate.setHours(0, 0, 0, 0);
+                    return orderDate >= sevenDaysAgo && orderDate <= today;
+                });
+
+
+                console.log('Todos os pedidos:', this.ordersAll);
+                console.log('Pedidos de hoje:', this.ordersToday);
+                console.log('Pedidos dos últimos 7 dias:', this.ordersLast7Days);
+            } catch (error) {
+                console.log('Erro ao buscar pedidos:', error);
+            }
+        }
+    },
     mounted() {
-
         this.getProfileUser();
         this.loadorders();
         this.loadCarts();
-
     },
-
 };
 </script>
