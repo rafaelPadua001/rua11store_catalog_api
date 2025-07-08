@@ -51,6 +51,7 @@
         </v-row>
 
         <v-row>
+            <V-col cols="12" sm="4"></V-col>
             <v-col cols="12" sm="4">
                 <v-card>
                     <v-card-title>Produtos Mais Pedidos</v-card-title>
@@ -59,8 +60,26 @@
             </v-col>
             <v-col cols="12" sm="4">
                 <v-card>
-                    <v-card-title>Fora do Estoque</v-card-title>
-                    <v-card-title class="text-h5 font-weight-bold">Produtos fora do estoque aqui...</v-card-title>
+                    <v-card-title>📦 Fora do Estoque</v-card-title>
+                    <v-card-text>
+                        <div v-if="stocks.length === 0">Todos os produtos estão em estoque !</div>
+                        <v-list v-else>
+                            <div v-for="(product, index) in stocks" :key="index" class="d-flex align-center mb-2">
+                                <!-- Avatar -->
+                                <v-avatar class="me-4" size="70">
+                                    <v-img :src="product.product.image_path"
+                                        :alt="product.product.seo?.slug || 'Produto'" cover />
+                                </v-avatar>
+
+                                <!-- Texto ao lado -->
+                                <div class="text-truncate" style="max-width: 200px;">
+                                    {{ product.product.name }}
+                                </div>
+                            </div>
+                        </v-list>
+
+
+                    </v-card-text>
                 </v-card>
             </v-col>
         </v-row>
@@ -115,6 +134,7 @@ export default {
             orders: [],
             ordersAll: [],
             ordersLast7Days: [],
+            stocks: [],
             ordersHeaders: [
                 { title: 'ID', key: 'id' },
                 { title: 'Client', key: 'user_id' }, // ou ajuste conforme seu campo
@@ -138,12 +158,12 @@ export default {
             const valores = this.ordersAll.map(order => {
                 const raw = order.total_amount;
                 const val = parseFloat(raw);
-                console.log(`Pedido ID ${order.id}: ${raw} -> ${val}`);
+                //.log(`Pedido ID ${order.id}: ${raw} -> ${val}`);
                 return isNaN(val) ? 0 : val;
             });
 
             const total = valores.reduce((sum, val) => sum + val, 0);
-            console.log("💰 Soma final:", total);
+            // console.log("💰 Soma final:", total);
             return total;
         },
         revenueLast7Days() {
@@ -234,11 +254,20 @@ export default {
                 });
 
 
-                console.log('Todos os pedidos:', this.ordersAll);
-                console.log('Pedidos de hoje:', this.ordersToday);
-                console.log('Pedidos dos últimos 7 dias:', this.ordersLast7Days);
+                //console.log('Pedidos de hoje:', this.ordersToday);
+                //console.log('Todos os pedidos:', this.ordersAll);
+                //console.log('Pedidos dos últimos 7 dias:', this.ordersLast7Days);
             } catch (error) {
                 console.log('Erro ao buscar pedidos:', error);
+            }
+        },
+        async loadStock() {
+            try {
+                const response = await api.get('/stock');
+                this.stocks = response.data.filter(product => product.product_quantity === 0 && product.product);
+                //  console.log('stock carregado:' , this.stocks);
+            } catch (error) {
+                console.log('Erro ao buscar estoque:', error);
             }
         }
     },
@@ -246,6 +275,7 @@ export default {
         this.getProfileUser();
         this.loadorders();
         this.loadCarts();
+        this.loadStock();
     },
 };
 </script>
