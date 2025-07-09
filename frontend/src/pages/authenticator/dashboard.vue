@@ -26,13 +26,14 @@
             <v-col cols="12" sm="4">
                 <v-card class="pa-4">
                     <v-card-title>🛒 Carrinhos Ativos</v-card-title>
+                    <v-divider></v-divider>
                     <v-card-text class="text-h5 font-weight-bold">{{ carts?.length || 0 }}</v-card-text>
                 </v-card>
             </v-col>
             <v-col cols="12" sm="4">
                 <v-card class="pa-4">
                     <v-card-title>📦 Pedidos de Hoje</v-card-title>
-
+                    <v-divider></v-divider>
                     <v-card-text class="text-h5 font-weight-bold">{{ orders?.length || 0 }}</v-card-text>
                 </v-card>
             </v-col>
@@ -41,6 +42,7 @@
             <v-col cols="12" sm="4">
                 <v-card class="pa-3">
                     <v-card-title>💰 Receita Total</v-card-title>
+                    <v-divider></v-divider>
                     <v-card-text class="text-h5 font-weight-bold">
                         R$ {{ totalRevenue.toFixed(2) }}
                     </v-card-text>
@@ -51,22 +53,37 @@
         </v-row>
 
         <v-row>
-            <V-col cols="12" sm="4"></V-col>
+            <v-col cols="12" sm="4"></v-col>
             <v-col cols="12" sm="4">
                 <v-card>
-                    <v-card-title>Produtos Mais Pedidos</v-card-title>
-                    <v-card-title class="text-h5 font-weight-bold">Mais pedidos aqui...</v-card-title>
+                    <v-card-title>🔥 Produtos Mais Pedidos</v-card-title>
+                    <v-divider></v-divider>
+                    <div v-if="top5Products.length == 0">
+                        <v-card-text>Nenhum produto encontrado</v-card-text>
+                    </div>
+                    <v-card-text>
+                        <v-list dense>
+                            <v-list-item v-for="(product, index) in top5Products" :key="product.id || index">
+                                <div>
+                                    <strong>{{ index + 1 }}. {{ product.name }}</strong><br>
+                                    Quantidade: {{ product.totalQuantity }}
+                                </div>
+                            </v-list-item>
+                        </v-list>
+                    </v-card-text>
+
                 </v-card>
             </v-col>
             <v-col cols="12" sm="4">
                 <v-card>
                     <v-card-title>📦 Fora do Estoque</v-card-title>
+                    <v-divider></v-divider>
                     <v-card-text>
                         <div v-if="stocks.length === 0">Todos os produtos estão em estoque !</div>
                         <v-list v-else>
                             <div v-for="(product, index) in stocks" :key="index" class="d-flex align-center mb-2">
                                 <!-- Avatar -->
-                                <v-avatar class="me-4" size="70">
+                                <v-avatar class="me-4" size="69">
                                     <v-img :src="product.product.image_path"
                                         :alt="product.product.seo?.slug || 'Produto'" cover />
                                 </v-avatar>
@@ -91,6 +108,7 @@
             <v-col cols="12">
                 <v-card class="pa-4">
                     <v-card-title>📊 Vendas nos últimos 7 dias</v-card-title>
+
                     <!-- <v-card-subtitle class="text-subtitle-1">
                         Receita Total: <strong>R$ {{ revenueLast7Days.toFixed(2) }}</strong>
                     </v-card-subtitle>-->
@@ -108,9 +126,7 @@
                 </v-card>
             </v-col>
         </v-row>
-
     </v-container>
-
 </template>
 
 <script>
@@ -125,7 +141,6 @@ const api = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
-
 export default {
     data() {
         return {
@@ -135,6 +150,8 @@ export default {
             ordersAll: [],
             ordersLast7Days: [],
             stocks: [],
+            topProducts: [],
+            top5Products: [],
             ordersHeaders: [
                 { title: 'ID', key: 'id' },
                 { title: 'Client', key: 'user_id' }, // ou ajuste conforme seu campo
@@ -173,7 +190,6 @@ export default {
                 return total + (isNaN(value) ? 0 : value);
             }, 0);
         }
-
     },
     methods: {
         capitalizeFirstLetter(text) {
@@ -204,7 +220,6 @@ export default {
                 });
 
                 this.profile = response.data;
-
             }
             catch (error) {
                 console.log('Erro ao buscar perfil do usuario:', error);
@@ -253,7 +268,31 @@ export default {
                     return orderDate >= sevenDaysAgo && orderDate <= today;
                 });
 
+                //Most purchased products
+                const productCountMap = {};
 
+                orders.forEach(order => {
+                    if (Array.isArray(order.products)) {
+                        order.products.forEach(product => {
+                            const key = product.id || product.name;
+                            if (!productCountMap[key]) {
+                                productCountMap[key] = {
+                                    ...product,
+                                    totalQuantity: 0
+                                };
+                            }
+
+                            productCountMap[key].totalQuantity += product.quantity || 1;
+                        });
+                    }
+                });
+
+                //convert to array and sort
+                this.topProducts = Object.values(productCountMap)
+                    .sort((a, b) => b.totalQuantity - a.totalQuantity);
+
+                // top 5 most sold
+                this.top5Products = this.topProducts.slice(0, 5);
                 //console.log('Pedidos de hoje:', this.ordersToday);
                 //console.log('Todos os pedidos:', this.ordersAll);
                 //console.log('Pedidos dos últimos 7 dias:', this.ordersLast7Days);
