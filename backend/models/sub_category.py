@@ -2,7 +2,7 @@ import sqlite3
 
 class SubCategory:
     def __init__(self, id=None, name=None, category_id=None):
-        seld.id = id
+        self.id = id
         self.name = name
         self.category_id
 

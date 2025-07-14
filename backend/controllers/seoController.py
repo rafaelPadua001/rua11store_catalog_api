@@ -23,12 +23,12 @@ class SeoController:
     def save_seo(seo_data):
         seo = Seo(
             route=seo_data.get('route'),
-            metaTitle=seo_data.get('metaTitle'),
-            metaDescription=seo_data.get('metaDescription'),
-            metaKeywords=seo_data.get('metaKeywords'),
-            ogTitle=seo_data.get('ogTitle'),
-            ogDescription=seo_data.get('ogDescription'),
-            ogImage=seo_data.get('ogImage', {}).get('url') if isinstance(seo_data.get('ogImage'), dict) else seo_data.get('ogImage')
+            metatitle=seo_data.get('metaTitle'),
+            metadescription=seo_data.get('metaDescription'),
+            metakeywords=seo_data.get('metaKeywords'),
+            ogtitle=seo_data.get('ogTitle'),
+            ogdescription=seo_data.get('ogDescription'),
+            ogimage=seo_data.get('ogImage', {}).get('url') if isinstance(seo_data.get('ogImage'), dict) else seo_data.get('ogImage')
         )
         db.session.add(seo)
         db.session.commit()
@@ -38,12 +38,12 @@ class SeoController:
         seo = Seo.query.get(seo_id)
         if seo:
             seo.route = seo_data.get('route', seo.route)
-            seo.metaTitle = seo_data.get('metaTitle', seo.metaTitle)
-            seo.metaDescription = seo_data.get('metaDescription', seo.metaDescription)
-            seo.metaKeywords = seo_data.get('metaKeywords', seo.metaKeywords)
-            seo.ogTitle = seo_data.get('ogTitle', seo.ogTitle)
-            seo.ogDescription = seo_data.get('ogDescription', seo.ogDescription)
-            seo.ogImage = seo_data.get('ogImage', {}).get('url') if isinstance(seo_data.get('ogImage'), dict) else seo_data.get('ogImage')
+            seo.metatitle = seo_data.get('metaTitle', seo.metaTitle)
+            seo.metadescription = seo_data.get('metaDescription', seo.metaDescription)
+            seo.metakeywords = seo_data.get('metaKeywords', seo.metaKeywords)
+            seo.ogtitle = seo_data.get('ogTitle', seo.ogTitle)
+            seo.ogdescription = seo_data.get('ogDescription', seo.ogDescription)
+            seo.ogimage = seo_data.get('ogImage', {}).get('url') if isinstance(seo_data.get('ogImage'), dict) else seo_data.get('ogImage')
 
             db.session.commit()
             return True
