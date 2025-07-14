@@ -5,31 +5,31 @@ class Seo(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     route = db.Column(db.String(255), nullable=False, unique=True)
-    metaTitle = db.Column(db.String(255), nullable=True)
-    metaDescription = db.Column(db.Text, nullable=True)
-    metaKeywords = db.Column(db.Text, nullable=True)
-    ogTitle = db.Column(db.String(255), nullable=True)
-    ogDescription = db.Column(db.Text, nullable=True)
-    ogImage = db.Column(db.String(255), nullable=True)
+    metatitle = db.Column(db.String(255), nullable=True)
+    metadescription = db.Column(db.Text, nullable=True)
+    metakeywords = db.Column(db.Text, nullable=True)
+    ogtitle = db.Column(db.String(255), nullable=True)
+    ogdescription = db.Column(db.Text, nullable=True)
+    ogimage = db.Column(db.String(255), nullable=True)
 
-    def __init__(self, route, metaTitle=None, metaDescription=None, metaKeywords=None,
-                 ogTitle=None, ogDescription=None, ogImage=None):
+    def __init__(self, route, metatitle=None, metadescription=None, metakeywords=None,
+                 ogtitle=None, ogdescription=None, ogimage=None):
         self.route = route
-        self.metaTitle = metaTitle
-        self.metaDescription = metaDescription
-        self.metaKeywords = metaKeywords
-        self.ogTitle = ogTitle
-        self.ogDescription = ogDescription
-        self.ogImage = ogImage
+        self.metatitle = metatitle
+        self.metadescription = metadescription
+        self.metakeywords = metakeywords
+        self.ogtitle = ogtitle
+        self.ogdescription = ogdescription
+        self.ogimage = ogimage
 
     def to_dict(self):
         return {
             "id": self.id,
             "route": self.route,
-            "metaTitle": self.metaTitle,
-            "metaDescription": self.metaDescription,
-            "metaKeywords": self.metaKeywords,
-            "ogTitle": self.ogTitle,
-            "ogDescription": self.ogDescription,
-            "ogImage": self.ogImage
+            "metaTitle": self.metatitle,
+            "metaDescription": self.metadescription,
+            "metaKeywords": self.metakeywords,
+            "ogTitle": self.ogtitle,
+            "ogDescription": self.ogdescription,
+            "ogImage": self.ogimage
         }
