@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
+from datetime import timedelta
 
 from config import Config
 from database import db
@@ -51,6 +52,7 @@ bcrypt = Bcrypt(app)
 
 # JWT
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "headers")  # Mais seguro via .env
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
 jwt = JWTManager(app)
 
 # Banco de dados
