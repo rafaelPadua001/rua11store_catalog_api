@@ -66,6 +66,7 @@
           title="Delivery"></v-list-item>
         <v-list-item link @click="navigateTo('/orders/orders')" prepend-icon="mdi-package" title="Orders"></v-list-item>
         <v-list-item link @click="navigateTo('/coupons/coupons')" prepend-icon="mdi-bookmark" title="Coupons"></v-list-item>
+        <v-list-item link @click="navigateTo('/comments/comment')" prepend-icon="mdi-comment-multiple" title="Comments"></v-list-item>
         <v-list-item link @click="navigateTo('/authenticator/profile')" prepend-icon="mdi-account"
           title="Profile"></v-list-item>
         <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>

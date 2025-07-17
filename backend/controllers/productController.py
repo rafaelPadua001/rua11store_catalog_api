@@ -62,7 +62,12 @@ class ProductController:
     def listar_produtos():
         products = Product.get_all()
         return jsonify([
-            {**item['product'].to_dict(), 'product_quantity': item['product_quantity']}
+            {
+                **item['product'],
+                'product_quantity': item['product_quantity'],
+                'seo': item.get('seo'),
+                'comments': item.get('comments', [])
+            }
             for item in products
         ])
 

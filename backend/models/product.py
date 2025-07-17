@@ -59,35 +59,70 @@ class Product(db.Model):
         try:
             from models.stock import Stock
             from models.productSeo import ProductSeo
-            # Faz join de Product com Stock para trazer quantidade
+            from models.comment import Comment
+
             results = db.session.query(
                 Product,
                 Stock.product_quantity,
-                ProductSeo
+                ProductSeo,
+                Comment
             ).join(
                 Stock, Product.id == Stock.id_product
             ).outerjoin(
                 ProductSeo, Product.id == ProductSeo.product_id
+            ).outerjoin(
+                Comment, Product.id == Comment.product_id
             ).all()
 
-            # results será lista de tuplas (Product, product_quantity)
-            products_with_qty = []
-            for product, quantity, seo in results:
-                products_with_qty.append({
-                    "product": product,
+            product_map = {}
+
+            for product, quantity, seo, comment in results:
+                pid = product.id
+                if pid not in product_map:
+                   product_map[pid] = {
+                    "product": {
+                        "id": product.id,
+                        "name": product.name,
+                        "description": product.description,
+                        "price": str(product.price),
+                        "image_path": product.image_path,
+                        "category_id": product.category_id,
+                        "subcategory_id": product.subcategory_id,
+                        "user_id": product.user_id,
+                        "length": product.length,
+                        "width": product.width,
+                        "height": product.height,
+                        "weight": product.weight,
+                        "quantity": product.quantity,
+                    },
                     "product_quantity": quantity,
-                    "product_seo": {
+                    "seo": {
                         "meta_title": seo.meta_title if seo else None,
                         "meta_description": seo.meta_description if seo else None,
                         "slug": seo.slug if seo else None,
                         "keywords": seo.keywords if seo else None
-                    } if seo else None
-                })
+                    } if seo else None,
+                    "comments": []
+                }
 
-            return products_with_qty
+                if comment:
+                    product_map[pid]["comments"].append({
+                        "id": comment.id,
+                        "product_id": comment.product_id,
+                        "user_id": comment.user_id,
+                        "user_name": comment.user_name,
+                        "avatar_url": comment.avatar_url,
+                        "comment": comment.comment,
+                        "created_at": comment.created_at.isoformat() if comment.created_at else None,
+                        "updated_at": comment.updated_at.isoformat() if comment.updated_at else None
+                    })
+
+            return list(product_map.values())
+
         except Exception as e:
             print(f"Erro ao buscar produtos: {e}")
             return []
+
 
 
     @staticmethod
