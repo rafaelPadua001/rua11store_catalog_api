@@ -66,7 +66,10 @@ class ProductController:
                 **item['product'],
                 'product_quantity': item['product_quantity'],
                 'seo': item.get('seo'),
-                'comments': item.get('comments', [])
+                'comments': [
+                    comment for comment in item.get('comments', [])
+                    if comment.get('product_id') == item['product']['id']
+                ]
             }
             for item in products
         ])
