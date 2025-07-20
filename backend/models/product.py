@@ -113,6 +113,7 @@ class Product(db.Model):
                         "user_name": comment.user_name,
                         "avatar_url": comment.avatar_url,
                         "comment": comment.comment,
+                        'status': comment.status,
                         "created_at": comment.created_at.isoformat() if comment.created_at else None,
                         "updated_at": comment.updated_at.isoformat() if comment.updated_at else None
                     })
