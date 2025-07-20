@@ -186,7 +186,7 @@ class MelhorEnvioService:
             "Accept": "application/json",
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
-            "User-Agent": f"{os.getenv("SENDER_NAME")} ({os.getenv("SENDER_EMAIL")})"
+            "User-Agent": f"({os.getenv('SENDER_NAME')}) ({os.getenv('SENDER_EMAIL')})"
         }
         try:
             if method.lower() == "post":
