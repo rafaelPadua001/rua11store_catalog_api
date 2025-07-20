@@ -2,8 +2,17 @@ import os
 import requests
 import json
 import traceback
+from dotenv import load_dotenv
+from sqlalchemy.orm import Session
+import sqlite3
+import json
+import traceback
 from sqlalchemy.orm import Session
 from models.delivery import Delivery
+from database import db
+
+load_dotenv
+import json
 from database import db
 
 
@@ -136,14 +145,14 @@ class MelhorEnvioService:
         return {
             "service": "2",
             "from": {
-                "name": "Rua11Store",
-                "phone": "+556199051731",
-                "email": "rafael.f.p.faria@hotmail.com",
-                "postal_code": "73082180",
-                "address": "QMS 19",
-                "number": "19",
-                "city": "Brasília",
-                "state_abbr": "DF"
+                "name": os.getenv("SENDER_NAME"),
+                "phone": os.getenv("SENDER_PHONE"),
+                "email": os.getenv("SENDER_EMAIL"),
+                "postal_code": os.getenv("SENDER_POSTAL_CODE"),
+                "address": os.getenv("SENDER_ADDRESS"),
+                "number": os.getenv("SENDER_NUMBER"),
+                "city": os.getenv("SENDER_CITY"),
+                "state_abbr": os.getenv("DF")
             },
             "to": {
                 "name": data["recipient_name"],
@@ -177,7 +186,7 @@ class MelhorEnvioService:
             "Accept": "application/json",
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
-            "User-Agent": "Rua11Store (rafael.f.p.faria@hotmail.com)"
+            "User-Agent": f"{os.getenv("SENDER_NAME")} ({os.getenv("SENDER_EMAIL")})"
         }
         try:
             if method.lower() == "post":
