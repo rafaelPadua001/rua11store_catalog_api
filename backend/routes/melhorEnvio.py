@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, make_response, redirect
 from services.melhorEnvioService import MelhorEnvioService
 import os;
 from flask_cors import cross_origin
+import requests
 
 melhorenvio_bp = Blueprint('melhorEnvio', __name__)
 melhor_envio = MelhorEnvioService()
@@ -43,7 +44,7 @@ def melhor_envio_callback():
     }
 
     token_url = "https://www.melhorenvio.com.br/oauth/token"
-    response = request.post(token_url, data=data, headers={"Accept": "application/json"})
+    response = requests.post(token_url, data=data, headers={"Accept": "application/json"})
 
     if response.statu_code == 200:
         token_data = response.json()
