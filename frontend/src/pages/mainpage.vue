@@ -17,7 +17,7 @@
           <v-btn class="mx-1" color="black" size="small" href="https://example.com/download-android-app.apk"
             target="_blank" >
             <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
-            Baixar para Android
+            App Android
           </v-btn>
 
           <v-btn class="mx-0" color="primary" size="small" href="https://rua11store-web.vercel.app/" target="_blank"
