@@ -8,11 +8,12 @@
         <!-- Imagem do produto -->
         <v-img :src="product.image_url" :alt="product?.seo?.slug" height="300" contain class="mb-4"></v-img>
         <v-card-title>
-          <h3>{{ product.name }}</h3>
+          <h3>{{ product.name }} - <strong>Preço:</strong> R$ {{ product.price }}</h3>
         </v-card-title>
 
         <!-- Conteúdo do produto -->
         <v-card-text>
+           <div>{{ product.description }}</div>
           <div v-if="product?.seo?.meta_keywords">
             <v-chip-group column>
               <v-chip v-for="(keyword, index) in product.seo.meta_keywords.split(',')" :key="index" class="ma-1"
@@ -21,7 +22,7 @@
               </v-chip>
             </v-chip-group>
           </div>
-          <div>{{ product.description }}</div>
+         
           <!-- <div v-if="product?.seo?.slug"><strong>Slug:</strong> {{ product.seo.slug }}</div> -->
           
           <div><strong>Preço:</strong> R$ {{ product.price }}</div>
