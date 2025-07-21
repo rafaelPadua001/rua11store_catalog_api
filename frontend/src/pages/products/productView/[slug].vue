@@ -3,12 +3,13 @@
     <v-col cols="12" sm="12" md="10" lg="10" xl="6">
       <v-card class="pa-4">
         <!-- Título do produto -->
-        <v-card-title>
-          <h3>{{ product.name }}</h3>
-        </v-card-title>
+        
 
         <!-- Imagem do produto -->
         <v-img :src="product.image_url" :alt="product?.seo?.slug" height="300" contain class="mb-4"></v-img>
+        <v-card-title>
+          <h3>{{ product.name }}</h3>
+        </v-card-title>
 
         <!-- Conteúdo do produto -->
         <v-card-text>
