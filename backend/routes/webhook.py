@@ -13,9 +13,9 @@ def handle_webhook():
 
     # Verificação opcional de assinatura
     expected_token = os.getenv("MP_WEBHOOK_SECRET")
-    if expected_token and request.headers.get("x-mp-signature") != expected_token:
-        print("Webhook rejeitado: token inválido")
-        return jsonify({'status': 'unauthorized'}), 401
+    #if expected_token and request.headers.get("x-mp-signature") != expected_token:
+    #    print("Webhook rejeitado: token inválido")
+    #    return jsonify({'status': 'unauthorized'}), 401
 
     data = request.get_json()
     print("📥 Webhook recebido:", data)
