@@ -34,6 +34,7 @@ declare module 'vue-router/auto-routes' {
     '/orders/orders': RouteRecordInfo<'/orders/orders', '/orders/orders', Record<never, never>, Record<never, never>>,
     '/payments/payments': RouteRecordInfo<'/payments/payments', '/payments/payments', Record<never, never>, Record<never, never>>,
     '/products/products': RouteRecordInfo<'/products/products', '/products/products', Record<never, never>, Record<never, never>>,
+    '/products/productView/[slug]': RouteRecordInfo<'/products/productView/[slug]', '/products/productView/:slug', { slug: ParamValue<true> }, { slug: ParamValue<false> }>,
     '/seo/seo': RouteRecordInfo<'/seo/seo', '/seo/seo', Record<never, never>, Record<never, never>>,
     '/stock/stock': RouteRecordInfo<'/stock/stock', '/stock/stock', Record<never, never>, Record<never, never>>,
   }

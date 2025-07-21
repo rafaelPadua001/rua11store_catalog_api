@@ -1,6 +1,7 @@
 from database import db
 from sqlalchemy import Numeric
 from sqlalchemy.orm import joinedload
+from models.productSeo import ProductSeo
 
 
 class Product(db.Model):
@@ -133,7 +134,31 @@ class Product(db.Model):
         except Exception as e:
             print(f"Erro ao buscar produto por ID: {e}")
             return None
+        
+    @staticmethod
+    def get_by_slug(slug):
+        try:
+            # Busca o SEO pelo slug
+            seo = ProductSeo.query.filter_by(slug=slug).first()
 
+            if not seo:
+                print(f'Slug não encontrado: {slug}')
+                return None
+
+            # Agora busca o Product pelo product_id
+            product = Product.query.get(seo.product_id)
+
+            if not product:
+                print(f'Produto com ID {seo.product_id} não encontrado.')
+                return None
+
+            return product
+
+        except Exception as e:
+            print(f'Erro ao buscar produto por slug: {e}')
+            return None
+
+        
     @staticmethod
     def find_by_id_and_user(product_id, user_id):
         try:
@@ -179,3 +204,12 @@ class Product(db.Model):
 
         return data
 
+    def to_dict(self):
+            return {
+                'id': self.id,
+                'name': self.name,
+                'price': self.price,
+                'product_quantity': self.quantity,
+                'seo': self.seo.to_dict() if self.seo else None,
+                'comments': [c.to_dict() for c in self.comments] if self.comments else []
+            }

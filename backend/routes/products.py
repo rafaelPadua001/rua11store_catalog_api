@@ -24,6 +24,10 @@ def update_product(product_id):
    if(request.method == 'DELETE'):
        return ProductController.delete_product(product_id)
 
+@products_bp.route('/product/<string:slug>', methods=["GET"])
+def get_by_slug(slug):
+    return ProductController.get_by_slug(slug)
+
 @products_bp.route('/uploads/<path:filename>')
 def uploaded_file(filename):
     # Ajuste o caminho conforme sua estrutura de diretórios
