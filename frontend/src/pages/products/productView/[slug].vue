@@ -8,7 +8,7 @@
         <!-- Imagem do produto -->
         <v-img :src="product.image_url" :alt="product?.seo?.slug" height="300" contain class="mb-4"></v-img>
         <v-card-title>
-          <h3>{{ product.name }} - <strong>Preço:</strong> R$ {{ product.price }}</h3>
+          <h3>{{ product.name }} - R$ {{ product.price }}</h3>
         </v-card-title>
 
         <!-- Conteúdo do produto -->
