@@ -7,10 +7,10 @@
             v-if="logoImage"
             :src="logoImage"
             alt="Rua11Store logo"
-            width="300"
-            height="300"
+            width="175"
+            height="175"
             contain
-            class="mb-n16 mx-auto d-block"
+            class="mb-n8 mx-auto d-block"
             ></v-img>
          
         </div>
@@ -28,13 +28,13 @@
             <v-btn color="black" class="outline" size="small" href="https://example.com/download-android-app.apk"
               target="_blank" variant="text">
               <v-icon class="mr-2" size="large">mdi-android</v-icon>
-              App Android
+              Baixar para Android
             </v-btn>
 
             <v-btn color="primary" size="small" href="https://rua11store-web.vercel.app/" target="_blank"
               variant="text">
               <v-icon class="mr-2" size="large">mdi-store</v-icon>
-              Loja Online
+               Acessar Loja
             </v-btn>
           </v-item-group>
         </div>
@@ -122,6 +122,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.gradient-btn {
+  background: linear-gradient(to right, #000000, #434343);
+  color: white !important;
+}
 .whatsapp-btn {
   position: fixed;
   bottom: 50px;
