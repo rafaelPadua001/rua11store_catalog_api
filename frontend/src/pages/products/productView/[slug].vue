@@ -25,7 +25,7 @@
          
           <!-- <div v-if="product?.seo?.slug"><strong>Slug:</strong> {{ product.seo.slug }}</div> -->
           
-          <div><strong>Preço:</strong> R$ {{ product.price }}</div>
+         
         </v-card-text>
       </v-card>
     </v-col>
