@@ -3,41 +3,34 @@
     <v-responsive class="align-center fill-height mx-auto" max-width="900">
       <div v-if="!loadFailed && pageContent" class="text-center">
         <div>
-          <v-img
-            v-if="logoImage"
-            :src="logoImage"
-            alt="Rua11Store logo"
-            width="175"
-            height="175"
-            contain
-            class="mb-n8 mx-auto d-block"
-            ></v-img>
-         
+          <v-img v-if="logoImage" :src="logoImage" alt="Rua11Store logo" width="175" height="175" contain
+            class="mb-n8 mx-auto d-block"></v-img>
+
         </div>
-       <!-- <h1 class="text-h3 font-weight-bold">{{ pageTitle }}</h1> -->
-       <!-- <div v-html="pageContent" class="text-body-2 font-weight-light text-center mt-0 mb-n2"></div> -->
+        <!-- <h1 class="text-h3 font-weight-bold">{{ pageTitle }}</h1> -->
+        <!-- <div v-html="pageContent" class="text-body-2 font-weight-light text-center mt-0 mb-n2"></div> -->
 
-        <div class="mt-0 mb-16 d-flex justify-center">
-          <v-item-group divided>
-            <v-btn color="black" class="outline" size="small" href="https://example.com/download-ios-app.apk"
-              target="_blank" variant="text" disabled>
-              <v-icon class="mr-2" size="large">mdi-apple</v-icon>
-              App iOS
-            </v-btn>
+        <div class="mt-0 mb-16 d-flex justify-center flex-wrap">
+  <v-btn class="mx-0" color="black" size="small" href="https://example.com/download-ios-app.apk"
+    target="_blank" variant="text" disabled>
+    <v-icon class="mr-2" size="large">mdi-apple</v-icon>
+    App iOS
+  </v-btn>
 
-            <v-btn color="black" class="outline" size="small" href="https://example.com/download-android-app.apk"
-              target="_blank" variant="text">
-              <v-icon class="mr-2" size="large">mdi-android</v-icon>
-              Baixar para Android
-            </v-btn>
+  <v-btn class="mx-1" color="black" size="small" href="https://example.com/download-android-app.apk"
+    target="_blank" variant="text">
+    <v-icon class="mr-2" size="large">mdi-android</v-icon>
+    Baixar para Android
+  </v-btn>
 
-            <v-btn color="primary" size="small" href="https://rua11store-web.vercel.app/" target="_blank"
-              variant="text">
-              <v-icon class="mr-2" size="large">mdi-store</v-icon>
-               Acessar Loja
-            </v-btn>
-          </v-item-group>
-        </div>
+  <v-btn class="mx-0" color="primary" size="small" href="https://rua11store-web.vercel.app/"
+    target="_blank" variant="text">
+    <v-icon class="mr-2" size="large">mdi-store</v-icon>
+    Acessar Loja
+  </v-btn>
+</div>
+
+
 
       </div>
 
@@ -46,17 +39,10 @@
         <v-progress-circular indeterminate />
       </div>
     </v-responsive>
-    <v-btn
-  color="deep-purple"
-  dark
-  class="whatsapp-btn"
-  href="https://wa.me/556191865680"
-  target="_blank"
-  elevation="10"
-  icon
->
-  <v-icon size="28">mdi-whatsapp</v-icon>
-</v-btn>
+    <v-btn color="deep-purple" dark class="whatsapp-btn" href="https://wa.me/556191865680" target="_blank"
+      elevation="10" icon>
+      <v-icon size="28">mdi-whatsapp</v-icon>
+    </v-btn>
 
   </v-container>
 
@@ -122,10 +108,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.gradient-btn {
-  background: linear-gradient(to right, #000000, #434343);
-  color: white !important;
+.v-btn {
+  margin-left: 1px !important;
+  margin-right: 1px !important;
 }
+
 .whatsapp-btn {
   position: fixed;
   bottom: 50px;
@@ -141,4 +128,3 @@ onMounted(() => {
   z-index: 9999;
 }
 </style>
-
