@@ -40,6 +40,10 @@
 
                     <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
+                         <v-btn :to="`/products/productView/${item.seo.slug}`" color="primary" icon small class="ma-0 pa-0"
+                            style="width: 32px; height: 32px;">
+                            <v-icon size="20">mdi-eye</v-icon>
+                        </v-btn>
                         <v-icon small color="primary" @click.stop="editProduct(item)">
                             mdi-pencil
                         </v-icon>

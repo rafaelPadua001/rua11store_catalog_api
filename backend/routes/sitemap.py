@@ -28,7 +28,7 @@ def sitemap():
     for produto in produtos:
         if produto.seo and produto.seo.slug:
             urls.append({
-                'loc': f"{base_url}/produto/{produto.seo.slug}",
+                'loc': f"{base_url}/products/productView/{produto.seo.slug}",
                 'lastmod': produto.updated_at.date().isoformat() if hasattr(produto, 'updated_at') and produto.updated_at else datetime.utcnow().date().isoformat()
 
             })

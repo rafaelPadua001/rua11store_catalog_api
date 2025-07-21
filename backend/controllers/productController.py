@@ -73,6 +73,34 @@ class ProductController:
             }
             for item in products
         ])
+    @staticmethod
+    def get_by_slug(slug):
+        data, error, status = ProductSeoController.get_by_slug(slug)
+
+        if error:
+            return jsonify(error), status
+
+        product_data = data["product"]
+        seo_data = data["seo"]
+
+        return jsonify({
+            "id": product_data["id"],
+            "name": product_data["name"],
+            "price": product_data["price"],
+            "image_url": product_data['image_url'],
+            "product_quantity": product_data.get("quantity", None),
+            "description": product_data.get('description'),
+            "seo": {
+                "slug": seo_data["slug"],
+                "meta_title": seo_data["meta_title"],
+                "meta_description": seo_data["meta_description"],
+                "meta_keywords": seo_data['meta_keywords'] 
+            },
+            # Se quiser os comentários, precisa buscá-los separadamente
+            # Ou incluir na consulta original
+            # "comments": [...]
+        })
+
 
     @staticmethod
     @jwt_required()

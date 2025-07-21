@@ -1,6 +1,10 @@
 from database import db
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from sqlalchemy.orm import joinedload
+
+
+
 
 class ProductSeo(db.Model):
     __tablename__ = 'product_seo'
@@ -18,3 +22,39 @@ class ProductSeo(db.Model):
 
     def __repr__(self):
         return f'<ProductSeo {self.meta_title}>'
+    
+    @staticmethod
+    def get_by_slug(slug):
+        from models.product import Product
+
+        try:
+            seo = ProductSeo.query.options(joinedload(ProductSeo.product)).filter_by(slug=slug).first()
+
+            if not seo:
+                return {"error": "Slug não encontrado"}, 404
+
+            product = seo.product
+
+            if not product:
+                return {"error": "Produto não encontrado"}, 404
+
+            return {
+                "product": {
+                    "id": product.id,
+                    "name": product.name,
+                    "price": product.price,
+                    "quantity": product.quantity,
+                    "description": product.description,
+                    # outros campos
+                },
+                "seo": {
+                    "slug": seo.slug,
+                    "meta_title": seo.meta_title,
+                    "meta_description": seo.meta_description,
+                    "keywords": seo.keywords,
+                }
+            }
+
+        except Exception as e:
+            print(f'Erro ao buscar produto por slug: {e}')
+            return {"error": "Erro interno"}, 500
