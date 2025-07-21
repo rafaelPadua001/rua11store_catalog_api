@@ -176,40 +176,27 @@ class Product(db.Model):
             return []
 
     def to_dict(self):
-        data = {
+        return {
             "id": self.id,
             "name": self.name,
-            "description": self.description,
-            "price": f"{self.price:.2f}",
-            "category_id": self.category_id,
-            "subcategory_id": self.subcategory_id,
-            "image_path": self.image_path,
+            "description": getattr(self, "description", None),
+            "price": f"{self.price:.2f}" if isinstance(self.price, float) else self.price,
+            "category_id": getattr(self, "category_id", None),
+            "subcategory_id": getattr(self, "subcategory_id", None),
+            "image_path": getattr(self, "image_path", None),
             "quantity": self.quantity,
-            "width": self.width,
-            "height": self.height,
-            "weight": self.weight,
-            "length": self.length,
-            "user_id": self.user_id,
+            "width": getattr(self, "width", None),
+            "height": getattr(self, "height", None),
+            "weight": getattr(self, "weight", None),
+            "length": getattr(self, "length", None),
+            "user_id": getattr(self, "user_id", None),
+            "seo": self.seo.to_dict() if self.seo and hasattr(self.seo, "to_dict") else (
+                {
+                    "meta_title": getattr(self.seo, "meta_title", None),
+                    "meta_description": getattr(self.seo, "meta_description", None),
+                    "slug": getattr(self.seo, "slug", None),
+                    "keywords": getattr(self.seo, "keywords", None),
+                } if self.seo else None
+            ),
+            "comments": [c.to_dict() for c in self.comments] if getattr(self, "comments", None) else []
         }
-
-        if self.seo:  # relacionamento product.seo
-            data["seo"] = {
-                "meta_title": self.seo.meta_title,
-                "meta_description": self.seo.meta_description,
-                "slug": self.seo.slug,
-                "keywords": self.seo.keywords,
-            }
-        else:
-            data["seo"] = None
-
-        return data
-
-    def to_dict(self):
-            return {
-                'id': self.id,
-                'name': self.name,
-                'price': self.price,
-                'product_quantity': self.quantity,
-                'seo': self.seo.to_dict() if self.seo else None,
-                'comments': [c.to_dict() for c in self.comments] if self.comments else []
-            }
