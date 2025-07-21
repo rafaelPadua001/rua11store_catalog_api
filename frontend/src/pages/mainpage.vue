@@ -10,19 +10,19 @@
         <div class="mt-0 mb-16 d-flex justify-center flex-wrap">
           <v-btn class="mx-0" color="black" size="small" href="https://example.com/download-ios-app.apk" target="_blank"
             disabled>
-            <v-icon class="mr-2" size="large">mdi-apple</v-icon>
+            <v-icon class="mr-0" size="large">mdi-apple</v-icon>
             App iOS
           </v-btn>
 
           <v-btn class="mx-1" color="black" size="small" href="https://example.com/download-android-app.apk"
             target="_blank" >
-            <v-icon class="mr-2" size="large" color="success">mdi-android</v-icon>
+            <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
             Baixar para Android
           </v-btn>
 
           <v-btn class="mx-0" color="primary" size="small" href="https://rua11store-web.vercel.app/" target="_blank"
            >
-            <v-icon class="mr-2" size="large">mdi-store</v-icon>
+            <v-icon class="mr-0" size="large">mdi-store</v-icon>
             Acessar Loja
           </v-btn>
         </div>
