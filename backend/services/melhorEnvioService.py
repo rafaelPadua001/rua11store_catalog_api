@@ -19,7 +19,7 @@ from database import db
 class MelhorEnvioService:
     def __init__(self):
         self.token = os.environ.get("MELHOR_ENVIO_TOKEN")
-        self.baseUrl = "https://sandbox.melhorenvio.com.br/api/v2"
+        self.baseUrl = os.environ.get("MELHOR_ENVIO_API")
         self.headers = {
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
