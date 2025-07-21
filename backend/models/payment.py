@@ -177,7 +177,7 @@ class Payment(db.Model):
                 extensions.email_controller.send_email(
                     subject=f"Rua11Store Confirmação de pedido n°: {order_id}",
                     recipients=[self.email],
-                    body="Seu pedido foi recebido com sucesso!",
+                    body=f"Seu pedido foi recebido com sucesso! {self.products}",
                     html=f"<p>Olá! Seu pedido n°: <b>{order_id}</b><br>"
                          f"Status do pedido: <b>{self.status}</b><br>"
                          f"Estamos separando seu pedido para envio.<br>"
