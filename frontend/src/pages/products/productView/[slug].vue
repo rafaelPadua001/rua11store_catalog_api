@@ -34,7 +34,7 @@
             Pedir pelo WhatsApp
           </v-btn>
 
-          <v-btn color="primary" @click="goToStore" class="mx-2">
+          <v-btn color="primary"  class="mx-2" href="https://rua11store-web.vercel.app/">
             <v-icon left>mdi-storefront</v-icon>
             Comprar na Loja
           </v-btn>
