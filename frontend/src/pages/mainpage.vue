@@ -30,7 +30,7 @@
 
         <v-row justify="center" class="my-2">
           <v-col cols="12" sm="10" md="8" lg="6">
-            <v-carousel :show-arrows="false" cycle hide-delimiters height="250" interval="3000" v-model="activeIndex">
+            <v-carousel :show-arrows="false" cycle hide-delimiters height="250" interval="500000" v-model="activeIndex">
               <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
                 <div class="d-flex justify-center" style="gap: 8px;">
                   <v-img v-for="product in chunk" :key="product.name" :src="product.image_path"
@@ -144,7 +144,7 @@ onMounted(() => {
   setInterval(() => {
     const maxIndex = chunkedProducts.value.length - 1
     activeIndex.value = activeIndex.value >= maxIndex ? 0 : activeIndex.value + 1
-  }, 3000)
+  }, 5000)
 })
 </script>
 
