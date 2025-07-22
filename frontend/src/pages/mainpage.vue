@@ -5,7 +5,7 @@
         <v-img v-if="logoImage" :src="logoImage" :alt="pageTitle" width="175" height="175" contain
           class="mb-n4 mx-auto d-block" />
 
-        <div class="mt-0 mb-16 d-flex justify-center flex-wrap">
+        <div class="mt-0 mb-2 d-flex justify-center flex-wrap">
           <v-row justify="center">
             <v-col cols="12" md="12" sm="6" class="d-flex justify-center">
               <!-- seus botões aqui -->
@@ -27,30 +27,61 @@
             </v-col>
           </v-row>
         </div>
+        <div class="mt-0 mb-1 d-flex justify-center flex-wrap">
+          <v-row justify="center" class="my-2">
+            <v-col cols="12" sm="10" md="8" lg="6">
+              <v-carousel :show-arrows="false" cycle hide-delimiters height="250" interval="500000"
+                v-model="activeIndex">
+                <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
+                  <div style="display: flex; justify-content: center; gap: 1px;">
+                    <template v-for="product in chunk" :key="product.name">
+                      <div style="max-width: 200px; max-height: 200px; flex-shrink: 0;">
+                        <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
+                          <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
+                            target="_blank" rel="noopener noreferrer" style="display: block;">
+                            <v-img :src="product.image_path" :alt="product.name" width="200" height="200" contain
+                              class="cursor-pointer" />
 
-        <v-row justify="center" class="my-2">
+                          </a>
+                        </template>
+                      </div>
+                    </template>
+                  </div>
+                </v-carousel-item>
+              </v-carousel>
+            </v-col>
+          </v-row>
+        </div>
+        <!-- Carousel Comentários -->
+        <v-row justify="center" class="my-4">
           <v-col cols="12" sm="10" md="8" lg="6">
-            <v-carousel :show-arrows="false" cycle hide-delimiters height="250" interval="500000" v-model="activeIndex">
-              <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
-                <div class="d-flex justify-center" style="gap: 8px;">
-                  <template v-for="product in chunk" :key="product.name">
-                    <router-link v-if="product?.seo?.slug" :to="`/products/productView/${product.seo.slug}`">
-                      <v-img :src="product.image_path" :alt="product.seo.slug || product.name" max-width="200"
-                        max-height="200" contain class="cursor-pointer" />
-                    </router-link>
+            <v-carousel cycle hide-delimiters :show-arrows="false" height="180" interval="7000"
+              v-model="activeCommentIndex">
+              <v-carousel-item v-for="(comment, index) in comments" :key="comment.id">
+                <v-card outlined class="mx-auto pa-4" max-width="600" elevation="0">
+                  <v-row align="center">
+                    <v-col cols="3" class="text-center">
+                      <v-avatar size="64">
+                        <v-img :src="comment.avatar_url" alt="Avatar" />
+                      </v-avatar>
+                    </v-col>
+                    <v-col cols="9">
 
-                    <v-img v-else :src="product.image_path" :alt="product.name" max-width="200" max-height="200"
-                      contain />
-                  </template>
-                </div>
+                      <div style="font-style: italic; font-size: 18px; margin-top: 4px;">"{{ comment.comment }}"</div>
+                      <div style="font-size: 12px; color: gray; margin-top: 4px;">
+                        <strong>{{ comment.user_name }}</strong> - {{ new Date(comment.created_at).toLocaleDateString()
+                        }}
+                      </div>
+                    </v-col>
+                  </v-row>
+                </v-card>
               </v-carousel-item>
-
             </v-carousel>
           </v-col>
         </v-row>
       </div>
 
-      <v-alert v-else-if="loadFailed" type="error">Página não encontrada.</v-alert>
+      
       <div v-else class="text-center" background>
         <v-progress-circular indeterminate />
       </div>
@@ -82,10 +113,21 @@ interface Product {
     meta_description?: string
     keywords?: string
   }
+  comments?: Comment[]
+}
+interface Comment {
+  id: number
+  avatar_url: string
+  comment: string
+  created_at: string
+  user_name: string
 }
 
+
 const productsData = ref<Product[]>([])
+const comments = ref<Comment[]>([])
 const activeIndex = ref(0)
+const activeCommentIndex = ref(0)
 
 const api = axios.create({
   baseURL:
@@ -129,13 +171,20 @@ async function loadProductsToCarousel() {
   try {
     const response = await api.get(`/products`)
     productsData.value = response.data
+
+    comments.value = []
+    response.data.forEach((product: Product) => {
+      if (product.comments) {
+        comments.value.push(...product.comments)
+      }
+    })
   } catch (error) {
     console.error('Erro ao buscar produtos:', error)
   }
 }
 
-// Computed que divide o array em pedaços (chunks) de 3 produtos
-const chunkSize = 3
+
+const chunkSize = 4
 const chunkedProducts = computed(() => {
   const chunks = []
   for (let i = 0; i < productsData.value.length; i += chunkSize) {
@@ -148,11 +197,15 @@ onMounted(() => {
   loadComponentFromAPI()
   loadProductsToCarousel()
 
-  // Atualiza o slide ativo automaticamente a cada 3s
   setInterval(() => {
     const maxIndex = chunkedProducts.value.length - 1
     activeIndex.value = activeIndex.value >= maxIndex ? 0 : activeIndex.value + 1
   }, 5000)
+
+  setInterval(() => {
+    const maxCommentIndex = comments.value.length - 1
+    activeCommentIndex.value = activeCommentIndex.value >= maxCommentIndex ? 0 : activeCommentIndex.value + 1
+  }, 7000)
 })
 </script>
 
