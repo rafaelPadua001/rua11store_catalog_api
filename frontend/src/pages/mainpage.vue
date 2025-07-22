@@ -33,10 +33,18 @@
             <v-carousel :show-arrows="false" cycle hide-delimiters height="250" interval="500000" v-model="activeIndex">
               <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
                 <div class="d-flex justify-center" style="gap: 8px;">
-                  <v-img v-for="product in chunk" :key="product.name" :src="product.image_path"
-                    :alt="product.seo?.slug || product.name" max-width="200" max-height="200" contain />
+                  <template v-for="product in chunk" :key="product.name">
+                    <router-link v-if="product?.seo?.slug" :to="`/products/productView/${product.seo.slug}`">
+                      <v-img :src="product.image_path" :alt="product.seo.slug || product.name" max-width="200"
+                        max-height="200" contain class="cursor-pointer" />
+                    </router-link>
+
+                    <v-img v-else :src="product.image_path" :alt="product.name" max-width="200" max-height="200"
+                      contain />
+                  </template>
                 </div>
               </v-carousel-item>
+
             </v-carousel>
           </v-col>
         </v-row>
