@@ -75,6 +75,12 @@ const pageContent = ref('')
 interface Product {
   name: string
   image_path: string
+   seo?: {
+    slug: string
+    meta_title?: string
+    meta_description?: string
+    keywords?: string
+  }
   // adicione mais campos se necessário
 }
 
