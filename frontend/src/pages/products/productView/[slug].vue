@@ -3,7 +3,7 @@
     <v-col cols="12" sm="12" md="10" lg="10" xl="6">
       <v-card class="pa-4">
         <!-- Título do produto -->
-        
+
 
         <!-- Imagem do produto -->
         <v-img :src="product.image_url" :alt="product?.seo?.slug" height="300" contain class="mb-4"></v-img>
@@ -13,7 +13,7 @@
 
         <!-- Conteúdo do produto -->
         <v-card-text>
-           <div>{{ product.description }}</div>
+          <div>{{ product.description }}</div>
           <div v-if="product?.seo?.meta_keywords">
             <v-chip-group column>
               <v-chip v-for="(keyword, index) in product.seo.meta_keywords.split(',')" :key="index" class="ma-1"
@@ -22,11 +22,28 @@
               </v-chip>
             </v-chip-group>
           </div>
-         
+
           <!-- <div v-if="product?.seo?.slug"><strong>Slug:</strong> {{ product.seo.slug }}</div> -->
-          
-         
+
+
         </v-card-text>
+
+        <v-card-actions class="d-flex justify-center mt-4">
+          <v-btn color="success" @click="goToWhatsApp" class="mx-2">
+            <v-icon left>mdi-whatsapp</v-icon>
+            Pedir pelo WhatsApp
+          </v-btn>
+
+          <v-btn color="primary" @click="goToStore" class="mx-2">
+            <v-icon left>mdi-storefront</v-icon>
+            Comprar na Loja
+          </v-btn>
+
+          <v-btn color="info" @click="downloadApp" class="mx-2">
+            <v-icon left>mdi-download</v-icon>
+            Baixar App
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-col>
   </v-row>

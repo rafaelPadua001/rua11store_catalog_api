@@ -52,6 +52,7 @@
                         </v-icon>
                     </template>
                 </v-data-table>
+                
             </v-card>
 
             <!-- Modal para Adicionar/Editar Produto -->
