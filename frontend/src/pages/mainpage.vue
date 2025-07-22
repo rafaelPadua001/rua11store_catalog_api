@@ -30,10 +30,10 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col v-for="(product, index) in productsData" :key="index" cols="12" sm="6" md="4">
+            <v-col cols="12" sm="6" md="4">
               <v-slide-group show-arrows>
                 <v-slide-group-item v-for="(product, index) in productsData" :key="index">
-                  <v-img :src="product.image_path" :alt="product.name" height="200" width="200" class="mx-2" cover />
+                  <v-img :src="product.image_path" :alt="product.seo?.slug" height="200" width="200" class="mx-2" cover />
                 </v-slide-group-item>
               </v-slide-group>
 
@@ -75,6 +75,12 @@ const pageContent = ref('')
 interface Product {
   name: string
   image_path: string
+   seo?: {
+    slug: string
+    meta_title?: string
+    meta_description?: string
+    keywords?: string
+  }
   // adicione mais campos se necessário
 }
 
