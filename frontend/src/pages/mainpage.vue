@@ -8,23 +8,38 @@
 
         </div>
         <div class="mt-0 mb-16 d-flex justify-center flex-wrap">
-          <v-btn class="mx-0" color="black" size="small" href="https://example.com/download-ios-app.apk" target="_blank"
-            disabled>
-            <v-icon class="mr-0" size="large">mdi-apple</v-icon>
-            App iOS
-          </v-btn>
+          <v-row>
+            <v-col>
+              <v-btn class="mx-0" color="black" size="small" href="https://example.com/download-ios-app.apk"
+                target="_blank" disabled>
+                <v-icon class="mr-0" size="large">mdi-apple</v-icon>
+                App iOS
+              </v-btn>
 
-          <v-btn class="mx-1" color="black" size="small" href="https://example.com/download-android-app.apk"
-            target="_blank" >
-            <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
-            Baixar para Android
-          </v-btn>
+              <v-btn class="mx-1" color="black" size="small" href="https://example.com/download-android-app.apk"
+                target="_blank">
+                <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
+                App Android
+              </v-btn>
 
-          <v-btn class="mx-0" color="primary" size="small" href="https://rua11store-web.vercel.app/" target="_blank"
-           >
-            <v-icon class="mr-0" size="large">mdi-store</v-icon>
-            Acessar Loja
-          </v-btn>
+              <v-btn class="mx-0" color="primary" size="small" href="https://rua11store-web.vercel.app/"
+                target="_blank">
+                <v-icon class="mr-0" size="large">mdi-store</v-icon>
+                Acessar Loja
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col v-for="(product, index) in productsData" :key="index" cols="12" sm="6" md="4">
+              <v-slide-group show-arrows>
+                <v-slide-group-item v-for="(product, index) in productsData" :key="index">
+                  <v-img :src="product.image_path" :alt="product.name" height="200" width="200" class="mx-2" cover />
+                </v-slide-group-item>
+              </v-slide-group>
+
+            </v-col>
+          </v-row>
+
         </div>
 
 
@@ -53,9 +68,19 @@ import axios from 'axios'
 import { useSeo } from '../useSeo'
 import logoImage from '../assets/rua11store_logo.png'
 
+const loadFailed = ref(false)
 const pageTitle = ref('')
 const pageContent = ref('')
-const loadFailed = ref(false)
+
+interface Product {
+  name: string
+  image_path: string
+  // adicione mais campos se necessário
+}
+
+const productsData = ref<Product[]>([])
+
+
 
 
 
@@ -99,8 +124,23 @@ async function loadSeoFromAPI(pageId: number) {
   }
 }
 
+async function loadProductsToCarrosel() {
+  try {
+    const response = await api.get(`/products`)
+    productsData.value = response.data;
+    return productsData;
+
+  }
+  catch {
+
+  }
+}
+
+
+
 onMounted(() => {
   loadComponentFromAPI()
+  loadProductsToCarrosel();
 })
 </script>
 
