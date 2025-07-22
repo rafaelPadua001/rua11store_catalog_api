@@ -29,16 +29,26 @@
               </v-btn>
             </v-col>
           </v-row>
-          <v-row>
-            <v-col cols="12" sm="6" md="4">
-              <v-slide-group show-arrows>
-                <v-slide-group-item v-for="(product, index) in productsData" :key="index">
-                  <v-img :src="product.image_path" :alt="product.seo?.slug" height="200" width="200" class="mx-2" cover />
-                </v-slide-group-item>
-              </v-slide-group>
+          <v-row justify="center">
+  <v-col cols="12" sm="8" md="6" class="mx-auto text-center">
+    <v-slide-group show-arrows class="d-flex justify-center">
+      <v-slide-group-item
+        v-for="(product, index) in productsData"
+        :key="index"
+      >
+        <v-img
+          :src="product.image_path"
+          :alt="product.seo?.slug"
+          height="200"
+          width="200"
+          class="mx-2"
+          cover
+        />
+      </v-slide-group-item>
+    </v-slide-group>
+  </v-col>
+</v-row>
 
-            </v-col>
-          </v-row>
 
         </div>
 
