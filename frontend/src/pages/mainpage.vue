@@ -39,7 +39,7 @@
                         <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
                           <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
                             target="_blank" rel="noopener noreferrer" style="display: block;">
-                            <v-img :src="product.image_path" :alt="product.seo?.slug" width="100" height="100" contain
+                            <v-img :src="product.image_path" :alt="product.seo?.slug" width="200" height="200" contain
                               class="cursor-pointer" />
 
                           </a>
