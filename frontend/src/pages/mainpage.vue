@@ -184,7 +184,7 @@ async function loadProductsToCarousel() {
 }
 
 
-const chunkSize = 4
+const chunkSize = 2
 const chunkedProducts = computed(() => {
   const chunks = []
   for (let i = 0; i < productsData.value.length; i += chunkSize) {
