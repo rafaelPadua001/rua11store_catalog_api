@@ -273,7 +273,7 @@ def recovery_password():
         # user.recovery_token = token
         # db.session.commit()
 
-    recovery_link = f"http://localhost:3000/authenticator/resetPassword?token={token}"
+    recovery_link = f"https://rua11store-catalog-api.vercel.app/authenticator/resetPassword?token={token}"
     EmailController.send_email(
     "Recuperação de senha",
     [email], 
