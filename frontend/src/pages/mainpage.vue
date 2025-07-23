@@ -39,7 +39,7 @@
                         <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
                           <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
                             target="_blank" rel="noopener noreferrer" style="display: block;">
-                            <v-img :src="product.image_path" :alt="product.seo?.slug" width="200" height="200" contain
+                            <v-img :src="product.image_path" :alt="product.seo?.slug" width="150" height="150" contain
                               class="cursor-pointer" />
 
                           </a>
@@ -67,8 +67,8 @@
                     </v-col>
                     <v-col cols="6">
 
-                      <div style="font-style: italic; font-size: 16px; margin-top: 4px;">"{{ comment.comment }}"</div>
-                      <div style="font-size: 12px; color: gray; margin-top: 4px;">
+                      <div style="font-style: italic; font-size: 14px; margin-top: 4px;">"{{ comment.comment }}"</div>
+                      <div style="font-size: 10pxpx; color: gray; margin-top: 4px;">
                         <strong>{{ comment.user_name }}</strong> - {{ new Date(comment.created_at).toLocaleDateString()
                         }}
                       </div>
