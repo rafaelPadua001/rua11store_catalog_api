@@ -68,7 +68,7 @@
                     <v-col cols="6">
 
                       <div style="font-style: italic; font-size: 14px; margin-top: 4px;">"{{ comment.comment }}"</div>
-                      <div style="font-size: 10pxpx; color: gray; margin-top: 4px;">
+                      <div style="font-size: 10px; color: gray; margin-top: 4px;">
                         <strong>{{ comment.user_name }}</strong> - {{ new Date(comment.created_at).toLocaleDateString()
                         }}
                       </div>
