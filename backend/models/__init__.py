@@ -14,6 +14,7 @@ from .orderItem import OrderItem
 from .coupon import Coupon
 from .couponUser import CouponUser
 from .notification import Notification
+
 __all__ = [
     'UserProfile',
     'Page',
@@ -31,4 +32,5 @@ __all__ = [
     'Coupon',
     'CouponUser',
     'Notification',
+  
 ]

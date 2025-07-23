@@ -23,7 +23,7 @@
 
                     <v-row justify="center">
                         <v-col cols="auto">
-                            <v-btn variant="text" color="primary">
+                            <v-btn variant="text" color="primary" @click="goToRecovery">
                                 Recovery password
                             </v-btn>
                         </v-col>
@@ -74,6 +74,10 @@ const goToRegister = () => {
 //   drawer.value = false; // Fecha o menu lateral
 //   router.push('/authenticator/login'); // Redireciona para a página de login
 // };
+
+const goToRecovery = () => {
+    router.push('/authenticator/recoveryPassword');
+}
 
 // Validações
 const emailRules = [
