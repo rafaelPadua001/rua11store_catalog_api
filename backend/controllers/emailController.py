@@ -1,10 +1,11 @@
 from flask_mail import Message
-
+from extensions import mail
 
 class EmailController:
     def __init__(self, mail):
         self.mail = mail
 
-    def send_email(self, subject, recipients, body, html):
+    @staticmethod
+    def send_email(subject, recipients, body, html):
         msg = Message(subject, recipients=recipients, body=body, html=html)
-        self.mail.send(msg)
+        mail.send(msg)
