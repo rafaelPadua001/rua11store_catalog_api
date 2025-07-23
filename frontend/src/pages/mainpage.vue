@@ -61,13 +61,13 @@
                 <v-card outlined class="mx-auto pa-4" max-width="600" elevation="0">
                   <v-row align="center">
                     <v-col cols="3" class="text-center">
-                      <v-avatar size="64">
+                      <v-avatar size="34">
                         <v-img :src="comment.avatar_url" alt="Avatar" />
                       </v-avatar>
                     </v-col>
-                    <v-col cols="9">
+                    <v-col cols="6">
 
-                      <div style="font-style: italic; font-size: 18px; margin-top: 4px;">"{{ comment.comment }}"</div>
+                      <div style="font-style: italic; font-size: 16px; margin-top: 4px;">"{{ comment.comment }}"</div>
                       <div style="font-size: 12px; color: gray; margin-top: 4px;">
                         <strong>{{ comment.user_name }}</strong> - {{ new Date(comment.created_at).toLocaleDateString()
                         }}
