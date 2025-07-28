@@ -60,8 +60,9 @@
                     item-title="title" item-value="key" label="Category Type" outlined dense></v-select>
 
                 </v-col>
-                <label>Select Subcategory:</label>
+                
                 <v-col cols="12" v-if="editedItem.is_subcategory">
+                  <label>Select Subcategory:</label>
                   <v-select v-model="editedItem.parent_id" :items="mainCategories" label="Parent Category"
                     item-title="name" item-text="name" item-value="id" outlined dense></v-select>
                 </v-col>
