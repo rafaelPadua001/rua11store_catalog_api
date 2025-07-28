@@ -1,32 +1,44 @@
 <template>
   <v-container class="fill-height">
-    <v-responsive class="align-center fill-height mx-auto" max-width="900">
-      <div v-if="!loadFailed && pageContent" class="text-center">
-        <v-img v-if="logoImage" :src="logoImage" :alt="pageTitle" width="175" height="175" contain
-          class="mb-n4 mx-auto d-block" />
+    <v-responsive class="align-center fill-height" max-width="100%">
 
-        <div class="mt-0 mb-2 d-flex justify-center flex-wrap">
-          <v-row justify="center">
-            <v-col cols="12" md="12" sm="6" class="d-flex justify-center">
-              <!-- seus botões aqui -->
-              <v-btn class="mx-0" color="black" size="small" href="https://example.com/download-ios-app.apk"
-                target="_blank" disabled>
-                <v-icon class="mr-0" size="large">mdi-apple</v-icon>
-                App iOS
-              </v-btn>
-              <v-btn class="mx-1" color="black" size="small" href="https://example.com/download-android-app.apk"
-                target="_blank">
-                <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
-                App Android
-              </v-btn>
-              <v-btn class="mx-0" color="primary" size="small" href="https://rua11store-web.vercel.app/"
-                target="_blank">
-                <v-icon class="mr-0" size="large">mdi-store</v-icon>
-                Acessar Loja
-              </v-btn>
-            </v-col>
-          </v-row>
-        </div>
+      <div v-if="!loadFailed && pageContent" class="px-2 px-sm-4">
+        <v-row justify="center" class="my-4">
+          <v-col>
+            <v-img v-if="logoImage" :src="logoImage" :alt="pageTitle" width="175" height="175" contain
+              class="mb-n4 mx-auto d-block" />
+
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col>
+            <div class="mt-0 mb-8 d-flex justify-center flex-wrap">
+              <v-row justify="center">
+                <v-col cols="12" sm="8" md="10"  class="d-flex justify-center px-2">
+                  <!-- seus botões aqui -->
+                  <v-btn class="mx-0" color="black" size="small" href="https://example.com/download-ios-app.apk"
+                    target="_blank" disabled>
+                    <v-icon class="mr-0" size="large">mdi-apple</v-icon>
+                    App iOS
+                  </v-btn>
+                  <v-btn class="mx-0" color="black" size="small" href="https://example.com/download-android-app.apk"
+                    target="_blank">
+                    <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
+                    App Android
+                  </v-btn>
+                  <v-btn class="mx-0" color="primary" size="small" href="https://rua11store-web.vercel.app/"
+                    target="_blank">
+                    <v-icon class="mr-0" size="large">mdi-store</v-icon>
+                    Acessar Loja
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </div>
+          </v-col>
+        </v-row>
+
+
         <div class="mt-0 mb-1 d-flex justify-center flex-wrap">
           <v-row justify="center" class="my-2">
             <v-col cols="12" sm="10" md="8" lg="6">
@@ -53,22 +65,24 @@
           </v-row>
         </div>
         <!-- Carousel Comentários -->
-        <v-row justify="center" class="my-4">
-          <v-col cols="12" sm="10" md="8" lg="6">
-            <v-carousel cycle hide-delimiters :show-arrows="false" height="180" interval="7000"
+        <v-row justify="center" class="my-0 mx-0">
+          <v-col cols="12" sm="12" md="8" lg="6">
+            <h4>Testimonials</h4>
+            <v-carousel cycle hide-delimiters :show-arrows="false"  interval="7000"
               v-model="activeCommentIndex">
               <v-carousel-item v-for="(comment, index) in comments" :key="comment.id">
-                <v-card outlined class="mx-auto pa-4" max-width="600" elevation="0">
+                <v-card outlined class="mx-auto pa-0" max-width="100%" elevation="0">
                   <v-row align="center">
-                    <v-col cols="3" class="text-center">
-                      <v-avatar size="34">
+                    <v-col cols="4" class="text-center">
+                      <v-avatar size="40">
                         <v-img :src="comment.avatar_url" alt="Avatar" />
                       </v-avatar>
                     </v-col>
-                    <v-col cols="6">
-
-                      <div style="font-style: italic; font-size: 14px; margin-top: 4px;">"{{ comment.comment }}"</div>
-                      <div style="font-size: 10px; color: gray; margin-top: 4px;">
+                    <v-col cols="5">
+                      <div style="font-style: italic; font-size: 12px; margin-top: 4px; color: gray;">
+                        <p>"{{ comment.comment }}"</p>
+                      </div>
+                      <div style="font-size: 8px; margin-top: 2px;">
                         <strong>{{ comment.user_name }}</strong> - {{ new Date(comment.created_at).toLocaleDateString()
                         }}
                       </div>
@@ -81,7 +95,7 @@
         </v-row>
       </div>
 
-      
+
       <div v-else class="text-center" background>
         <v-progress-circular indeterminate />
       </div>
