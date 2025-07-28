@@ -93,6 +93,14 @@ import { ref, inject, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
+const api = axios.create({
+  baseURL:
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://rua11store-catalog-api-lbp7.onrender.com",
+  headers: { "Content-Type": "application/json" },
+});
+
 
 
 const logoUrl = ref('');
@@ -133,6 +141,8 @@ onMounted(async () => {
   try{
     const res = await api.get('/config/config');
     logoUrl.value = res.data.logo_url;
+    console.log("Logo URL:", logoUrl.value);
+
   }
   catch(error){
     console.error("Erro ao carregar logo:", error);
@@ -155,13 +165,6 @@ const navigateTo = (path) => {
   router.push(path);
 };
 
-const api = axios.create({
-  baseURL:
-    window.location.hostname === "localhost"
-      ? "http://localhost:5000"
-      : "https://rua11store-catalog-api-lbp7.onrender.com",
-  headers: { "Content-Type": "application/json" },
-});
 
 const fetchNotifications = async () => {
   const token = localStorage.getItem('user_token');
