@@ -17,6 +17,7 @@ from routes.notification import notification_bp
 from routes.coupon import coupon_bp
 from routes.comments import comments_bp
 from routes.sitemap import sitemap_bp
+from routes.config import config_bp
 
 def register_routes(app):
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -37,3 +38,4 @@ def register_routes(app):
     app.register_blueprint(coupon_bp, url_prefix='/coupon')
     app.register_blueprint(comments_bp, url_prefix='/comments')
     app.register_blueprint(sitemap_bp, url_prefix='/sitemap')
+    app.register_blueprint(config_bp, url_prefix='/config')
