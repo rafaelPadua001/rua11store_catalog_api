@@ -1,7 +1,8 @@
 <template>
-  <v-row justify="center">
+  <v-container class=" fill-height">
+    <v-row justify="center">
     <v-col cols="12" sm="12" md="8" lg="10" xl="6">
-      <v-card class="pa-1 fill-height">
+      <v-card class="pa-2">
         <!-- Imagem do produto -->
         <v-img :src="product.image_url" :alt="product?.seo?.slug" height="250" contain class="mb-4"></v-img>
 
@@ -65,6 +66,8 @@
       </v-card>
     </v-col>
   </v-row>
+  </v-container>
+  
 </template>
 
 
