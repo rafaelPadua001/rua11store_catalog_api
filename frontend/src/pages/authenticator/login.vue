@@ -4,8 +4,8 @@
             <v-col cols="12" sm="8" md="6" lg="4">
                 <v-card class="pa-2">
                     <template v-slot:title>
-                        <div class="text-center">
-                            <v-img src="@/assets/rua11store_logo.png" alt="rua11store_logo.png" width="120" contain
+                        <div class="text-center" v-if="logoUrl">
+                            <v-img :src="logoUrl" alt="logo" width="120" contain
                                 class="mx-auto"></v-img>
                         </div>
                     </template>
@@ -63,8 +63,17 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from 'axios';
+
+
+const api = axios.create({
+    baseURL:
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://rua11store-catalog-api-lbp7.onrender.com",
+    headers: { "Content-Type": "application/json" },
+});
 
 // Campos do formulário
 const email = ref("");
@@ -72,6 +81,7 @@ const password = ref("");
 const form = ref(null);
 const loading = ref(false); // Estado para mostrar o spinner no botão
 const router = useRouter();
+const logoUrl = ref('');
 
 //const goToRegister = () => {
 //
@@ -98,6 +108,15 @@ const passwordRules = [
     (v) => v.length >= 8 || "A senha deve ter pelo menos 8 caracteres",
 ];
 
+onMounted(async () => {
+    try {
+        const res = await api.get('/config/config');
+        logoUrl.value = res.data.logo_url;
+    } catch (err) {
+        console.error("Erro ao carregar logo:", err);
+    }
+});
+
 // Função de Login
 const login = async () => {
     if (!form.value) return; // Evita erro caso `form` não esteja carregado
@@ -106,7 +125,7 @@ const login = async () => {
     if (valid) {
         loading.value = true; // Ativa o loading no botão
         try {
-            const response = await axios.post('https://rua11store-catalog-api-lbp7.onrender.com/auth/login', {
+            const response = await api.post('/auth/login', {
                 email: email.value,
                 password: password.value,
             });
@@ -128,4 +147,5 @@ const login = async () => {
         }
     }
 };
+
 </script>

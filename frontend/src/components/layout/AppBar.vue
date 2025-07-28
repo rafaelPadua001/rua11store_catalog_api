@@ -1,7 +1,14 @@
 <template>
   <v-app-bar color="purple-darken-3" density="comfortable">
     <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-    <v-app-bar-title>Rua11Store</v-app-bar-title>
+    <v-app-bar-title>
+      <template v-if="logoUrl">
+        <v-img :src="logoUrl" alt="Logo" width="60" contain class="my-auto"></v-img>
+      </template>
+      <template v-else>
+        Rua11Store
+      </template>
+    </v-app-bar-title>
 
     <v-spacer></v-spacer>
 
@@ -86,6 +93,9 @@ import { ref, inject, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
+
+
+const logoUrl = ref('');
 const drawer = ref(false);
 const router = useRouter();
 const isAuthenticated = ref(false);
@@ -119,7 +129,14 @@ function parseJwt(token) {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  try{
+    const res = await api.get('/config/config');
+    logoUrl.value = res.data.logo_url;
+  }
+  catch(error){
+    console.error("Erro ao carregar logo:", error);
+  }
   checkAuth();
   window.addEventListener('storage', checkAuth);
 });
