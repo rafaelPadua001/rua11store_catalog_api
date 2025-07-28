@@ -141,8 +141,6 @@ onMounted(async () => {
   try{
     const res = await api.get('/config/config');
     logoUrl.value = res.data.logo_url;
-    console.log("Logo URL:", logoUrl.value);
-
   }
   catch(error){
     console.error("Erro ao carregar logo:", error);
