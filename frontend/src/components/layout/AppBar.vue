@@ -53,52 +53,53 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="10" sm="8" >
-         <v-navigation-drawer v-model="drawer" class="bg-purple-darken-3" theme="dark" temporary>
-      <v-list>
-        <v-list-item>
-          <v-list-item-title class="text-h6">Menu</v-list-item-title>
-        </v-list-item>
+      <v-col cols="12" md="10" sm="8">
+        <v-navigation-drawer v-model="drawer" class="bg-purple-darken-3" theme="dark" temporary>
+          <v-list>
+            <v-list-item>
+              <v-list-item-title class="text-h6">Menu</v-list-item-title>
+            </v-list-item>
 
-        <v-divider></v-divider>
+            <v-divider></v-divider>
 
-        <div v-if="isAuthenticated">
-          <v-list-item link @click="navigateTo('/authenticator/dashboard')" prepend-icon="mdi-home"
-            title="Dashboard"></v-list-item>
-          <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
-            title="Pages"></v-list-item>
-          <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
-          <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
-            title="Categories"></v-list-item>
-          <v-list-item link @click="navigateTo('/products/products')" prepend-icon="mdi-cart"
-            title="Products"></v-list-item>
-          <v-list-item link @click="navigateTo('/stock/stock')" prepend-icon="mdi-finance" title="Stock"></v-list-item>
-          <v-list-item link @click="navigateTo('/payments/payments')" prepend-icon="mdi-wallet"
-            title="Payments"></v-list-item>
-          <v-list-item link @click="navigateTo('/delivery/delivery')" prepend-icon="mdi-moped"
-            title="Delivery"></v-list-item>
-          <v-list-item link @click="navigateTo('/orders/orders')" prepend-icon="mdi-package"
-            title="Orders"></v-list-item>
-          <v-list-item link @click="navigateTo('/coupons/coupons')" prepend-icon="mdi-bookmark"
-            title="Coupons"></v-list-item>
-          <v-list-item link @click="navigateTo('/comments/comment')" prepend-icon="mdi-comment-multiple"
-            title="Comments"></v-list-item>
-          <v-list-item link @click="navigateTo('/authenticator/profile')" prepend-icon="mdi-account"
-            title="Profile"></v-list-item>
-          <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
-        </div>
+            <div v-if="isAuthenticated">
+              <v-list-item link @click="navigateTo('/authenticator/dashboard')" prepend-icon="mdi-home"
+                title="Dashboard"></v-list-item>
+              <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
+                title="Pages"></v-list-item>
+              <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
+              <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
+                title="Categories"></v-list-item>
+              <v-list-item link @click="navigateTo('/products/products')" prepend-icon="mdi-cart"
+                title="Products"></v-list-item>
+              <v-list-item link @click="navigateTo('/stock/stock')" prepend-icon="mdi-finance"
+                title="Stock"></v-list-item>
+              <v-list-item link @click="navigateTo('/payments/payments')" prepend-icon="mdi-wallet"
+                title="Payments"></v-list-item>
+              <v-list-item link @click="navigateTo('/delivery/delivery')" prepend-icon="mdi-moped"
+                title="Delivery"></v-list-item>
+              <v-list-item link @click="navigateTo('/orders/orders')" prepend-icon="mdi-package"
+                title="Orders"></v-list-item>
+              <v-list-item link @click="navigateTo('/coupons/coupons')" prepend-icon="mdi-bookmark"
+                title="Coupons"></v-list-item>
+              <v-list-item link @click="navigateTo('/comments/comment')" prepend-icon="mdi-comment-multiple"
+                title="Comments"></v-list-item>
+              <v-list-item link @click="navigateTo('/authenticator/profile')" prepend-icon="mdi-account"
+                title="Profile"></v-list-item>
+              <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
+            </div>
 
-        <div v-else>
-          <v-list-item link @click="navigateTo('/')" prepend-icon="mdi-home" title="Home"></v-list-item>
-          <v-list-item link @click="navigateTo('/authenticator/login')" prepend-icon="mdi-login"
-            title="Login"></v-list-item>
-        </div>
-      </v-list>
-    </v-navigation-drawer>
+            <div v-else>
+              <v-list-item link @click="navigateTo('/')" prepend-icon="mdi-home" title="Home"></v-list-item>
+              <v-list-item link @click="navigateTo('/authenticator/login')" prepend-icon="mdi-login"
+                title="Login"></v-list-item>
+            </div>
+          </v-list>
+        </v-navigation-drawer>
       </v-col>
     </v-row>
 
-   
+
 
   </v-container>
 
@@ -147,7 +148,6 @@ const checkAuth = () => {
       }
     }
   }
-  console.log("Usuário autenticado:", isAuthenticated.value);
 };
 
 // Função para extrair user_id do JWT, caso não esteja salvo no localStorage
