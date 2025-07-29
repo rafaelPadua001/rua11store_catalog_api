@@ -41,7 +41,7 @@ class MelhorEnvioService:
         ]
 
         payload = {
-            "from": {"postal_code": zipcode_origin},
+            "from": {"postal_code": os.getenv("SENDER_POSTAL_CODE")},
             "to": {"postal_code": zipcode_destiny},
             "products": products,
             "services": "",
