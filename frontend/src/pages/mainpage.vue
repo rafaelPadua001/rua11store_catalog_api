@@ -16,18 +16,18 @@
               <v-row justify="center">
                 <v-col cols="12" sm="8" md="10" class="d-flex justify-center px-2">
                   <!-- seus botões aqui -->
-                  <v-btn class="mx-0 text-caption" color="black" size="small" href="https://example.com/download-ios-app.apk"
-                    target="_blank" disabled>
+                  <v-btn class="mx-0 text-caption" color="black" size="small"
+                    href="https://example.com/download-ios-app.apk" target="_blank" disabled>
                     <v-icon class="mr-0" size="large">mdi-apple</v-icon>
                     App iOS
                   </v-btn>
-                  <v-btn class="mx-0 text-caption" color="black" size="small" href="https://example.com/download-android-app.apk"
-                    target="_blank">
+                  <v-btn class="mx-0 text-caption" color="black" size="small"
+                    href="https://example.com/download-android-app.apk" target="_blank">
                     <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
                     App Android
                   </v-btn>
-                  <v-btn class="mx-0 text-caption" color="primary" size="small" href="https://rua11store-web.vercel.app/"
-                    target="_blank">
+                  <v-btn class="mx-0 text-caption" color="primary" size="small"
+                    href="https://rua11store-web.vercel.app/" target="_blank">
                     <v-icon class="mr-0" size="large">mdi-store</v-icon>
                     Acessar Loja
                   </v-btn>
@@ -72,14 +72,16 @@
                 <v-carousel-item v-for="(comment, index) in comments" :key="comment.id">
                   <v-card outlined class="mx-auto pa-2" max-width="100%" elevation="0">
                     <v-row no-gutters class="align-center">
-                      <v-col  cols="auto" class="pr-4">
+                      <v-col cols="auto" class="pr-4">
                         <v-avatar size="50">
                           <v-img :src="comment.avatar_url" alt="Avatar" />
                         </v-avatar>
                       </v-col>
-                      <v-col >
+                      <v-col>
                         <div style="font-style: italic; font-size: 18px; margin-top: 4px; color: gray;">
-                          <p>"{{ comment.comment }}" - <strong  style="font-size: 12px; color: black">{{ comment.user_name }}</strong> </p>
+                          <p>"{{ comment.comment }}" - <strong style="font-size: 12px; color: black">{{
+                              comment.user_name
+                              }}</strong> </p>
                         </div>
                         <!-- <div style="font-size: 12px; margin-top: 2px;">
                         - <strong>{{ comment.user_name }}</strong> 
