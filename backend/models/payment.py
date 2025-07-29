@@ -80,6 +80,8 @@ class Payment(db.Model):
             payment_id = self.id
             delivery_id = None
 
+          
+
             if self.address and self.products:
                 product = self.products[0]
                 delivery = Delivery(
@@ -115,7 +117,7 @@ class Payment(db.Model):
                 if 'error' in result:
                     print(f"Erro ao atualizar o estoque para {product_id}: {result['error']}")
 
-            #print(self.status)
+            print(self.status)
             order = Order(
                 user_id=uuid.UUID(str(self.usuario_id)),
                 payment_id=payment_id,
@@ -172,7 +174,6 @@ class Payment(db.Model):
             try:
                 if extensions.email_controller is None:
                     raise Exception("email_controller não está inicializado!")
-                # first mail to client
                 extensions.email_controller.send_email(
                     subject=f"Rua11Store Confirmação de pedido n°: {order_id}",
                     recipients=[self.email],
@@ -183,22 +184,6 @@ class Payment(db.Model):
                          f"Valor total: <b>R${self.total_value:.2f}</b>.<br><br>"
                          f"Atenciosamente,<br>Rua11Store.</p>"
                 )
-
-                # second mail to admin
-                admin_email = os.getenv('SENDER_EMAIL')
-                if admin_email:
-                    extensions.email_controller.send_email(
-                        subject=f"[Alerta de novo pedido] Pedido n°: {order_id}",
-                        recipients=[admin_email],
-                        body=f"Novo pedido recebido: {order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                        html=f"<p>Olá! Um novo pedido foi recebido: <b>{order_id}</b><br>"
-                             f"Para: <b>{self.address.get('recipient_name', 'Cliente')}</b><br>"
-                             f"Valor total: <b>R${self.total_value:.2f}</b>.<br>"
-                             f"Produtos: {self.products}<br>"
-                             f"Atenciosamente,<br>Rua11Store.</p>"
-                    )
-                else:
-                    print("Erro: Variável de ambiente SENDER_EMAIL não está definida.")
             except Exception as e:
                 print(f'Erro ao enviar e-mail: {e}')
 
