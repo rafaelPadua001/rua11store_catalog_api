@@ -1,91 +1,108 @@
 <template>
-  <v-app-bar color="purple-darken-3" density="comfortable">
-    <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-    <v-app-bar-title>
-      <template v-if="logoUrl">
-        <v-img :src="logoUrl" alt="Logo" width="60" contain class="my-auto"></v-img>
-      </template>
-      <template v-else>
-        Rua11Store
-      </template>
-    </v-app-bar-title>
+  <v-container>
+    <v-row>
+      <v-col cols="12" md="10" sm="8">
+        <v-app-bar color="purple-darken-3" density="comfortable">
+          <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated"></v-app-bar-nav-icon>
+          <v-app-bar-title>
+            <template v-if="logoUrl">
+              <v-img :src="logoUrl" alt="Logo" width="60" contain class="my-auto"></v-img>
+            </template>
+            <template v-else>
+              Rua11Store
+            </template>
+          </v-app-bar-title>
 
-    <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
 
-    <v-menu offset-y :nudge-y="20" content-class="custom-menu">
-      <template #activator="{ props }">
-        <v-btn icon v-bind="props" @click="showNotifications">
-          <v-icon>mdi-bell</v-icon>
-          <div v-if="hasNewNotifications" class="red-dot"></div>
-        </v-btn>
-      </template>
+          <v-menu offset-y :nudge-y="20" content-class="custom-menu">
+            <template #activator="{ props }">
+              <v-btn icon v-bind="props" @click="showNotifications">
+                <v-icon>mdi-bell</v-icon>
+                <div v-if="hasNewNotifications" class="red-dot"></div>
+              </v-btn>
+            </template>
 
 
+            <v-list>
+              <v-list-item v-for="(notification, index) in notifications" :key="index">
+                <v-list-item-title>
+                  <v-card @click="markAsRead(notification.id)">
+                    <v-card-text>{{ notification.message }}</v-card-text>
+                    <v-card-actions>
+                      <!-- <v-btn text @click="notification.show = true">Ver</v-btn> -->
+                      <v-btn text @click="markAsRead(notification.id)">Marcar</v-btn>
+                      <!-- <v-btn text @click="notification.show = false">Fechar</v-btn> -->
+
+                    </v-card-actions>
+                  </v-card>
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item v-if="notifications.length === 0">
+                <v-list-item-title class="text-grey">Sem notificações</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+          <v-snackbar v-model="snackbar.show" :timeout="3000" color="success">
+            {{ snackbar.text }}
+          </v-snackbar>
+          <v-btn icon @click="navigateTo('/')">
+            <v-icon>mdi-domain</v-icon>
+          </v-btn>
+        </v-app-bar>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="10" sm="8" >
+         <v-navigation-drawer v-model="drawer" class="bg-purple-darken-3" theme="dark" temporary>
       <v-list>
-        <v-list-item v-for="(notification, index) in notifications" :key="index">
-          <v-list-item-title>
-            <v-card @click="markAsRead(notification.id)">
-              <v-card-text>{{ notification.message }}</v-card-text>
-              <v-card-actions>
-                <!-- <v-btn text @click="notification.show = true">Ver</v-btn> -->
-                <v-btn text @click="markAsRead(notification.id)">Marcar</v-btn>
-                <!-- <v-btn text @click="notification.show = false">Fechar</v-btn> -->
+        <v-list-item>
+          <v-list-item-title class="text-h6">Menu</v-list-item-title>
+        </v-list-item>
 
-              </v-card-actions>
-            </v-card>
-          </v-list-item-title>
-        </v-list-item>
-        <v-list-item v-if="notifications.length === 0">
-          <v-list-item-title class="text-grey">Sem notificações</v-list-item-title>
-        </v-list-item>
+        <v-divider></v-divider>
+
+        <div v-if="isAuthenticated">
+          <v-list-item link @click="navigateTo('/authenticator/dashboard')" prepend-icon="mdi-home"
+            title="Dashboard"></v-list-item>
+          <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
+            title="Pages"></v-list-item>
+          <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
+          <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
+            title="Categories"></v-list-item>
+          <v-list-item link @click="navigateTo('/products/products')" prepend-icon="mdi-cart"
+            title="Products"></v-list-item>
+          <v-list-item link @click="navigateTo('/stock/stock')" prepend-icon="mdi-finance" title="Stock"></v-list-item>
+          <v-list-item link @click="navigateTo('/payments/payments')" prepend-icon="mdi-wallet"
+            title="Payments"></v-list-item>
+          <v-list-item link @click="navigateTo('/delivery/delivery')" prepend-icon="mdi-moped"
+            title="Delivery"></v-list-item>
+          <v-list-item link @click="navigateTo('/orders/orders')" prepend-icon="mdi-package"
+            title="Orders"></v-list-item>
+          <v-list-item link @click="navigateTo('/coupons/coupons')" prepend-icon="mdi-bookmark"
+            title="Coupons"></v-list-item>
+          <v-list-item link @click="navigateTo('/comments/comment')" prepend-icon="mdi-comment-multiple"
+            title="Comments"></v-list-item>
+          <v-list-item link @click="navigateTo('/authenticator/profile')" prepend-icon="mdi-account"
+            title="Profile"></v-list-item>
+          <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
+        </div>
+
+        <div v-else>
+          <v-list-item link @click="navigateTo('/')" prepend-icon="mdi-home" title="Home"></v-list-item>
+          <v-list-item link @click="navigateTo('/authenticator/login')" prepend-icon="mdi-login"
+            title="Login"></v-list-item>
+        </div>
       </v-list>
-    </v-menu>
-    <v-snackbar v-model="snackbar.show" :timeout="3000" color="success">
-      {{ snackbar.text }}
-    </v-snackbar>
-    <v-btn icon @click="navigateTo('/')">
-      <v-icon>mdi-domain</v-icon>
-    </v-btn>
-  </v-app-bar>
+    </v-navigation-drawer>
+      </v-col>
+    </v-row>
 
-  <v-navigation-drawer v-model="drawer" class="bg-purple-darken-3" theme="dark" temporary>
-    <v-list>
-      <v-list-item>
-        <v-list-item-title class="text-h6">Menu</v-list-item-title>
-      </v-list-item>
+   
 
-      <v-divider></v-divider>
+  </v-container>
 
-      <div v-if="isAuthenticated">
-        <v-list-item link @click="navigateTo('/authenticator/dashboard')" prepend-icon="mdi-home"
-          title="Dashboard"></v-list-item>
-        <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
-          title="Pages"></v-list-item>
-        <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
-        <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
-          title="Categories"></v-list-item>
-        <v-list-item link @click="navigateTo('/products/products')" prepend-icon="mdi-cart"
-          title="Products"></v-list-item>
-        <v-list-item link @click="navigateTo('/stock/stock')" prepend-icon="mdi-finance" title="Stock"></v-list-item>
-        <v-list-item link @click="navigateTo('/payments/payments')" prepend-icon="mdi-wallet"
-          title="Payments"></v-list-item>
-        <v-list-item link @click="navigateTo('/delivery/delivery')" prepend-icon="mdi-moped"
-          title="Delivery"></v-list-item>
-        <v-list-item link @click="navigateTo('/orders/orders')" prepend-icon="mdi-package" title="Orders"></v-list-item>
-        <v-list-item link @click="navigateTo('/coupons/coupons')" prepend-icon="mdi-bookmark" title="Coupons"></v-list-item>
-        <v-list-item link @click="navigateTo('/comments/comment')" prepend-icon="mdi-comment-multiple" title="Comments"></v-list-item>
-        <v-list-item link @click="navigateTo('/authenticator/profile')" prepend-icon="mdi-account"
-          title="Profile"></v-list-item>
-        <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
-      </div>
 
-      <div v-else>
-        <v-list-item link @click="navigateTo('/')" prepend-icon="mdi-home" title="Home"></v-list-item>
-        <v-list-item link @click="navigateTo('/authenticator/login')" prepend-icon="mdi-login"
-          title="Login"></v-list-item>
-      </div>
-    </v-list>
-  </v-navigation-drawer>
 </template>
 
 <script setup>
@@ -118,6 +135,19 @@ const snackbar = ref({
 
 const checkAuth = () => {
   isAuthenticated.value = !!localStorage.getItem('user_token');
+  if (!isAuthenticated.value) {
+    localStorage.removeItem('user_id');
+  } else {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      const token = localStorage.getItem('user_token');
+      const payload = parseJwt(token);
+      if (payload && payload.user_id) {
+        localStorage.setItem('user_id', payload.user_id);
+      }
+    }
+  }
+  console.log("Usuário autenticado:", isAuthenticated.value);
 };
 
 // Função para extrair user_id do JWT, caso não esteja salvo no localStorage
@@ -138,11 +168,11 @@ function parseJwt(token) {
 }
 
 onMounted(async () => {
-  try{
+  try {
     const res = await api.get('/config/config');
     logoUrl.value = res.data.logo_url;
   }
-  catch(error){
+  catch (error) {
     console.error("Erro ao carregar logo:", error);
   }
   checkAuth();
