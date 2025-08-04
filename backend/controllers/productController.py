@@ -94,6 +94,15 @@ class ProductController:
             {
                 **item['product'],
                 'product_quantity': item['product_quantity'],
+                'thumbnail_path': (
+                    item['product'].get('thumbnail_path')
+                    or (item.get('product_images')[0]['image_path'] if item.get('product_images') else None)
+                    or (
+                        item['product'].get('image_paths')[0]
+                        if isinstance(item['product'].get('image_path'), list) and item['product'].get('image_paths')
+                        else None
+                    )
+                ),
                 'seo': item.get('seo'),
                 'images': item.get('product_images', []),  # adiciona as imagens aqui
                 'video': (
