@@ -98,7 +98,8 @@ class ProductSeoController:
                     "id": product.id,
                     "name": product.name,
                     "price": product.price,
-                    "image_url": product.image_path,
+                    "image_url": product.image_paths,
+                    "thumbnail_path": product.thumbnail_path,
                     "quantity": product.quantity,
                     "description": product.description
                     # outros campos...

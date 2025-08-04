@@ -84,7 +84,7 @@
                             <div v-for="(product, index) in stocks" :key="index" class="d-flex align-center mb-2">
                                 <!-- Avatar -->
                                 <v-avatar class="me-4" size="69">
-                                    <v-img :src="product.product.image_path"
+                                    <v-img :src="product.product.thumbnail_path"
                                         :alt="product.product.seo?.slug || 'Produto'" cover />
                                 </v-avatar>
 

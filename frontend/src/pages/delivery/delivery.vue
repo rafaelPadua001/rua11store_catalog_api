@@ -17,8 +17,8 @@
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading deliveries...">
 
                     <!-- Exibe imagens de produtos -->
-                    <template v-slot:item.image="{ item }">
-                        <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
+                    <template v-slot:item.thumbnail_path="{ item }">
+                        <v-img v-if="item.thumbnail_path" :src="getProductImage(item.thumbail_path, item.id)"
                             alt="Imagem do Produto" contain min-width="60" max-width="70" min-height="10"
                             class="rounded-lg"></v-img>
                         <span v-else>Sem Imagem</span>

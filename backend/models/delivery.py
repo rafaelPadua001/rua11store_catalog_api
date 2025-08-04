@@ -159,7 +159,7 @@ class Delivery(db.Model):
                         'product_id': item.product_id,
                         'name': item.product.name if item.product else None,
                         'description': item.product.description if item.product else None,
-                        'image': item.product.image_path if item.product else None,
+                        'image': item.product.thumbnail_path if item.product else None,
                         'price': item.unit_price,
                         'quantity': item.quantity
                     })

@@ -43,7 +43,7 @@ class Order(db.Model):
             'products': [
                 {
                     'name': item.product.name,
-                    'product_image': item.product.image_path,
+                    'product_image': item.product.thumbnail_path,
                     'description': item.product.description,
                     'quantity': item.quantity,
                     'unit_price': item.product.price,
