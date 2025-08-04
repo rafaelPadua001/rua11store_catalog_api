@@ -5,7 +5,7 @@ class ProductImage(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-    image_path = db.Column(db.String, nullable=False)  # Caminho para a imagem do produto
+    image_paths = db.Column(db.String, nullable=False)  # Caminho para a imagem do produto
     is_thumbnail = db.Column(db.Boolean, default=False)  # Indica se a imagem é a miniatura
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
@@ -18,7 +18,7 @@ class ProductImage(db.Model):
         return {
             'id': self.id,
             'product_id': self.product_id,
-            'image_paths': self.image_path,
+            'image_paths': self.image_paths,
             'is_thumbnail': self.is_thumbnail,
             'created_at': self.created_at.isoformat() if self.created_at else None  
         }
