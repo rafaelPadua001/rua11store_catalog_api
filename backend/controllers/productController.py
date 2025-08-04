@@ -95,14 +95,19 @@ class ProductController:
                 **item['product'],
                 'product_quantity': item['product_quantity'],
                 'thumbnail_path': (
+                    # Novo campo principal
                     item['product'].get('thumbnail_path')
-                    or (item.get('product_images')[0]['image_path'] if item.get('product_images') else None)
+                    # Primeira imagem registrada em product_images
+                    or (item.get('product_images')[0]['image_path']
+                        if item.get('product_images') else None)
+                    # Compatibilidade com campo antigo image_paths na tabela products
                     or (
                         item['product'].get('image_paths')[0]
-                        if isinstance(item['product'].get('image_path'), list) and item['product'].get('image_paths')
-                        else None
+                        if isinstance(item['product'].get('image_paths'), list)
+                        and item['product'].get('image_paths') else None
                     )
                 ),
+
                 'seo': item.get('seo'),
                 'images': item.get('product_images', []),  # adiciona as imagens aqui
                 'video': (
