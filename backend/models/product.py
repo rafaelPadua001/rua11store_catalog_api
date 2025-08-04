@@ -14,7 +14,7 @@ class Product(db.Model):
     category_id = db.Column(db.Integer)
     subcategory_id = db.Column(db.Integer)
     thumbnail_path = db.Column(db.String)  # Caminho para a imagem de miniatura
-    image_path = db.Column(db.String)
+    image_paths = db.Column(db.String)
    # video_path = db.Column(db.String)  # Caminho para o vídeo do produto
     quantity = db.Column(db.Integer, default=1)
     width = db.Column(db.Float)
@@ -214,7 +214,7 @@ class Product(db.Model):
             "price": f"{self.price:.2f}" if isinstance(self.price, float) else self.price,
             "category_id": getattr(self, "category_id", None),
             "subcategory_id": getattr(self, "subcategory_id", None),
-            "image_path": getattr(self, "image_path", None),
+            "image_paths": getattr(self, "image_paths", None),
             "thumbnail_path": getattr(self, "thumbnail_path", None),
             "product_images": [
             {
