@@ -1,24 +1,26 @@
 <template>
-    <v-row justify="center">
+    <v-row justify="center" no-gutters>
         <v-col cols="12" sm="12" md="10" lg="10" xl="6">
-            <v-card class="pa-4">
+            <v-card class="pa-4" elevation="0">
                 <v-card-title class="d-flex justify-center">
-                    <h1 class="text-h5">Products Management</h1>
+                    <h5>Products Management</h5>
                 </v-card-title>
+                
+                <v-divider></v-divider>
 
-                <v-card-actions class="d-flex justify-end mb-4">
+                <v-card-actions class="d-flex justify-end mb-0">
                     <v-btn color="primary" @click="newProduct">
                         <v-icon left>mdi-plus</v-icon>
                         Add Product
                     </v-btn>
                 </v-card-actions>
 
-                <v-data-table :headers="headers" :items="products" :items-per-page="10" class="elevation-1"
+                <v-data-table :headers="headers" :items="products" :items-per-page="20" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading products...">
                     <!-- 🔹 Slot para exibir imagens -->
-                    <template v-slot:item.image="{ item }">
-                        <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
-                            alt="Imagem do Produto" contain min-width="60" max-width="70" min-height="10"
+                    <template v-slot:item.thumbnail_path="{ item }">
+                        <v-img v-if="item.thumbnail_path" :src="getProductImage(item.thumbnail_path, item.id)"
+                            alt="Imagem do Produto" contain min-width="60" max-width="60" min-height="30"
                             class="rounded-lg"></v-img>
                         <span v-else>Sem Imagem</span>
                     </template>
@@ -40,10 +42,10 @@
 
                     <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
-                         <v-btn :to="`/products/productView/${item.seo.slug}`" color="primary" icon small class="ma-0 pa-0"
-                            style="width: 32px; height: 32px;">
-                            <v-icon size="20">mdi-eye</v-icon>
-                        </v-btn>
+                        <router-link :to="`/products/productView/${item.seo.slug}`">
+                            <v-icon small color="primary">mdi-eye</v-icon>
+                        </router-link>
+
                         <v-icon small color="primary" @click.stop="editProduct(item)">
                             mdi-pencil
                         </v-icon>
@@ -57,126 +59,16 @@
 
             <!-- Modal para Adicionar/Editar Produto -->
             <v-dialog v-model="productDialog" max-width="600" fullscreen>
-                <v-card class="pa-4 text-center">
-                    <v-toolbar flat color="transparent">
-                        <v-toolbar-title class="headline">{{ formTitle }}</v-toolbar-title>
-
-                        <v-btn icon @click="productDialog = false">
-                            <v-icon>mdi-close</v-icon>
-                        </v-btn>
-
-                    </v-toolbar>
-                    <v-card-text>
-                        <v-row dense>
-                            <v-subheader class="text-left">Informações Básicas</v-subheader>
-                            <v-divider class="mb-3"></v-divider>
-                            <v-col cols="12" md="4" sm="6">
-                                <v-text-field v-model="editedProduct.name" label="Product Name" outlined dense>
-                                </v-text-field>
-                            </v-col>
-                            <v-col cols="12" md="4" sm="6">
-                                <v-file-input v-model="editedProduct.image" label="Product Image" outlined show-size
-                                    dense></v-file-input>
-                            </v-col>
-                        </v-row>
-
-                        <v-row dense>
-                            <v-subheader class="text-left">Categoria</v-subheader>
-                            <v-divider class="mb-3"></v-divider>
-                            <v-col cols="12" md="6" sm="6">
-                                <v-select v-model="editedProduct.category_id" :items="mainCategories" label="Category"
-                                    item-title="name" item-text="name" item-value="id" outlined dense></v-select>
-                            </v-col>
-
-                            <v-col cols="12" md="6" sm="6">
-                                <v-select v-model="editedProduct.subcategory_id" :items="subcategories"
-                                    label="Subcategory" item-title="name" item-text="name" item-value="id" outlined
-                                    dense></v-select>
-                            </v-col>
-
-                        </v-row>
-
-                        <v-row dense>
-                            <v-subheader class="text-left">Descrição</v-subheader>
-                            <v-divider class="mb-3"></v-divider>
-                            <v-col cols="12">
-                                <v-textarea v-model="editedProduct.description" label="Description" outlined dense>
-                                </v-textarea>
-                            </v-col>
-                        </v-row>
-
-                        <v-row dense>
-                            <v-subheader class="text-left">Estoque</v-subheader>
-                            <v-divider class="mb-3"></v-divider>
-                            <v-col cols="6">
-                                <v-text-field v-model="formattedPrice" label="Price" outlined dense
-                                    @input="updatePrice"></v-text-field>
-                            </v-col>
-                            <v-col cols="6">
-                                <v-text-field v-model="editedProduct.quantity" label="Quantity" type="number" outlined
-                                    dense></v-text-field>
-                            </v-col>
-                        </v-row>
-
-                        <v-row dense>
-                            <v-subheader class="text-left">Dimensões</v-subheader>
-                            <v-divider class="mb-3"></v-divider>
-                            <v-col cols="12" md="4" sm="6">
-                                <v-text-field v-model="editedProduct.width" label="width(cm)" type="number" outlined
-                                    dense></v-text-field>
-                            </v-col>
-                            <v-col cols="12" md="4" sm="6">
-                                <v-text-field v-model="editedProduct.height" label="Height (cm)" type="number" outlined
-                                    dense></v-text-field>
-                            </v-col>
-                        </v-row>
-                        <v-row dense>
-                            <v-col cols="12" md="4" sm="6">
-                                <v-text-field v-model="formattedWeight" label="Weight (kg)" type="text" outlined
-                                    dense></v-text-field>
-                            </v-col>
-
-                            <v-col cols="12" md="4" sm="6">
-                                <v-text-field v-model="editedProduct.length" label="length (cm)" type="number" outlined
-                                    dense></v-text-field>
-                            </v-col>
-                        </v-row>
-
-                        <v-row dense>
-                            <v-subheader class="text-left">SEO</v-subheader>
-                            <v-col cols="12">
-
-                                <v-divider class="mb-3"></v-divider>
-                            </v-col>
-
-                            <v-col cols="12" md="6">
-                                <v-text-field v-model="editedProduct.seo.meta_title" label="Meta Title" outlined
-                                    dense></v-text-field>
-                            </v-col>
-
-                            <v-col cols="12" md="6">
-                                <v-text-field v-model="editedProduct.seo.slug" label="Slug (URL)" outlined
-                                    dense></v-text-field>
-                            </v-col>
-
-                            <v-col cols="12">
-                                <v-textarea v-model="editedProduct.seo.meta_description" label="Meta Description"
-                                    outlined dense rows="2" auto-grow></v-textarea>
-                            </v-col>
-
-                            <v-col cols="12">
-                                <v-text-field v-model="editedProduct.seo.keywords"
-                                    label="Keywords (separadas por vírgula)" outlined dense></v-text-field>
-                            </v-col>
-                        </v-row>
-
-
-                    </v-card-text>
-                    <v-card-actions>
-                        <v-btn color="grey darken-1" text @click="close">Cancel</v-btn>
-                        <v-btn color="primary" text @click="saveProduct">Save</v-btn>
-                    </v-card-actions>
-                </v-card>
+                <ProductForm
+                   :edited-product="editedProduct"
+                   :categories="categories"
+                   :main-categories="mainCategories"
+                   :subcategories="subcategories"
+                   :form-title="formTitle"
+                   @close="close"
+                   @save-product="saveProduct"
+                />
+               
             </v-dialog>
         </v-col>
     </v-row>
@@ -184,6 +76,7 @@
 
 <script>
 import axios from "axios";
+import ProductForm from "./ProductForm.vue";
 //   import { directive as mask } from "v-mask";
 
 
@@ -196,12 +89,14 @@ const api = axios.create({
 });
 
 export default {
+      components: {
+    ProductForm
+  },
     data() {
         return {
             loading: false,
             productDialog: false,
             editedIndex: -1,
-
             editedProduct: {
                 id: null,
                 name: '',
@@ -247,7 +142,7 @@ export default {
             categories: [],
             headers: [
                 // { text: "ID", value: "id", width: "20px", align: "center" },
-                { title: "Image", key: "image", sortable: false },
+                { title: "Image", key: "thumbnail_path", sortable: false },
                 { title: "Product Name", key: "name", width: "250px" },
                 { title: "Product Description", key: "description", width: "250px" },
                 { title: "Category", key: "category", width: "200px" },
@@ -344,6 +239,7 @@ export default {
 
                 const token = localStorage.getItem("user_token");
                 if (!token) return this.$router.push("/login");
+                
 
                 const formData = new FormData();
                 formData.append("name", this.editedProduct.name || ""); // Evita erro
@@ -352,7 +248,15 @@ export default {
                 formData.append("category_id", this.editedProduct.category_id || "");
                 formData.append("subcategory_id", this.editedProduct.subcategory_id || "");
                 formData.append("quantity", this.editedProduct.quantity || 1);
-                formData.append("imagem", this.editedProduct.image || "");
+                formData.append("thumbnail", this.editedProduct.thumbnail || "");
+                if (Array.isArray(this.editedProduct.images)) {
+                    this.editedProduct.images.forEach((file) => {
+                    if (file instanceof File) {
+                        formData.append("images", file);
+                    }
+                    });
+                }
+                formData.append("video", this.editedProduct.video || "");
                 formData.append('width', this.editedProduct.width || "");
                 formData.append('height', this.editedProduct.height || "");
                 formData.append('weight', this.editedProduct.weight || "");
@@ -389,7 +293,7 @@ export default {
 
                 this.close();
             } catch (error) {
-                console.error("Error saving product:", error);
+                console.log("Error saving product:", error);
             }
         },
         getProductImage(imagePath, productId = null) {
@@ -397,9 +301,13 @@ export default {
             if (!imagePath) return "https://via.placeholder.com/300";
 
             // Se já for URL completa (http ou https)
-            if (imagePath.startsWith('http')) {
-                return imagePath.replace('http://', 'https://'); // Força HTTPS
-            }
+            //if (imagePath.startsWith('http')) {
+            //    return imagePath.replace('http://', 'https://'); // Força HTTPS
+           // }
+
+            return imagePath.startsWith('http')
+            ? imagePath.replace('http://', 'https://') // garante HTTPS
+            : imagePath;
 
             // Define a base URL conforme o ambiente
             const baseUrl = window.location.hostname === 'localhost'

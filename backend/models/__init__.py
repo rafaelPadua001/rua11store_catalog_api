@@ -1,6 +1,8 @@
 from .userProfile import UserProfile
 from .page import Page
 from .product import Product
+from .productImage import ProductImage
+from .productVideo import ProductVideo
 from .productSeo import ProductSeo
 from .category import Category
 from .stock import Stock
@@ -15,10 +17,13 @@ from .coupon import Coupon
 from .couponUser import CouponUser
 from .notification import Notification
 
+
 __all__ = [
     'UserProfile',
     'Page',
     'Product',
+    'ProductImage',
+    'ProductVideo',
     'ProductSeo',
     'Category',
     'Stock',

@@ -10,8 +10,8 @@
                 <v-data-table :headers="headers" :items="stocks" :items-per-page="10" class="elevation-1" item-key="id"
                     fixed-header height="500" :loading="loading" loading-text="Loading stock...">
                 
-                    <template v-slot:item.image_path="{ item }">
-                        <v-img v-if="item.product.image_path" :src="getProductImage(item.product.image_path) " alt="Product Image" contain :width="70" :height="70" 
+                    <template v-slot:item.thumbnail_path="{ item }">
+                        <v-img v-if="item.product.thumbnail_path" :src="getProductImage(item.product.thumbnail_path, item.id) " alt="Product Image" contain :width="70" :height="70" 
                             class="rounded-lg"></v-img>
                         <span v-else>No Image</span>
                     </template>
@@ -70,7 +70,7 @@ export default {
             editedStock: { id: null, name: "", quantity: 1 },
             stocks: [],
             headers: [
-                { title: "Product Image", key: "image_path", sortable: false  },
+                { title: "Product Image", key: "thumbnail_path", sortable: false  },
                 { title: "Product Name", key: "product_name" },
                 { title: "Variations", key: "variations" },
                 { title: "Quantity", key: "product_quantity" },
@@ -103,6 +103,10 @@ export default {
             if (imagePath.startsWith('http')) {
                 return imagePath.replace('http://', 'https://'); // Força HTTPS
             }
+
+            return imagePath.startsWith('http')
+            ? imagePath.replace('http://', 'https://') // garante HTTPS
+            : imagePath;
 
             // Define a base URL conforme o ambiente
             const baseUrl = window.location.hostname === 'localhost'

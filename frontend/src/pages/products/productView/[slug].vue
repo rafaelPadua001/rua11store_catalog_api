@@ -4,7 +4,7 @@
     <v-col cols="12" sm="12" md="8" lg="10" xl="6">
       <v-card class="pa-2">
         <!-- Imagem do produto -->
-        <v-img :src="product.image_url" :alt="product?.seo?.slug" height="250" contain class="mb-4"></v-img>
+        <v-img :src="product.thumbnail_path" :alt="product?.seo?.slug" height="250" contain class="mb-4"></v-img>
 
         <v-card-title class="d-flex justify-start">
           <h4 style="font-size: 14px;">{{ product.name }} - R$ {{ product.price }}</h4>

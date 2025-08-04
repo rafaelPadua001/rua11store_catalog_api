@@ -13,7 +13,9 @@ class Product(db.Model):
     price = db.Column(Numeric(10,2))
     category_id = db.Column(db.Integer)
     subcategory_id = db.Column(db.Integer)
-    image_path = db.Column(db.String)
+    thumbnail_path = db.Column(db.String)  # Caminho para a imagem de miniatura
+    image_paths = db.Column(db.String)
+   # video_path = db.Column(db.String)  # Caminho para o vídeo do produto
     quantity = db.Column(db.Integer, default=1)
     width = db.Column(db.Float)
     height = db.Column(db.Float)
@@ -61,9 +63,13 @@ class Product(db.Model):
             from models.stock import Stock
             from models.productSeo import ProductSeo
             from models.comment import Comment
+            from models.productImage import ProductImage
+            from models.productVideo import ProductVideo
 
             results = db.session.query(
                 Product,
+                ProductImage,
+                ProductVideo,
                 Stock.product_quantity,
                 ProductSeo,
                 Comment
@@ -73,39 +79,66 @@ class Product(db.Model):
                 ProductSeo, Product.id == ProductSeo.product_id
             ).outerjoin(
                 Comment, Product.id == Comment.product_id
+            ).outerjoin(
+                ProductImage, Product.id == ProductImage.product_id
+            ).outerjoin(
+                ProductVideo, Product.id == ProductVideo.product_id
             ).all()
 
             product_map = {}
 
-            for product, quantity, seo, comment in results:
+            for product, product_image, product_video, quantity, seo, comment in results:
                 pid = product.id
-                if pid not in product_map:
-                   product_map[pid] = {
-                    "product": {
-                        "id": product.id,
-                        "name": product.name,
-                        "description": product.description,
-                        "price": str(product.price),
-                        "image_path": product.image_path,
-                        "category_id": product.category_id,
-                        "subcategory_id": product.subcategory_id,
-                        "user_id": product.user_id,
-                        "length": product.length,
-                        "width": product.width,
-                        "height": product.height,
-                        "weight": product.weight,
-                        "quantity": product.quantity,
-                    },
-                    "product_quantity": quantity,
-                    "seo": {
-                        "meta_title": seo.meta_title if seo else None,
-                        "meta_description": seo.meta_description if seo else None,
-                        "slug": seo.slug if seo else None,
-                        "keywords": seo.keywords if seo else None
-                    } if seo else None,
-                    "comments": []
-                }
 
+                if pid not in product_map:
+                    product_map[pid] = {
+                        "product": {
+                            "id": product.id,
+                            "name": product.name,
+                            "description": product.description,
+                            "price": str(product.price),
+                            "thumbnail_path": product.thumbnail_path,
+                            "category_id": product.category_id,
+                            "subcategory_id": product.subcategory_id,
+                            "user_id": product.user_id,
+                            "length": product.length,
+                            "width": product.width,
+                            "height": product.height,
+                            "weight": product.weight,
+                            "quantity": product.quantity,
+                        },
+                        "product_images": [],
+                        "product_videos": [],
+                        "product_quantity": quantity,
+                        "seo": {
+                            "meta_title": seo.meta_title if seo else None,
+                            "meta_description": seo.meta_description if seo else None,
+                            "slug": seo.slug if seo else None,
+                            "keywords": seo.keywords if seo else None
+                        } if seo else None,
+                        "comments": [],
+                    }
+
+                # Adiciona imagens (todas as encontradas)
+                if product_image:
+                    product_map[pid]["product_images"].append({
+                        "id": product_image.id,
+                        "product_id": product_image.product_id,
+                        "image_paths": product_image.image_paths,
+                        "is_thumbnail": product_image.is_thumbnail,
+                        "created_at": product_image.created_at.isoformat() if product_image.created_at else None
+                    })
+
+                # adiciona videos (todos encontrados)
+                if product_video:
+                    product_map[pid]["product_videos"].append({
+                        "id": product_video.id,
+                        "product_id": product_video.product_id,
+                        "video_path":   product_video.video_path,
+                        "created_at": product_video.created_at,
+                    })
+
+                # Adiciona comentários (todos)
                 if comment:
                     product_map[pid]["comments"].append({
                         "id": comment.id,
@@ -114,7 +147,7 @@ class Product(db.Model):
                         "user_name": comment.user_name,
                         "avatar_url": comment.avatar_url,
                         "comment": comment.comment,
-                        'status': comment.status,
+                        "status": comment.status,
                         "created_at": comment.created_at.isoformat() if comment.created_at else None,
                         "updated_at": comment.updated_at.isoformat() if comment.updated_at else None
                     })
@@ -124,9 +157,7 @@ class Product(db.Model):
         except Exception as e:
             print(f"Erro ao buscar produtos: {e}")
             return []
-
-
-
+    
     @staticmethod
     def get_by_id(product_id):
         try:
@@ -183,7 +214,25 @@ class Product(db.Model):
             "price": f"{self.price:.2f}" if isinstance(self.price, float) else self.price,
             "category_id": getattr(self, "category_id", None),
             "subcategory_id": getattr(self, "subcategory_id", None),
-            "image_path": getattr(self, "image_path", None),
+            "image_paths": getattr(self, "image_paths", None),
+            "thumbnail_path": getattr(self, "thumbnail_path", None),
+            "product_images": [
+            {
+                    "id": img.id,
+                    "product_id": img.product_id,
+                    "image_paths": img.image_paths,
+                    "is_thumbnail": img.is_thumbnail,
+                    "created_at": img.created_at.isoformat() if img.created_at else None
+                }
+                for img in getattr(self, "product_images", [])
+            ],
+           "product_video": None if not getattr(self, "product_videos", None) else {
+                "id": self.product_videos[0].id,
+                "product_id": self.product_videos[0].product_id,
+                "video_path": self.product_videos[0].image_path,
+                "created_at": self.product_videos[0].created_at.isoformat() if self.product_videos[0].created_at else None
+            },
+
             "quantity": self.quantity,
             "width": getattr(self, "width", None),
             "height": getattr(self, "height", None),

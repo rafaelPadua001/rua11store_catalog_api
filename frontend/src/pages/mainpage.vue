@@ -50,7 +50,7 @@
                         <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
                           <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
                             target="_blank" rel="noopener noreferrer" style="display: block;">
-                            <v-img :src="product.image_path" :alt="product.seo?.slug" width="150" height="150" contain
+                            <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" width="150" height="150" contain
                               class="cursor-pointer" />
 
                           </a>
@@ -125,7 +125,7 @@ const pageContent = ref('')
 
 interface Product {
   name: string
-  image_path: string
+  thumbnail_path: string
   seo?: {
     slug: string
     meta_title?: string
