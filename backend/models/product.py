@@ -14,7 +14,7 @@ class Product(db.Model):
     category_id = db.Column(db.Integer)
     subcategory_id = db.Column(db.Integer)
     thumbnail_path = db.Column(db.String)  # Caminho para a imagem de miniatura
-    image_path = db.Column(db.String)
+    image_paths = db.Column(db.String)
    # video_path = db.Column(db.String)  # Caminho para o vídeo do produto
     quantity = db.Column(db.Integer, default=1)
     width = db.Column(db.Float)
@@ -124,7 +124,7 @@ class Product(db.Model):
                     product_map[pid]["product_images"].append({
                         "id": product_image.id,
                         "product_id": product_image.product_id,
-                        "image_path": product_image.image_path,
+                        "image_paths": product_image.image_paths,
                         "is_thumbnail": product_image.is_thumbnail,
                         "created_at": product_image.created_at.isoformat() if product_image.created_at else None
                     })
@@ -214,13 +214,13 @@ class Product(db.Model):
             "price": f"{self.price:.2f}" if isinstance(self.price, float) else self.price,
             "category_id": getattr(self, "category_id", None),
             "subcategory_id": getattr(self, "subcategory_id", None),
-            "image_path": getattr(self, "image_path", None),
+            "image_paths": getattr(self, "image_paths", None),
             "thumbnail_path": getattr(self, "thumbnail_path", None),
             "product_images": [
             {
                     "id": img.id,
                     "product_id": img.product_id,
-                    "image_path": img.image_path,
+                    "image_paths": img.image_paths,
                     "is_thumbnail": img.is_thumbnail,
                     "created_at": img.created_at.isoformat() if img.created_at else None
                 }
