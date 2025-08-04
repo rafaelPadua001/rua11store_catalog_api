@@ -102,9 +102,9 @@ class ProductController:
                         if item.get('product_images') else None)
                     # Compatibilidade com campo antigo image_paths na tabela products
                     or (
-                        item['product'].get('image_paths')[0]
-                        if isinstance(item['product'].get('image_paths'), list)
-                        and item['product'].get('image_paths') else None
+                        item['product'].get('image_path')[0]
+                        if isinstance(item['product'].get('image_path'), list)
+                        and item['product'].get('image_path') else None
                     )
                 ),
 
