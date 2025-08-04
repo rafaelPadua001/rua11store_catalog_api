@@ -5,7 +5,7 @@
                 <v-card-title class="d-flex justify-center">
                     <h5>Products Management</h5>
                 </v-card-title>
-                
+
                 <v-divider></v-divider>
 
                 <v-card-actions class="d-flex justify-end mb-0">
@@ -19,7 +19,8 @@
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading products...">
                     <!-- 🔹 Slot para exibir imagens -->
                     <template v-slot:item.thumbnail_path="{ item }">
-                        <v-img v-if="item.thumbnail_path" :src="getProductImage(item.thumbnail_path, item.id)"
+                        <v-img v-if="item.thumbnail_path || (item.image_paths && item.image_paths.length > 0)"
+                            :src="getProductImage(item.thumbnail_path || item.image_paths[0], item.id)"
                             alt="Imagem do Produto" contain min-width="60" max-width="60" min-height="30"
                             class="rounded-lg"></v-img>
                         <span v-else>Sem Imagem</span>
@@ -54,21 +55,14 @@
                         </v-icon>
                     </template>
                 </v-data-table>
-                
+
             </v-card>
 
             <!-- Modal para Adicionar/Editar Produto -->
             <v-dialog v-model="productDialog" max-width="600" fullscreen>
-                <ProductForm
-                   :edited-product="editedProduct"
-                   :categories="categories"
-                   :main-categories="mainCategories"
-                   :subcategories="subcategories"
-                   :form-title="formTitle"
-                   @close="close"
-                   @save-product="saveProduct"
-                />
-               
+                <ProductForm :edited-product="editedProduct" :categories="categories" :main-categories="mainCategories"
+                    :subcategories="subcategories" :form-title="formTitle" @close="close" @save-product="saveProduct" />
+
             </v-dialog>
         </v-col>
     </v-row>
@@ -89,9 +83,9 @@ const api = axios.create({
 });
 
 export default {
-      components: {
-    ProductForm
-  },
+    components: {
+        ProductForm
+    },
     data() {
         return {
             loading: false,
@@ -239,7 +233,7 @@ export default {
 
                 const token = localStorage.getItem("user_token");
                 if (!token) return this.$router.push("/login");
-                
+
 
                 const formData = new FormData();
                 formData.append("name", this.editedProduct.name || ""); // Evita erro
@@ -251,9 +245,9 @@ export default {
                 formData.append("thumbnail", this.editedProduct.thumbnail || "");
                 if (Array.isArray(this.editedProduct.images)) {
                     this.editedProduct.images.forEach((file) => {
-                    if (file instanceof File) {
-                        formData.append("images", file);
-                    }
+                        if (file instanceof File) {
+                            formData.append("images", file);
+                        }
                     });
                 }
                 formData.append("video", this.editedProduct.video || "");
@@ -303,11 +297,11 @@ export default {
             // Se já for URL completa (http ou https)
             //if (imagePath.startsWith('http')) {
             //    return imagePath.replace('http://', 'https://'); // Força HTTPS
-           // }
+            // }
 
             return imagePath.startsWith('http')
-            ? imagePath.replace('http://', 'https://') // garante HTTPS
-            : imagePath;
+                ? imagePath.replace('http://', 'https://') // garante HTTPS
+                : imagePath;
 
             // Define a base URL conforme o ambiente
             const baseUrl = window.location.hostname === 'localhost'
