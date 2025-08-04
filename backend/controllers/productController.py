@@ -309,7 +309,7 @@ class ProductController:
                 ProductImageController.update_images(product.id, image_paths)
         else:
             # Mantém as imagens já salvas
-            image_paths = [img.image_paths for img in getattr(product, "product_images", [])]
+            image_paths = [img.image_path for img in getattr(product, "product_images", [])]
 
         # --------------------------
         # THUMBNAIL
