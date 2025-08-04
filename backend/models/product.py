@@ -124,7 +124,7 @@ class Product(db.Model):
                     product_map[pid]["product_images"].append({
                         "id": product_image.id,
                         "product_id": product_image.product_id,
-                        "image_paths": product_image.image_paths,
+                        "image_path": product_image.image_path,
                         "is_thumbnail": product_image.is_thumbnail,
                         "created_at": product_image.created_at.isoformat() if product_image.created_at else None
                     })
@@ -220,7 +220,7 @@ class Product(db.Model):
             {
                     "id": img.id,
                     "product_id": img.product_id,
-                    "image_paths": img.image_paths,
+                    "image_path": img.image_path,
                     "is_thumbnail": img.is_thumbnail,
                     "created_at": img.created_at.isoformat() if img.created_at else None
                 }

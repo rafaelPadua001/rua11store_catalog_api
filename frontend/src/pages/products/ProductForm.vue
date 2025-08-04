@@ -62,7 +62,7 @@
                     <v-row v-else-if="Array.isArray(editedProduct.images) && editedProduct.images.length > 0">
                         <v-col v-for="(img, index) in editedProduct.images" :key="'saved-' + index" cols="6" md="4"
                             class="position-relative">
-                            <v-img :src="typeof img === 'string' ? img : img.image_paths" max-height="200"
+                            <v-img :src="typeof img === 'string' ? img : img.image_path" max-height="200"
                                 class="rounded mt-1" aspect-ratio="1" />
                             <v-btn icon size="x-small" color="black" class="position-absolute mt-2"
                                 style="top: 5px; right: 5px;" @click="removeImage(index)">
