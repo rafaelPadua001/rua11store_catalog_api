@@ -93,9 +93,9 @@
               <v-col cols="12" sm="2">
                 <strong>Total Value:</strong> R$ {{ Number(selectedOrderItems[0]?.total_price).toFixed(2) }}
               </v-col>
-              <v-col cols="12">
+            <!--  <v-col cols="12">
                 <strong>Description:</strong> {{ selectedOrderItems[0]?.description }}
-              </v-col>
+              </v-col> -->
             </v-row>
 
             <!-- Delivery -->
