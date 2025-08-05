@@ -15,9 +15,10 @@
 
                 <v-data-table :headers="headers" :items="deliveries" :items-per-page="10" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading deliveries...">
+
                     <!-- Exibe imagens de produtos -->
-                    <template v-slot:item.image="{ item }">
-                        <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
+                    <template v-slot:item.thumbnail_path="{ item }">
+                        <v-img v-if="item.thumbnail_path" :src="getProductImage(item.thumbail_path, item.id)"
                             alt="Imagem do Produto" contain min-width="60" max-width="70" min-height="10"
                             class="rounded-lg"></v-img>
                         <span v-else>Sem Imagem</span>
@@ -28,8 +29,7 @@
 
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
-                        <!-- Botão de buscar item no carrinho -->
-
+                    
                         <!-- Ícone de criar envio -->
                         <v-icon small @click.stop="shipmentCreate(item)">
                             mdi-cart
@@ -169,6 +169,7 @@
 
 <script>
 import axios from "axios";
+import { toRaw } from 'vue';
 
 const api = axios.create({
     baseURL: window.location.hostname === "localhost"
@@ -231,35 +232,46 @@ export default {
             this.loading = true;
             try {
                 const response = await api.get("delivery/deliveries");
+                console.log(response.data);
                 if (response.data && Array.isArray(response.data)) {
-                    this.deliveries = response.data.flat().map(delivery => ({
-                        id: delivery.id,
-                        recipient_name: delivery.recipient_name,
-                        street: delivery.street,
-                        number: delivery.number,
-                        complement: delivery.complement,
-                        city: delivery.city,
-                        state: delivery.state,
-                        zip_code: delivery.zip_code.replace(/\D/g, ''),
-                        bairro: delivery.bairro,
-                        country: delivery.country,
-                        phone: delivery.phone,
-                        price: delivery.total_value,
-                        delivery_id: delivery.delivery_id,
-                        email: delivery.email,
-                        products: delivery.products,
-                        height: delivery.height,
-                        width: delivery.width,
-                        length: delivery.length,
-                        weight: delivery.weight,
-                        cpf: delivery.cpf.replace(/\D/g, ''),
-                        melhorenvio_id: delivery.melhorenvio_id,
-                        order_id: delivery.order_id,
-                        user_id: delivery.user_id,
-                        status: delivery.status,
-                        //   email: delivery.userEmail,
+                    this.deliveries = response.data.flat().map(delivery => {
+                        // Extrair todos os produtos de todos os orders da entrega
+                        let allProducts = [];
+                        if (delivery.orders && Array.isArray(delivery.orders)) {
+                            delivery.orders.forEach(order => {
+                                if (order.products && Array.isArray(order.products)) {
+                                    allProducts = allProducts.concat(order.products);
+                                }
+                            });
+                        }
 
-                    }));
+                        return {
+                            id: delivery.id,
+                            recipient_name: delivery.recipient_name,
+                            street: delivery.street,
+                            number: delivery.number,
+                            complement: delivery.complement,
+                            city: delivery.city,
+                            state: delivery.state,
+                            zip_code: delivery.zip_code ? delivery.zip_code.replace(/\D/g, '') : '',
+                            bairro: delivery.bairro,
+                            country: delivery.country,
+                            phone: delivery.phone,
+                            price: delivery.total_value,
+                            delivery_id: delivery.delivery_id,
+                            email: delivery.email,
+                            products: allProducts,  // produtos agrupados de todos os orders
+                            height: delivery.height,
+                            width: delivery.width,
+                            length: delivery.length,
+                            weight: delivery.weight,
+                            cpf: delivery.cpf,
+                            melhorenvio_id: delivery.melhorenvio_id,
+                            order_id: delivery.order_id,
+                            user_id: delivery.user_id,
+                            status: delivery.status,
+                        };
+                    });
 
                     console.log(response.data);
                 } else {
@@ -273,32 +285,54 @@ export default {
         },
         async shipmentCreate(item) {
             try {
+                console.log('Item antes:', toRaw(item.products));  // mostra o array puro de produtos
+
+                let allProducts = [];
+
+                if (item.products && item.products.length > 0) {
+                    item.products.forEach(product => {
+                        if (
+                            product.name &&
+                            typeof product.price === 'number' &&
+                            typeof product.quantity === 'number'
+                        ) {
+                            allProducts.push({
+                                name: product.name,
+                                price: product.price,
+                                quantity: product.quantity
+                            });
+                        } else {
+                            console.warn('Produto inválido ignorado:', product);
+                        }
+                    });
+                }
+
+                if (allProducts.length === 0) {
+                    return window.alert('Erro: Nenhum produto com name, price e quantity válido encontrado.');
+                }
+
+                item.products = allProducts;
+
+                console.log('Payload final antes do envio:', toRaw(item));
+
                 const response = await api.post('/melhorEnvio/shipmentCreate', item);
-                // console.log('Resposta da API:', response.data);
 
                 if (response.data.message === 'Envio criado com sucesso. Aguarde pagamento.') {
-                    const shipmentId = response.data.shipment_id;
-
-                    // Forçando reatividade (Vue 2)
-                    item.melhorenvio_id = shipmentId;
-
+                    item.melhorenvio_id = response.data.shipment_id;
 
                     this.isPaymentButtonPayTagDisabled = false;
                     this.isCheckitemButton = true;
 
-                    // Atualizando a lista de envios, se necessário
-                    this.shipment = [...this.shipment];
-
-
-                    // Nenhum reload necessário
-                    return window.alert('item adicionado ao carrinho do melhor envio');
+                    window.alert('Item adicionado ao carrinho do Melhor Envio');
                 } else {
                     window.alert('Algo deu errado. Por favor, tente novamente.');
                 }
             } catch (error) {
-                console.log('Erro no envio:', error);
+                console.error('Erro ao criar envio:', error.response?.data || error.message || error);
+                window.alert('Erro ao criar envio. Detalhes no console.');
             }
         },
+
 
         async checkItemInCart(item) {
             try {

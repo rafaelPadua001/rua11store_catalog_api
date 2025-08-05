@@ -69,7 +69,7 @@ def create_coupon():
         )
         return jsonify({
             'message': 'Cupom criado com sucesso!',
-            'coupon': coupon.to_dict()
+            'coupon': coupon
         }), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
@@ -88,7 +88,9 @@ def update_coupon(coupon_id):
         else:
             data = request.form
 
-        client_id = data.get('client_id')
+        client_id_raw = data.get('client_id')
+        client_id = int(client_id_raw) if client_id_raw not in [None, '', 'null'] else None
+
         title = data.get('title')
         code = data.get('code')
         discount = data.get('discount')
@@ -140,8 +142,9 @@ def serve_uploads(filename):
 @coupon_bp.route('/pick_up_coupon', methods=['POST'])
 def pick_up_coupon():
     data = request.get_json()
-    
-    return CouponController.pick_up_coupon_by_client_id(data)
+    controller = CouponController()
+    response, status_code = controller.pick_up_coupon_by_client_id(data)
+    return jsonify(response), status_code
 
 @coupon_bp.route('/get-coupons/<string:user_id>', methods=['GET'])
 def get_coupons_by_user(user_id):

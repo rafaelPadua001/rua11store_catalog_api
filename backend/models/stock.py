@@ -1,9 +1,26 @@
-import sqlite3
+from datetime import datetime
+from database import db
+from sqlalchemy.orm import joinedload
 
-class Stock:
-    def __init__(self, id=None, id_product=None, user_id=None, category_id=None, product_name=None,
-                 product_price=None, product_quantity=None, variations=None):
-        self.id = id
+
+class Stock(db.Model):
+    __tablename__ = 'stock'
+
+    id = db.Column(db.Integer, primary_key=True)
+    id_product = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    user_id = db.Column(db.Integer, nullable=False)
+    category_id = db.Column(db.Integer, nullable=False)
+    product_name = db.Column(db.String(255), nullable=False)
+    product_price = db.Column(db.Float, nullable=False)
+    product_quantity = db.Column(db.Float, nullable=False)
+    variations = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    product = db.relationship('Product', back_populates='stock')
+
+
+    def __init__(self, id_product, user_id, category_id, product_name, product_price, product_quantity, variations=None):
         self.id_product = id_product
         self.user_id = user_id
         self.category_id = category_id
@@ -11,163 +28,91 @@ class Stock:
         self.product_price = product_price
         self.product_quantity = product_quantity
         self.variations = variations
-
-    @staticmethod
-    def get_db_connection():
-        """Cria uma nova conexão com o banco de dados"""
-        conn = sqlite3.connect('database.db')
-        conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
-        return conn
-
-    @staticmethod
-    def create(data):
-        """Adiciona um novo item ao estoque"""
-        query = """
-            INSERT INTO stock (id_product, user_id, category_id, product_name, product_price, product_quantity,
-                variations, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        """
-
-        conn = Stock.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(query, (
-            data['id_product'],
-            data['user_id'],
-            data['category_id'],
-            data['product_name'],
-            data['product_price'],
-            data['product_quantity'],
-            data.get('variations', None)
-        ))
         
-        conn.commit()
-        stock_id = cursor.lastrowid  # Pega o ID gerado
-        conn.close()
-        return stock_id
-
-    @staticmethod
-    def get_all():
-        """Busca todos os itens do estoque"""
-        query = """SELECT stock.*, products.image_path
-                FROM stock
-                JOIN products ON stock.id_product = products.id
-        """
-        conn = Stock.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(query)
-        rows = cursor.fetchall()
-        conn.close()
-        return rows
-
-    @staticmethod
-    def get_by_id(stock_id):
-        """Busca um item do estoque pelo ID"""
-        query = "SELECT * FROM stock WHERE id = ?"
-        conn = Stock.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(query, (stock_id,))
-        row = cursor.fetchone()
-        conn.close()
-        return row
-    
-    @staticmethod
-    def get_stock_id_by_product(id_product):
-        """Retorna o stock_id associado a um id_product"""
-        query = "SELECT id FROM stock WHERE id_product = ?"
-        conn = Stock.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(query, (id_product,))
-        stock = cursor.fetchone()
-        conn.close()
-        return stock["id"] if stock else None  # Retorna None se não encontrar
-
-    @staticmethod
-    def update(stock_id, data):
-        """Atualiza um item do estoque"""
-        query = """UPDATE stock 
-                   SET id_product = ?, user_id = ?, category_id = ?, product_name = ?, 
-                       product_price = ?, product_quantity = ?, variations = ?, updated_at = CURRENT_TIMESTAMP
-                   WHERE id = ?"""
-
-        conn = Stock.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(query, (
-            data['id_product'],
-            data['user_id'],
-            data['category_id'],
-            data['product_name'],
-            data['product_price'],
-            data['product_quantity'],
-            data.get('variations', None),
-            stock_id
-        ))
-        
-        conn.commit()
-        updated = cursor.rowcount > 0
-        conn.close()
-        return updated
-    
-    @staticmethod
-    def update_stock_quantity(product_id, quantity, conn=None):
-        """Atualiza a quantidade de um item do estoque"""
-        should_close = False
-        if conn is None:
-            conn = Stock.get_db_connection()
-            should_close = True
-
-        try:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute(""" 
-                SELECT product_quantity, id FROM stock WHERE id_product = ?
-            """, (product_id,))
-            row = cursor.fetchone()
-
-            if row is None:
-                return False
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "id_product": self.id_product,
+            "user_id": self.user_id,
+            "category_id": self.category_id,
+            "product_name": self.product_name,
+            "product_price": self.product_price,
+            "product_quantity": self.product_quantity,
             
-            current_quantity = row['product_quantity']
-            new_quantity = current_quantity - quantity
-
-            if new_quantity < 0:
-                return {"error": "Quantidade insuficiente em estoque"}
-
-            cursor.execute(
-                "UPDATE stock SET product_quantity = ? WHERE id = ?",
-                (new_quantity, row['id'])
-            )
-            conn.commit()
-
-            return {
-                "stock_id": row['id'],
-                "old_quantity": current_quantity,
-                "new_quantity": new_quantity
-            }
-        finally:
-            if should_close:
-                conn.close()
-
-
-    @staticmethod
-    def delete(stock_id):
-        """Remove um item do estoque"""
-        query = "DELETE FROM stock WHERE id = ?"
-        conn = Stock.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(query, (stock_id,))
-        conn.commit()
-        deleted = cursor.rowcount > 0
-        conn.close()
-        return deleted
+            # "product_width": self.product_width,
+            # "product_height": self.product_height,
+            # "product_weight": self.product_weight,
+            # "product_lenght": self.product_lenght,
+            "variations": self.variations,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "product": self.product.to_dict() if self.product else None
+        }
     
-    @staticmethod
-    def delete_by_productId(product_id):
-        """Remove um item do estoque"""
-        query = "DELETE FROM stock WHERE id_product = ?"
-        conn = Stock.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(query, (product_id,))
-        conn.commit()
-        deleted = cursor.rowcount > 0
-        conn.close()
-        return deleted
+    @classmethod
+    def create(cls, data):
+        stock = cls(**data)
+        db.session.add(stock)
+        db.session.commit()
+        return stock.id
+
+    @classmethod
+    def get_all(cls):
+        return cls.query.options(joinedload(cls.product)).all()
+
+    @classmethod
+    def get_by_id(cls, stock_id):
+        return cls.query.get(stock_id)
+
+    @classmethod
+    def get_stock_id_by_product(cls, id_product):
+        stock = cls.query.filter_by(id_product=id_product).first()
+        return stock.id if stock else None
+
+    @classmethod
+    def update(cls, stock_id, data):
+        stock = cls.query.get(stock_id)
+        if not stock:
+            return False
+        for key, value in data.items():
+            setattr(stock, key, value)
+        stock.updated_at = datetime.utcnow()
+        db.session.commit()
+        return True
+
+    @classmethod
+    def update_stock_quantity(cls, product_id, quantity):
+        stock = cls.query.filter_by(id_product=product_id).first()
+        if not stock:
+            return False
+
+        new_quantity = stock.product_quantity - quantity
+        if new_quantity < 0:
+            return {"error": "Quantidade insuficiente em estoque"}
+
+        old_quantity = stock.product_quantity
+        stock.product_quantity = new_quantity
+        db.session.commit()
+        return {
+            "stock_id": stock.id,
+            "old_quantity": old_quantity,
+            "new_quantity": new_quantity
+        }
+
+    @classmethod
+    def delete(cls, stock_id):
+        stock = cls.query.get(stock_id)
+        if not stock:
+            return False
+        db.session.delete(stock)
+        db.session.commit()
+        return True
+
+    @classmethod
+    def delete_by_productId(cls, product_id):
+        stock = cls.query.filter_by(id_product=product_id).first()
+        if not stock:
+            return False
+        db.session.delete(stock)
+        db.session.commit()
+        return True

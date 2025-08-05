@@ -98,7 +98,7 @@ class CreditCardPayment(PaymentStrategy):
                 total_value=result.get("transaction_amount"),
                 payment_date=result.get("date_approved"),
                 payment_type="crédito",
-                cpf=data["payer_cpf"],
+                cpf=data["payer_cpf"].replace(".", "").replace("-", "").strip(),
                 email=data["payer_email"],
                 status=result["status"],
                 usuario_id=data["userId"],
@@ -144,6 +144,7 @@ class DebitCardPayment(PaymentStrategy):
         "token": data["card_token"],
         "description": data.get("description", "Compra com cartão de crédito"),
         "installments": int(data["installments"]),  # 1 se for débito simulado
+        "payment_type_id": "debit_card",
         "payment_method_id": data.get("payment_method_id", "visa"),  # "visa", "master", etc
         "payer": {
             "email": data["payer_email"],
@@ -165,15 +166,18 @@ class DebitCardPayment(PaymentStrategy):
     print(payment_data)
 
     response = requests.post(url, headers=headers, json=payment_data)
+    
     result = response.json()
-
+    print("❗️Resposta do Mercado Pago:")
+    print(result)
+    print(response)
     if response.status_code == 201:
         # pagamento aprovado
         payment = Payment(
             payment_id=result.get("id"),
             total_value=result.get("transaction_amount"),
             payment_date=result.get("date_approved"),
-            payment_type="crédito",  # trocado para refletir o teste
+            payment_type="débito",  # trocado para refletir o teste
             cpf=cpf_limpo,
             email=data["payer_email"],
             status=result["status"],

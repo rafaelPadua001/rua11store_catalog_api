@@ -12,11 +12,11 @@
                         Add Product
                     </v-btn>
                 </v-card-actions> -->
-                
 
-                <v-data-table :headers="headers" :items="orders" :items-per-page="10" class="elevation-1"
-                    item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading deliveries...">
-                    
+
+                <v-data-table :headers="headers" :items="orders" :items-per-page="10" class="elevation-1" item-key="id"
+                    fixed-header height="500" :loading="loading" loading-text="Loading deliveries...">
+
                     <!-- Exibe imagens de produtos -->
                     <!-- <template v-slot:item.image="{ item }">
                         <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
@@ -36,19 +36,19 @@
                     </template>
 
                     <!-- Exibe a categoria -->
-                   
+
 
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
-                      
 
-                         <!-- Botão de buscar item no carrinho  -->
+
+                        <!-- Botão de buscar item no carrinho  -->
                         <v-icon small @click.stop="checkItemInCart(item)">
                             mdi-file-search
                         </v-icon>
 
-                      
-                         <!-- Ícone de deletar produto  -->
+
+                        <!-- Ícone de deletar produto  -->
                         <v-icon small @click.stop="deleteItemCart(item)">
                             mdi-delete
                         </v-icon>
@@ -56,36 +56,36 @@
                 </v-data-table>
 
                 <v-dialog v-model="dialogCheckItems" max-width="600px">
-                   
+
                     <v-card>
                         <v-card-title>
                             <span class="headline">Detalhes do Pedido</span>
                         </v-card-title>
-                        
+
 
                         <v-card-subtitle>
                             <!-- {{ selectedOrderItems }} -->
                             <v-row v-for="(item, index) in selectedOrderItems" :key="index" class="mb-4">
                                 <v-col cols="12" sm="6">
-                                    <strong>Nome do Produto:</strong> {{ item.product_name }}
+                                    <strong>Nome do Produto:</strong> {{ item.name }}
                                 </v-col>
                                 <v-col cols="12" sm="6">
-                                    <strong>Descrição:</strong> {{ item.product_description }}
+                                    <strong>Descrição:</strong> {{ item.description }}
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <strong>Quantidade:</strong> {{ item.quantity }}
                                 </v-col>
                                 <v-col cols="12" sm="6">
-                                    <strong>Preço Unitário:</strong> R$ {{ item.unit_price.toFixed(2) }}
+                                    <strong>Preço Unitário:</strong> R$ {{ item.unit_price }}
                                 </v-col>
-                                <!-- <v-col cols="12" sm="6">
+                                <v-col cols="12" sm="6">
                                     <strong>Preço Total:</strong> R$ {{ item.total_price.toFixed(2) }}
-                                </v-col> -->
+                                </v-col>
                             </v-row>
 
                         </v-card-subtitle>
-                        
-<!-- 
+
+                        <!-- 
                         <v-card-subtitle>
                             <v-row>
                                 <v-col cols="12" sm="6">
@@ -110,11 +110,11 @@
                         </v-card-subtitle> -->
 
                         <v-card-actions>
-                             <!-- Botão de compra de etiqueta no carrinho  -->
-                              <!-- <v-btn small @click.stop="shipmentCheckout(cartItems.data)">
+                            <!-- Botão de compra de etiqueta no carrinho  -->
+                            <!-- <v-btn small @click.stop="shipmentCheckout(cartItems.data)">
                                 checkout
                               </v-btn> -->
-                            
+
                             <v-btn color="green" text @click="dialogCheckItems = false">Close</v-btn>
                         </v-card-actions>
                     </v-card>
@@ -179,6 +179,7 @@ export default {
             this.loading = true;
             try {
                 const response = await api.get("order/get-orders");
+                console.log(response.data);
                 if (response.data && Array.isArray(response.data)) {
                     this.orders = response.data.flat().map(order => ({
                         id: order.id,
@@ -188,12 +189,12 @@ export default {
                         order_date: order.order_date,
                         status: order.status,
                         total_amount: order.total_amount,
-                        delivery_id:  Array.isArray(order.delivery_id) ? order.delivery_id[0] : order.delivery_id,
-                        items: order.items
+                        delivery_id: Array.isArray(order.delivery_id) ? order.delivery_id[0] : order.delivery_id,
+                        items: order.products
 
                     }));
 
-                    // console.log(response.data);
+                    console.log(this.orders);
                 } else {
                     console.error("Resposta não contém um array de entregas:", response.data);
                 }
@@ -204,10 +205,10 @@ export default {
             }
         },
         async checkItemInCart(item) {
-          this.selectedOrderItems = item.items;
-          this.dialogCheckItems = true
+            this.selectedOrderItems = item.items;
+            this.dialogCheckItems = true;
         },
-     
+
     }
 };
 </script>

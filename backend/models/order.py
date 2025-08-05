@@ -1,99 +1,33 @@
-import sqlite3
 from datetime import datetime
-# from controllers.orderController import orderController
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, desc
+from sqlalchemy.orm import relationship, Session
+
+from database import db  # Supondo que você tenha Base e engine já configurados no db.py
+import uuid  
 
 
-class Order:
-    def __init__(self, id, user_id, payment_id, delivery_id, shipment_info, order_date, items , total_amount, status=None):
-        self.id = id
-        self.user_id = user_id
-        self.payment_id = payment_id
-        self.delivery_id = delivery_id,
-        self.shipment_info = shipment_info
-        self.order_date = order_date
-        self.status = status
-        self.total_amount = total_amount
-        self.items = items  # lista de dicionários com "product_id", "quantity", "unit_price"
-        
+class Order(db.Model):
+    __tablename__ = 'orders'
 
-    @staticmethod
-    def get_db_connection():
-        """Cria uma nova conexão com o banco de dados"""
-        conn = sqlite3.connect('database.db', timeout=30.0)  # 10 segundos de timeout
-        conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
-        return conn
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), nullable=False, default=lambda: str(uuid.uuid4()))
+    payment_id = db.Column(db.Integer, db.ForeignKey('payments.id'))
+    delivery_id = Column(Integer, ForeignKey('delivery.id'))
+    shipment_info = Column(Text, nullable=True)
+    total_amount = Column(Float, nullable=False)
+    order_date = Column(DateTime, default=datetime.utcnow)
+    status = Column(String, nullable=True)
+
+    items = relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
+    #product = relationship('Product') 
+    delivery = db.relationship('Delivery', backref='orders', uselist=False)
+
+    payment = relationship('Payment', back_populates='orders', uselist=False)
     
-    @staticmethod
-    def get_all():
-        orders = {}
-        conn = Order.get_db_connection()
-        cursor = conn.cursor()
 
-        cursor.execute(""" 
-            SELECT 
-                o.id AS order_id,
-                o.user_id,
-                o.payment_id,
-                o.delivery_id,
-                o.shipment_info,
-                o.total_amount AS order_total,
-                o.order_date,
-                o.status,
-                oi.id AS item_id,
-                oi.product_id,
-                oi.quantity,
-                oi.unit_price,
-                oi.total_price,
-                p.name AS product_name,
-                p.description as product_description,
-                p.price as product_price,
-                p.image_path as product_image       
-            FROM 
-                orders o
-            INNER JOIN 
-                order_items oi ON o.id = oi.order_id
-            LEFT JOIN
-                products p ON oi.product_id = p.id
-            ORDER BY 
-                o.id DESC
-        """)
 
-        rows = cursor.fetchall()
-        conn.close()
 
-        for row in rows:
-            order_id = row['order_id']
-            
-            # Se ainda não adicionamos esse pedido ao dicionário, criamos ele
-            if order_id not in orders:
-                orders[order_id] = Order(
-                    id=row['order_id'],
-                    user_id=row['user_id'],
-                    payment_id=row['payment_id'],
-                    delivery_id=row['delivery_id'],
-                    shipment_info=row['shipment_info'],
-                    order_date=row['order_date'],
-                    total_amount=row['order_total'],
-                    status=row['status'],
-                    items=[]
-                )
-
-            # Adiciona o item à lista de items da order
-            orders[order_id].items.append({
-                "item_id": row['item_id'],
-                "product_id": row['product_id'],
-                "delivery_id": row['delivery_id'],
-                "quantity": row['quantity'],
-                "unit_price": row['unit_price'],
-                "total_price": row['total_price'],
-                "product_name": row['product_name'],
-                "product_description": row['product_description'],
-                "product_image": row['product_image']
-            })
-
-        # Converte cada pedido em dicionário
-        return [order.to_dict() for order in orders.values()]
-
+    # order_items = relationship('OrderItem', back_populates='order')
 
     def to_dict(self):
         return {
@@ -101,135 +35,55 @@ class Order:
             "user_id": self.user_id,
             "payment_id": self.payment_id,
             "delivery_id": self.delivery_id,
+            "melhorenvio_id": self.delivery.melhorenvio_id if self.delivery else None,
             "shipment_info": self.shipment_info,
-            "order_date": self.order_date,
+            "order_date": self.order_date.isoformat() if self.order_date else None,
             "status": self.status,
             "total_amount": self.total_amount,
-            "items": self.items  # já é uma lista de dicionários
+            'products': [
+                {
+                    'name': item.product.name,
+                    'product_image': item.product.thumbnail_path,
+                    'description': item.product.description,
+                    'quantity': item.quantity,
+                    'unit_price': item.product.price,
+                    'total_price': item.total_price
+                }
+                for item in self.items if item.product  # Para garantir que o relacionamento existe
+            ]
         }
 
+    @staticmethod
+    def get_all():
+        orders = db.session.query(Order).order_by(Order.id.desc()).all()
+        return [order.to_dict() for order in orders]
 
-        
-   
-    def get_order_by_userId(user_id):
+
+
+    @staticmethod
+    def get_by_user_id(user_id):
+        print("user_id recebido:", user_id)
         try:
-            print(f"Buscando pedidos para o usuário com ID: {user_id}")  # Log para verificar o user_id
-            conn = Order.get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT 
-                    o.id AS order_id,
-                    o.user_id,
-                    o.payment_id,
-                    o.shipment_info,
-                    o.total_amount AS order_total,
-                    o.order_date,
-                    o.status,
-                    oi.id AS item_id,
-                    oi.product_id,
-                    oi.quantity,
-                    oi.unit_price,
-                    oi.total_price,
-                    p.name AS product_name,
-                    p.description AS product_description,
-                    p.price AS product_price,
-                    p.image_path AS product_image,
-                    d.melhorenvio_id AS delivery_id
-                FROM 
-                    orders o
-                JOIN 
-                    order_items oi ON o.id = oi.order_id
-                JOIN
-                    products p ON oi.product_id = p.id
-                JOIN 
-                    delivery d ON o.delivery_id = d.id  
-                WHERE
-                    o.user_id = ?
-                ORDER BY 
-                    o.id DESC
+            user_uuid = uuid.UUID(user_id)  # converter para objeto UUID
+        except ValueError:
+            return None
 
-            """, (user_id,))
-
-            results = cursor.fetchall()
-            print(results)
-            conn.close()
-
-            if results:
-               
-                orders = {}
-                for row in results:
-                    order_id = row[0]
-
-                    
-                    if order_id not in orders:
-                        orders[order_id] = {
-                            'order_id': row[0],
-                            'user_id': row[1],
-                            'payment_id': row[2],
-                            'shipment_info': row[3],
-                            'order_total': row[4],
-                            'order_date': row[5],
-                            'status': row[6],
-                            'delivery_id': row[16],
-                            'items': []
-                        }
-
-                   
-                    orders[order_id]['items'].append({
-                        'item_id': row[7],
-                        'product_id': row[8],
-                        'quantity': row[9],
-                        'unit_price': row[10],
-                        'total_price': row[11],
-                        'product_name': row[12],
-                        'product_description': row[13],
-                        'product_price': row[14],
-                        'product_image': row[15],
-                        
-                    })
-                    print(orders)
-                return list(orders.values())
-            else:
-                return None
-
-        except Exception as e:
-            print(f"Erro ao buscar os pedidos e itens: {str(e)}")  # Log para capturar erro
-            raise Exception(f"Erro ao buscar os pedidos e itens: {str(e)}")
+        orders = (
+            db.session.query(Order)
+            .filter(Order.user_id == user_uuid)
+            .order_by(desc(Order.id))
+            .all()
+        )
+        return [order.to_dict() for order in orders]
 
 
-
-    
-
-    def save(self):
+    def save(self, session: Session):
         try:
-            conn = self.get_db_connection()
-            cursor = conn.cursor()
-
-            # Inserir na tabela orders
-            cursor.execute("""
-                INSERT INTO orders (user_id, payment_id, shipment_info, total_amount, created_at)
-                VALUES (?, ?, ?, ?, ?)
-            """, (self.user_id, self.payment_id, self.shipment_info, self.total_amount, datetime.now()))
-
-            # Pegar o ID do pedido
-            order_id = cursor.lastrowid
-
-            # Inserir os itens do pedido
-            for item in self.items:
-                product_id = item['product_id']
-                quantity = item['quantity']
-                unit_price = item['unit_price']
-                total_price = unit_price * quantity
-
-                cursor.execute("""
-                    INSERT INTO order_items (order_id, product_id, quantity, unit_price, total_price)
-                    VALUES (?, ?, ?, ?, ?)
-                """, (order_id, product_id, quantity, unit_price, total_price))
-
-            conn.commit()
-            conn.close()
-
-            return order_id  # Retorna o ID do pedido criado
-
+            session.add(self)
+            session.commit()
+            return self.id
         except Exception as e:
+            session.rollback()
             raise Exception(f"Erro ao salvar o pedido: {str(e)}")
+
+

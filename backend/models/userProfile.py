@@ -1,81 +1,59 @@
-import sqlite3
 from typing import Optional
+from datetime import date
+from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy.orm import relationship, Session
+from database import db  # sua instância do SQLAlchemy
+from models.user import User  # ajuste o caminho conforme necessário
 
-def create_connection():
-    """Cria conexão com o banco de dados"""
-    return sqlite3.connect("database.db")
 
-class UserProfile:
-    def __init__(self, user_id: int, username: str, full_name: str, 
-                 birth_date: str, email: str,  # Adicionado email como obrigatório
-                 avatar_url: Optional[str] = None,
-                 name: Optional[str] = None):
-        """
-        Inicializa um perfil de usuário completo.
-        
-        Args:
-            user_id: ID do usuário
-            username: Nome de usuário único
-            full_name: Nome completo
-            birth_date: Data de nascimento (YYYY-MM-DD)
-            email: Endereço de email (obrigatório)
-            avatar_url: URL da foto de perfil
-            name: Nome alternativo (se diferente de full_name)
-        """
+class UserProfile(db.Model):
+    __tablename__ = 'profiles'
+
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    username = Column(String(150), nullable=False, unique=True)
+    full_name = Column(String(200), nullable=False)
+    birth_date = Column(Date, nullable=False)
+    avatar_url = Column(String(255), nullable=True)
+
+    # Relacionamento com User para acessar dados do usuário
+    user = relationship('User', back_populates='profile', uselist=False)
+
+    def __init__(self, user_id: int, username: str, full_name: str,
+                 birth_date: date, avatar_url: Optional[str] = None):
         self.user_id = user_id
         self.username = username
         self.full_name = full_name
         self.birth_date = birth_date
-        self.email = email  # Campo obrigatório adicionado
         self.avatar_url = avatar_url
-        self.name = name if name else full_name  # Usa full_name se name não for fornecido
 
-    @classmethod
-    def get_by_user_id(cls, user_id) -> Optional['UserProfile']:
-        """
-        Busca perfil completo com JOIN entre users e profiles
-        
-        Args:
-            user_id: ID do usuário (str ou int)
-            
-        Returns:
-            Instância de UserProfile ou None se não encontrado
-        """
-        try:
-            user_id = int(user_id) if isinstance(user_id, str) else user_id
-            if not isinstance(user_id, int) or user_id <= 0:
-                raise ValueError("ID de usuário inválido")
-                
-            conn = create_connection()
-            cursor = conn.cursor()
-            
-            cursor.execute(
-                '''SELECT p.username, p.full_name, p.birth_date, p.avatar_url,
-                          u.name, u.email 
-                   FROM profiles p
-                   JOIN users u ON p.user_id = u.id
-                   WHERE p.user_id = ?''',
-                (user_id,)
-            )
 
-            profile_data = cursor.fetchone()
-            conn.close()
+# No model User, ajuste o relacionamento assim:
+# class User(db.Model):
+#     __tablename__ = 'users'
+#     id = Column(Integer, primary_key=True)
+#     email = Column(String, unique=True, nullable=False)
+#     password = Column(String, nullable=False)
+#     name = Column(String, nullable=False)
+#     birth_date = Column(Date, nullable=False)
+#
+#     profile = relationship('UserProfile', back_populates='user', uselist=False)
 
-            if profile_data:
-                return cls(
-                    user_id=user_id,
-                    username=profile_data[0],
-                    full_name=profile_data[1],
-                    birth_date=profile_data[2],
-                    avatar_url=profile_data[3],
-                    name=profile_data[4],  # name da tabela users
-                    email=profile_data[5]  # email da tabela users
-                )
-            return None
-            
-        except sqlite3.Error as e:
-            print(f"Erro de banco de dados: {e}")
-            raise
-        except Exception as e:
-            print(f"Erro inesperado: {e}")
-            raise
+
+def get_user_profile_by_user_id(session: Session, user_id: int) -> Optional[UserProfile]:
+    try:
+        user_id = int(user_id) if isinstance(user_id, str) else user_id
+        if user_id <= 0:
+            raise ValueError("ID de usuário inválido")
+
+        # Consulta UserProfile já com relacionamento carregado (join automático)
+        profile = session.query(UserProfile).filter_by(user_id=user_id).first()
+
+        if profile:
+            # Pode acessar dados relacionados via profile.user.email, profile.user.name etc.
+            return profile
+
+        return None
+
+    except Exception as e:
+        print(f"Erro ao buscar perfil: {e}")
+        raise

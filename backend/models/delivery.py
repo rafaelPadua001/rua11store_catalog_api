@@ -1,32 +1,45 @@
-import sqlite3
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship, joinedload
+from database import db  # ou o local correto da sua instância SQLAlchemy
+from models.order import Order
+from models.orderItem import OrderItem
+from models.product import Product
 
-class Delivery:
-    def __init__(self, id, product_id, user_id, recipient_name, street, number,
-                  complement, city, state, zip_code, country, phone, bairro, total_value,
-                delivery_id, width=None, height=None, length=None, weight=None, cpf=None, melhorenvio_id=None, order_id=None):
-        self.id = id
-        self.product_id = product_id
-        self.user_id = user_id
-        self.recipient_name = recipient_name
-        self.street = street
-        self.number = number
-        self.complement = complement
-        self.city = city
-        self.state = state
-        self.zip_code = zip_code
-        self.country = country
-        self.phone = phone
-        self.bairro = bairro
-        self.total_value = total_value
-        self.delivery_id = delivery_id
-        self.width = width  
-        self.height = height  
-        self.length = length  
-        self.weight = weight 
-        self.cpf = cpf
-        self.melhorenvio_id = melhorenvio_id
-        self.order_id = order_id
 
+class Delivery(db.Model):
+    __tablename__ = 'delivery'
+
+    id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, ForeignKey('products.id', ondelete='CASCADE'), nullable=True)
+    user_id = Column(Integer, nullable=False)
+    recipient_name = Column(String(255))
+    street = Column(String(255))
+    number = Column(String(50))
+    complement = Column(String(255))
+    city = Column(String(100))
+    state = Column(String(50))
+    zip_code = Column(String(20))
+    country = Column(String(100))
+    phone = Column(String(20))
+    bairro = Column(String(100))
+    total_value = Column(Float)
+    delivery_id = Column(String(100))
+    width = Column(Float)
+    height = Column(Float)
+    length = Column(Float)
+    weight = Column(Float)
+    #cpf = Column(String(20))
+    #status = Column(String(50))
+    #service_status = Column(String(50))
+    #state_abbr = Column(String(10))
+    #company_name = Column(String(100))
+    #tracking_link = Column(String(255))
+
+    melhorenvio_id = Column(String(100), unique=True)
+    order_id = Column(String(100))
+    product = relationship('Product', backref=db.backref('deliveries', passive_deletes=True))
+
+    
     def to_dict(self):
         return {
             "id": self.id,
@@ -44,207 +57,113 @@ class Delivery:
             "bairro": self.bairro,
             "total_value": self.total_value,
             "delivery_id": self.delivery_id,
-            "width": self.width,  
-            "height": self.height,  
-            "length": self.length,  
-            "weight": self.weight,
-            "cpf": self.cpf,
+            "width": float(self.width) if self.width is not None else None,
+            "height": float(self.height) if self.height is not None else None,
+            "length": float(self.length) if self.length is not None else None,
+            "weight": float(self.weight) if self.weight is not None else None,
+            #"cpf": self.cpf,
             "melhorenvio_id": self.melhorenvio_id,
-            'order_id': self.order_id
+            "order_id": self.order_id
         }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
     @staticmethod
-    def get_db_connection():
-        """Cria uma nova conexão com o banco de dados"""
-        conn = sqlite3.connect('database.db')
-        conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelos nomes
-        return conn
+    def update_shipment(shipment_data):
+        try:
+            delivery = Delivery.query.filter_by(melhorenvio_id=shipment_data['melhorenvio_id']).first()
+            if not delivery:
+                return False
+
+            delivery.status = shipment_data['status']
+            delivery.service_status = shipment_data['service_status']
+            delivery.state_abbr = shipment_data['state_abbr']
+            delivery.company_name = shipment_data['company_name']
+            delivery.tracking_link = shipment_data['tracking_link']
+
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            print(f"Erro ao atualizar entrega: {e}")
+            return False
 
     @staticmethod
     def get_all():
-        conn = Delivery.get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT 
-                    d.id AS id,
-                    d.recipient_name,
-                    d.complement AS complement,
-                    d.street,
-                    d.number,
-                    d.city,
-                    d.state,
-                    d.zip_code,
-                    d.country,
-                    d.phone,
-                    d.bairro,
-                    d.total_value AS total_value,
-                    d.width,
-                    d.height,
-                    d.length,
-                    d.weight,
-                    d.melhorenvio_id,
-                    d.order_id AS order_id,
-
-                    o.id,
-                    o.user_id,
-                    o.payment_id,
-                    o.delivery_id,
-                    o.shipment_info,
-                    o.total_amount AS order_total,
-                    o.order_date,
-                    o.status,
-
-                    pay.id AS payment_id,
-                    pay.cpf AS cpf,
-                    pay.email AS email,
-                    
-
-                    oi.id AS item_id,
-                    oi.product_id,
-                    oi.quantity,
-                    oi.unit_price,
-                    oi.total_price,
-
-                    p.name AS product_name,
-                    p.description AS product_description,
-                    p.image_path AS product_image
-                    
-
-                FROM 
-                    delivery d
-                INNER JOIN
-                    orders o ON d.id = o.delivery_id
-                LEFT JOIN 
-                    order_items oi ON o.id = oi.order_id
-                LEFT JOIN
-                    products p ON oi.product_id = p.id
-                LEFT JOIN
-                    payments AS pay ON o.payment_id = pay.id
-
-                ORDER BY 
-                    d.id DESC;
-
-
-
-        """)
-        rows = cursor.fetchall()
-        conn.close()
+        deliveries = Delivery.query.order_by(Delivery.id.desc()).all()
 
         deliveries_dict = {}
 
-        for row in rows:
-            delivery_id = row['id']
+        for d in deliveries:
+            print(f"Delivery ID {d.id} - Width: {d.width} | Weight: {d.weight}")
+            deliveries_dict[d.id] = {
+                'id': d.id,
+                'recipient_name': d.recipient_name,
+                'street': d.street,
+                'number': d.number,
+                'complement': d.complement,
+                'city': d.city,
+                'state': d.state,
+                'zip_code': d.zip_code,
+                'country': d.country,
+                'phone': d.phone,
+                'bairro': d.bairro,
+                'total_value': d.total_value,
+                'width': d.width,
+                'height': d.height,
+                'length': d.length,
+                'weight': d.weight,
+                'melhorenvio_id': d.melhorenvio_id,
+                'order_id': d.order_id,  # string, não relacionamento
+                'user_id': None,
+                'payment_id': None,
+                'cpf': None,
+                'email': None,
+                'order_total': None,
+                'order_date': None,
+                'status': None,
+                'products': [],
+                'orders': []  # <<< ESSENCIAL
+            }
 
-            # Se ainda não adicionamos esse delivery, criamos a entrada
-            if delivery_id not in deliveries_dict:
-                delivery_dict = {
-                    'id': delivery_id,
-                    'recipient_name': row['recipient_name'],
-                    'street': row['street'],
-                    'number': row['number'],
-                    'complement': row['complement'],
-                    'city': row['city'],
-                    'state': row['state'],
-                    'zip_code': row['zip_code'],
-                    'country': row['country'],
-                    'phone': row['phone'],
-                    'bairro': row['bairro'],
-                    'total_value': row['total_value'],
-                    'width': row['width'],
-                    'height': row['height'],
-                    'length': row['length'],
-                    'weight': row['weight'],
-                    'melhorenvio_id': row['melhorenvio_id'],
-                    'order_id': row['order_id'],
-                    'user_id': row['user_id'],
-                    'payment_id': row['payment_id'],
-                    'cpf': row['cpf'],
-                    'email': row['email'],
-                    'order_total': row['order_total'],
-                    'order_date': row['order_date'],
-                    'status': row['status'],
-                    'products': []  # importante inicializar apenas uma vez
+            orders = Order.query.filter(Order.delivery_id == d.id).options(db.joinedload(Order.payment)).all()
+
+            # Se houver pedidos, pega o primeiro para preencher os campos principais da entrega
+            if orders:
+                first_order = orders[0]
+                deliveries_dict[d.id]['user_id'] = first_order.user_id
+                deliveries_dict[d.id]['payment_id'] = first_order.payment_id
+                deliveries_dict[d.id]['cpf'] = first_order.payment.cpf if first_order.payment else None
+                deliveries_dict[d.id]['email'] = first_order.payment.email if first_order.payment else None
+                deliveries_dict[d.id]['order_total'] = first_order.total_amount
+                deliveries_dict[d.id]['order_date'] = first_order.order_date.isoformat() if first_order.order_date else None
+                deliveries_dict[d.id]['status'] = first_order.status
+
+            for order in orders:
+                order_data = {
+                    'order_id': order.id,
+                    'user_id': order.user_id,
+                    'payment_id': order.payment_id,
+                    'order_total': order.total_amount,
+                    'order_date': order.order_date.isoformat() if order.order_date else None,
+                    'cpf': order.payment.cpf if order.payment else None,
+                    'email': order.payment.email if order.payment else None,
+                    'status': order.status,
+                    'products': []
                 }
 
-                deliveries_dict[delivery_id] = delivery_dict
+                for item in order.items:
+                    order_data['products'].append({
+                        'product_id': item.product_id,
+                        'name': item.product.name if item.product else None,
+                        'description': item.product.description if item.product else None,
+                        'image': item.product.thumbnail_path if item.product else None,
+                        'price': item.unit_price,
+                        'quantity': item.quantity
+                    })
 
-            # Sempre adiciona o produto
-            deliveries_dict[delivery_id]['products'].append({
-                'product_id': row['product_id'],
-                'name': row['product_name'],
-                'description': row['product_description'],
-                'image': row['product_image'],
-                'price': row['unit_price'],
-                'quantity': row['quantity'] or 1
-            })
+                deliveries_dict[d.id]['orders'].append(order_data)
 
-        # Retorna apenas os valores únicos (com lista de produtos agregada)
         return list(deliveries_dict.values())
-
-
-    def save(self):
-        conn = sqlite3.connect('database.db')
-        try:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO delivery (
-                    product_id, user_id, recipient_name, street, number,
-                    complement, city, state, zip_code, country, phone, bairro, total_value, delivery_id,
-                    width, height, length, weight
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                self.product_id,
-                self.user_id,
-                self.recipient_name,
-                self.street,
-                self.number,
-                self.complement,
-                self.city,
-                self.state,
-                self.zip_code,
-                self.country,
-                self.phone,
-                self.bairro,
-                self.total_value,
-                self.delivery_id,
-                self.width,  
-                self.height,  
-                self.length,  
-                self.weight,  
-            ))
-            conn.commit()
-        except sqlite3.Error as e:
-            print(f"Erro ao salvar a entrega: {e}")
-            conn.rollback()
-        finally:
-            conn.close()
-
-    def update(shipment_data):
-        print('Shipment ', shipment_data)
-        try:
-            conn = Delivery.get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute( cursor.execute("""
-                UPDATE delivery SET
-                    status = ?,
-                    service_status = ?,
-                    state_abbr = ?,
-                    company_name = ?,
-                    tracking_link = ?
-                WHERE melhorenvio_id = ?
-            """, (
-                shipment_data['status'],
-                shipment_data['service_status'],
-                shipment_data['state_abbr'],
-                shipment_data['company_name'],
-                shipment_data['tracking_link'],
-                shipment_data['melhorenvio_id']
-            )))
-
-            conn.commit()
-            conn.close()
-
-            print(f"Delivery {melhorenvio_id} atualizado com sucesso")
-            return True
-        except Exception as e:
-            print(f'Erro ao atualizar entrega: ${e}')
-            return False

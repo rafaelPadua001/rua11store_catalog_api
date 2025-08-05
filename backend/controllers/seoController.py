@@ -1,74 +1,59 @@
-import sqlite3
 from models.seo import Seo
+from database import db
 
 class SeoController:
-    def get_db_connection():
-        """Cria uma nova conexão com o banco de dados"""
-        conn = sqlite3.connect('database.db', timeout=30.0)
-        conn.row_factory = sqlite3.Row
-        return conn
+
     @staticmethod
     def get_all_seo():
-        db = SeoController.get_db_connection()
-        rows = db.execute("SELECT * FROM seo_pages").fetchall()
-        seo_items = []
+        seo_items = Seo.query.all()
+        return [item.to_dict() for item in seo_items]
 
-        for row in rows:
-            seo_item = Seo.from_row(row)
-            seo_items.append(seo_item.to_dict())
-
-        return seo_items
-    
+    @staticmethod
     def get_seo_by_id(seo_id):
-        db = SeoController.get_db_connection()
-        row = db.execute("SELECT * FROM seo_pages WHERE route = ?", (seo_id,)).fetchone()
-        if row:
-            return Seo.from_row(row)
-        return None
-    
-    @staticmethod
-    def save_seo(seo: Seo):
-        route_id = seo.get('route')
-
-        db = SeoController.get_db_connection()
-        db.execute(
-            "INSERT INTO seo_pages (route, title, description, keywords, og_title, og_description, og_image) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (route_id, seo['metaTitle'], seo['metaDescription'], seo['metaKeywords'], seo['ogTitle'], seo['ogDescription'], seo['ogImage'])
-        )
-        db.commit()
+        print(seo_id)
+        return Seo.query.get(seo_id)
 
     @staticmethod
-    def update_seo(seo_id: int, seo: Seo):
-        print(seo)
-        og_image = seo['ogImage']
-        if isinstance(og_image, dict):
-            og_image = og_image.get('url', '')
+    def get_seo_by_route(route):
+        route = str(route)
+        print(route)
+        return Seo.query.filter_by(route=route).first()
 
-        db = SeoController.get_db_connection()
-        db.execute(
-            """
-            UPDATE seo_pages
-            SET route = ?, title = ?, description = ?, keywords = ?,
-                og_title = ?, og_description = ?, og_image = ?
-            WHERE id = ?
-            """,
-            (
-                seo.get('route', ''),
-                seo.get('metaTitle', ''),
-                seo.get('metaDescription', ''),
-                seo.get('metaKeywords', ''),
-                seo.get('ogTitle', ''),
-                seo.get('ogDescription', ''),
-                og_image,
-                seo_id
-            )
+    @staticmethod
+    def save_seo(seo_data):
+        seo = Seo(
+            route=seo_data.get('route'),
+            metatitle=seo_data.get('metaTitle'),
+            metadescription=seo_data.get('metaDescription'),
+            metakeywords=seo_data.get('metaKeywords'),
+            ogtitle=seo_data.get('ogTitle'),
+            ogdescription=seo_data.get('ogDescription'),
+            ogimage=seo_data.get('ogImage', {}).get('url') if isinstance(seo_data.get('ogImage'), dict) else seo_data.get('ogImage')
         )
-        db.commit()
+        db.session.add(seo)
+        db.session.commit()
 
+    @staticmethod
+    def update_seo(seo_id, seo_data):
+        seo = Seo.query.get(seo_id)
+        if seo:
+            seo.route = seo_data.get('route', seo.route)
+            seo.metatitle = seo_data.get('metaTitle', seo.metaTitle)
+            seo.metadescription = seo_data.get('metaDescription', seo.metaDescription)
+            seo.metakeywords = seo_data.get('metaKeywords', seo.metaKeywords)
+            seo.ogtitle = seo_data.get('ogTitle', seo.ogTitle)
+            seo.ogdescription = seo_data.get('ogDescription', seo.ogDescription)
+            seo.ogimage = seo_data.get('ogImage', {}).get('url') if isinstance(seo_data.get('ogImage'), dict) else seo_data.get('ogImage')
 
+            db.session.commit()
+            return True
+        return False
 
     @staticmethod
     def delete_seo(seo_id):
-        db = SeoController.get_db_connection()
-        db.execute("DELETE FROM seo_pages WHERE id = ?", (seo_id,))
-        db.commit()
+        seo = Seo.query.get(seo_id)
+        if seo:
+            db.session.delete(seo)
+            db.session.commit()
+            return True
+        return False

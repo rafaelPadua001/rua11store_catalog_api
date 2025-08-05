@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, get_jwt
+from itsdangerous import URLSafeTimedSerializer
 import sqlite3
 import datetime
 from models.userProfile import UserProfile
@@ -10,13 +11,17 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 import os
 from flask import send_from_directory
+from flask_sqlalchemy import SQLAlchemy
+from models.user import User
+from models.userProfile import UserProfile, get_user_profile_by_user_id
+from models.tokenBlockList import TokenBlocklist
+from controllers.emailController import EmailController
+from database import db
 
 
-# Criando o Blueprint para autenticação
-# Adiciona o diretório pai ao caminho de importação
 sys.path.append(str(Path(__file__).parent.parent))
 
-# Agora importe o UserProfile
+
 from models.userProfile import UserProfile
 
 auth_bp = Blueprint("auth", __name__)
@@ -36,9 +41,14 @@ CORS(
 # Configuração do JWTManager
 jwt = JWTManager()
 
+serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY", "your-secret-key"))
+
+
 # Função para criar a conexão com o banco de dados
-def create_connection():
-    return sqlite3.connect("database.db")
+def create_connection(app):
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
 
 # Função para verificar se o token está na blocklist
 @jwt.token_in_blocklist_loader
@@ -58,93 +68,41 @@ def check_if_token_in_blocklist(jwt_header, jwt_payload):
 @auth_bp.route('/register', methods=["POST"])
 def register():
     data = request.json
-    print("Dados recebidos no registro:", data)  # Log para depuração
-
-    # Extração dos dados
     email = data.get('email')
     password = data.get('password')
-    name = data.get('name')          # Nome completo (para tabela users)
-    birth_date = data.get('birthDate')  # Data de nascimento (para tabela users)
-    username = data.get('username')  # Nome de usuário único (para tabela profiles)
-    avatar_url = data.get('avatarUrl', '')  # Opcional
+    name = data.get('name')
+    birth_date = data.get('birthDate')
+    avatar_url = data.get('avatarUrl', '')
 
-    # Validação dos campos obrigatórios
-    required_fields = {
-        'email': email,
-        'password': password,
-        'name': name,
-        'birthDate': birth_date,
-        'username': username
-    }
-    
-    missing_fields = [field for field, value in required_fields.items() if not value]
-    if missing_fields:
-        return jsonify({
-            "error": "Campos obrigatórios faltando",
-            "missing_fields": missing_fields
-        }), 400
+    if not all([email, password, name, birth_date]):
+        return jsonify({"error": "Campos obrigatórios faltando"}), 400
 
-    # Verificar se o e-mail ou o nome de usuário já existem
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
-    existing_user = cursor.fetchone()
-    if existing_user:
+    # Verifica se usuário existe
+    if User.query.filter_by(email=email).first():
         return jsonify({"error": "E-mail já está em uso"}), 400
-    
-    cursor.execute('SELECT id FROM profiles WHERE username = ?', (username,))
-    existing_username = cursor.fetchone()
-    if existing_username:
+
+    if UserProfile.query.filter_by(username=name).first():
         return jsonify({"error": "Nome de usuário já existe"}), 400
 
-    # Criptografia da senha
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+    
+    user = User(email=email, password=hashed_password, name=name, birth_date=birth_date)
+    db.session.add(user)
+    db.session.commit()
 
-    try:
-        cursor.execute('BEGIN TRANSACTION')
-        
-        # 1. Insere na tabela users (com name e birth_date)
-        cursor.execute(
-            'INSERT INTO users (email, password, name, birth_date) VALUES (?, ?, ?, ?)',
-            (email, hashed_password, name, birth_date)
-        )
-        user_id = cursor.lastrowid
-        
-        # 2. Insere na tabela profiles
-        cursor.execute(
-            '''INSERT INTO profiles 
-               (user_id, username, full_name, birth_date, avatar_url) 
-               VALUES (?, ?, ?, ?, ?)''',
-            (user_id, username, name, birth_date, avatar_url)
-        )
-        
-        conn.commit()
-        
-        # Gera token JWT - Certifique-se de que o user_id seja uma string
-        access_token = create_access_token(identity=int(user_id))  # Converte user_id para string
-        
-        return jsonify({
-            "message": "Registro concluído com sucesso",
-            "access_token": access_token,
-            "user_id": user_id,
-            "username": username
-        }), 201
-        
-    except sqlite3.IntegrityError as e:
-        conn.rollback()
-        if 'email' in str(e):
-            return jsonify({"error": "E-mail já está em uso"}), 400
-        elif 'username' in str(e):
-            return jsonify({"error": "Nome de usuário já existe"}), 400
-        return jsonify({"error": f"Erro de banco de dados: {str(e)}"}), 400
-        
-    except Exception as e:
-        conn.rollback()
-        print("Erro durante o registro:", str(e))
-        return jsonify({"error": "Erro interno no servidor"}), 500
-        
-    finally:
-        conn.close()
+    profile = UserProfile(user_id=user.id, username=name, full_name=name, birth_date=birth_date, avatar_url=avatar_url)
+    db.session.add(profile)
+    db.session.commit()
+
+    access_token = create_access_token(identity=user.id)
+
+    return jsonify({
+        "message": "Registro concluído com sucesso",
+        "access_token": access_token,
+        "user_id": user.id,
+        "username": name
+    }), 201
+
         
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
@@ -173,7 +131,7 @@ def get_profile():
 
         # 4. Buscar o perfil
         print(f"[DEBUG] Buscando perfil para user_id: {user_id}")
-        profile = UserProfile.get_by_user_id(user_id)
+        profile = get_user_profile_by_user_id(db.session, user_id)
         
         if not profile:
             return jsonify({
@@ -188,8 +146,8 @@ def get_profile():
             "full_name": profile.full_name,
             "birth_date": profile.birth_date,
             "avatar_url": profile.avatar_url or "" , # Garante string vazia se None
-            "name": profile.name,
-            "email": profile.email 
+            # "name": profile.name,
+            # "email": profile.email 
         }
         
         print(f"[DEBUG] Perfil encontrado: {response_data}")
@@ -224,7 +182,7 @@ def upload_avatar():
 
     #update url avatar on database
     user_id = get_jwt_identity()
-    avatar_url = f'https://rua11storecatalogapi-production.up.railway.app/{file_path}' #public url
+    avatar_url = f'https://rua11store-catalog-api-lbp7.onrender.com/{file_path}' #public url
 
     #update on database
     conn = create_connection()
@@ -245,7 +203,6 @@ def uploaded_file(filename):
     return send_from_directory('uploads/avatars', filename)
 
 
-# Rota de login
 @auth_bp.route('/login', methods=["POST"])
 def login():
     data = request.json
@@ -254,63 +211,101 @@ def login():
 
     if not email or not password:
         return jsonify({"error": "E-mail e senha são obrigatórios"}), 400
-    
-    conn = create_connection()
-    cursor = conn.cursor()
 
-    # Buscar o usuário no banco de dados
-    cursor.execute('SELECT id, name, email, password FROM users WHERE email = ?', (email,))
-    user = cursor.fetchone()
+    # Buscar o usuário usando SQLAlchemy ORM
+    user = User.query.filter_by(email=email).first()
 
     if user is None:
         return jsonify({"error": "Usuário não encontrado"}), 404
-    
-    # Verificar se a senha está correta
-    if not bcrypt.check_password_hash(user[3], password):
+
+    # Verificar a senha
+    if not bcrypt.check_password_hash(user.password, password):
         return jsonify({"error": "Senha incorreta"}), 401
-    
-    # Gerar o token JWT - Certifique-se de que o user_id seja uma string
-    token = create_access_token(identity=str(user[0])) 
+
+    # Criar o token JWT
+    token = create_access_token(identity=str(user.id))
 
     return jsonify({"message": "Login realizado com sucesso!", "token": token}), 200
+
 
 # Rota de logout
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
     try:
-        # Obtém os dados do token JWT
         jti = get_jwt()["jti"]
         user_id = get_jwt_identity()
         
-        print(f"Revogando token {jti} para usuário {user_id}")  # Debug
+        print(f"Revogando token {jti} para usuário {user_id}")
         
-        # Adiciona à blocklist no banco de dados
-        conn = create_connection()
-        cursor = conn.cursor()
+        # Verifica se o token já está na blocklist para evitar duplicidade
+        existing = TokenBlocklist.query.filter_by(jti=jti).first()
+        if existing:
+            return jsonify({"msg": "Token já revogado"}), 400
         
-        # Verifica se a tabela existe
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS token_blocklist (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                jti TEXT NOT NULL UNIQUE,
-                user_id INTEGER NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        
-        # Insere o token revogado
-        cursor.execute(
-            "INSERT INTO token_blocklist (jti, user_id) VALUES (?, ?)",
-            (jti, user_id)
-        )
-        conn.commit()
-        conn.close()
+        revoked_token = TokenBlocklist(jti=jti, user_id=user_id)
+        db.session.add(revoked_token)
+        db.session.commit()
         
         return jsonify({"msg": "Logout realizado com sucesso"}), 200
-        
-    except sqlite3.IntegrityError:
-        return jsonify({"error": "Token já revogado"}), 400
+
     except Exception as e:
-        print(f"Erro no logout: {str(e)}")
-        return jsonify({"error": "Falha no logout"}), 500
+        print(f"Erro ao revogar token: {str(e)}")
+        return jsonify({"error": "Erro interno"}), 500
+
+
+@auth_bp.route('/recoveryPassword', methods=['POST'])
+def recovery_password():
+    data = request.json
+    email = data.get('email')
+    if not email:
+        return jsonify({"error": "E-mail é obrigatório"}), 400
+    
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({"error": "Usuário não encontrado"}), 404
+    
+    token = serializer.dumps(email, salt="password-recovery")
+
+
+    # (Opcional) Salvar o token no banco se quiser controle mais rígido
+        # user.recovery_token = token
+        # db.session.commit()
+
+    recovery_link = f"https://rua11store-catalog-api.vercel.app/authenticator/resetPassword?token={token}"
+    EmailController.send_email(
+    "Recuperação de senha",
+    [email], 
+    f"Clique aqui para redefinir sua senha: {recovery_link}",
+    f"<p>Clique <a href='{recovery_link}'>aqui</a> para redefinir sua senha.</p>"
+)
+
+
+    return jsonify({"message": "E-mail de recuperação enviado com sucesso"}), 200
+
+@auth_bp.route('/resetPassword', methods=['POST'])
+def reset_password():
+    data = request.json
+    token = data.get('token')
+    new_password = data.get('newPassword')  # usa 'newPassword' camelCase
+
+    if not token or not new_password:
+        return jsonify({"error": "Token e nova senha são obrigatórios"}), 400
+
+    try:
+        email = serializer.loads(token, salt="password-recovery", max_age=3600)
+    except Exception:
+        return jsonify({"error": "Token inválido ou expirado"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "Usuário não encontrado"}), 404
+
+    hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+    user.password = hashed_password
+    db.session.commit()
+
+    return jsonify({"message": "Senha redefinida com sucesso"}), 200
+
+
