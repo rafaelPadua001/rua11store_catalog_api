@@ -1,207 +1,198 @@
 <template>
-    <v-row justify="center" no-gutters>
-        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
-            <v-card class="pa-4" elevation="0">
-                <v-card-title class="d-flex justify-center">
-                    <h5>Orders Management</h5>
-                </v-card-title>
-                <v-divider></v-divider>
-                <!-- <v-card-actions class="d-flex justify-end mb-4">
-                    <v-btn color="primary" @click="newProduct" disabled>
-                        <v-icon left>mdi-plus</v-icon>
-                        Add Product
-                    </v-btn>
-                </v-card-actions> -->
+  <v-row justify="center" no-gutters>
+    <v-col cols="12" sm="12" md="10" lg="10" xl="6">
+      <v-card class="pa-4" elevation="0">
+        <v-card-title class="d-flex justify-center">
+          <h5>Orders Management</h5>
+        </v-card-title>
+        <v-divider></v-divider>
 
+        <!-- Botão adicionar produto (desativado) -->
+        <!-- 
+        <v-card-actions class="d-flex justify-end mb-4">
+          <v-btn color="primary" @click="newProduct" disabled>
+            <v-icon left>mdi-plus</v-icon>
+            Add Product
+          </v-btn>
+        </v-card-actions> 
+        -->
 
-                <v-data-table :headers="headers" :items="orders" :items-per-page="10" class="elevation-1" item-key="id"
-                    fixed-header height="500" :loading="loading" loading-text="Loading deliveries...">
+        <v-data-table
+          :headers="headers"
+          :items="orders"
+          :items-per-page="10"
+          class="elevation-1"
+          item-key="id"
+          fixed-header
+          height="500"
+          :loading="loading"
+          loading-text="Loading deliveries..."
+        >
+          <!-- Exibe a descrição do produto -->
+          <template v-slot:item.description="{ item }">
+            <span>
+              {{ item.description?.length > 38 ? item.description.substring(0, 38) + '...' : item.description }}
+            </span>
+          </template>
 
-                    <!-- Exibe imagens de produtos -->
-                    <!-- <template v-slot:item.image="{ item }">
-                        <v-img v-if="item.image_path" :src="getProductImage(item.image_path, item.id)"
-                            alt="Imagem do Produto" contain min-width="60" max-width="70" min-height="10"
-                            class="rounded-lg"></v-img>
-                        <span v-else>Sem Imagem</span>
-                    </template> -->
+          <!-- Ações -->
+          <template v-slot:item.actions="{ item }">
+            <!-- Botão buscar item no carrinho -->
+            <v-icon small @click.stop="checkItemInCart(item)">
+              mdi-file-search
+            </v-icon>
 
-                    <!-- Exibe a descrição do produto -->
-                    <template v-slot:item.description="{ item }">
-                        <span v-if="item.description && item.description.length > 100">
-                            {{ item.description.substring(0, 38) }}...
-                        </span>
-                        <span v-else>
-                            {{ item.description }}
-                        </span>
-                    </template>
+            <!-- Ícone deletar produto -->
+            <v-icon small @click.stop="deleteItemCart(item)">
+              mdi-delete
+            </v-icon>
+          </template>
+        </v-data-table>
 
-                    <!-- Exibe a categoria -->
-
-
-                    <!-- Exibe os ícones de ações -->
-                    <template v-slot:item.actions="{ item }">
-
-
-                        <!-- Botão de buscar item no carrinho  -->
-                        <v-icon small @click.stop="checkItemInCart(item)">
-                            mdi-file-search
-                        </v-icon>
-
-
-                        <!-- Ícone de deletar produto  -->
-                        <v-icon small @click.stop="deleteItemCart(item)">
-                            mdi-delete
-                        </v-icon>
-                    </template>
-                </v-data-table>
-
-                <v-dialog v-model="dialogCheckItems" max-width="600" fullscreen>
-
-                    <v-card  class="pa-4 text-center">
-                        <v-toolbar flat color="transparent">
-            <v-toolbar-title class="headline">Detalhes do Pedido</v-toolbar-title>
-
-            <v-btn icon @click="dialogCheckItems = false">
+        <!-- Diálogo -->
+        <v-dialog v-model="dialogCheckItems" max-width="900" fullscreen="$vuetify.display.smAndDown">
+          <v-card class="pa-4">
+            <v-toolbar flat>
+              <v-toolbar-title class="headline">Detalhes do Pedido</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn icon @click="dialogCheckItems = false">
                 <v-icon>mdi-close</v-icon>
-            </v-btn>
+              </v-btn>
+            </v-toolbar>
 
-        </v-toolbar>
-                       
+            <!-- Order -->
+            <v-row>
+              <v-col cols="12">
+                <strong>Order</strong>
+                <v-divider></v-divider>
+              </v-col>
 
-                        <v-card-subtitle>
-                            <!-- {{ selectedOrderItems }} -->
-                            <v-row v-for="(item, index) in selectedOrderItems" :key="index">
-                                <v-col cols="auto" sm="12" class="text-left" >
-                                    <strong>Order</strong>
-                                    <v-divider></v-divider>
+              <v-col cols="12" sm="2">
+                <v-card width="120">
+                  <v-img
+                    v-if="selectedOrderItems[0]?.product_image"
+                    :src="selectedOrderItems[0].product_image"
+                    :alt="selectedOrderItems[0].seo?.slug || selectedOrderItems[0]?.name"
+                    max-width="120"
+                    max-height="120"
+                    contain
+                    class="rounded-lg"
+                  />
+                </v-card>
+              </v-col>
 
-                                </v-col>
-                                <v-row>
-                                    <v-col cols="auto" sm="2">
-                                        <v-card width="120">
-                                            <v-img v-if="item.product_image" :src="item.product_image"
-                                                :alt="item.seo?.slug || item.name" max-width="120" max-height="120"
-                                                contain class="rounded-lg">
-                                            </v-img>
-                                        </v-card>
-                                    </v-col>
-                                    <v-col cols="auto" sm="2">
-                                        <strong>OrderId:</strong> #{{ selectedOrder.id }}
+              <v-col cols="12" sm="2">
+                <strong>OrderId:</strong> #{{ selectedOrder.id }}
+              </v-col>
+              <v-col cols="12" sm="3">
+                <strong>Product Name:</strong> {{ selectedOrderItems[0]?.name }}
+              </v-col>
+              <v-col cols="12" sm="3">
+                <strong>Unit Value:</strong> R$ {{ Number(selectedOrderItems[0]?.unit_price).toFixed(2) }}
+              </v-col>
+              <v-col cols="12" sm="2">
+                <strong>Total Value:</strong> R$ {{ Number(selectedOrderItems[0]?.total_price).toFixed(2) }}
+              </v-col>
+              <v-col cols="12">
+                <strong>Description:</strong> {{ selectedOrderItems[0]?.description }}
+              </v-col>
+            </v-row>
 
-                                    </v-col>
-                                    <v-col cols="auto" sm="3">
-                                        <strong>Product Name:</strong> {{ item.name }}
-                                    </v-col>
-                                    <v-col cols="auto" sm="3">
-                                        <strong>Unit Value:</strong> R$ {{ Number(item.unit_price).toFixed(2) }}
-                                    </v-col>
+            <!-- Delivery -->
+            <v-row class="mt-4">
+              <v-col cols="12">
+                <strong>Delivery</strong>
+                <v-divider></v-divider>
+              </v-col>
 
-                                    <v-col cols="auto" sm="2">
-                                        <strong>Total Value:</strong> R$ {{ Number(item.total_price).toFixed(2) }}
-                                    </v-col>
+              <v-col cols="12" sm="6">
+                <strong>ID:</strong> {{ selectedOrderDelivery?.id }}
+              </v-col>
+              <v-col cols="12" sm="6">
+                <strong>Melhor Envio ID:</strong> {{ selectedOrderDelivery?.melhorenvio_id }}
+              </v-col>
+              <v-col cols="12" sm="8">
+                <strong>User id:</strong> {{ selectedOrder.user_id }}
+              </v-col>
+              <v-col cols="12" sm="4">
+                <strong>Recipient Name:</strong> {{ selectedOrderDelivery?.recipient_name }}
+              </v-col>
+              <v-col cols="12" sm="6">
+                <strong>Phone:</strong> {{ selectedOrderDelivery?.phone }}
+              </v-col>
+              <v-col cols="12" sm="6">
+                <strong>Bairro:</strong> {{ selectedOrderDelivery?.bairro }}
+              </v-col>
+              <v-col cols="12" sm="6">
+                <strong>Cidade:</strong> {{ selectedOrderDelivery?.city }}
+              </v-col>
+              <v-col cols="12">
+                <strong>Address:</strong>
+                {{ selectedOrderDelivery?.street }} {{ selectedOrderDelivery?.number }} {{ selectedOrderDelivery?.complement }}
+              </v-col>
+              <v-col cols="12" sm="6">
+                <strong>Complement:</strong> {{ selectedOrderDelivery?.complement }}
+              </v-col>
+              <v-col cols="12" sm="6">
+                <strong>zipcode:</strong> {{ selectedOrder.shipment_info }}
+              </v-col>
+              <v-col cols="12" sm="3">
+                <strong>Preço:</strong> R$ {{ selectedOrderDelivery?.total_value }}
+              </v-col>
+              <v-col cols="12" sm="3">
+                <strong>total_amount:</strong> {{ selectedOrder.total_amount }}
+              </v-col>
+              <v-col cols="12" sm="6">
+                <strong>Status:</strong>
+                <v-chip v-if="selectedOrder.status === 'approved'" color="success">
+                  {{ selectedOrder.status }}
+                </v-chip>
+              </v-col>
+            </v-row>
 
-                                    <v-col cols="auto" sm="6">
-                                        <strong>Description:</strong> {{ item.description }}
-                                    </v-col>
-                                </v-row>
+            <!-- Dados de entrega do carrinho (comentado) -->
+            <!--
+            <v-card-subtitle>
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <strong>Endereço:</strong> {{ cartItems.data.to.address }}
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <strong>Cidade:</strong> {{ cartItems.data.to.city }}
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <strong>Estado:</strong> {{ cartItems.data.to.state }}
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <strong>Telefone:</strong> {{ cartItems.data.to.phone }}
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <strong>Email:</strong> {{ cartItems.data.to.email }}
+                </v-col>
+              </v-row>
+            </v-card-subtitle>
+            -->
 
-                            </v-row>
-
-                            <v-row>
-                                <v-col cols="auto" sm="12" class="text-left" >
-                                    <strong>Delivery</strong>
-                                    <v-divider></v-divider>
-                                </v-col>
-                                <v-col cols="auto" sm="6">
-                                    <strong>ID:</strong> {{ selectedOrderDelivery.id }}
-                                </v-col>
-                                <v-col cols="auto" sm="6">
-                                    <strong>Melhor Envio ID:</strong> {{ selectedOrderDelivery.melhorenvio_id }}
-                                </v-col>
-                                <v-col cols="auto" sm="8">
-                                    <strong>User id</strong> {{ selectedOrder.user_id }}
-                                </v-col>
-                                <v-col cols="auto" sm="3">
-                                    <strong>Recipient Name:</strong> {{ selectedOrderDelivery.recipient_name }}
-                                </v-col>
-                                <v-col cols="auto" sm="6">
-                                    <strong>Phone:</strong> {{ selectedOrderDelivery.phone }}
-                                </v-col>
-                                <v-col cols="auto" sm="3">
-                                    <strong>Bairro:</strong> {{ selectedOrderDelivery.bairro }}
-                                </v-col>
-                                <v-col cols="auto" sm="2">
-                                    <strong>Cidade:</strong> {{ selectedOrderDelivery.city }}
-                                </v-col>
-                                <v-col cols="auto" sm="6">
-                                    <strong>Address:</strong> {{ selectedOrderDelivery.street }} {{
-                                    selectedOrderDelivery.number }} {{
-                                    selectedOrderDelivery.complement }} {{ selectedOrderDelivery.bairro }}
-                                </v-col>
-                                <v-col cols="auto" sm="6">
-                                    <strong>Complement:</strong> {{ selectedOrderDelivery.complement }}
-                                </v-col>
-                                <v-col cols="auto" sm="6">
-                                    <strong>zipcode:</strong> {{ selectedOrder.shipment_info }}
-                                </v-col>
-                                <v-col cols="auto" sm="3">
-                                    <strong>Preço:</strong> R$ {{ selectedOrderDelivery.total_value }}
-                                </v-col>
-                                <v-col cols="auto" sm="3">
-                                    <strong>total_amount</strong> {{ selectedOrder.total_amount }}
-                                </v-col>
-                               
-                                <v-col cols="auto" sm="6">
-                                    <strong>Status</strong>
-                                    <v-chip v-if="selectedOrder.status === 'approved'" color="success">{{
-                                        selectedOrder.status
-                                        }}</v-chip>
-                                </v-col>
-                            </v-row>
-
-
-                        </v-card-subtitle>
-
-                        <!-- 
-                        <v-card-subtitle>
-                            <v-row>
-                                <v-col cols="12" sm="6">
-                                    <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Endereço:</strong> {{ cartItems.data.to.address }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Cidade:</strong> {{ cartItems.data.to.city }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Estado:</strong> {{ cartItems.data.to.state }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Telefone:</strong> {{ cartItems.data.to.phone }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Email:</strong> {{ cartItems.data.to.email }}
-                                </v-col>
-                            </v-row>
-                        </v-card-subtitle> -->
-
-                        <v-card-actions>
-                            <!-- Botão de compra de etiqueta no carrinho  -->
-                            <!-- <v-btn small @click.stop="shipmentCheckout(cartItems.data)">
-                                checkout
-                              </v-btn> -->
-
-                            <v-btn color="green" text @click="dialogCheckItems = false">Close</v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
-            </v-card>
-
-
-        </v-col>
-    </v-row>
+            <v-card-actions>
+              <!-- Botão compra etiqueta no carrinho -->
+              <!-- 
+              <v-btn small @click.stop="shipmentCheckout(cartItems.data)">
+                checkout
+              </v-btn> 
+              -->
+              <v-spacer></v-spacer>
+              <v-btn color="green" text @click="dialogCheckItems = false">Close</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-card>
+    </v-col>
+  </v-row>
 </template>
+
 
 
 <script>
