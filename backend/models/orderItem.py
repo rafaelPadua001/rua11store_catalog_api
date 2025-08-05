@@ -28,4 +28,9 @@ class OrderItem(db.Model):
             'quantity': self.quantity,
             'unit_price': self.unit_price,
             'total_price': self.total_price,
+            'product': {
+                'id' : self.id,
+                'name': self.product_name,
+                
+            }
         }
