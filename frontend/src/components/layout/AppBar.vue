@@ -6,8 +6,10 @@
           <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated"></v-app-bar-nav-icon>
           <v-app-bar-title>
             <template v-if="logoUrl">
-              <v-img :src="logoUrl" alt="Logo" width="60" contain class="my-auto"></v-img>
+              <v-img :src="logoUrl" alt="Logo" width="60" contain class="my-auto" style="cursor: pointer;"
+                @click="$router.push('/')" />
             </template>
+
             <template v-else>
               Rua11Store
             </template>
