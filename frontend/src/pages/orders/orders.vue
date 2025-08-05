@@ -55,7 +55,7 @@
                     </template>
                 </v-data-table>
 
-                <v-dialog v-model="dialogCheckItems" max-width="600px">
+                <v-dialog v-model="dialogCheckItems" max-width="800px">
 
                     <v-card>
                         <v-card-title>
@@ -65,24 +65,96 @@
 
                         <v-card-subtitle>
                             <!-- {{ selectedOrderItems }} -->
-                            <v-row v-for="(item, index) in selectedOrderItems" :key="index" class="mb-4">
-                                <v-col cols="12" sm="6">
-                                    <strong>Nome do Produto:</strong> {{ item.name }}
+                            <v-row v-for="(item, index) in selectedOrderItems" :key="index">
+                                <v-col cols="auto" sm="12">
+                                    <strong>Order</strong>
+                                      <v-divider></v-divider>
+
                                 </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Descrição:</strong> {{ item.description }}
+                                <v-row>
+                                      <v-col cols="auto" sm="4">
+                                    <v-card width="120">
+                                        <v-img 
+                                            v-if="item.product_image"
+                                            :src="item.product_image"
+                                            :alt="item.seo?.slug || item.name"
+                                            max-width="120"
+                                            max-height="120"
+                                            contain
+                                            class="rounded-lg">
+                                        </v-img>
+                                    </v-card>
                                 </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Quantidade:</strong> {{ item.quantity }}
+                                 <v-col cols="auto" sm="">
+                                    <strong>OrderId:</strong> #{{ selectedOrder.id }}
+                                    
                                 </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Preço Unitário:</strong> R$ {{ item.unit_price }}
+                                <v-col cols="auto" sm="6">
+                                     <strong>Product Name:</strong> {{ item.name }}
                                 </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Preço Total:</strong> R$ {{ item.total_price.toFixed(2) }}
+                                 <v-col cols="auto" sm="6">
+                                    <strong>Unit Value:</strong> R$ {{ Number(item.unit_price).toFixed(2) }}
                                 </v-col>
+                                  
+                                 <v-col cols="auto" sm="6">
+                                    <strong>Total Value:</strong> R$ {{ Number(item.total_price).toFixed(2) }}
+                                </v-col>
+
+                                  <v-col cols="auto" sm="12">
+                                    <strong>Description:</strong> {{ item.description }}
+                                </v-col>
+                                </v-row>
+                            
                             </v-row>
 
+                           <v-row>
+                            <v-col cols="auto" sm="12">
+                                <strong>Delivery</strong>
+                                <v-divider></v-divider>
+                            </v-col>
+                              <v-col cols="auto" sm="6">
+    <strong>ID:</strong> {{ selectedOrderDelivery.id }}
+  </v-col>
+                            <v-col cols="auto" sm="6">
+    <strong>Melhor Envio ID:</strong> {{ selectedOrderDelivery.melhorenvio_id }}
+  </v-col>
+                            <v-col cols="auto" sm="6">
+                                <strong>User id</strong> {{ selectedOrder.user_id }}
+                            </v-col>
+                              <v-col cols="auto" sm="6">
+    <strong>Recipient Name:</strong> {{ selectedOrderDelivery.recipient_name }}
+  </v-col>
+    <v-col cols="auto" sm="6">
+    <strong>Phone:</strong> {{ selectedOrderDelivery.phone }}
+  </v-col>
+   <v-col cols="auto" sm="6">
+    <strong>Bairro:</strong>  {{ selectedOrderDelivery.bairro }}
+  </v-col>
+   <v-col cols="auto" sm="6">
+    <strong>Cidade:</strong>  {{ selectedOrderDelivery.city }}
+  </v-col>
+   <v-col cols="auto" sm="6">
+    <strong>Address:</strong>  {{ selectedOrderDelivery.street }} {{ selectedOrderDelivery.number }} {{ selectedOrderDelivery.complement }} {{ selectedOrderDelivery.bairro }}
+  </v-col>
+   <v-col cols="auto" sm="6">
+    <strong>Complement:</strong> {{ selectedOrderDelivery.complement }}
+  </v-col>
+  <v-col cols="auto" sm="6">
+    <strong>Preço:</strong> R$ {{ selectedOrderDelivery.total_value }}
+  </v-col>
+                            <v-col cols="auto" sm="6">
+                                <strong>total_amount</strong> {{ selectedOrder.total_amount }}
+                            </v-col>
+                            <v-col cols="auto" sm="6">
+                                <strong>zipcode:</strong> {{ selectedOrder.shipment_info }} 
+                            </v-col>
+                           <v-col cols="auto" sm="4">
+                            <strong>Status</strong>
+                            <v-chip v-if="selectedOrder.status === 'approved'" color="success">{{ selectedOrder.status }}</v-chip> 
+                           </v-col>
+                           </v-row>
+
+                         
                         </v-card-subtitle>
 
                         <!-- 
@@ -143,6 +215,8 @@ export default {
             loading: false,
             orders: [],
             selectedOrderItems: [],
+            selectedOrder: null,
+            selectedOrderDelivery: null,
             headers: [
                 { title: "ID", key: "id" },
                 { title: "User ID", key: "user_id" },
@@ -179,9 +253,20 @@ export default {
             this.loading = true;
             try {
                 const response = await api.get("order/get-orders");
-                console.log(response.data);
-                if (response.data && Array.isArray(response.data)) {
-                    this.orders = response.data.flat().map(order => ({
+
+                // Garante que sempre será um array simples
+                const ordersArray = Array.isArray(response.data) ? response.data.flat() : [];
+
+                console.log("Orders recebidos:", ordersArray);
+
+                this.orders = ordersArray.map(order => {
+                    const items = (order.products || []).map((prod, index) => ({
+                        ...prod,
+                        seo: order.product_seo?.[index] || {},
+                        delivery: order.product_delivery?.[index] || {}
+                    }));
+
+                    return {
                         id: order.id,
                         user_id: order.user_id,
                         payment_id: order.payment_id,
@@ -190,22 +275,22 @@ export default {
                         status: order.status,
                         total_amount: order.total_amount,
                         delivery_id: Array.isArray(order.delivery_id) ? order.delivery_id[0] : order.delivery_id,
-                        items: order.products
-
-                    }));
-
-                    console.log(this.orders);
-                } else {
-                    console.error("Resposta não contém um array de entregas:", response.data);
-                }
+                        delivery: order.delivery,
+                        items
+                    };
+                });
             } catch (error) {
-                console.error("Erro ao carregar entregas:", error);
+                console.error("Erro ao carregar pedidos:", error);
+                this.orders = [];
             } finally {
                 this.loading = false;
             }
         },
-        async checkItemInCart(item) {
-            this.selectedOrderItems = item.items;
+        async checkItemInCart(order) {
+            this.selectedOrder = order;
+            this.selectedOrderItems = order.items;
+            this.selectedOrderDelivery = order.delivery;
+            
             this.dialogCheckItems = true;
         },
 
