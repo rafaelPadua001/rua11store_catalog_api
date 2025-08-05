@@ -81,9 +81,9 @@
                 </v-card>
               </v-col>
 
-              <v-col cols="12" sm="2">
+             <!-- <v-col cols="12" sm="2">
                 <strong>OrderId:</strong> #{{ selectedOrder.id }}
-              </v-col>
+              </v-col> -->
               <v-col cols="12" sm="3">
                 <strong>Product Name:</strong> {{ selectedOrderItems[0]?.name }}
               </v-col>
