@@ -1,11 +1,11 @@
 <template>
-    <v-row justify="center">
-        <v-col cols="12" md="12" lg="10" xl="10" sm="12">
-            <v-card class="pa-4">
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
+            <v-card class="pa-4" elevation="0">
                 <v-card-title class="d-flex justify-center">
-                    <h1 class="text-h5">Orders Management</h1>
+                    <h5>Orders Management</h5>
                 </v-card-title>
-
+                <v-divider></v-divider>
                 <!-- <v-card-actions class="d-flex justify-end mb-4">
                     <v-btn color="primary" @click="newProduct" disabled>
                         <v-icon left>mdi-plus</v-icon>
@@ -55,24 +55,29 @@
                     </template>
                 </v-data-table>
 
-                <v-dialog v-model="dialogCheckItems" max-width="800px">
+                <v-dialog v-model="dialogCheckItems" max-width="600" fullscreen>
 
-                    <v-card>
-                        <v-card-title>
-                            <span class="headline">Detalhes do Pedido</span>
-                        </v-card-title>
+                    <v-card  class="pa-4 text-center">
+                        <v-toolbar flat color="transparent">
+            <v-toolbar-title class="headline">Detalhes do Pedido</v-toolbar-title>
 
+            <v-btn icon @click="dialogCheckItems = false">
+                <v-icon>mdi-close</v-icon>
+            </v-btn>
+
+        </v-toolbar>
+                       
 
                         <v-card-subtitle>
                             <!-- {{ selectedOrderItems }} -->
                             <v-row v-for="(item, index) in selectedOrderItems" :key="index">
-                                <v-col cols="auto" sm="12">
+                                <v-col cols="auto" sm="12" class="text-left" >
                                     <strong>Order</strong>
                                     <v-divider></v-divider>
 
                                 </v-col>
                                 <v-row>
-                                    <v-col cols="auto" sm="4">
+                                    <v-col cols="auto" sm="2">
                                         <v-card width="120">
                                             <v-img v-if="item.product_image" :src="item.product_image"
                                                 :alt="item.seo?.slug || item.name" max-width="120" max-height="120"
@@ -80,22 +85,22 @@
                                             </v-img>
                                         </v-card>
                                     </v-col>
-                                    <v-col cols="auto" sm="">
+                                    <v-col cols="auto" sm="2">
                                         <strong>OrderId:</strong> #{{ selectedOrder.id }}
 
                                     </v-col>
-                                    <v-col cols="auto" sm="6">
+                                    <v-col cols="auto" sm="3">
                                         <strong>Product Name:</strong> {{ item.name }}
                                     </v-col>
-                                    <v-col cols="auto" sm="6">
+                                    <v-col cols="auto" sm="3">
                                         <strong>Unit Value:</strong> R$ {{ Number(item.unit_price).toFixed(2) }}
                                     </v-col>
 
-                                    <v-col cols="auto" sm="6">
+                                    <v-col cols="auto" sm="2">
                                         <strong>Total Value:</strong> R$ {{ Number(item.total_price).toFixed(2) }}
                                     </v-col>
 
-                                    <v-col cols="auto" sm="12">
+                                    <v-col cols="auto" sm="6">
                                         <strong>Description:</strong> {{ item.description }}
                                     </v-col>
                                 </v-row>
@@ -103,7 +108,7 @@
                             </v-row>
 
                             <v-row>
-                                <v-col cols="auto" sm="12">
+                                <v-col cols="auto" sm="12" class="text-left" >
                                     <strong>Delivery</strong>
                                     <v-divider></v-divider>
                                 </v-col>
@@ -113,19 +118,19 @@
                                 <v-col cols="auto" sm="6">
                                     <strong>Melhor Envio ID:</strong> {{ selectedOrderDelivery.melhorenvio_id }}
                                 </v-col>
-                                <v-col cols="auto" sm="6">
+                                <v-col cols="auto" sm="8">
                                     <strong>User id</strong> {{ selectedOrder.user_id }}
                                 </v-col>
-                                <v-col cols="auto" sm="6">
+                                <v-col cols="auto" sm="3">
                                     <strong>Recipient Name:</strong> {{ selectedOrderDelivery.recipient_name }}
                                 </v-col>
                                 <v-col cols="auto" sm="6">
                                     <strong>Phone:</strong> {{ selectedOrderDelivery.phone }}
                                 </v-col>
-                                <v-col cols="auto" sm="6">
+                                <v-col cols="auto" sm="3">
                                     <strong>Bairro:</strong> {{ selectedOrderDelivery.bairro }}
                                 </v-col>
-                                <v-col cols="auto" sm="6">
+                                <v-col cols="auto" sm="2">
                                     <strong>Cidade:</strong> {{ selectedOrderDelivery.city }}
                                 </v-col>
                                 <v-col cols="auto" sm="6">
@@ -137,15 +142,16 @@
                                     <strong>Complement:</strong> {{ selectedOrderDelivery.complement }}
                                 </v-col>
                                 <v-col cols="auto" sm="6">
-                                    <strong>Preço:</strong> R$ {{ selectedOrderDelivery.total_value }}
-                                </v-col>
-                                <v-col cols="auto" sm="6">
-                                    <strong>total_amount</strong> {{ selectedOrder.total_amount }}
-                                </v-col>
-                                <v-col cols="auto" sm="6">
                                     <strong>zipcode:</strong> {{ selectedOrder.shipment_info }}
                                 </v-col>
-                                <v-col cols="auto" sm="4">
+                                <v-col cols="auto" sm="3">
+                                    <strong>Preço:</strong> R$ {{ selectedOrderDelivery.total_value }}
+                                </v-col>
+                                <v-col cols="auto" sm="3">
+                                    <strong>total_amount</strong> {{ selectedOrder.total_amount }}
+                                </v-col>
+                               
+                                <v-col cols="auto" sm="6">
                                     <strong>Status</strong>
                                     <v-chip v-if="selectedOrder.status === 'approved'" color="success">{{
                                         selectedOrder.status
