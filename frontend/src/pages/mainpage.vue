@@ -50,8 +50,8 @@
                         <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
                           <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
                             target="_blank" rel="noopener noreferrer" style="display: block;">
-                            <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" width="150" height="150" contain
-                              class="cursor-pointer" />
+                            <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" width="150" height="150"
+                              contain class="cursor-pointer" />
 
                           </a>
                         </template>
@@ -80,7 +80,7 @@
                       <v-col>
                         <div style="font-style: italic; font-size: 18px; margin-top: 4px; color: gray;">
                           <p>"{{ comment.comment }}" - <strong style="font-size: 12px; color: black">{{
-                              comment.user_name
+                            comment.user_name
                               }}</strong> </p>
                         </div>
                         <!-- <div style="font-size: 12px; margin-top: 2px;">
@@ -101,9 +101,17 @@
       </div>
 
 
-      <div v-else class="text-center" background>
-        <v-progress-circular indeterminate />
+      <div v-else class="text-center pa-4">
+        <v-progress-circular indeterminate color="primary" size="64" />
+        <p v-if="slowServer" class="mt-2 text-grey">
+          Nosso servidor está iniciando... isso pode levar alguns segundos.
+        </p>
+        <p v-else class="mt-2 text-grey">
+          Carregando dados...
+        </p>
       </div>
+
+
     </v-responsive>
 
     <v-btn color="deep-purple" dark class="whatsapp-btn" href="https://wa.me/556191865680" target="_blank"
@@ -122,6 +130,7 @@ import logoImage from '../assets/rua11store_logo.png'
 const loadFailed = ref(false)
 const pageTitle = ref('')
 const pageContent = ref('')
+const slowServer = ref(false)
 
 interface Product {
   name: string
@@ -213,6 +222,15 @@ const chunkedProducts = computed(() => {
 })
 
 onMounted(() => {
+  setTimeout(() => {
+    if (!pageContent.value) {
+      slowServer.value = true;
+
+      loadComponentFromAPI()
+      loadProductsToCarousel()
+    }
+  }, 5000)
+
   loadComponentFromAPI()
   loadProductsToCarousel()
 
