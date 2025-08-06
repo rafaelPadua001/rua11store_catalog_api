@@ -65,6 +65,7 @@ class Order(db.Model):
                {
                 'id': self.delivery.id if self.delivery else None,
                 'melhorenvio_id': self.delivery.melhorenvio_id if self.delivery else None,
+                'order_id': self.delivery.order_id if self.delivery else None,
                 'state': self.delivery.state if self.delivery else None,
                 'recipient_name': self.delivery.recipient_name if self.delivery else None,
                 'street': self.delivery.street if self.delivery else None,
