@@ -26,14 +26,14 @@
                         <span v-else>Sem Imagem</span>
                     </template>
 
-                    <template v-slot:item.description="{ item }">
+                    <!--<template v-slot:item.description="{ item }">
                         <span v-if="item.description && item.description.length > 100">
                             {{ item.description.substring(0, 38) }}...
                         </span>
                         <span v-else>
                             {{ item.description }}
                         </span>
-                    </template>
+                    </template> -->
 
                     <!-- 🔹 Slot para categoria -->
                     <template v-slot:item.category="{ item }">
@@ -143,9 +143,9 @@ export default {
                 // { text: "ID", value: "id", width: "20px", align: "center" },
                 { title: "Image", key: "thumbnail_path", sortable: false,  width: "150px" },
                 { title: "Product Name", key: "name", width: "150px" },
-                { title: "Product Description", key: "description", width: "150px" },
+               // { title: "Product Description", key: "description", width: "150px" },
                 { title: "Category", key: "category", width: "100px" },
-                { title: "Price", key: "price", width: "150px", align: "right" },
+                { title: "Price", key: "price", width: "120px", align: "right" },
                // { title: "Quantity", key: "quantity", width: "120px", align: "right" },
               //  { title: "Weight", key: "weight", width: "120px", align: "right" },
                 { title: "Actions", key: "actions", width: "100px", align: "center", sortable: false },
