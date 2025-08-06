@@ -25,12 +25,12 @@ export function useSeo() {
     ? 'http://localhost:5000'
     : 'https://rua11store-catalog-api-lbp7.onrender.com'
 
-    metaTitle.value = data.metaTitle || ''
-    metaDescription.value = data.metaDescription || ''
-    metaKeywords.value = data.metaKeywords || ''
-    ogTitle.value = data.ogTitle || ''
-    ogDescription.value = data.ogDescription || ''
-    ogImage.value =  ogImage.value = data.ogImage ? `${data.ogImage}` : ''
+    metaTitle.value = data.metaTitle ||  data.seo.meta_title || ''
+    metaDescription.value = data.metaDescription || data.seo.meta_description || ''
+    metaKeywords.value = data.metaKeywords || data.seo.meta_keywords || ''
+    ogTitle.value = data.ogTitle || data.seo.meta_title || ''
+    ogDescription.value = data.ogDescription || data.seo.meta_description || ''
+    ogImage.value =  ogImage.value = data.ogImage ? `${data.ogImage}` : data.thumbnail_path || '' 
   }
 
   return { setSeo }
