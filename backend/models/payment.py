@@ -79,7 +79,7 @@ class Payment(db.Model):
 
             payment_id = self.id
             delivery_id = None
-
+           
             if self.address and self.products:
                 product = self.products[0]
                 delivery = Delivery(
@@ -140,7 +140,7 @@ class Payment(db.Model):
                 'order_id': order_id,
                 'is_global': True
             })
-
+            products_html = "<ul style='list-style: none; padding: 0;'>"
             for product in self.products:
                 if 'id' not in product:
                     print("Erro: 'id' não encontrado no produto:", product)
@@ -173,29 +173,91 @@ class Payment(db.Model):
                 if extensions.email_controller is None:
                     raise Exception("email_controller não está inicializado!")
                 # first mail to client
+                
+                products_html = """
+                <table cellpadding="5" cellspacing="0" border="0" style="width:100%; border-collapse: collapse;">
+                """
+                for p in self.products:
+                    image = p.get('image') or p.get('image_url','https://via.placeholder.com/80')
+                    name = p.get('name') or p.get('product_name', 'Produto sem nome')
+                    price = p.get('price', 0.0)
+                    quantity = p.get('quantity', 1)
+
+                    products_html += f"""
+                    <tr>
+                        <td style="width:90px; text-align:center; vertical-align:middle;">
+                            <img src="{image}" alt="{name}" width="80" style="display:block; border-radius:5px;">
+                        </td>
+                        <td style="vertical-align:middle; font-size:14px;">
+                            <b>{name}</b><br>
+                            Quantidade: {quantity}<br>
+                            R${price:.2f}
+                        </td>
+                    </tr>
+                    """
+                products_html += "</table>"
+
+
                 extensions.email_controller.send_email(
-                    subject=f"Rua11Store Confirmação de pedido n°: {order_id}",
+                    subject=f"Rua11Store Confirmação de pedido n°: #{order_id}",
                     recipients=[self.email],
-                    body=f"Seu pedido foi recebido com sucesso! {self.products}",
-                    html=f"<p>Olá! Seu pedido n°: <b>{order_id}</b><br>"
-                         f"Status do pedido: <b>{self.status}</b><br>"
-                         f"Estamos separando seu pedido para envio.<br>"
-                         f"Valor total: <b>R${self.total_value:.2f}</b>.<br><br>"
-                         f"Atenciosamente,<br>Rua11Store.</p>"
+                    body=f"Seu pedido foi recebido com sucesso!",
+                      html=f"""
+                        <p>Olá! Seu pedido n°: <b>#{order_id}</b>
+                        Valor total: <b>R${self.total_value:.2f}</b>
+                        Status do pedido: <b>{self.status}</b><br><br>
+                        <b>Itens do seu pedido:</b>
+                        {products_html}
+                        <br>
+                        Estamos separando seu pedido para envio.<br>
+                        Atenciosamente,<br>
+                        Rua11Store.
+                        </p>
+                    """
                 )
 
                 # second mail to admin
+                products_html_admin = """
+                <table cellpadding="5" cellspacing="0" border="0" style="width:100%; border-collapse: collapse;">
+                """
+                for p in self.products:
+                    image = p.get('image') or p.get('image_url','https://via.placeholder.com/80')
+                    name = p.get('name') or p.get('product_name', 'Produto sem nome')
+                    price = p.get('price', 0.0)
+                    quantity = p.get('quantity', 1)
+
+                    products_html_admin += f"""
+                    <tr>
+                        <td style="width:90px; text-align:center; vertical-align:middle;">
+                            <img src="{image}" alt="{name}" width="80" style="display:block; border-radius:5px;">
+                        </td>
+                        <td style="vertical-align:middle; font-size:14px;">
+                            <b>{name}</b><br>
+                            Quantidade: {quantity}<br>
+                            R${price:.2f}
+                        </td>
+                    </tr>
+                    """
+                products_html_admin += "</table>"
+
+                # Envia e-mail para o admin
                 admin_email = os.getenv('SENDER_EMAIL')
                 if admin_email:
                     extensions.email_controller.send_email(
-                        subject=f"[Alerta de novo pedido] Pedido n°: {order_id}",
+                        subject=f"[Alerta de novo pedido] Pedido n°: #{order_id}",
                         recipients=[admin_email],
-                        body=f"Novo pedido recebido: {order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                        html=f"<p>Olá! Um novo pedido foi recebido: <b>{order_id}</b><br>"
-                             f"Para: <b>{self.address.get('recipient_name', 'Cliente')}</b><br>"
-                             f"Valor total: <b>R${self.total_value:.2f}</b>.<br>"
-                             f"Produtos: {self.products}<br>"
-                             f"Atenciosamente,<br>Rua11Store.</p>"
+                        body=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+                        html=f"""
+                            <p>Olá! Um novo pedido foi recebido: <b>#{order_id}</b><br>
+                            Para: <b>{self.address.get('recipient_name', 'Cliente')}</b><br>
+                            Valor total: <b>R${self.total_value:.2f}</b>.<br><br>
+                            <b>Produtos:</b><br><br>
+                            {products_html_admin}
+                            <br>
+                            Atenciosamente,<br>
+                            Rua11Store.
+                            </p>
+                        """
                     )
                 else:
                     print("Erro: Variável de ambiente SENDER_EMAIL não está definida.")
