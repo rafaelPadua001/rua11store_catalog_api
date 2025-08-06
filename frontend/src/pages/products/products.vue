@@ -41,6 +41,11 @@
                         <span v-else>Sem Categoria</span>
                     </template>
 
+                    <!-- slot para price-->
+                     <template v-slot:item.price="{item}">
+                        <span v-if="item && item.price">R$ {{ item.price }}</span>
+                     </template>
+
                     <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
                         <router-link :to="`/products/productView/${item.seo.slug}`">
@@ -136,14 +141,14 @@ export default {
             categories: [],
             headers: [
                 // { text: "ID", value: "id", width: "20px", align: "center" },
-                { title: "Image", key: "thumbnail_path", sortable: false },
-                { title: "Product Name", key: "name", width: "250px" },
-                { title: "Product Description", key: "description", width: "250px" },
-                { title: "Category", key: "category", width: "200px" },
-                { title: "Price", key: "price", width: "120px", align: "right" },
-                { title: "Quantity", key: "quantity", width: "120px", align: "right" },
-                { title: "Weight", key: "weight", width: "120px", align: "right" },
-                { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
+                { title: "Image", key: "thumbnail_path", sortable: false,  width: "150px" },
+                { title: "Product Name", key: "name", width: "150px" },
+                { title: "Product Description", key: "description", width: "150px" },
+                { title: "Category", key: "category", width: "100px" },
+                { title: "Price", key: "price", width: "150px", align: "right" },
+               // { title: "Quantity", key: "quantity", width: "120px", align: "right" },
+              //  { title: "Weight", key: "weight", width: "120px", align: "right" },
+                { title: "Actions", key: "actions", width: "100px", align: "center", sortable: false },
             ],
         };
     },
