@@ -100,6 +100,7 @@ class CreditCardPayment(PaymentStrategy):
                 payment_type="crédito",
                 cpf=data["payer_cpf"].replace(".", "").replace("-", "").strip(),
                 email=data["payer_email"],
+                name=data['payer_name'],
                 status=result["status"],
                 usuario_id=data["userId"],
                 products=data["products"],
