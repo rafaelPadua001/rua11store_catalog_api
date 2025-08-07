@@ -27,6 +27,7 @@ class Payment(db.Model):
     payment_type = Column(String)
     cpf = Column(String)
     email = Column(String)
+    name = Column(String)
     status = Column(String)
     usuario_id = db.Column(UUID(as_uuid=True), nullable=False, default=uuid.uuid4)
     coupon_code = Column(String, nullable=True)
@@ -37,13 +38,14 @@ class Payment(db.Model):
 
 
     def __init__(self,  payment_id, total_value, payment_date, payment_type,
-                 cpf, email, status, usuario_id, products,
+                 cpf, name, email, status, usuario_id, products,
                  address=None, coupon_code=None, coupon_amount=None):
         self.payment_id = payment_id
         self.total_value = total_value
         self.payment_date = payment_date or datetime.now()
         self.payment_type = payment_type
         self.cpf = cpf
+        self.name = name
         self.email = email
         self.status = status
         self.usuario_id = usuario_id
@@ -66,6 +68,7 @@ class Payment(db.Model):
             'payment_type': self.payment_type,
             'cpf': self.cpf,
             'email': self.email,
+            'name': self.name,
             'status': self.status,
             'usuario_id': self.usuario_id,
             'coupon_code': self.coupon_code,
@@ -216,7 +219,7 @@ class Payment(db.Model):
                         <br>
 
                         <div style="text-align:center; margin: 20px 0;">
-                            <a href="https://rua11store-catalog-api-lbp7.onrender.com/order/{order_id}/download" 
+                            <a href="http://localhost:5000/order/{order_id}/download" 
                             style="background-color:#4CAF50; color:white; padding:10px 20px; 
                                     text-decoration:none; border-radius:5px; font-weight:bold; display:inline-block;">
                                 📄 Baixar PDF
