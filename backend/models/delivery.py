@@ -28,8 +28,43 @@ class Delivery(db.Model):
     height = Column(Float)
     length = Column(Float)
     weight = Column(Float)
+    user_name = Column(String(255))
+    serviceid = Column(String(100))
+    quote = Column(Float)
+    coupon = Column(String(100))
+    discount = Column(Float)
+    delivery_min = Column(String(100))
+    delivery_max = Column(String(100))
+    status = Column(String(50))
+    diameter = Column(Float)
+    format = Column(String(50))
+    billed_weight = Column(Float)
+    receipt = Column(String(50))
+    own_hand = Column(String(50))
+    collect = Column(String(50))
+    collect_schedule_at = Column(String(100))
+    reverse = Column(String(50))
+    non_commercial = Column(String(50))
+    authorization_code = Column(String(100))  # Corrigido: estava 'authorizathon_code'
+    tracking = Column(String(100))
+    self_tracking = Column(String(255))
+    delivery_receipt = Column(String(255))
+    additional_info = Column(String(255))
+    cte_key = Column(String(100))
+    paid_at = Column(String(100))
+    generated_at = Column(String(100))
+    posted_at = Column(String(100))
+    delivered_at = Column(String(100))
+    canceled_at = Column(String(100))
+    suspend_at = Column(String(100))
+    expired_at = Column(String(100))
+    create_at = Column(String(100))
+    updated_at = Column(String(100))
+    parse_api_at = Column(String(100))
+    received_at = Column(String(100))
+    risk = Column(String(255))
     #cpf = Column(String(20))
-    #status = Column(String(50))
+    status = Column(String(50))
     #service_status = Column(String(50))
     #state_abbr = Column(String(10))
     #company_name = Column(String(100))
@@ -61,6 +96,42 @@ class Delivery(db.Model):
             "height": float(self.height) if self.height is not None else None,
             "length": float(self.length) if self.length is not None else None,
             "weight": float(self.weight) if self.weight is not None else None,
+            "user_name": self.user_name,
+            "serviceId": self.serviceid,
+            "quote": self.quote,
+            "coupon": self.coupon,
+            "discount": self.discount,
+            "delivery_min": self.delivery_min,
+            "delivery_max": self.delivery_max,
+            "status": self.status,
+            "diameter": self.diameter,
+            "format": self.format,
+            "billed_weight": self.billed_weight,
+            "receipt": self.receipt,
+            "own_hand": self.own_hand,
+            "collect": self.collect,
+            "collect_schedule_at": self.collect_schedule_at,
+            "reverse": self.reverse,
+            "non_commercial": self.non_commercial,
+            "authorization_code": self.authorization_code,
+            "tracking": self.tracking,
+            "self_tracking": self.self_tracking,
+            "delivery_receipt": self.delivery_receipt,
+            "additional_info": self.additional_info,
+            "cte_key": self.cte_key,
+            "paid_at": self.paid_at,
+            "generated_at": self.generated_at,
+            "posted_at": self.posted_at,
+            "delivered_at": self.delivered_at,
+            "canceled_at": self.canceled_at,
+            "suspend_at": self.suspend_at,
+            "expired_at": self.expired_at,
+            "create_at": self.create_at,
+            "updated_at": self.updated_at,
+            "parse_api_at": self.parse_api_at,
+            "received_at": self.received_at,
+            "risk": self.risk,
+
             #"cpf": self.cpf,
             "melhorenvio_id": self.melhorenvio_id,
             "order_id": self.order_id
@@ -124,6 +195,41 @@ class Delivery(db.Model):
                 'order_total': None,
                 'order_date': None,
                 'status': None,
+                'user_name': d.user_name,
+                'serviceId': d.serviceid,
+                'quote': d.quote,
+                'coupon': d.coupon,
+                'discount': d.discount,
+                'delivery_min': d.delivery_min,
+                'delivery_max': d.delivery_max,
+                'diameter': d.diameter,
+                'format': d.format,
+                'billed_weight': d.billed_weight,
+                'receipt': d.receipt,
+                'own_hand': d.own_hand,
+                'collect': d.collect,
+                'collect_schedule_at': d.collect_schedule_at,
+                'reverse': d.reverse,
+                'non_commercial': d.non_commercial,
+                'authorization_code': d.authorization_code,
+                'tracking': d.tracking,
+                'self_tracking': d.self_tracking,
+                'delivery_receipt': d.delivery_receipt,
+                'additional_info': d.additional_info,
+                'cte_key': d.cte_key,
+                'paid_at': d.paid_at.isoformat() if d.paid_at else None,
+                'generated_at': d.generated_at.isoformat() if d.generated_at else None,
+                'posted_at': d.posted_at.isoformat() if d.posted_at else None,
+                'delivered_at': d.delivered_at.isoformat() if d.delivered_at else None,
+                'canceled_at': d.canceled_at.isoformat() if d.canceled_at else None,
+                'suspend_at': d.suspend_at.isoformat() if d.suspend_at else None,
+                'expired_at': d.expired_at.isoformat() if d.expired_at else None,
+                'create_at': d.create_at.isoformat() if d.create_at else None,
+                'updated_at': d.updated_at.isoformat() if d.updated_at else None,
+                'parse_api_at': d.parse_api_at.isoformat() if d.parse_api_at else None,
+                'received_at': d.received_at.isoformat() if d.received_at else None,
+                'risk': d.risk,
+
                 'products': [],
                 'orders': []  # <<< ESSENCIAL
             }

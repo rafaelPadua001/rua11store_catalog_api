@@ -188,7 +188,7 @@ export default {
             shipment: [],
             headers: [
                 { title: "ID", key: "id" },
-                { title: "User ID", key: "user_id" },
+               // { title: "User ID", key: "user_id" },
                 { title: "Recipient Name", key: "recipient_name" },
                 { title: "Street", key: "street", align: "right" },
                 { title: "Number", key: "number" },
@@ -200,6 +200,7 @@ export default {
                 { title: "Country", key: "country" },
                 { title: "Phone", key: "phone" },
                 { title: "Email", key: "email" },
+                {title: "Name", key: "user_name"},
                 { title: "Price", key: "price" },
                 { title: "Status", key: "status" },
                 // { title: "Delivery", key: "delivery_id" },
@@ -248,6 +249,7 @@ export default {
                         return {
                             id: delivery.id,
                             recipient_name: delivery.recipient_name,
+                            user_name: delivery.user_name,
                             street: delivery.street,
                             number: delivery.number,
                             complement: delivery.complement,
