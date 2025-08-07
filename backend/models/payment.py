@@ -216,7 +216,7 @@ class Payment(db.Model):
                         <br>
 
                         <div style="text-align:center; margin: 20px 0;">
-                            <a href="http://localhost:5000/order/{order_id}/download" 
+                            <a href="https://rua11store-catalog-api-lbp7.onrender.com/order/{order_id}/download" 
                             style="background-color:#4CAF50; color:white; padding:10px 20px; 
                                     text-decoration:none; border-radius:5px; font-weight:bold; display:inline-block;">
                                 📄 Baixar PDF
