@@ -202,18 +202,34 @@ class Payment(db.Model):
                     subject=f"Rua11Store Confirmação de pedido n°: #{order_id}",
                     recipients=[self.email],
                     body=f"Seu pedido foi recebido com sucesso!",
-                      html=f"""
-                        <p>Olá! Seu pedido n°: <b>#{order_id}</b>
-                        Valor total: <b>R${self.total_value:.2f}</b>
-                        Status do pedido: <b>{self.status}</b><br><br>
-                        <b>Itens do seu pedido:</b>
+                        html = f"""
+                        <div style="text-align:center; font-size:14px;">
+                            <p>
+                                Olá! Seu pedido n°: <b>#{order_id}</b><br>
+                                Valor total: <b>R${self.total_value:.2f}</b><br>
+                                Status do pedido: <b>{self.status}</b><br><br>
+                            </p>
+                        </div>
+
+                        <p><b>Itens do seu pedido:</b></p>
                         {products_html}
                         <br>
-                        Estamos separando seu pedido para envio.<br>
-                        Atenciosamente,<br>
-                        Rua11Store.
+
+                        <div style="text-align:center; margin: 20px 0;">
+                            <a href="https://rua11store-catalog-api-lbp7.onrender.com/order/{order_id}/download" 
+                            style="background-color:#4CAF50; color:white; padding:10px 20px; 
+                                    text-decoration:none; border-radius:5px; font-weight:bold; display:inline-block;">
+                                📄 Baixar PDF
+                            </a>
+                        </div>
+
+                        <p>
+                            Estamos separando seu pedido para envio.<br>
+                            Atenciosamente,<br>
+                            Rua11Store.
                         </p>
                     """
+
                 )
 
                 # second mail to admin
@@ -247,15 +263,21 @@ class Payment(db.Model):
                         subject=f"[Alerta de novo pedido] Pedido n°: #{order_id}",
                         recipients=[admin_email],
                         body=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                        html=f"""
-                            <p>Olá! Um novo pedido foi recebido: <b>#{order_id}</b><br>
-                            Para: <b>{self.address.get('recipient_name', 'Cliente')}</b><br>
-                            Valor total: <b>R${self.total_value:.2f}</b>.<br><br>
-                            <b>Produtos:</b><br><br>
+                        html = f"""
+                            <div style="text-align:center; font-size:14px;">
+                                <p>
+                                    Olá! Um novo pedido foi recebido: <b>#{order_id}</b><br>
+                                    Para: <b>{self.address.get('recipient_name', 'Cliente')}</b><br>
+                                    Valor total: <b>R${self.total_value:.2f}</b>.<br><br>
+                                </p>
+                            </div>
+
+                            <p><b>Produtos:</b></p>
                             {products_html_admin}
                             <br>
-                            Atenciosamente,<br>
-                            Rua11Store.
+                            <p>
+                                Atenciosamente,<br>
+                                Rua11Store.
                             </p>
                         """
                     )
