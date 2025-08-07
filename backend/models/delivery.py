@@ -4,6 +4,7 @@ from database import db  # ou o local correto da sua instância SQLAlchemy
 from models.order import Order
 from models.orderItem import OrderItem
 from models.product import Product
+#from models.delivery import Delivery
 
 
 class Delivery(db.Model):
@@ -273,3 +274,12 @@ class Delivery(db.Model):
                 deliveries_dict[d.id]['orders'].append(order_data)
 
         return list(deliveries_dict.values())
+
+    def get_delivery_by_melhorenvio_id(melhorenvio_id: str):
+        try:
+            print(melhorenvio_id)
+            #delivery = Delivery.query.filter_by(melhorenvio_id=melhorenvio_id).first()
+            return Delivery.query.filter_by(melhorenvio_id=melhorenvio_id).first()
+        except Exception as e:
+            print(f"Erro ao buscar delivery pelo melhorenvio_id: {e}")
+            return None

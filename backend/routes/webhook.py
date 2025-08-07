@@ -1,7 +1,7 @@
 from flask import Flask, Blueprint, request, jsonify
 from controllers.paymentController import PaymentController
 import os
-
+from models.delivery import Delivery
 
 
 webhook_bp = Blueprint('webhook', __name__)
@@ -51,3 +51,32 @@ def handle_webhook():
         }), 200
 
     return jsonify({'status': 'ignored', 'message': f'Status {status} não tratado'}), 200
+
+
+@webhook_bp.route('/melhor-envio/webhook', methods=['POST'])
+def handle_melhorEnvio_webhook():
+    
+    payload = request.json
+    #print("Recebido webhook Melhor Envio:", payload)
+
+    #Validate Process
+    event = payload.get('event')
+    data = payload.get('data', {})
+    melhorenvio_id = data.get('id')
+
+    delivery = Delivery.get_delivery_by_melhorenvio_id(melhorenvio_id)
+
+    if not delivery:
+        #print(f"Delivery não encontrado para melhorenvio_id: {melhorenvio_id}")
+        return jsonify({"error": "Delivery não encontrado"}), 404
+    
+    #update status delivery
+    if event == 'shipment.updated':
+        shipment_id = data.get('id')
+        status = data.get('status')
+        delivery.status = status
+        delivery.save()
+        #atualiza o status no banco, envia notificação e etc
+        #print(f"STatus atualizado: {shipment_id} -> {status}")
+
+    return '', 200
