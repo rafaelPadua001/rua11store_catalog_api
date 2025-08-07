@@ -82,12 +82,18 @@ class Payment(db.Model):
 
             payment_id = self.id
             delivery_id = None
-           
+
+            total_weight = sum(float(p.get('weight', 0)) * int(p.get('quantity', 1)) for p in self.products)
+            total_height = sum(float(p.get('height', 0)) * int(p.get('quantity', 1)) for p in self.products)
+            total_width  = sum(float(p.get('width', 0)) * int(p.get('quantity', 1)) for p in self.products)
+            total_length = sum(float(p.get('length', 0)) * int(p.get('quantity', 1)) for p in self.products)
+                    
             if self.address and self.products:
                 product = self.products[0]
                 delivery = Delivery(
                     product_id=product['product_id'],
                     user_id=self.usuario_id,
+                    user_name=self.name,
                     recipient_name=self.address.get('recipient_name', ''),
                     street=self.address.get('street', ''),
                     number=self.address.get('number', ''),
@@ -100,10 +106,10 @@ class Payment(db.Model):
                     bairro=self.address.get('bairro', ''),
                     total_value=self.address.get('total_value', 0),
                     delivery_id=self.address.get('delivery_id', ''),
-                    width=product.get('width', 0),
-                    height=product.get('height', 0),
-                    length=product.get('length', 0),
-                    weight=product.get('weight', 0)
+                    width=round(total_width, 2),
+                    height=round(total_height, 2),
+                    length=round(total_length, 2),
+                    weight=round(total_weight, 2)
                 )
                 db.session.add(delivery)
                 db.session.flush()
