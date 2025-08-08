@@ -45,7 +45,7 @@
                             </v-chip>
                         </span>
                          <span v-else-if="item.status === 'rejected'">
-                            <v-chip color="errror">
+                            <v-chip color="error">
                                 {{ item.status }}
                             </v-chip>
                         </span>
