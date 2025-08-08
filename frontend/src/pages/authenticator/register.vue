@@ -66,6 +66,14 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from 'axios';
 
+const api = axios.create({
+    baseURL:
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://rua11store-catalog-api-lbp7.onrender.com",
+    headers: { "Content-Type": "application/json" },
+});
+
 const logoUrl = ref('');
 const router = useRouter();
 const form = ref(null);
