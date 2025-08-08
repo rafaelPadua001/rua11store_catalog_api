@@ -9,7 +9,7 @@ class ProductImage(db.Model):
     is_thumbnail = db.Column(db.Boolean, default=False)  # Indica se a imagem é a miniatura
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-
+    product = db.relationship("Product", back_populates="images")
     def save(self):
         db.sessioon.add(self)
         db.session.commit()
