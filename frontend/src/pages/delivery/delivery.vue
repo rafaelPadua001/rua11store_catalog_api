@@ -79,87 +79,149 @@
                         <v-card-title>
                             <span class="headline">Detalhes da Entrega</span>
                         </v-card-title>
-
+                        <v-divider></v-divider>
 
                         <v-spacer></v-spacer>
 
                         <v-card-subtitle>
                             <v-row>
-                                <v-col cols="8" sm="3">
-                                    <strong>Id:</strong> {{ cartItems.data.id }}
+                                <!--<v-col cols="12" sm="6">
+      <strong>ID:</strong> {{ delivery.id }}
+    </v-col> -->
+                                <v-col cols="12" sm="6">
+                                    <strong>Destinatário:</strong> {{ delivery.recipient_name }}
                                 </v-col>
-
-                            </v-row>
-                            <v-row>
-                                <v-col cols="8" sm="3">
-                                    <strong>Order Id:</strong> {{ cartItems.data.protocol }}
+                                <v-col cols="12" sm="6">
+                                    <strong>Usuário:</strong> {{ delivery.user_name }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Rua:</strong> {{ delivery.street }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Número:</strong> {{ delivery.number }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Complemento:</strong> {{ delivery.complement }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Cidade:</strong> {{ delivery.city }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Estado:</strong> {{ delivery.state }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>CEP:</strong> {{ delivery.zip_code }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Bairro:</strong> {{ delivery.bairro }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>País:</strong> {{ delivery.country }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Telefone:</strong> {{ delivery.phone }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Email:</strong> {{ delivery.email }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Status:</strong> {{ delivery.status }}
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Delivery Min:</strong> {{ delivery.delivery_min }} days
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Delivery Max:</strong> {{ delivery.delivery_max }} days
+                                </v-col>
+                                <v-col cols="12" sm="6">
+                                    <strong>Tracking code:</strong> {{ delivery.tracking }}
                                 </v-col>
                             </v-row>
 
                             <v-divider></v-divider>
-                            <v-spacer></v-spacer>
+                            <div v-if="cartItems.length >= 1 && loadingCart">
 
-                            <v-row>
+                                <v-row>
+                                    <v-col cols="8" sm="3">
+                                        <strong>Id:</strong> {{ cartItems.data.id }}
+                                    </v-col>
 
-                                <v-col cols="12" sm="6">
-                                    <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Endereço:</strong> {{ cartItems.data.to.address }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>CEP:</strong> {{ cartItems.data.to.postal_code }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Cidade:</strong> {{ cartItems.data.to.city }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Estado:</strong> {{ cartItems.data.to.state_abbr }}
-                                </v-col>
+                                </v-row>
+                                <v-row>
+                                    <v-col cols="8" sm="3">
+                                        <strong>Order Id:</strong> {{ cartItems.data.protocol }}
+                                    </v-col>
+                                </v-row>
 
-                                <v-col cols="12" sm="6">
-                                    <strong>Telefone:</strong> {{ cartItems.data.to.phone }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Email:</strong> {{ cartItems.data.to.email }}
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Status:</strong>
-                                    <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{
-                                        cartItems.data.status
+                                <v-divider></v-divider>
+                                <v-spacer></v-spacer>
+
+                                <v-row>
+                                    <v-col cols="12" sm="6">
+                                        <strong>Nome do Destinatário:</strong> {{ cartItems.data.to.name }}
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <strong>Endereço:</strong> {{ cartItems.data.to.address }}
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <strong>CEP:</strong> {{ cartItems.data.to.postal_code }}
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <strong>Cidade:</strong> {{ cartItems.data.to.city }}
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <strong>Estado:</strong> {{ cartItems.data.to.state_abbr }}
+                                    </v-col>
+
+                                    <v-col cols="12" sm="6">
+                                        <strong>Telefone:</strong> {{ cartItems.data.to.phone }}
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <strong>Email:</strong> {{ cartItems.data.to.email }}
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <strong>Status:</strong>
+                                        <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{
+                                            cartItems.data.status
                                         }}</strong>
-                                    <strong v-else> {{ cartItems.data.status }}</strong>
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Delivery max: </strong>
-                                    <strong> {{ cartItems.data.delivery_max }} dias uteis</strong>
+                                        <strong v-else> {{ cartItems.data.status }}</strong>
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <strong>Delivery max: </strong>
+                                        <strong> {{ cartItems.data.delivery_max }} dias uteis</strong>
 
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Format: </strong>
-                                    <strong> {{ cartItems.data.format }} </strong>
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <strong>Format: </strong>
+                                        <strong> {{ cartItems.data.format }} </strong>
 
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <strong>Price: </strong>
-                                    <strong> {{ cartItems.data.price }} </strong>
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <strong>Price: </strong>
+                                        <strong> {{ cartItems.data.price }} </strong>
 
-                                </v-col>
-                            </v-row>
+                                    </v-col>
+                                </v-row>
 
-                            <v-row>
-                                <v-col>
-                                    <v-list>
-                                        <strong>Itens: ({{ cartItems.data.products.length }})</strong>
-                                        <v-divider></v-divider>
-                                        <v-list-item v-for="(product, index) in cartItems.data.products" :key="index">
-                                            <v-list-item-title>{{ product.name }}</v-list-item-title>
-                                            <v-list-item-subtitle>Quantitdade: {{ product.quantity }} - Preço: {{
-                                                product.unitary_value }}</v-list-item-subtitle>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-col>
-                            </v-row>
+                                <v-row>
+                                    <v-col>
+                                        <v-list>
+                                            <strong>Itens: ({{ cartItems.data.products.length }})</strong>
+                                            <v-divider></v-divider>
+                                            <v-list-item v-for="(product, index) in cartItems.data.products"
+                                                :key="index">
+                                                <v-list-item-title>{{ product.name }}</v-list-item-title>
+                                                <v-list-item-subtitle>Quantitdade: {{ product.quantity }} - Preço: {{
+                                                    product.unitary_value }}</v-list-item-subtitle>
+                                            </v-list-item>
+                                        </v-list>
+                                    </v-col>
+                                </v-row>
+                            </div>
+                            <div v-else>
+                                <v-progress-circular indeterminate color="primary" />
+                            </div>
+
                         </v-card-subtitle>
 
                         <v-card-actions>
@@ -189,6 +251,7 @@ export default {
     data() {
         return {
             loading: false,
+            delivery: [],
             deliveries: [],
             cartItems: [],
             checkItemEnabled: {},
@@ -199,16 +262,16 @@ export default {
                 { title: "Status", key: "status" },
                 { title: "Payer Name", key: "user_name" },
                 { title: "Payer Email", key: "email" },
-                { title: "Recipient Name", key: "recipient_name" },
-                { title: "Street", key: "street", align: "right" },
-                { title: "Number", key: "number" },
-                { title: "Complement", key: "complement" },
-                { title: "City", key: "city" },
-                { title: "State", key: "state" },
-                { title: "Postal Code", key: "zip_code" },
-                { title: "Bairro", key: "bairro" },
-                { title: "Country", key: "country" },
-                { title: "Phone", key: "phone" },
+                //{ title: "Recipient Name", key: "recipient_name" },
+                // { title: "Street", key: "street", align: "right" },
+                // { title: "Number", key: "number" },
+                // { title: "Complement", key: "complement" },
+                // { title: "City", key: "city" },
+                //   { title: "State", key: "state" },
+                //   { title: "Postal Code", key: "zip_code" },
+                //    { title: "Bairro", key: "bairro" },
+                //   { title: "Country", key: "country" },
+                //   { title: "Phone", key: "phone" },
                 { title: "Price", key: "price" },
 
                 // { title: "Delivery", key: "delivery_id" },
@@ -280,6 +343,9 @@ export default {
                             order_id: delivery.order_id,
                             user_id: delivery.user_id,
                             status: delivery.status,
+                            delivery_min: delivery.delivery_min,
+                            delivery_max: delivery.delivery_max,
+                            tracking: delivery.tracking,
                         };
                     });
 
@@ -343,37 +409,31 @@ export default {
             }
         },
         async checkItemInCart(item) {
+            this.delivery = item;
+            this.cartItems = { data: { products: [] } }; // inicializa para evitar erro
+            this.loadingCart = true;
+            this.dialogCheckItemCart = true;
+
             try {
                 const response = await api.post(`/melhorEnvio/checkItemInCart/${item.id}`, {
                     melhorenvio_id: item.melhorenvio_id,
                     order_id: item.order_id
-                }, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
                 });
-                if (response.status === 200 && response.data && response.data.status === 'success') {
-                    // this.$toast.success('O item está no carrinho');
-                    //window.alert('O item está no carrinho');
-                    this.cartItems = response.data;
-                    this.dialogCheckItemCart = true;
-                    return this.shipment.push(this.cartItems);
 
+                if (response.status === 200 && response.data && response.data.status === 'success') {
+                    this.cartItems = response.data;
+                    this.shipment.push(this.cartItems); // se necessário
                 } else {
-                    // this.$toast.info('O item não está no carrinho');
                     window.alert('O item não está no carrinho');
                 }
-
             } catch (error) {
-                // Verifique se o erro contém a propriedade response
                 if (error.response) {
-                    window.alert('item não encontrado no carrinho:', error.response.data);
-                    // this.$toast.error('Erro ao verificar item no carrinho');
+                    console.log('Item não encontrado no carrinho: ' + JSON.stringify(error.response.data));
                 } else {
-                    // Se não houver response, logue o erro simples
                     console.log('Erro desconhecido:', error);
-                    // this.$toast.error('Erro desconhecido');
                 }
+            } finally {
+                this.loadingCart = false;
             }
         },
         async shipmentCheckout(item) {
