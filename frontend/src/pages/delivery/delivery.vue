@@ -218,9 +218,9 @@
                                     </v-col>
                                 </v-row>
                             </div>
-                            <div v-else>
+                           <!-- <div v-else-if="this.loadingCart">
                                 <v-progress-circular indeterminate color="primary" />
-                            </div>
+                            </div> -->
 
                         </v-card-subtitle>
 
