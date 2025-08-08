@@ -2,6 +2,7 @@ from flask import Flask, Blueprint, request, jsonify
 from controllers.paymentController import PaymentController
 import os
 from models.delivery import Delivery
+from database import db
 
 
 webhook_bp = Blueprint('webhook', __name__)
@@ -55,28 +56,38 @@ def handle_webhook():
 
 @webhook_bp.route('/melhor-envio/webhook', methods=['POST'])
 def handle_melhorEnvio_webhook():
+    data = request.get_json(force=True, silent=True) or {}
     
-    payload = request.json
-    #print("Recebido webhook Melhor Envio:", payload)
+    #print("📦 Payload recebido:", data)   
+    event = data.get('event')
+   
+    if event == 'webhook.ping':
+        jsonify({"message": "Webhook verificado com sucesso"}), 200
 
-    #Validate Process
-    event = payload.get('event')
-    data = payload.get('data', {})
-    melhorenvio_id = data.get('id')
+    resource = data.get('resource') or data.get('data')
+    shipment_id = resource.get('id') if resource else None
 
-    delivery = Delivery.get_delivery_by_melhorenvio_id(melhorenvio_id)
+    if not shipment_id:
+        return jsonify({"message": "Webhook verificado com sucesso"}), 200
 
+    delivery = Delivery.query.filter_by(melhorenvio_id=shipment_id).first()
     if not delivery:
-        #print(f"Delivery não encontrado para melhorenvio_id: {melhorenvio_id}")
         return jsonify({"error": "Delivery não encontrado"}), 404
-    
-    #update status delivery
-    if event == 'shipment.updated':
-        shipment_id = data.get('id')
-        status = data.get('status')
-        delivery.status = status
-        delivery.save()
-        #atualiza o status no banco, envia notificação e etc
-        #print(f"STatus atualizado: {shipment_id} -> {status}")
 
-    return '', 200
+    # Map event to intern status
+    event_status_map = {
+        "shipment.created": "created",
+        "shipment.updated": "updated",
+        "shipment.deleted": "deleted",
+        "shipment.canceled": "canceled",
+        "shipment.printed": "printed",
+        "shipment.purchased": "purchased",
+    }
+
+    # update status delivery
+    if event in event_status_map:
+        delivery.status = event_status_map[event]
+        db.session.commit()
+        return jsonify({"message": f"Delivery status updated to '{delivery.status}'"}), 200
+      
+    return jsonify({"message": f"Event '{event}' ignorado"}), 200

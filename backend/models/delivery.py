@@ -169,7 +169,6 @@ class Delivery(db.Model):
         deliveries_dict = {}
 
         for d in deliveries:
-            print(f"Delivery ID {d.id} - Width: {d.width} | Weight: {d.weight}")
             deliveries_dict[d.id] = {
                 'id': d.id,
                 'recipient_name': d.recipient_name,
@@ -195,7 +194,7 @@ class Delivery(db.Model):
                 'email': None,
                 'order_total': None,
                 'order_date': None,
-                'status': None,
+                'status': d.status,
                 'user_name': d.user_name,
                 'serviceId': d.serviceid,
                 'quote': d.quote,
@@ -246,7 +245,7 @@ class Delivery(db.Model):
                 deliveries_dict[d.id]['email'] = first_order.payment.email if first_order.payment else None
                 deliveries_dict[d.id]['order_total'] = first_order.total_amount
                 deliveries_dict[d.id]['order_date'] = first_order.order_date.isoformat() if first_order.order_date else None
-                deliveries_dict[d.id]['status'] = first_order.status
+                deliveries_dict[d.id]['status'] = d.status
 
             for order in orders:
                 order_data = {

@@ -1,17 +1,11 @@
 <template>
-    <v-row justify="center">
-        <v-col cols="12" md="12" lg="10" xl="10" sm="12">
-            <v-card class="pa-4">
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" md="10" lg="10" xl="6" sm="12">
+            <v-card class="pa-4" elevation="0">
                 <v-card-title class="d-flex justify-center">
-                    <h1 class="text-h5">Delivery Management</h1>
+                    <h5>Delivery Management</h5>
                 </v-card-title>
-
-                <!-- <v-card-actions class="d-flex justify-end mb-4">
-                    <v-btn color="primary" @click="newProduct" disabled>
-                        <v-icon left>mdi-plus</v-icon>
-                        Add Product
-                    </v-btn>
-                </v-card-actions> -->
+                <v-divider></v-divider>
 
                 <v-data-table :headers="headers" :items="deliveries" :items-per-page="10" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading deliveries...">
@@ -24,12 +18,29 @@
                         <span v-else>Sem Imagem</span>
                     </template>
 
+                    <template v-slot:item.price="{ item }">
+                        <span v-if="item.price">R$ {{ item.price.toFixed(2) }}</span>
+                        <span v-else>no value found...</span>
+                    </template>
 
+                    <template v-slot:item.status="{ item }">
+                        <span v-if="item.status == 'created' || item.status == 'printed'">
+                            <v-chip color="success">{{ item.status }}</v-chip>
+                        </span>
+                        <span v-else-if="item.status == 'updated' || item.status == 'pending'">
+                            <v-chip color="primary">{{ item.status }}</v-chip>
+                        </span>
+                        <span v-else-if="item.status == 'deleted' || item.status == 'canceled'">
+                            <v-chip color="error">{{ item.status }}</v-chip>
+                        </span>
+                        <span v-else-if="item.status == 'purchased'">
+                            <v-chip color="warning">{{ item.status }}</v-chip>
+                        </span>
 
-
+                    </template>
                     <!-- Exibe os ícones de ações -->
                     <template v-slot:item.actions="{ item }">
-                    
+
                         <!-- Ícone de criar envio -->
                         <v-icon small @click.stop="shipmentCreate(item)">
                             mdi-cart
@@ -116,7 +127,7 @@
                                     <strong>Status:</strong>
                                     <strong v-if="cartItems.data.status == 'pending'" class="text-blue"> {{
                                         cartItems.data.status
-                                    }}</strong>
+                                        }}</strong>
                                     <strong v-else> {{ cartItems.data.status }}</strong>
                                 </v-col>
                                 <v-col cols="12" sm="6">
@@ -142,11 +153,9 @@
                                         <strong>Itens: ({{ cartItems.data.products.length }})</strong>
                                         <v-divider></v-divider>
                                         <v-list-item v-for="(product, index) in cartItems.data.products" :key="index">
-                                            <v-list-item-content>
-                                                <v-list-item-title>{{ product.name }}</v-list-item-title>
-                                                <v-list-item-subtitle>Quantitdade: {{ product.quantity }} - Preço: {{
-                                                    product.unitary_value }}</v-list-item-subtitle>
-                                            </v-list-item-content>
+                                            <v-list-item-title>{{ product.name }}</v-list-item-title>
+                                            <v-list-item-subtitle>Quantitdade: {{ product.quantity }} - Preço: {{
+                                                product.unitary_value }}</v-list-item-subtitle>
                                         </v-list-item>
                                     </v-list>
                                 </v-col>
@@ -161,8 +170,6 @@
                     </v-card>
                 </v-dialog>
             </v-card>
-
-
         </v-col>
     </v-row>
 </template>
@@ -188,7 +195,10 @@ export default {
             shipment: [],
             headers: [
                 { title: "ID", key: "id" },
-               // { title: "User ID", key: "user_id" },
+                // { title: "User ID", key: "user_id" },
+                { title: "Status", key: "status" },
+                { title: "Payer Name", key: "user_name" },
+                { title: "Payer Email", key: "email" },
                 { title: "Recipient Name", key: "recipient_name" },
                 { title: "Street", key: "street", align: "right" },
                 { title: "Number", key: "number" },
@@ -199,12 +209,10 @@ export default {
                 { title: "Bairro", key: "bairro" },
                 { title: "Country", key: "country" },
                 { title: "Phone", key: "phone" },
-                { title: "Email", key: "email" },
-                {title: "Name", key: "user_name"},
                 { title: "Price", key: "price" },
-                { title: "Status", key: "status" },
+
                 // { title: "Delivery", key: "delivery_id" },
-                { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
+                { title: "Actions", key: "actions", width: "100px", align: "center", sortable: false },
             ],
             isPaymentButtonPayTagDisabled: true,
             isCheckitemButton: true,
@@ -233,7 +241,7 @@ export default {
             this.loading = true;
             try {
                 const response = await api.get("delivery/deliveries");
-                console.log(response.data);
+                // console.log(response.data);
                 if (response.data && Array.isArray(response.data)) {
                     this.deliveries = response.data.flat().map(delivery => {
                         // Extrair todos os produtos de todos os orders da entrega
@@ -275,7 +283,7 @@ export default {
                         };
                     });
 
-                    console.log(response.data);
+                    //  console.log(response.data);
                 } else {
                     console.error("Resposta não contém um array de entregas:", response.data);
                 }
@@ -287,7 +295,7 @@ export default {
         },
         async shipmentCreate(item) {
             try {
-                console.log('Item antes:', toRaw(item.products));  // mostra o array puro de produtos
+                // console.log('Item antes:', toRaw(item.products));  // mostra o array puro de produtos
 
                 let allProducts = [];
 
@@ -315,7 +323,7 @@ export default {
 
                 item.products = allProducts;
 
-                console.log('Payload final antes do envio:', toRaw(item));
+                //console.log('Payload final antes do envio:', toRaw(item));
 
                 const response = await api.post('/melhorEnvio/shipmentCreate', item);
 
@@ -334,8 +342,6 @@ export default {
                 window.alert('Erro ao criar envio. Detalhes no console.');
             }
         },
-
-
         async checkItemInCart(item) {
             try {
                 const response = await api.post(`/melhorEnvio/checkItemInCart/${item.id}`, {
@@ -432,7 +438,6 @@ export default {
                 }
             }
         },
-
         async shipmentGenerate(item) {
             console.log(item);
             try {
@@ -487,7 +492,6 @@ export default {
                 window.alert('Erro ao buscar PDF: ' + error);
             }
         },
-
         async deleteItemCart(item) {
 
             try {
