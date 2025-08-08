@@ -1,11 +1,11 @@
 <template>
-    <v-row justify="center">
-        <v-col cols="12" md="10" lg="8" xl="6">
-            <v-card class="pa-4">
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
+            <v-card class="pa-4" elevation="0">
                 <v-card-title class="d-flex justify-center">
-                    <h1 class="text-h5">Stock Management</h1>
+                    <h5>Stock Management</h5>
                 </v-card-title>
-
+                <v-divider></v-divider>
 
                 <v-data-table :headers="headers" :items="stocks" :items-per-page="10" class="elevation-1" item-key="id"
                     fixed-header height="500" :loading="loading" loading-text="Loading stock...">
@@ -16,6 +16,10 @@
                         <span v-else>No Image</span>
                     </template>
 
+                    <template v-slot:item.product_price="{item}">
+                        R$ {{ item.product.price }}
+                    </template>
+                    
                     <template v-slot:item.actions="{ item }">
                         <v-icon small @click.stop="deleteStock(item.id)" color="error">
                             mdi-delete
