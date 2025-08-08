@@ -26,7 +26,8 @@ class Product(db.Model):
 
     stock = db.relationship('Stock', back_populates='product', uselist=False)
     seo = db.relationship('ProductSeo', uselist=False, back_populates='product', cascade="all, delete-orphan")
-
+    images = db.relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
+    
     def save(self):
         """Salva ou atualiza o produto"""
         try:

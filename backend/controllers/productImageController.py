@@ -16,7 +16,7 @@ class ProductImageController:
             for path in image_paths:
                 img = ProductImage(
                     product_id=product_id,
-                    image_paths=path,   # nome da coluna correto
+                    image_path=path,   # nome da coluna correto
                     is_thumbnail=is_thumbnail
                 )
                 db.session.add(img)
