@@ -29,6 +29,7 @@ class PaymentController:
             if address_data:
                 delivery = Delivery(
                     usuario_id=dados_pagamento['usuario_id'],
+                    user_name=address_data.get('user_name'),
                     recipient_name=address_data.get('recipient_name'),
                     street=address_data.get('street'),
                     number=address_data.get('number'),

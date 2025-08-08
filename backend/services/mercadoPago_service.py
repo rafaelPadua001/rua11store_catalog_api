@@ -82,7 +82,8 @@ class CreditCardPayment(PaymentStrategy):
                     "address": {
                         "zip_code": data.get("zip_code", "00000-000"),
                         "street_name": data.get("street_name", "Rua Exemplo"),
-                        "street_number": data.get("street_number", 123)
+                        "street_number": data.get("street_number", 123),
+                       
                     }
                 }
             }
@@ -100,6 +101,7 @@ class CreditCardPayment(PaymentStrategy):
                 payment_type="crédito",
                 cpf=data["payer_cpf"].replace(".", "").replace("-", "").strip(),
                 email=data["payer_email"],
+                name=data['payer_name'],
                 status=result["status"],
                 usuario_id=data["userId"],
                 products=data["products"],

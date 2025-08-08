@@ -126,6 +126,10 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useSeo } from '../useSeo'
 import logoImage from '../assets/rua11store_logo.png'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const slug = (route.params as any).slug
 
 const loadFailed = ref(false)
 const pageTitle = ref('')
@@ -165,19 +169,39 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+
 const { setSeo } = useSeo()
+
 
 async function loadComponentFromAPI() {
   try {
-    const pageName = 'Home Page'
-    const encodedPageName = encodeURIComponent(pageName)
-    const response = await api.get(`/pages/pages/${encodedPageName}`)
+    let pageId: number | undefined
 
-    pageTitle.value = response.data.title
-    pageContent.value = response.data.content
+    // Verifica se estamos na página de produto
+    const slug = (route.params as { slug?: string }).slug
+
+    if (slug) {
+      // Produto
+      const productResponse = await api.get(`/products/by-slug/${slug}`)
+      pageTitle.value = productResponse.data.title
+      pageContent.value = productResponse.data.description
+      pageId = productResponse.data.id
+    } else {
+      // Página comum (Home Page)
+      const pageName = 'Home Page'
+      const encodedPageName = encodeURIComponent(pageName)
+      const pageResponse = await api.get(`/pages/pages/${encodedPageName}`)
+      pageTitle.value = pageResponse.data.title
+      pageContent.value = pageResponse.data.content
+      pageId = pageResponse.data.id
+    }
+
     loadFailed.value = false
 
-    await loadSeoFromAPI(response.data.id)
+    // Só carrega SEO se conseguiu encontrar um id válido
+    if (pageId) {
+      await loadSeoFromAPI(pageId)
+    }
   } catch (error) {
     console.error('Erro ao buscar componente:', error)
     loadFailed.value = true
@@ -188,7 +212,6 @@ async function loadSeoFromAPI(pageId: number) {
   try {
     const response = await api.get(`/seo/seo/${pageId}`)
     const seoData = response.data.seo
-
     setSeo(seoData)
   } catch (error) {
     console.error('Erro ao buscar SEO:', error)

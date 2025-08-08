@@ -36,13 +36,14 @@ class SeoController:
     @staticmethod
     def update_seo(seo_id, seo_data):
         seo = Seo.query.get(seo_id)
+    
         if seo:
             seo.route = seo_data.get('route', seo.route)
-            seo.metatitle = seo_data.get('metaTitle', seo.metaTitle)
-            seo.metadescription = seo_data.get('metaDescription', seo.metaDescription)
-            seo.metakeywords = seo_data.get('metaKeywords', seo.metaKeywords)
-            seo.ogtitle = seo_data.get('ogTitle', seo.ogTitle)
-            seo.ogdescription = seo_data.get('ogDescription', seo.ogDescription)
+            seo.metatitle = seo_data.get('metaTitle', seo.metatitle)
+            seo.metadescription = seo_data.get('metaDescription', seo.metadescription)
+            seo.metakeywords = seo_data.get('metaKeywords', seo.metakeywords)
+            seo.ogtitle = seo_data.get('ogTitle', seo.ogtitle)
+            seo.ogdescription = seo_data.get('ogDescription', seo.ogdescription)
             seo.ogimage = seo_data.get('ogImage', {}).get('url') if isinstance(seo_data.get('ogImage'), dict) else seo_data.get('ogImage')
 
             db.session.commit()
