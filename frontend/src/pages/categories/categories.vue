@@ -1,10 +1,11 @@
 <template>
-  <v-row justify="center">
-    <v-col cols="12" md="12" lg="8" xl="6">
-      <v-card class="pa-4">
+  <v-row justify="center" no-gutters>
+    <v-col cols="12" md="12" lg="10" xl="6">
+      <v-card class="pa-4" elevation="0">
         <v-card-title class="d-flex justify-center">
-          <h1 class="text-h5">Categories Management</h1>
+          <h5>Categories Management</h5>
         </v-card-title>
+        <v-divider></v-divider>
 
         <v-card-actions class="d-flex justify-end mb-4">
           <v-btn color="primary" @click="newItem">
