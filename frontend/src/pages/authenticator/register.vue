@@ -1,12 +1,13 @@
 <template>
     <v-card class="mx-auto justify-center" width="400">
-        <template v-slot:title>
+        
+        
+        <v-card-text>
+            <template v-slot:title>
             <div class="text-center" v-if="logoUrl">
                 <v-img :src="logoUrl" alt="logo" width="120" contain class="mx-auto"></v-img>
             </div>
         </template>
-        <v-divider></v-divider>
-        <v-card-text>
             <v-form ref="form" @submit.prevent="register">
                 <v-container>
                     <v-row justify="center">
