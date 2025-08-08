@@ -1,11 +1,12 @@
 <template>
-    <v-row justify="center">
-        <v-col cols="12" md="12" lg="12" xl="12">
-            <v-card class="pa-4">
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
+            <v-card class="pa-4" elevation="0">
                 <v-card-title class="d-flex justify-center">
-                    <h1 class="text-h5">Pages Management</h1>
+                    <h5>Pages Management</h5>
                 </v-card-title>
-
+                <v-divider></v-divider>
+                
                 <v-card-actions class="d-flex justify-end mb-4">
                     <v-btn color="primary" @click="newPageItem" class="mb-2">
                         <v-icon left>mdi-plus</v-icon>
@@ -24,10 +25,9 @@
                     </template>
 
                     <template v-slot:item.actions="{ item }">
-                        <v-btn :to="`/menagementPage/pageView/${item.id}`" color="primary" icon small class="ma-0 pa-0"
-                            style="width: 32px; height: 32px;">
-                            <v-icon size="20">mdi-eye</v-icon>
-                        </v-btn>
+                        <router-link :to="`/menagementPage/pageView/${item.id}`"icon small class="ma-0 pa-0">
+                            <v-icon size="20" color="primary">mdi-eye</v-icon>
+                        </router-link>
 
                         <v-icon small color="primary" @click.stop="editPage(item)">
                             mdi-pencil
