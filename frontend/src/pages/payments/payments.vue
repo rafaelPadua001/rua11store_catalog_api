@@ -1,19 +1,20 @@
 <template>
-    <v-row justify="center">
-        <v-col cols="12" sm="12" md="10" lg="10" xl="10">
-            <v-card class="pa-4">
-                <v-card-title class="d-flex justify-center">
-                    <h1 class="text-h5">Payments Management</h1>
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
+            <v-card class="pa-4" elevation="0">
+                <v-card-title class="d-flex justify-center" elevation="0">
+                    <h5>Payments Management</h5>
                 </v-card-title>
+                <v-divider></v-divider>
 
-                <v-card-actions class="d-flex justify-end mb-4">
+               <!-- <v-card-actions class="d-flex justify-end mb-4">
                     <v-btn color="primary" disabled>
                         <v-icon left>mdi-plus</v-icon>
                         Add Product
                     </v-btn>
-                </v-card-actions>
+                </v-card-actions> -->
 
-                <v-data-table :headers="headers" :items="payments" :items-per-page="10" class="elevation-1"
+                <v-data-table :headers="headers" :items="payments" :items-per-page="20" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading payments...">
                     <!-- 🔹 Slot para exibir imagens -->
                     <template v-slot:item.image="{ item }">
@@ -23,27 +24,44 @@
                         <span v-else>Sem Imagem</span>
                     </template>
 
-                    <template v-slot:item.description="{ item }">
-                        <span v-if="item.description && item.description.length > 100">
-                            {{ item.description.substring(0, 38) }}...
+                    <template v-slot:item.totalValue="{ item }">
+                        <span v-if="item.totalValue">
+                            R$ {{ item.totalValue }}
                         </span>
                         <span v-else>
-                            {{ item.description }}
+                            R$ {{ item.totalValue }}
                         </span>
                     </template>
 
-                    <!-- 🔹 Slot para categoria -->
-                    <template v-slot:item.category="{ item }">
-                        <span v-if="item && item.category_id">{{ getCategoryName(item.category_id) }}</span>
-                        <span v-else>Sem Categoria</span>
+                    <template v-slot:item.status="{item}">
+                        <span v-if="item.status === 'pending'">
+                            <v-chip color="primary">
+                                {{ item.status }}
+                            </v-chip>
+                        </span>
+                         <span v-else-if="item.status === 'approved'">
+                            <v-chip color="success">
+                                {{ item.status }}
+                            </v-chip>
+                        </span>
+                         <span v-else-if="item.status === 'rejected'">
+                            <v-chip color="errror">
+                                {{ item.status }}
+                            </v-chip>
+                        </span>
                     </template>
+
+                    <template v-slot:item.paymentDate="{item}">
+                        {{ new Date(item.paymentDate).toLocaleDateString('pt-BR')  }}
+                    </template>
+
 
                     <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
-                        <v-icon small class="mr-2" @click.stop="openDetailsDialog(item)">
+                        <v-icon small class="mr-2" @click.stop="openDetailsDialog(item)" color="primary">
                             mdi-eye
                         </v-icon>
-                        <v-icon small @click.stop="deleteProduct(item.id)">
+                        <v-icon small @click.stop="deleteProduct(item.id)" color="error">
                             mdi-delete
                         </v-icon>
                     </template>
@@ -51,27 +69,45 @@
             </v-card>
 
             <!-- Modal para Adicionar/Editar Produto -->
-            <v-dialog v-model="detailsDialog" max-width="500px">
+            <v-dialog v-model="detailsDialog" max-width="800px">
                 <v-card>
                     <v-card-title class="headline">Payment #{{ selectedItem.id }}</v-card-title>
 
                     <v-card-text>
                         <v-container>
                             <v-row>
-                                <v-col cols="12" class="mb-4">
+                                <v-col cols="12" sm="6" class="mb-4">
+                                    <b>Payment Id:</b> #{{ selectedItem.paymentId }}
+                                </v-col>
+                                <v-col cols="12" sm="6" class="mb-4">
+                                    <b>Type:</b> {{ selectedItem.paymentType }}
+                                </v-col>
+                                <v-col cols="12" sm="6" class="mb-4">
+                                    <b>User CPF:</b> {{ maskCpf(selectedItem.userCpf) }}
+                                </v-col>
+                                <v-col cols="12" sm="6" class="mb-4">
+                                    <b>User Name:</b> {{ selectedItem.userName }}
+                                </v-col>
+
+                                <v-col cols="12" sm="6" class="mb-4">
                                     <b>User email:</b> {{ selectedItem.userEmail }}
                                 </v-col>
 
-                                <v-col cols="12" class="mb-4">
-                                    <b>Payment ID:</b> {{ selectedItem.payment_id }}
-
-
-                                    <b>Type:</b> {{ selectedItem.paymentType }}
-                                </v-col>
-
-                                <v-col cols="12" class="mb-4">
+                                <v-col cols="12" sm="6" class="mb-4">
                                     <b>Method:</b> <span v-if="paymentDetails && paymentDetails.method">{{
                                         paymentDetails.method }}</span>
+                                    <span v-else>-</span>
+                                </v-col>
+
+                                <v-col cols="12" sm="6" class="mb-4">
+                                    <b>Coupon code:</b> <span v-if="paymentDetails && paymentDetails.coupon_code">{{
+                                        paymentDetails.coupon_code }}</span>
+                                    <span v-else>-</span>
+                                </v-col>
+
+                                <v-col cols="12" sm="6" class="mb-4">
+                                    <b>Coupon amount:</b> <span v-if="paymentDetails && paymentDetails.coupon_amount">{{
+                                        paymentDetails.coupon_amount }}</span>
                                     <span v-else>-</span>
                                 </v-col>
 
@@ -141,17 +177,16 @@ export default {
             //categories: [],
             headers: [
                 { title: "Id", key: "id" },
-                { title: "Payment Id", key: "paymentId" },
-                { title: "Payment Type", key: "paymentType" },
-                { title: "Total Value", key: "totalValue", align: "end" },
-                { title: "Status", key: "status" },
-                { title: "Payment Date", key: "paymentDate" },
+                { title: "Name", key: "userName" },
                 { title: "Email", key: "userEmail" },
-                { title: "User Id", key: "userId" },
-                { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
+                // { title: "Payment Id", key: "paymentId" },
+                //{ title: "Payment Type", key: "paymentType" },
+                { title: "Status", key: "status" },
+                // { title: "User Id", key: "userId" },
+                { title: "Total Value", key: "totalValue", align: "end" },
+                { title: "Payment Date", key: "paymentDate" },
+                { title: "Actions", key: "actions", width: "100px", align: "center", sortable: false },
             ],
-
-
         };
     },
     watch: {
@@ -203,7 +238,9 @@ export default {
                             status: payment.status,
                             paymentDate: payment.payment_date,
                             userEmail: payment.email,
+                            userName: payment.name,
                             userId: payment.usuario_id,
+                            userCpf: payment.cpf
                         }));
                     } else {
                         this.payments = [];
@@ -215,6 +252,13 @@ export default {
                 .finally(() => {
                     this.loading = false;
                 });
+        },
+        maskCpf(cpf) {
+            if (!cpf) return '';
+            const strCpf = cpf.toString();
+
+            return '***.***.***-' + strCpf.slice(-3);
+
         },
         async openDetailsDialog(item) {
             this.selectedItem = item;

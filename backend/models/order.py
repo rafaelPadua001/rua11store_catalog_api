@@ -1,9 +1,14 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, desc
 from sqlalchemy.orm import relationship, Session
-
+import requests
 from database import db  # Supondo que você tenha Base e engine já configurados no db.py
-import uuid  
+import uuid
+import io
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+
 
 
 class Order(db.Model):
@@ -116,5 +121,60 @@ class Order(db.Model):
         except Exception as e:
             session.rollback()
             raise Exception(f"Erro ao salvar o pedido: {str(e)}")
+        
+    def generate_pdf(self):
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer, pagesize=A4)
 
+        # Cabeçalho
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(50, 800, f"Pedido #{self.id} - Rua11Store")
 
+        # Dados do cliente
+        p.setFont("Helvetica", 12)
+        p.drawString(50, 780, f"Cliente (User ID): {self.user_id}")
+        p.drawString(50, 765, f"Status: {self.status}")
+        p.drawString(50, 750, f"Valor total: R${self.total_amount:.2f}")
+
+        # Lista de produtos
+        y = 720
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(50, y, "Produtos:")
+        y -= 20
+        p.setFont("Helvetica", 12)
+
+        for item in self.items:
+            product = item.product
+            if not product:
+                continue
+
+            name = getattr(product, 'name', 'Produto sem nome')
+            quantity = getattr(item, 'quantity', 1)
+            price = getattr(product, 'price', 0.0)
+            image_url = getattr(product, 'thumbnail_path', None)
+
+            if image_url:
+                try:
+                    resp = requests.get(image_url, stream=True, timeout=5)
+                    if resp.status_code == 200:
+                        img_data = io.BytesIO(resp.content)
+                        img = ImageReader(img_data)
+                        p.drawImage(img, 50, y - 40, width=40, height=40, preserveAspectRatio=True, mask='auto')
+                except Exception as e:
+                    print(f"Erro ao carregar imagem {image_url}: {e}")
+
+            p.setFont("Helvetica", 12)
+            p.drawString(100, y - 15, f"{name} (x{quantity}) - R${price:.2f}")
+
+            y -= 50
+
+            if y < 100:
+                p.showPage()
+                y = 780
+
+        # Finaliza PDF
+        p.showPage()
+        p.save()
+        buffer.seek(0)
+
+        return buffer

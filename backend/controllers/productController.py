@@ -156,7 +156,7 @@ class ProductController:
     @staticmethod
     @jwt_required()
     def adicionar_produto():
-        print("request.files keys:", list(request.files.keys()))
+        #print("request.files keys:", list(request.files.keys()))
         for key in request.files:
             print(f"{key} => {[f.filename for f in request.files.getlist(key)]}")
 
@@ -199,6 +199,7 @@ class ProductController:
                     print(f"Upload imagem: {img.filename} -> {url}")
                     if url:
                         imagem_paths.append(url)
+                
 
 
         # Upload do vídeo
@@ -228,6 +229,7 @@ class ProductController:
                 category_id=category_id,
                 subcategory_id=subcategory_id,
                 thumbnail_path=thumbnail_path,
+                image_paths=imagem_paths,
                 quantity=quantity,
                 width=width,
                 height=height,
@@ -262,7 +264,7 @@ class ProductController:
 
             # Salvar imagens extras no banco
             if imagem_paths:
-                print(imagem_paths)
+                #print(imagem_paths)
                 ProductImageController.create_images(novo_produto.id, imagem_paths)
 
             # Salvar vídeo no banco

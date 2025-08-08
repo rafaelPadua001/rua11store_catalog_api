@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file, abort
 from datetime import datetime
 from models.order import Order
+
 orders_bp = Blueprint('order', __name__)
 
 @orders_bp.route('/get-orders', methods=['GET'])
@@ -39,3 +40,18 @@ def create_order():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@orders_bp.route('/<int:order_id>/download', methods=['GET'])
+def pdf_download(order_id):
+    order = Order.query.get(order_id)
+    if not order:
+        abort(404, description="Pedido não encontrado")
+
+    buffer = order.generate_pdf()
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f"Pedido_{order_id}.pdf",
+        mimetype='application/pdf'
+    )
