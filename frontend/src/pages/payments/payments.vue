@@ -1,19 +1,20 @@
 <template>
-    <v-row justify="center">
-        <v-col cols="12" sm="12" md="10" lg="10" xl="10">
-            <v-card class="pa-4">
-                <v-card-title class="d-flex justify-center">
-                    <h1 class="text-h5">Payments Management</h1>
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
+            <v-card class="pa-4" elevation="0">
+                <v-card-title class="d-flex justify-center" elevation="0">
+                    <h5>Payments Management</h5>
                 </v-card-title>
+                <v-divider></v-divider>
 
-                <v-card-actions class="d-flex justify-end mb-4">
+               <!-- <v-card-actions class="d-flex justify-end mb-4">
                     <v-btn color="primary" disabled>
                         <v-icon left>mdi-plus</v-icon>
                         Add Product
                     </v-btn>
-                </v-card-actions>
+                </v-card-actions> -->
 
-                <v-data-table :headers="headers" :items="payments" :items-per-page="10" class="elevation-1"
+                <v-data-table :headers="headers" :items="payments" :items-per-page="20" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading payments...">
                     <!-- 🔹 Slot para exibir imagens -->
                     <template v-slot:item.image="{ item }">
@@ -32,14 +33,35 @@
                         </span>
                     </template>
 
+                    <template v-slot:item.status="{item}">
+                        <span v-if="item.status === 'pending'">
+                            <v-chip color="primary">
+                                {{ item.status }}
+                            </v-chip>
+                        </span>
+                         <span v-else-if="item.status === 'approved'">
+                            <v-chip color="success">
+                                {{ item.status }}
+                            </v-chip>
+                        </span>
+                         <span v-else-if="item.status === 'rejected'">
+                            <v-chip color="errror">
+                                {{ item.status }}
+                            </v-chip>
+                        </span>
+                    </template>
+
+                    <template v-slot:item.paymentDate="{item}">
+                        {{ new Date(item.paymentDate).toLocaleDateString('pt-BR')  }}
+                    </template>
 
 
                     <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
-                        <v-icon small class="mr-2" @click.stop="openDetailsDialog(item)">
+                        <v-icon small class="mr-2" @click.stop="openDetailsDialog(item)" color="primary">
                             mdi-eye
                         </v-icon>
-                        <v-icon small @click.stop="deleteProduct(item.id)">
+                        <v-icon small @click.stop="deleteProduct(item.id)" color="error">
                             mdi-delete
                         </v-icon>
                     </template>
@@ -155,14 +177,14 @@ export default {
             //categories: [],
             headers: [
                 { title: "Id", key: "id" },
+                { title: "Name", key: "userName" },
+                { title: "Email", key: "userEmail" },
                 // { title: "Payment Id", key: "paymentId" },
-                { title: "Payment Type", key: "paymentType" },
+                //{ title: "Payment Type", key: "paymentType" },
+                { title: "Status", key: "status" },
                 // { title: "User Id", key: "userId" },
                 { title: "Total Value", key: "totalValue", align: "end" },
-                { title: "Status", key: "status" },
                 { title: "Payment Date", key: "paymentDate" },
-                { title: "Email", key: "userEmail" },
-                { title: "Name", key: "userName" },
                 { title: "Actions", key: "actions", width: "100px", align: "center", sortable: false },
             ],
         };
