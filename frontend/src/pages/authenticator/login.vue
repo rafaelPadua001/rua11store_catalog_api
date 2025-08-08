@@ -2,12 +2,13 @@
     <v-container class="fill-height d-flex align-center justify-center">
         <v-row justify="center">
             <v-col cols="12" sm="8" md="6" lg="4">
-                <template v-slot:title>
+               
+                <v-card class="pa-2">
+                     <template v-slot:title>
                     <div class="text-center" v-if="logoUrl">
                         <v-img :src="logoUrl" alt="logo" width="120" contain class="mx-auto"></v-img>
                     </div>
                 </template>
-                <v-card class="pa-2">
                     <v-card-text>
                         <v-form ref="form" @submit.prevent="login">
                             <v-row>
