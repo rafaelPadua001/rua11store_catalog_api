@@ -139,7 +139,7 @@
                             </v-row>
 
                             <v-divider></v-divider>
-                            <div v-if="cartItems.length >= 1 && loadingCart">
+                            <div v-if="cartItems && cartItems.data && cartItems.data.products && cartItems.data.products.length">
 
                                 <v-row>
                                     <v-col cols="8" sm="3">
@@ -218,9 +218,9 @@
                                     </v-col>
                                 </v-row>
                             </div>
-                           <!-- <div v-else-if="this.loadingCart">
+                           <div v-else-if="this.loadingCart">
                                 <v-progress-circular indeterminate color="primary" />
-                            </div> -->
+                            </div>
 
                         </v-card-subtitle>
 
