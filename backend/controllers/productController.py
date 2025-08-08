@@ -199,6 +199,7 @@ class ProductController:
                     print(f"Upload imagem: {img.filename} -> {url}")
                     if url:
                         imagem_paths.append(url)
+                
 
 
         # Upload do vídeo
@@ -228,6 +229,7 @@ class ProductController:
                 category_id=category_id,
                 subcategory_id=subcategory_id,
                 thumbnail_path=thumbnail_path,
+                image_paths=imagem_paths,
                 quantity=quantity,
                 width=width,
                 height=height,
