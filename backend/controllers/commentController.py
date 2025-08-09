@@ -1,7 +1,7 @@
 from models.comment import Comment
 from database import db
 from datetime import datetime
-
+from models import Product
 class CommentController:
     def __init__(self):
         # Usar a sessão do Flask-SQLAlchemy direto
@@ -10,7 +10,15 @@ class CommentController:
     def get_all():
         try:
             comments = Comment.query.all()
-            return [comment.to_dict() for comment in comments]
+            result = []
+            for comment in comments:
+                # Buscar produto relacionado ao product_id do comment
+                product = Product.query.filter_by(id=comment.product_id).first()
+                comment_dict = comment.to_dict()
+                # Adicionar os dados do produto no dicionário do comentário
+                comment_dict['product'] = product.to_dict() if product else None
+                result.append(comment_dict)
+            return result
         except Exception as e:
             print(f"Erro ao buscar comentarios: {e}")
             return []

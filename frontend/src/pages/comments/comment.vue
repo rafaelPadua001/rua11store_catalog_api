@@ -1,8 +1,11 @@
 <template>
-    <v-row justify="center" align="center" class="mt-4">
-        <v-col cols="12" sm="10" md="10" lg="10" xl="6">
-            <v-card class="pa-4">
-                <v-card-title>Comments management</v-card-title>
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
+            <v-card class="pa-4" elevation="0">
+                <v-card-title class="d-flex justify-center">
+                    <h5>Comments managementComments management</h5>
+                </v-card-title>
+                <v-divider></v-divider>
                 <v-card-actions class="d-flex justify-end mb-4">
                     <v-btn color="primary" @click="newComment" class="mb-2">
                         <v-icon left>mdi-plus</v-icon>
@@ -20,8 +23,31 @@
                             class="rounded-lg"></v-img>
                         <span v-else>Sem Imagem</span>
                     </template> -->
+                    <template v-slot:item.product_name="{item}">
+                        {{ item.product.name }}
+                    </template>
+                    <template v-slot:item.created_at="{item}">
+                        {{ new Date(item.created_at).toLocaleDateString('pt-BR') }}
+                    </template>
 
+                    <template v-slot:item.updated_at="{item}">
+                        {{ new Date(item.updated_at).toLocaleDateString('pt-BR') }}
+                    </template>
+
+                    <template v-slot:item.status="{item}">
+                        <span v-if="item.status === 'pendente'">
+                            <v-chip color="primary">{{ item.status }}</v-chip>
+                        </span>
+                        <span v-else-if="item.status === 'ativo'">
+                            <v-chip color="success">{{ item.status }}</v-chip>
+                        </span>
+                        <span v-else>
+                            <v-chip color="error">{{ item.status }}</v-chip>
+                        </span>
+                     
+                    </template>
                     <!-- Exibe os ícones de ações -->
+                     
                     <template v-slot:item.actions="{ item }">
                         <v-icon small color="primary" @click="editDialog(item)">
                             mdi-pencil
@@ -47,13 +73,13 @@
                                     auto-grow />
 
                                 <!-- Produto relacionado -->
-                                <v-text-field v-model="editedComment.product_id" label="ID do Produto" required
-                                    type="number" />
+                                <v-text-field v-model="editedComment.product.name" label="ID do Produto" required
+                                    type="text" />
 
-                                <v-text-field v-model="editedComment.user_id" label="ID do Produto" required
-                                    type="number" />
+                                <v-text-field v-model="editedComment.user_id" label="ID do User" required
+                                    type="text" />
 
-                                <v-text-field v-model="editedComment.user_name" label="ID do Produto" required
+                                <v-text-field v-model="editedComment.user_name" label="User name" required
                                     type="text" />
                                 <!-- Status do comentário -->
                                 <v-select v-model="editedComment.status" :items="['ativo', 'pendente', 'removido']"
@@ -92,13 +118,15 @@ export default {
             loading: false,
             headers: [
                 { title: "ID", key: "id" },
-                { title: "User ID", key: "user_id" },
+               // { title: "User ID", key: "user_id" },
                 { title: "User Name", key: "user_name" },
-                { title: "Product ID", key: "product_id" },
+               // { title: "Product ID", key: "product_id" },
+                { title: "Product Name", key: "product_name" },
                // { title: "Title", key: "title" },
                 { title: "Comment", key: "comment" },
                 { title: "Created At", key: "created_at" },
                 { title: "Updated At", key: "updated_at" },
+                { title: "Status", key: "status" },
                 { title: "Actions", key: "actions", sortable: false }
             ],
 
@@ -125,7 +153,7 @@ export default {
             try {
                 const response = await api.get("/comments/comments", config);
                 this.comments = response.data;
-                console.log(this.comments);
+              //  console.log(this.comments);
             } catch (error) {
                 console.error("Error loading coupons:", error);
             } finally {
@@ -161,7 +189,8 @@ export default {
                     return this.comments.push(response.data.comment);
                 } else {
                     response = await api.put(`/comments/update/${this.editedComment.id}`, payload, config);
-                    Object.assign(this.comments[this.editedIndex], response.data.comments);
+                    Object.assign(this.comments[this.editedIndex], response.data);
+                    return this.commentDialog = false;
                 }
                 this.close();
             } catch (error) {
