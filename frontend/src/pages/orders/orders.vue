@@ -278,7 +278,7 @@ export default {
         // Garante que sempre será um array simples
         const ordersArray = Array.isArray(response.data) ? response.data.flat() : [];
 
-        console.log("Orders recebidos:", ordersArray);
+     //   console.log("Orders recebidos:", ordersArray);
 
         this.orders = ordersArray.map(order => {
           const items = (order.products || []).map((prod, index) => ({
