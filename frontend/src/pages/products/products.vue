@@ -298,40 +298,11 @@ export default {
         getProductImage(imagePath, productId = null) {
             // Imagem padrão se não houver caminho
             if (!imagePath) return "https://via.placeholder.com/300";
-
-            // Se já for URL completa (http ou https)
-            //if (imagePath.startsWith('http')) {
-            //    return imagePath.replace('http://', 'https://'); // Força HTTPS
-            // }
+                
 
             return imagePath.startsWith('http')
                 ? imagePath.replace('http://', 'https://') // garante HTTPS
                 : imagePath;
-
-            // Define a base URL conforme o ambiente
-            const baseUrl = window.location.hostname === 'localhost'
-                ? 'http://localhost:5000'
-                : 'https://rua11store-catalog-api-lbp7.onrender.com';
-
-            // Extrai o nome do arquivo (última parte do caminho)
-            const filename = imagePath.split('/').pop();
-
-            // Obtém o nome do produto de forma segura
-            let productName = 'produto';
-
-            // Se tiver productId, busca na lista de produtos
-            if (productId) {
-                const product = this.products.find(p => p.id === productId);
-                if (product?.name) {
-                    productName = product.name.replace(/\s+/g, '_').toLowerCase();
-                }
-            }
-            // Se estiver editando, usa o editedProduct
-            else if (this.editedProduct?.name) {
-                productName = this.editedProduct.name.replace(/\s+/g, '_').toLowerCase();
-            }
-
-            return `${baseUrl}/${imagePath}`;
         },
         async deleteProduct(productId) {
             if (!confirm("Tem certeza que deseja remover este produto permanentemente ?")) return;
