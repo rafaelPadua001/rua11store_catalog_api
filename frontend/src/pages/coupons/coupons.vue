@@ -148,7 +148,7 @@ export default {
             try {
                 const response = await api.get("/coupon/coupons", config);
                 this.coupons = response.data;
-                console.log(this.coupons);
+               // console.log(this.coupons);
             } catch (error) {
                 console.error("Error loading coupons:", error);
             } finally {
