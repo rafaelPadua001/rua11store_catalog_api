@@ -213,7 +213,7 @@ export default {
             try {
                 const response = await api.get("/products");
                 this.products = response.data;
-                console.log(this.products);
+              //  console.log(this.products);
             } catch (error) {
                 console.error("Error loading products:", error);
             } finally {
