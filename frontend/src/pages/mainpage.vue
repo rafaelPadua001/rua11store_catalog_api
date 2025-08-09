@@ -70,7 +70,7 @@
               <h4>Testimonials</h4>
               <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000" v-model="activeCommentIndex">
                 <v-carousel-item v-for="(comment, index) in comments" :key="comment.id">
-                  <v-card outlined class="mx-auto pa-2" max-width="100%" elevation="0">
+                  <v-card v-if="comment.status === 'ativo'"  class="mx-auto pa-2" max-width="100%" elevation="0">
                     <v-row no-gutters class="align-center">
                       <v-col cols="auto" class="pr-4">
                         <v-avatar size="50">
@@ -153,6 +153,7 @@ interface Comment {
   comment: string
   created_at: string
   user_name: string
+  status: string
 }
 
 

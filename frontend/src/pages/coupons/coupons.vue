@@ -1,14 +1,18 @@
 <template>
-    <v-row justify="center" align="center" class="mt-4">
-        <v-col cols="12" sm="10" md="10" lg="10" xl="6">
-            <v-card class="pa-4">
-                <v-card-title>Coupons management</v-card-title>
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
+            <v-card class="pa-4" elevation="0">
+                <v-card-title class="d-flex justify-center">
+                    <h5>Coupons management</h5>
+                </v-card-title>
                 <v-card-actions class="d-flex justify-end mb-4">
                     <v-btn color="primary" @click="newCoupon" class="mb-2">
                         <v-icon left>mdi-plus</v-icon>
                         Add Coupon
                     </v-btn>
                 </v-card-actions>
+
+                <v-divider></v-divider>
 
                 <v-data-table 
                     :headers="headers" 
@@ -144,7 +148,7 @@ export default {
             try {
                 const response = await api.get("/coupon/coupons", config);
                 this.coupons = response.data;
-                console.log(this.coupons);
+               // console.log(this.coupons);
             } catch (error) {
                 console.error("Error loading coupons:", error);
             } finally {

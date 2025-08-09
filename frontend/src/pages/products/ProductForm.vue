@@ -1,5 +1,4 @@
 <template>
-
     <v-card class="pa-4 text-center">
         <v-toolbar flat color="transparent">
             <v-toolbar-title class="headline">{{ formTitle }}</v-toolbar-title>

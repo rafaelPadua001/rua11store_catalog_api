@@ -3,6 +3,8 @@ from controllers.paymentController import PaymentController
 import os
 from models.delivery import Delivery
 from database import db
+from models import Delivery, Order, Payment
+from controllers.emailController import EmailController
 
 
 webhook_bp = Blueprint('webhook', __name__)
@@ -88,6 +90,41 @@ def handle_melhorEnvio_webhook():
     if event in event_status_map:
         delivery.status = event_status_map[event]
         db.session.commit()
+
+        #found payer email
+        payment_email = (
+            db.session.query(Payment.email)
+            .join(Order, Payment.id == Order.payment_id)
+            .filter(Order.delivery_id == delivery.id)
+            .first()
+        )
+
+        if payment_email and payment_email[0]:
+            try:
+                body_text = f"O status da sua entrega foi atualizado para: {delivery.status}"
+                html_message = f'<p style="text-align: center;">{body_text}</p>'
+
+                if event == "shipment.purchased":
+                    tracking_code = resource.get('tracking_code') or resource.get('tracking') or resource.get('tracking_number') or ""
+                    if tracking_code:
+                        rastreio_url = f"https://www.melhorrastreio.com.br/rastreamento/{tracking_code}"
+
+                        button_html = f'<div style="text-align:center; margin-top:20px;">' \
+                                        f'<a href="{rastreio_url}" style="background-color:#28a745; color:#fff; padding:12px 24px; text-decoration:none; border-radius:5px; font-weight:bold; display:inline-block;">Rastreie seu pedido</a>' \
+                                        '</div>'
+
+
+                        html_message += button_html
+
+                EmailController.send_email(
+                    recipients=[payment_email[0]],
+                    subject="Atualização no status da sua entrega",
+                    body=body_text,
+                    html = html_message
+                )
+            except Exception as e:
+                print(f"❌ Erro ao enviar email: {e}")
+
         return jsonify({"message": f"Delivery status updated to '{delivery.status}'"}), 200
       
     return jsonify({"message": f"Event '{event}' ignorado"}), 200

@@ -1,10 +1,13 @@
 <template>
     <v-card class="mx-auto justify-center" width="400">
-        <template v-slot:title>
-            <div class="text-center font-weight-black">Rua11Store</div>
-        </template>
-        <v-divider></v-divider>
+        
+        
         <v-card-text>
+            <template v-slot:title>
+            <div class="text-center" v-if="logoUrl">
+                <v-img :src="logoUrl" alt="logo" width="120" contain class="mx-auto"></v-img>
+            </div>
+        </template>
             <v-form ref="form" @submit.prevent="register">
                 <v-container>
                     <v-row justify="center">
@@ -63,7 +66,15 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from 'axios';
 
+const api = axios.create({
+    baseURL:
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://rua11store-catalog-api-lbp7.onrender.com",
+    headers: { "Content-Type": "application/json" },
+});
 
+const logoUrl = ref('');
 const router = useRouter();
 const form = ref(null);
 const loading = ref(false);
@@ -83,6 +94,16 @@ const birthDateRules = [
     (v) => /^\d{4}-\d{2}-\d{2}$/.test(v) || "Data inválida (use o formato YYYY-MM-DD)",
     (v) => isAdult(v) || "Você precisa ter pelo menos 18 anos para se registrar",
 ];
+
+onMounted(async () => {
+    try {
+        const res = await api.get('/config/config');
+        logoUrl.value = res.data.logo_url;
+    } catch (err) {
+        console.error("Erro ao carregar logo:", err);
+    }
+});
+
 
 // Função para verificar se o usuário tem 18 anos ou mais
 const isAdult = (birthDate) => {
