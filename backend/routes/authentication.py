@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, get_jwt
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jwt
 from itsdangerous import URLSafeTimedSerializer
 import sqlite3
 import datetime
@@ -110,7 +110,7 @@ def get_profile():
     try:
         # 1. Obter e validar o user_id do token
         user_id = get_jwt_identity()
-        print(f"[DEBUG] Token user_id: {user_id} (type: {type(user_id)})")  # Log para diagnóstico
+       # print(f"[DEBUG] Token user_id: {user_id} (type: {type(user_id)})")  # Log para diagnóstico
         
         if not user_id:
             return jsonify({"error": "Token inválido - ID de usuário ausente"}), 401
@@ -119,7 +119,7 @@ def get_profile():
         try:
             user_id = int(user_id)
         except (TypeError, ValueError) as e:
-            print(f"[ERROR] Falha ao converter user_id: {e}")
+           # print(f"[ERROR] Falha ao converter user_id: {e}")
             return jsonify({
                 "error": "Formato de ID inválido",
                 "details": f"O ID deve ser numérico (recebido: {user_id})"
@@ -130,7 +130,7 @@ def get_profile():
             return jsonify({"error": "ID de usuário deve ser positivo"}), 400
 
         # 4. Buscar o perfil
-        print(f"[DEBUG] Buscando perfil para user_id: {user_id}")
+        #print(f"[DEBUG] Buscando perfil para user_id: {user_id}")
         profile = get_user_profile_by_user_id(db.session, user_id)
         
         if not profile:
@@ -150,7 +150,7 @@ def get_profile():
             # "email": profile.email 
         }
         
-        print(f"[DEBUG] Perfil encontrado: {response_data}")
+       # print(f"[DEBUG] Perfil encontrado: {response_data}")
         return jsonify(response_data), 200
         
     except sqlite3.Error as e:
@@ -224,9 +224,17 @@ def login():
 
     # Criar o token JWT
     token = create_access_token(identity=str(user.id))
+    refresh_token= create_refresh_token(identity=user.id)
 
-    return jsonify({"message": "Login realizado com sucesso!", "token": token}), 200
+    return jsonify({"message": "Login realizado com sucesso!", "access_token": token, "refresh_token": refresh_token}), 200
 
+#rota refresh token 
+@auth_bp.route('/refresh', methods=['POST'])
+@jwt_required()
+def refresh():
+    current_user = get_jwt_identity()
+    new_access_token = create_access_token(identity=current_user)
+    return jsonify(access_token=new_access_token), 200
 
 # Rota de logout
 @auth_bp.route('/logout', methods=['POST'])

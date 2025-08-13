@@ -52,7 +52,13 @@ bcrypt = Bcrypt(app)
 
 # JWT
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "headers")  # Mais seguro via .env
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(
+    seconds=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", 900))
+)
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(
+    seconds=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", 2592000))
+)
+
 jwt = JWTManager(app)
 
 # Banco de dados

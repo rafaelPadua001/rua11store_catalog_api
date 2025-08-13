@@ -247,7 +247,7 @@ export default {
         async saveSeo() {
             this.loading = true;
             try {
-                const token = localStorage.getItem('user_token');
+                const token = localStorage.getItem('access_token');
 
                 if (!token) return this.$router.push('/login');
 
@@ -301,7 +301,7 @@ export default {
             if (!confirm("Tem certeza que deseja remover este item de SEO permanentemente ?")) return;
 
             try {
-                const token = localStorage.getItem('user_token')
+                const token = localStorage.getItem('access_token')
                 if (!token) return this.$router.push('/login')
 
                 await api.delete(`/seo/seo/${seoId}`, {

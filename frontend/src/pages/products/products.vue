@@ -236,7 +236,7 @@ export default {
                     return;
                 }
 
-                const token = localStorage.getItem("user_token");
+                const token = localStorage.getItem("access_token");
                 if (!token) return this.$router.push("/login");
 
 
@@ -308,7 +308,7 @@ export default {
             if (!confirm("Tem certeza que deseja remover este produto permanentemente ?")) return;
 
             try {
-                const token = localStorage.getItem('user_token')
+                const token = localStorage.getItem('access_token')
                 if (!token) return this.$router.push('/login')
 
                 await api.delete(`/products/${productId}`, {
