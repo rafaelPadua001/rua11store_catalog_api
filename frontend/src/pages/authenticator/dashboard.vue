@@ -141,6 +141,12 @@ const api = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
+function isValidJWT(token) {
+  if (!token) return false;
+  const parts = token.split('.');
+  return parts.length === 3;
+}
+
 export default {
     data() {
         return {
@@ -197,12 +203,13 @@ export default {
         },
         async waitForToken(retries = 10, delay = 300) {
             for (let i = 0; i < retries; i++) {
-                const token = localStorage.getItem('user_token');
-                if (token) return token;
+                const token = localStorage.getItem('access_token');
+                if (token && isValidJWT(token)) return token;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
             return null; // Se não encontrou o token após as tentativas
         },
+        
         async getProfileUser() {
             try {
                 const token = await this.waitForToken();

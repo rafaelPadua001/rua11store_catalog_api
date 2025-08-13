@@ -201,7 +201,7 @@ export default {
         async savePage() {
             this.loading = true;
             try {
-                const token = localStorage.getItem('user_token');
+                const token = localStorage.getItem('access_token');
 
                 if (!token) return this.$router.push('/login');
 
@@ -236,7 +236,7 @@ export default {
             if (!confirm("Tem certeza que deseja remover esta página permanentemente ?")) return;
 
             try {
-                const token = localStorage.getItem('user_token')
+                const token = localStorage.getItem('access_token')
                 if (!token) return this.$router.push('/login')
 
                 await api.delete(`/pages/pages/${pageId}`, {
@@ -248,7 +248,7 @@ export default {
                 //Remove product from local list
                 this.pages = this.pages.filter(page => page.id !== pageId);
 
-                this.$toast.success('Produto removido com sucesso');
+                //this.$toast.success('Produto removido com sucesso');
             }
             catch (error) {
                 console.log("Error deleting product:", error);

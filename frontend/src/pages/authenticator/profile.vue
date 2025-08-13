@@ -71,12 +71,12 @@ const fileInput = ref(null);
 
 // Função para buscar o perfil do usuário
 const fetchUserProfile = async () => {
-  const token = localStorage.getItem('user_token');
+  const token = localStorage.getItem('access_token');
   console.log("Token armazenado:", token); // Verificando o token armazenado
 
   if (!token) {
     console.error('Nenhum token encontrado. Faça login novamente.');
-    return;
+    return false;
   }
 
   try {
@@ -131,7 +131,7 @@ const uploadAvatar = async (event) => {
   const formData = new FormData();
   formData.append('avatar', file);
 
-  const token = localStorage.getItem('user_token');
+  const token = localStorage.getItem('access_token');
 
   if (!token) {
     console.error('Nenhum token encontrado. Faça login novamente.');

@@ -137,7 +137,7 @@ export default {
     methods: {
         async loadCoupons() {
             this.loading = true;
-            const token = localStorage.getItem("user_token");
+            const token = localStorage.getItem("access_token");
             if (!token) return this.$router.push("/login");
 
             const config = {
@@ -183,7 +183,7 @@ export default {
                 formData.append('image', this.editedCoupon.image);
             }
 
-            const token = localStorage.getItem("user_token");
+            const token = localStorage.getItem("access_token");
             if (!token) return this.$router.push("/login");
 
             const config = {
@@ -244,7 +244,7 @@ export default {
         deleteCoupon(item) {
             if (!confirm(`Deseja realmente deletar o cupom ${item.title}?`)) return;
 
-            const token = localStorage.getItem("user_token");
+            const token = localStorage.getItem("access_token");
             if (!token) return this.$router.push("/login");
 
             const config = {

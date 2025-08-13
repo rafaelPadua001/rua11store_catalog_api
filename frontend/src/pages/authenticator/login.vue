@@ -132,7 +132,8 @@ const login = async () => {
 
 
             if (response.data.message == "Login realizado com sucesso!") {
-                localStorage.setItem('user_token', response.data.token)
+                localStorage.setItem('access_token', response.data.access_token)
+                localStorage.setItem('refresh_token', response.data.refresh_token)
                 window.dispatchEvent(new Event("storage"));
 
                 return router.push('/authenticator/dashboard');
@@ -140,7 +141,7 @@ const login = async () => {
         } catch (error) {
             console.log('Erro no login:', error);
             alert('Credenciais inválidas ou erro no servidor');
-            return;
+            return false;
         }
         finally {
             loading.value = false;

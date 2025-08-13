@@ -137,13 +137,13 @@ const snackbar = ref({
 
 
 const checkAuth = () => {
-  isAuthenticated.value = !!localStorage.getItem('user_token');
+  isAuthenticated.value = !!localStorage.getItem('access_token');
   if (!isAuthenticated.value) {
     localStorage.removeItem('user_id');
   } else {
     const userId = localStorage.getItem('user_id');
     if (!userId) {
-      const token = localStorage.getItem('user_token');
+      const token = localStorage.getItem('access_token');
       const payload = parseJwt(token);
       if (payload && payload.user_id) {
         localStorage.setItem('user_id', payload.user_id);
@@ -197,7 +197,7 @@ const navigateTo = (path) => {
 
 
 const fetchNotifications = async () => {
-  const token = localStorage.getItem('user_token');
+  const token = localStorage.getItem('access_token');
 
   if (!token) {
     console.warn("Usuário não autenticado, não é possível buscar notificações.");
@@ -248,7 +248,7 @@ const fetchNotifications = async () => {
 }
 
 const markAsRead = async (notificationId) => {
-  const token = localStorage.getItem('user_token');
+  const token = localStorage.getItem('access_token');
 
   if (!token) {
     console.warn("Usuário não autenticado, não é possível marcar notificações como lidas.");
@@ -279,7 +279,7 @@ const markAsRead = async (notificationId) => {
 
 
 const logout = async () => {
-  const token = localStorage.getItem('user_token');
+  const token = localStorage.getItem('access_token');
 
   if (!token) {
     alert("Você já está deslogado.");
@@ -300,7 +300,7 @@ const logout = async () => {
     );
 
     if (response.status === 200) {
-      localStorage.removeItem('user_token');
+      localStorage.removeItem('access_token');
       localStorage.removeItem('user_id');
       window.dispatchEvent(new Event('storage'));
       alert('Logout realizado com sucesso!');
@@ -310,7 +310,7 @@ const logout = async () => {
     console.error('Erro no logout:', error.response?.data || error.message);
 
     if (error.response?.status === 401 || error.response?.status === 422) {
-      localStorage.removeItem('user_token');
+      localStorage.removeItem('access_token');
       localStorage.removeItem('user_id');
       window.dispatchEvent(new Event('storage'));
     }

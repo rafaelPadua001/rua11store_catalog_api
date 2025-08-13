@@ -3,15 +3,15 @@
         <v-col cols="12" sm="12" md="10" lg="10" xl="6">
             <v-card class="pa-4" elevation="0">
                 <v-card-title class="d-flex justify-center">
-                    <h5>Comments managementComments management</h5>
+                    <h5>Comments management</h5>
                 </v-card-title>
                 <v-divider></v-divider>
-                <v-card-actions class="d-flex justify-end mb-4">
+               <!-- <v-card-actions class="d-flex justify-end mb-4">
                     <v-btn color="primary" @click="newComment" class="mb-2">
                         <v-icon left>mdi-plus</v-icon>
                         Add Coupon
                     </v-btn>
-                </v-card-actions>
+                </v-card-actions>-->
 
                 <v-data-table :headers="headers" :items="comments" :items-per-page="10" class="elevation-1"
                     item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading coupons...">
@@ -142,7 +142,7 @@ export default {
     methods: {
         async loadComments() {
             this.loading = true;
-            const token = localStorage.getItem("user_token");
+            const token = localStorage.getItem("access_token");
             if (!token) return this.$router.push("/login");
 
             const config = {
@@ -170,7 +170,7 @@ export default {
         },
         async submitComment() {
             try {
-                const token = localStorage.getItem('user_token');
+                const token = localStorage.getItem('access_token');
 
                 if (!token) return this.$router.push('/login');
 
@@ -219,7 +219,7 @@ export default {
         deleteComment(item) {
             if (!confirm(`Deseja realmente deletar o cupom ${item.comment}?`)) return;
     
-            const token = localStorage.getItem("user_token");
+            const token = localStorage.getItem("access_token");
             if (!token) return this.$router.push("/login");
     
             const config = {
