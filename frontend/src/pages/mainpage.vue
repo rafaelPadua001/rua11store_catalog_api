@@ -94,6 +94,8 @@
                               :src="product.thumbnail_path"
                               :alt="product.seo?.slug"
                               max-width="100%"
+                              height="100%"
+                              max-height="100%"
                               class="cursor-pointer"
                               cover
                             />
