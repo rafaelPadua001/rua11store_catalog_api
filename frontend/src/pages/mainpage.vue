@@ -2,24 +2,13 @@
   <v-container class="fill-height">
     <v-responsive class="align-center fill-height ms-0 me-auto" max-width="100%">
       <div v-if="!loadFailed && pageContent" class="px-2 px-sm-4 align-center">
-        
+
         <!-- HERO -->
         <v-row justify="center" class="my-0">
           <v-col>
-            <v-card
-              elevation="0"
-              :color="pageBackgroundColor"
-              class="rounded-lg overflow-hidden"
-             v-if="pageBackgroundColor || pageImage"
-            >
-              <v-img
-                :src="pageImage"
-                :alt="pageTitle"
-                max-height="320"
-                height="100%"
-                class="mx-auto d-block"
-                
-              />
+            <v-card elevation="0" :color="pageBackgroundColor" class="rounded-lg overflow-hidden"
+              v-if="pageBackgroundColor || pageImage">
+              <v-img :src="pageImage" :alt="pageTitle" max-height="320" height="100%" class="mx-auto d-block" />
               <v-card-text class="py-0 text-center">
                 <div class="text-h6 text-sm-h4 font-weight-bold">
                   {{ pageHeroTitle }}
@@ -30,23 +19,11 @@
               </v-card-text>
 
               <!-- Botões Hero -->
-              <v-card-text
-                v-if="pageHeroButtons && pageHeroButtons.length >= 1"
-                class="d-flex justify-center flex-wrap gap-2 py-0"
-              >
+              <v-card-text v-if="pageHeroButtons && pageHeroButtons.length >= 1"
+                class="d-flex justify-center flex-wrap gap-2 py-0">
                 <v-row justify="center" no-gutters>
-                  <v-col
-                    cols="12"
-                    sm="auto"
-                    v-for="(button, index) in pageHeroButtons"
-                    :key="index"
-                  >
-                    <v-btn
-                      class="text-caption"
-                      block
-                      :color="button.heroButtonBackgroundColor"
-                      :href="button.url"
-                    >
+                  <v-col cols="12" sm="auto" v-for="(button, index) in pageHeroButtons" :key="index">
+                    <v-btn class="text-caption" block :color="button.heroButtonBackgroundColor" :href="button.url">
                       <v-icon :icon="button.icon.value" class="mr-1"></v-icon>
                       {{ button.label }}
                     </v-btn>
@@ -61,41 +38,22 @@
         <div class="mt-0 mb-0 d-flex justify-center flex-wrap">
           <v-row justify="center" class="my-2">
             <v-col cols="12" sm="12" md="10" lg="6">
-              <v-carousel
-                :show-arrows="false"
-                cycle
-                hide-delimiters
-                max-width="100%"
-                interval="750000"
-                v-model="activeIndex"
-              >
+              <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" interval="750000"
+                v-model="activeIndex">
                 <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
                   <v-row justify="center" class="pa-2" dense>
-                    <v-col
-                      v-for="product in chunk"
-                      :key="product.name"
-                      cols="12"
-                      sm="6"
-                      md="6"
-                    >
+                    <v-col v-for="product in chunk" :key="product.name" cols="12" sm="6" md="6">
                       <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
                         <v-card class="my-2" elevation="0">
-                          <a
-                            :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <v-card-title class="text-right">
-                              <v-chip>
+                          <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
+                            target="_blank" rel="noopener noreferrer">
+
+                            <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer" cover>
+                              <v-chip class="ma-2" color="primary" text-color="white"
+                                style="position: absolute; top: 0; right: 0;">
                                 <strong>R$ {{ product.price ?? '0,00' }}</strong>
                               </v-chip>
-                            </v-card-title>
-                            <v-img
-                              :src="product.thumbnail_path"
-                              :alt="product.seo?.slug"
-                              class="cursor-pointer"
-                              cover
-                            />
+                            </v-img>
                           </a>
                         </v-card>
                       </template>
@@ -113,20 +71,9 @@
         <div class="d-flex justify-center flex-wrap">
           <v-row justify="center">
             <v-col cols="12" sm="10" md="8" lg="6">
-              <v-carousel
-                cycle
-                hide-delimiters
-                :show-arrows="false"
-                interval="7000"
-                v-model="activeCommentIndex"
-              >
+              <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000" v-model="activeCommentIndex">
                 <v-carousel-item v-for="(comment, index) in comments" :key="comment.id">
-                  <v-card
-                    v-if="comment.status === 'ativo'"
-                    class="mx-auto pa-2"
-                    max-width="100%"
-                    elevation="0"
-                  >
+                  <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-2" max-width="100%" elevation="0">
                     <v-row no-gutters class="align-center">
                       <v-col cols="auto" class="pr-4">
                         <v-avatar size="50">
@@ -134,9 +81,7 @@
                         </v-avatar>
                       </v-col>
                       <v-col>
-                        <div
-                          style="font-style: italic; font-size: 16px; margin-top: 4px; color: gray;"
-                        >
+                        <div style="font-style: italic; font-size: 16px; margin-top: 4px; color: gray;">
                           <p>
                             "{{ comment.comment }}" -
                             <strong style="font-size: 12px; color: black">
@@ -165,15 +110,8 @@
     </v-responsive>
 
     <!-- WhatsApp -->
-    <v-btn
-      color="deep-purple"
-      dark
-      class="whatsapp-btn"
-      href="https://wa.me/556191865680"
-      target="_blank"
-      elevation="10"
-      icon
-    >
+    <v-btn color="deep-purple" dark class="whatsapp-btn" href="https://wa.me/556191865680" target="_blank"
+      elevation="10" icon>
       <v-icon size="28">mdi-whatsapp</v-icon>
     </v-btn>
   </v-container>
