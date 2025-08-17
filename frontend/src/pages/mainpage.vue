@@ -6,7 +6,7 @@
           <v-col>
             <v-card elevation="0" :color="pageBackgroundColor" width="100%"
                 class="rounded-b-lg rounded-t-0 overflow-hidden" style="height: 400px;" v-if="pageBackgroundColor || pageImage">
-              <v-img  :src="pageImage" :alt="pageTitle" height="250" contain
+              <v-img  :src="pageImage" :alt="pageTitle" height="320" contain
                 class="mx-auto d-block mt-1" />
               <v-card-text class="py-0">
                 <v-row justify="center" no-gutters>
