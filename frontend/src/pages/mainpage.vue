@@ -6,7 +6,7 @@
         <!-- HERO -->
         <v-row justify="center" class="my-0">
           <v-col>
-            <v-card elevation="0" :color="pageBackgroundColor" class="rounded-lg overflow-hidden"
+            <v-card elevation="4" :color="pageBackgroundColor" class="rounded-lg overflow-hidden"
               v-if="pageBackgroundColor || pageImage">
               <v-img :src="pageImage" :alt="pageTitle" max-height="320" height="100%" class="mx-auto d-block" />
               <v-card-text class="py-0 text-center">
@@ -22,11 +22,15 @@
               <v-card-text v-if="pageHeroButtons && pageHeroButtons.length >= 1"
                 class="d-flex justify-center flex-wrap gap-2 py-0">
                 <v-row justify="center" no-gutters>
-                  <v-col cols="12" sm="auto" v-for="(button, index) in pageHeroButtons" :key="index">
-                    <v-btn class="text-caption" block :color="button.heroButtonBackgroundColor" :href="button.url">
-                      <v-icon :icon="button.icon.value" class="mr-1"></v-icon>
-                      {{ button.label }}
-                    </v-btn>
+                  <v-col v-for="(button, index) in pageHeroButtons" :key="index">
+                    
+                      <v-btn class="mx-0 text-caption hover-btn" size="x-large" target="_blank" block
+                        :color="button.heroButtonBackgroundColor" :href="button.url" variant="elevated">
+                        <v-icon :icon="button.icon.value" class="mr-1" size="large"></v-icon>
+                        {{ button.label }}
+                      </v-btn>
+                    
+
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -275,7 +279,15 @@ onMounted(() => {
   margin-left: 1px !important;
   margin-right: 1px !important;
 }
+.hover-btn {
+  transition: transform 0.2s, box-shadow 0.2s; /* animação suave */
+}
 
+.hover-btn:hover {
+  transform: translateY(-3px); /* leve "subida" do botão */
+  box-shadow: 0px 8px 25px rgba(92, 92, 92, 0.3); /* sombra maior no hover */
+  opacity: 0.90
+}
 .whatsapp-btn {
   position: fixed;
   bottom: 50px;
