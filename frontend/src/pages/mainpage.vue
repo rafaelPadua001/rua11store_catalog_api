@@ -72,7 +72,7 @@
                                 <v-img 
                                   :src="product.thumbnail_path"
                                   :alt="product.seo?.slug"
-                                  width="300"
+                                  width="290"
                                   height="300"
                                   class="cursor-pointer"
                                   contain 
