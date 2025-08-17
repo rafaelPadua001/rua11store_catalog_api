@@ -23,7 +23,7 @@
               <v-card-text v-if="pageHeroButtons && pageHeroButtons.length >= 1" class="d-flex justify-center gap-2 py-0">
                 <v-row justify='center' no-gutters>
                   <v-col cols="auto" v-for="(button, index) in pageHeroButtons" :key="index">
-                    <v-btn class=" text-caption" :color="button.heroButtonBackgroundColor">
+                    <v-btn class=" text-caption" :color="button.heroButtonBackgroundColor"  :href="button.url">
                       <v-icon :icon="button.icon.value"></v-icon>
                       {{ button.label }}
                     </v-btn>
@@ -72,7 +72,7 @@
                                 <v-img 
                                   :src="product.thumbnail_path"
                                   :alt="product.seo?.slug"
-                                  width="290"
+                                  width="29 0"
                                   height="300"
                                   class="cursor-pointer"
                                   contain 
