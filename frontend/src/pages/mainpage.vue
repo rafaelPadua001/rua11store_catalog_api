@@ -23,25 +23,10 @@
               <v-card-text v-if="pageHeroButtons && pageHeroButtons.length >= 1" class="d-flex justify-center gap-2 py-0">
                 <v-row justify='center' no-gutters>
                   <v-col cols="auto" v-for="(button, index) in pageHeroButtons" :key="index">
-                    <v-btn class=" text-caption" :color="button.heroButtonBackgroundColor">
+                    <v-btn class=" text-caption" :color="button.heroButtonBackgroundColor"  :href="button.url">
                       <v-icon :icon="button.icon.value"></v-icon>
                       {{ button.label }}
                     </v-btn>
-                   <!-- <v-btn class="mx-1 text-caption" color="black" size="small"
-                      href="https://example.com/download-ios-app.apk" target="_blank" disabled>
-                      <v-icon class="mr-0" size="large">mdi-apple</v-icon>
-                      App iOS
-                    </v-btn>
-                    <v-btn class="mx-1 text-caption" color="black" size="small"
-                      href="https://example.com/download-android-app.apk" target="_blank">
-                      <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
-                      App Android
-                    </v-btn>
-                    <v-btn class="mx-1 text-caption" color="primary" size="small"
-                      href="https://rua11store-web.vercel.app/" target="_blank">
-                      <v-icon class="mr-0" size="large">mdi-store</v-icon>
-                      Acessar Loja
-                    </v-btn>-->
                   </v-col>
                 </v-row>
 
