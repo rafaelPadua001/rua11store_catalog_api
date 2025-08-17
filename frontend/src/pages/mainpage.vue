@@ -39,7 +39,7 @@
         </v-row>
 
         <!-- Produtos -->
-        <div class="mt-0 mb-0 d-flex justify-center flex-wrap">
+        <div class="mt-14 d-flex justify-center flex-wrap">
           <v-row justify="center" class="my-2">
             <v-col cols="12" sm="12" md="10" lg="6">
               <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" interval="750000"
