@@ -67,7 +67,7 @@
                                 <v-img 
                                   :src="product.thumbnail_path"
                                   :alt="product.seo?.slug"
-                                  width="200"
+                                  width="170"
                                   max-width="100%"
                                   height="250"
                                   max-height="100%"
@@ -78,7 +78,7 @@
                             <v-card-text>
                                 <v-row justify="center" no-gutters>
                                   <v-col cols="auto">
-                                    {{ product.name.length > 20 ? product.name.slice(0, 30) + '...' : product.name }} - <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                                    {{ product.name.length > 30 ? product.name.slice(0, 10) + '...' : product.name }} - <strong>R$ {{ product.price ?? '0,00' }}</strong>
                                   </v-col>
                                 </v-row>
                                 
