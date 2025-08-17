@@ -4,56 +4,88 @@
       <div v-if="!loadFailed && pageContent" class="px-2 px-sm-4 align-center">
         <v-row justify="center" class="my-4">
           <v-col>
-            <v-img v-if="logoImage" :src="logoImage" :alt="pageTitle" width="175" height="175" contain
-              class="mb-n4 mx-auto d-block" />
+            <v-card elevation="0" :color="pageBackgroundColor" width="100%"
+                class="rounded-b-lg rounded-t-0 overflow-hidden" style="height: 400px;" v-if="pageBackgroundColor || pageImage">
+              <v-img  :src="pageImage" :alt="pageTitle" height="250" contain
+                class="mx-auto d-block mt-1" />
+              <v-card-text class="py-0">
+                <v-row justify="center" no-gutters>
+                  <v-col cols="auto">
+                    {{ pageHeroTitle }}
+                  </v-col>
+                </v-row no-gutters>
+                <v-row justify="center" >
+                  <v-col cols="auto">
+                    {{ pageHeroSubTitle }}
+                  </v-col>
+                </v-row>
+              </v-card-text>
+              <v-card-text v-if="pageHeroButtons && pageHeroButtons.length >= 1" class="d-flex justify-center gap-2 py-0">
+                <v-row justify='center' no-gutters>
+                  <v-col cols="auto" v-for="(button, index) in pageHeroButtons" :key="index">
+                    <v-btn class=" text-caption" :color="button.heroButtonBackgroundColor">
+                      <v-icon :icon="button.icon.value"></v-icon>
+                      {{ button.label }}
+                    </v-btn>
+                   <!-- <v-btn class="mx-1 text-caption" color="black" size="small"
+                      href="https://example.com/download-ios-app.apk" target="_blank" disabled>
+                      <v-icon class="mr-0" size="large">mdi-apple</v-icon>
+                      App iOS
+                    </v-btn>
+                    <v-btn class="mx-1 text-caption" color="black" size="small"
+                      href="https://example.com/download-android-app.apk" target="_blank">
+                      <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
+                      App Android
+                    </v-btn>
+                    <v-btn class="mx-1 text-caption" color="primary" size="small"
+                      href="https://rua11store-web.vercel.app/" target="_blank">
+                      <v-icon class="mr-0" size="large">mdi-store</v-icon>
+                      Acessar Loja
+                    </v-btn>-->
+                  </v-col>
+                </v-row>
 
+              </v-card-text>
+
+            </v-card>
           </v-col>
         </v-row>
-
-        <v-row>
-          <v-col>
-            <div class="mt-0 mb-8 d-flex justify-center flex-wrap">
-              <v-row justify="center">
-                <v-col cols="12" sm="8" md="10" class="d-flex justify-center px-2">
-                  <!-- seus botões aqui -->
-                  <v-btn class="mx-0 text-caption" color="black" size="small"
-                    href="https://example.com/download-ios-app.apk" target="_blank" disabled>
-                    <v-icon class="mr-0" size="large">mdi-apple</v-icon>
-                    App iOS
-                  </v-btn>
-                  <v-btn class="mx-0 text-caption" color="black" size="small"
-                    href="https://example.com/download-android-app.apk" target="_blank">
-                    <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
-                    App Android
-                  </v-btn>
-                  <v-btn class="mx-0 text-caption" color="primary" size="small"
-                    href="https://rua11store-web.vercel.app/" target="_blank">
-                    <v-icon class="mr-0" size="large">mdi-store</v-icon>
-                    Acessar Loja
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </div>
-          </v-col>
-        </v-row>
-
-
         <div class="mt-0 mb-1 d-flex justify-center flex-wrap">
           <v-row justify="center" class="my-2">
             <v-col cols="12" sm="10" md="8" lg="6">
-              <v-carousel :show-arrows="false" cycle hide-delimiters height="250" interval="500000"
+              <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%"  interval="750000"
                 v-model="activeIndex">
                 <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
                   <div style="display: flex; justify-content: center; gap: 1px;">
                     <template v-for="product in chunk" :key="product.name">
-                      <div style="max-width: 200px; max-height: 200px; flex-shrink: 0;">
+                      <div style=" flex-shrink: 0;">
                         <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
-                          <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
-                            target="_blank" rel="noopener noreferrer" style="display: block;">
-                            <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" width="150" height="150"
-                              contain class="cursor-pointer" />
-
-                          </a>
+                          
+                            <v-card class="my-2" elevation="0">
+                              <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
+                                target="_blank" rel="noopener noreferrer" style="display: block;">
+                                <v-img 
+                                  :src="product.thumbnail_path"
+                                  :alt="product.seo?.slug"
+                                  width="200"
+                                  max-width="100%"
+                                  height="300"
+                                  max-height="100%"
+                                  class="cursor-pointer"
+                                  cover 
+                                />
+                             </a>  
+                            <v-card-text>
+                                <v-row justify="center" no-gutters>
+                                  <v-col cols="auto">
+                                    {{product.name}} - <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                                  </v-col>
+                                </v-row>
+                                
+                              </v-card-text>
+                            </v-card>
+                            
+                         
                         </template>
                       </div>
                     </template>
@@ -64,11 +96,12 @@
           </v-row>
         </div>
         <!-- Carousel Comentários -->
+        <h3>Testimonials</h3>
+        <v-divider></v-divider>
         <div class="d-flex justify-center flex-wrap">
           <v-row justify="center">
             <v-col cols="12" sm="10" md="8" lg="6">
-              <h4>Testimonials</h4>
-              <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000" v-model="activeCommentIndex">
+             <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000" v-model="activeCommentIndex">
                 <v-carousel-item v-for="(comment, index) in comments" :key="comment.id">
                   <v-card v-if="comment.status === 'ativo'"  class="mx-auto pa-2" max-width="100%" elevation="0">
                     <v-row no-gutters class="align-center">
@@ -134,11 +167,17 @@ const slug = (route.params as any).slug
 const loadFailed = ref(false)
 const pageTitle = ref('')
 const pageContent = ref('')
+const pageHeroTitle = ref('')
+const pageHeroSubTitle = ref('')
+const pageBackgroundColor = ref('')
+const pageImage = ref('')
+const pageHeroButtons = ref<any[]>([])
 const slowServer = ref(false)
 
 interface Product {
   name: string
   thumbnail_path: string
+  price: number
   seo?: {
     slug: string
     meta_title?: string
@@ -194,6 +233,13 @@ async function loadComponentFromAPI() {
       const pageResponse = await api.get(`/pages/pages/${encodedPageName}`)
       pageTitle.value = pageResponse.data.title
       pageContent.value = pageResponse.data.content
+      pageHeroTitle.value = pageResponse.data.hero_title
+      pageHeroSubTitle.value = pageResponse.data.hero_subtitle
+      pageBackgroundColor.value = pageResponse.data.hero_background_color
+      pageImage.value = pageResponse.data.hero_image
+      pageHeroButtons.value = pageResponse.data.hero_buttons
+
+      console.log(pageResponse.data);
       pageId = pageResponse.data.id
     }
 

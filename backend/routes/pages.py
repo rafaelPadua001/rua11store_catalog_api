@@ -14,20 +14,35 @@ def get_page(page_id):
     if page:
         return jsonify({
             "id": page.id,
+            "name": page.name,
             "title": page.title,
-            "content": page.content}), 200
+            "content": page.content,
+            "hero_title": page.hero_title,
+            "hero_subtitle": page.hero_subtitle,
+            "hero_image": page.hero_image,
+            "hero_background_color": page.hero_background_color,
+            "hero_buttons": page.hero_buttons,
+            "carousel_image": page.carousel_images,
+        }), 200
+            
     else:
         return jsonify({"error": "Page not found"}), 404
     
-@pages_bp.route("/pages/<string:page_name>", methods=["GET"])
-def get_page_name(page_name):
-    print(page_name)
-    page = PageController.get_page_by_name(page_name)
+@pages_bp.route("/pages/<string:page_title>", methods=["GET"])
+def get_page_name(page_title):
+    page = PageController.get_page_by_title(page_title)
     if page:
         return jsonify({
             "id": page.id,
+            "name": page.name,
             "title": page.title,
-            "content": page.content
+            "content": page.content,
+             "hero_title": page.hero_title,
+            "hero_subtitle": page.hero_subtitle,
+            "hero_image": page.hero_image,
+            "hero_background_color": page.hero_background_color,
+            "hero_buttons": page.hero_buttons,
+            "carousel_image": page.carousel_images,
         }), 200
     else:
         return jsonify({"error": "Página não encontrada"}), 404
