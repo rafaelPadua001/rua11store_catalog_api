@@ -50,10 +50,10 @@
             </v-card>
           </v-col>
         </v-row>
-        <div class="mt-0 mb-1 d-flex justify-center flex-wrap">
+        <div class="mt-0 mb-0 d-flex justify-center flex-wrap">
           <v-row justify="center" class="my-2">
-            <v-col cols="12" sm="10" md="8" lg="6">
-              <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%"  interval="750000"
+            <v-col cols="12" sm="12" md="10" lg="6">
+              <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" interval="750000"
                 v-model="activeIndex">
                 <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
                   <div style="display: flex; justify-content: center; gap: 1px;">
@@ -64,25 +64,28 @@
                             <v-card class="my-2" elevation="0">
                               <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
                                 target="_blank" rel="noopener noreferrer" style="display: block;">
+                                <v-card-title class="text-right">
+                                  <v-chip>
+                                    <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                                  </v-chip>
+                                </v-card-title>
                                 <v-img 
                                   :src="product.thumbnail_path"
                                   :alt="product.seo?.slug"
-                                  width="170"
-                                  max-width="100%"
-                                  height="250"
-                                  max-height="100%"
+                                  width="300"
+                                  height="300"
                                   class="cursor-pointer"
-                                  cover 
+                                  contain 
                                 />
                              </a>  
-                            <v-card-text>
+                            <!-- <v-card-text>
                                 <v-row justify="center" no-gutters>
-                                  <v-col cols="auto">
-                                    {{ product.name.length > 30 ? product.name.slice(0, 10) + '...' : product.name }} - <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                                  <v-col cols="12">
+                                    {{ product.name.length > 15 ? product.name.slice(0, 20) + '...' : product.name }}
                                   </v-col>
                                 </v-row>
                                 
-                              </v-card-text>
+                              </v-card-text>-->
                             </v-card>
                             
                          
