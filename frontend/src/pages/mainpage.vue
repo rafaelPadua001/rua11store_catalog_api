@@ -23,13 +23,13 @@
                 class="d-flex justify-center flex-wrap gap-2 py-0">
                 <v-row justify="center" no-gutters>
                   <v-col v-for="(button, index) in pageHeroButtons" :key="index">
-                    
-                      <v-btn class="mx-0 text-caption hover-btn" size="x-large" target="_blank" block
-                        :color="button.heroButtonBackgroundColor" :href="button.url" variant="elevated">
-                        <v-icon :icon="button.icon.value" class="mr-1" size="large"></v-icon>
-                        {{ button.label }}
-                      </v-btn>
-                    
+
+                    <v-btn class="mx-0 text-caption hover-btn" size="x-large" target="_blank" block
+                      :color="button.heroButtonBackgroundColor" :href="button.url" variant="elevated">
+                      <v-icon :icon="button.icon.value" class="mr-1" size="large"></v-icon>
+                      {{ button.label }}
+                    </v-btn>
+
 
                   </v-col>
                 </v-row>
@@ -39,7 +39,7 @@
         </v-row>
 
         <!-- Produtos -->
-        <div class="mt-0 mb-0 d-flex justify-center flex-wrap">
+        <div class="mt-14 d-flex justify-center flex-wrap">
           <v-row justify="center" class="my-2">
             <v-col cols="12" sm="12" md="10" lg="6">
               <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" interval="750000"
@@ -48,17 +48,21 @@
                   <v-row justify="center" class="pa-2" dense>
                     <v-col v-for="product in chunk" :key="product.name" cols="12" sm="6" md="6">
                       <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
-                        <v-card class="my-2" elevation="0">
-                          <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
-                            target="_blank" rel="noopener noreferrer">
+                        <v-card elevation="0">
+                          <v-card-text>
+                            <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
+                              target="_blank" rel="noopener noreferrer">
 
-                            <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer" cover>
-                              <v-chip class="ma-2" color="primary" text-color="white"
-                                style="position: absolute; top: 0; right: 0;">
-                                <strong>R$ {{ product.price ?? '0,00' }}</strong>
-                              </v-chip>
-                            </v-img>
-                          </a>
+                              <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer"
+                                cover>
+                                <v-chip class="ma-0" color="primary" text-color="white"
+                                  style="position: absolute; top: 0; right: 0;">
+                                  <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                                </v-chip>
+                              </v-img>
+                            </a>
+                          </v-card-text>
+
                         </v-card>
                       </template>
                     </v-col>
@@ -70,17 +74,17 @@
         </div>
 
         <!-- Carousel Comentários -->
-        <h3 class="text-center mt-6">Testimonials</h3>
+        <h3 class="text-center">Testimonials</h3>
         <v-divider></v-divider>
         <div class="d-flex justify-center flex-wrap">
           <v-row justify="center">
             <v-col cols="12" sm="10" md="8" lg="6">
               <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000" v-model="activeCommentIndex">
                 <v-carousel-item v-for="(comment, index) in comments" :key="comment.id">
-                  <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-2" max-width="100%" elevation="0">
+                  <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" max-width="100%" elevation="0">
                     <v-row no-gutters class="align-center">
                       <v-col cols="auto" class="pr-4">
-                        <v-avatar size="50">
+                        <v-avatar size="60">
                           <v-img :src="comment.avatar_url" alt="Avatar" />
                         </v-avatar>
                       </v-col>
@@ -279,15 +283,20 @@ onMounted(() => {
   margin-left: 1px !important;
   margin-right: 1px !important;
 }
+
 .hover-btn {
-  transition: transform 0.2s, box-shadow 0.2s; /* animação suave */
+  transition: transform 0.2s, box-shadow 0.2s;
+  /* animação suave */
 }
 
 .hover-btn:hover {
-  transform: translateY(-3px); /* leve "subida" do botão */
-  box-shadow: 0px 8px 25px rgba(92, 92, 92, 0.3); /* sombra maior no hover */
+  transform: translateY(-3px);
+  /* leve "subida" do botão */
+  box-shadow: 0px 8px 25px rgba(92, 92, 92, 0.3);
+  /* sombra maior no hover */
   opacity: 0.90
 }
+
 .whatsapp-btn {
   position: fixed;
   bottom: 50px;
