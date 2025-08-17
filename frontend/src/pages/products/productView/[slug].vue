@@ -1,76 +1,88 @@
 <template>
   <v-container class="fill-height">
     <v-row justify="center">
-      <v-col cols="12" sm="12" md="8" lg="10" xl="6">
+      <v-col cols="12" sm="10" md="8" lg="10" xl="6">
         <v-card class="pa-2">
-
           <!-- Imagem do produto -->
-          <v-img
-            :src="product.thumbnail_path"
-            :alt="product?.seo?.slug"
-            height="250"
-            contain
-            class="mb-4"
-          ></v-img>
+
 
           <!-- Nome e preço -->
           <v-card-title class="d-flex justify-start">
-            <h4 style="font-size: 14px;">
-              {{ product.name }} - R$ {{ product.price }}
-            </h4>
+            <h3 style="font-size: 18px;">
+              {{ product.name }}
+            </h3>
           </v-card-title>
+       
+          <v-divider></v-divider>
+          <v-card-subtitle class="text-h6">
+            R$ {{ product.price }}
+          </v-card-subtitle>
 
+          <!-- <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
+            <v-sheet class="overflow-hidden" max-width="700" rounded="xl">
+              <v-carousel
+                v-model="currentIndex"
+                direction="vertical"
+                height="400"
+                progress="red"
+                vertical-arrows="left"
+                vertical-delimiters="right"
+                hide-delimiters-backgrund
+              >
+                <v-carousel-item
+                  v-for="(img, index) in product.images"
+                ></v-carousel-item>
+              </v-carousel>
+            </v-sheet>
+          </v-defaults-provider> -->
+          <v-img :src="product.thumbnail_path" :alt="product?.seo?.slug" max-height="500" contain>
+<template v-slot:placeholder>
+      <div class="d-flex align-center justify-center fill-height">
+        <v-progress-circular
+          color="grey-lighten-4"
+          indeterminate
+        ></v-progress-circular>
+      </div>
+    </template>
+          </v-img>
           <!-- Descrição e palavras-chave -->
-          <v-card-text class="text-justify">
-            <div><p>{{ product.description }}</p></div>
+          <!--<v-card-text class="text-justify">
+            <v-row v-if="product?.seo?.meta_keywords">
+              <v-col v-for="(keyword, index) in product.seo.meta_keywords.split(',')" :key="index">
+                <v-chip-group column>
+                  <v-chip>
+                    {{ keyword.trim() }}
+                  </v-chip>
+                </v-chip-group>
+              </v-col>
+            </v-row>
 
-            <div v-if="product?.seo?.meta_keywords">
-              <v-chip-group column>
-                <v-chip
-                  v-for="(keyword, index) in product.seo.meta_keywords.split(',')"
-                  :key="index"
-                  class="ma-1"
-                  color="primary"
-                  text-color="white"
-                  outlined
-                  small
-                >
-                  {{ keyword.trim() }}
-                </v-chip>
-              </v-chip-group>
-            </div>
+
+
+
+
           </v-card-text>
+          <v-divider></v-divider> -->
 
+          <v-card-text>
+            <p class="text-center">{{ product.description }}</p>
+          </v-card-text>
+          <v-divider></v-divider>
           <!-- Botões -->
-          <v-card-actions
-            class="d-flex flex-wrap justify-center mt-4"
-            style="gap: 1px;"
-          >
-            <v-btn
-              color="success"
-              @click="goToWhatsApp"
-              style="min-width: 180px;"
-            >
-              <v-icon left>mdi-whatsapp</v-icon>
-              Pedir pelo WhatsApp
+          <v-card-actions class="d-flex flex-wrap justify-center" style="gap: 1px;">
+            <v-btn color="success" @click="goToWhatsApp" variant="elevated" size="small">
+              <v-icon left size="large">mdi-whatsapp</v-icon>
+
             </v-btn>
 
-            <v-btn
-              color="primary"
-              href="https://rua11store-web.vercel.app/"
-              style="min-width: 180px;"
-            >
-              <v-icon left>mdi-storefront</v-icon>
-              Comprar na Loja
+            <v-btn color="primary" href="https://rua11store-web.vercel.app/" size="small" variant="elevated">
+              <v-icon left size="large">mdi-storefront</v-icon>
+
             </v-btn>
 
-            <v-btn
-              color="info"
-              @click="downloadApp"
-              style="min-width: 180px;"
-            >
-              <v-icon left>mdi-download</v-icon>
-              Baixar App
+            <v-btn color="info" @click="downloadApp" variant="elevated" size="small">
+              <v-icon left size="large">mdi-download</v-icon>
+
             </v-btn>
           </v-card-actions>
 
