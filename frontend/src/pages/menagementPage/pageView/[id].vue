@@ -1,20 +1,92 @@
-<!-- PageView.vue -->
 <template>
   <v-container class="fill-height">
-    <v-responsive class="align-center fill-height mx-auto" max-width="900">
-      <div class="text-center" background>
-        <h1 class="text-h3 font-weight-bold">{{ page.title }}</h1>
-        <div class="text-body-2 font-weight-light mb-n1">{{ stripHtml(page.content) }}</div>
+    <v-responsive class="align-center fill-height mx-auto">
+      <div class="text-center">
+        <v-row justify="center" class="mt-0 mb-4" no-gutters>
+          <v-col cols="12">
+              <v-card elevation="0">
+                <v-card-title class="text-left">{{ page.name }}</v-card-title>
+              </v-card>
+              <v-divider></v-divider>
+              <v-card elevation="0" :color="page.hero_background_color" width="100%"
+                class="rounded-b-lg rounded-t-0 overflow-hidden" style="height: 400px;" v-if="page.hero_background_color || page.heroImage">
+              <v-img  :src="page.hero_image" :alt="page.title" height="250" contain
+                class="mx-auto d-block mt-1" />
+              <v-card-text class="py-0">
+                <v-row justify="center" no-gutters>
+                  <v-col cols="auto">
+                    {{ page.hero_title }}
+                  </v-col>
+                </v-row no-gutters>
+                <v-row justify="center" >
+                  <v-col cols="auto">
+                    {{ page.hero_subtitle }}
+                  </v-col>
+                </v-row>
+              </v-card-text>
+              <v-card-text v-if="page.hero_buttons && page.hero_buttons.length >= 1" class="d-flex justify-center gap-2 py-1">
+                <v-row justify='center' no-gutters>
+                  <v-col cols="auto" v-for="(button, index) in page.hero_buttons" :key="index">
+                    <v-btn class="mx-1 text-caption" :color="button.heroButtonBackgroundColor">
+                      <v-icon :icon="button.icon.value"></v-icon>
+                      {{ button.label }}
+                    </v-btn>
+                   <!-- <v-btn class="mx-1 text-caption" color="black" size="small"
+                      href="https://example.com/download-ios-app.apk" target="_blank" disabled>
+                      <v-icon class="mr-0" size="large">mdi-apple</v-icon>
+                      App iOS
+                    </v-btn>
+                    <v-btn class="mx-1 text-caption" color="black" size="small"
+                      href="https://example.com/download-android-app.apk" target="_blank">
+                      <v-icon class="mr-0" size="large" color="success">mdi-android</v-icon>
+                      App Android
+                    </v-btn>
+                    <v-btn class="mx-1 text-caption" color="primary" size="small"
+                      href="https://rua11store-web.vercel.app/" target="_blank">
+                      <v-icon class="mr-0" size="large">mdi-store</v-icon>
+                      Acessar Loja
+                    </v-btn>-->
+                  </v-col>
+                </v-row>
+
+              </v-card-text>
+
+            </v-card>
+
+          </v-col>
+        </v-row>
+        
+        <div class="mt-0 mb-1 d-flex justify-center flex-wrap" v-if="page.carousel_image && page.carousel_image.length >= 1">
+          <v-row justify="center" class="my-2">
+            <v-col cols="12" sm="10" md="8" lg="6">
+              <v-carousel :show-arrows="false" cycle hide-delimiters height="350" interval="5000" v-model="activeIndex">
+                <v-carousel-item v-for="(img, index) in page.carousel_image" :key="index">
+                  <v-card elevation="0">
+                    <v-img :src="img" width="300" height="300" contain class="mx-auto" />
+                  </v-card>
+                </v-carousel-item>
+              </v-carousel>
+            </v-col>
+          </v-row>
+        </div>
+
+       
+       <!-- {{ page.name }} -->
+         <v-card v-if="page.content">
+          <v-card-text>
+             <v-card-title class="text-left">{{ page.name }}</v-card-title>
+             <v-divider></v-divider>
+            <div class="text-body-2 text-left font-weight-light mb-n1" v-html="page.content"></div>
+          </v-card-text>
+         </v-card>
       </div>
     </v-responsive>
   </v-container>
-
 </template>
 
 <script>
 import axios from "axios";
 import { useSeo } from '../../../useSeo';
-
 
 const api = axios.create({
   baseURL: window.location.hostname === "localhost"
@@ -24,10 +96,19 @@ const api = axios.create({
 });
 
 const { setSeo } = useSeo()
+
 export default {
   data() {
     return {
-      page: {}
+      page: {
+        carousel_image: [],
+        hero_image: "",
+        hero_title: "",
+        hero_subtitle: "",
+        title: "",
+        content: ""
+      },
+      activeIndex: 0
     };
   },
   async created() {
@@ -48,12 +129,12 @@ export default {
       const pageId = this.$route.params.id;
       try {
         const response = await api.get(`/pages/pages/${pageId}`);
-        this.page = response.data;
+        // mantém reatividade
+        Object.assign(this.page, response.data);
         await this.loadComponentFromAPI();
       } catch (error) {
-        console.log('Erro ao buscar página');
+        console.log('Erro ao buscar página', error);
       }
-
     },
 
     stripHtml(html) {
@@ -61,30 +142,23 @@ export default {
       div.innerHTML = html;
       return div.textContent || div.innerText || "";
     },
+
     async loadComponentFromAPI() {
       try {
-        const pageName = this.page.title;
-        const encodedPageName = encodeURIComponent(pageName);
-        const response = await api.get(`/pages/pages/${encodedPageName}`);
-
-        // pageTitle.value = response.data.title;
-        // pageContent.value = response.data.content;
-        // pageId = response.data.id;
-        //loadFailed.value = false;
-
+        const pageTitle = this.page.title;
+        const encodedPageTitle = encodeURIComponent(pageTitle);
+        const response = await api.get(`/pages/pages/${encodedPageTitle}`);
         await this.loadSeoFromAPI(response.data.id);
-
       } catch (error) {
         console.error('Erro ao buscar componente:', error);
-        // loadFailed.value = true;
       }
     },
+
     async loadSeoFromAPI(pageId) {
       try {
         const response = await api.get(`/seo/seo/${pageId}`);
         const seoData = response.data.seo;
-
-        setSeo(seoData);  // atualiza SEO via composable
+        setSeo(seoData);
       } catch (error) {
         console.error('Erro ao buscar SEO:', error);
       }
