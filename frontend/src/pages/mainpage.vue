@@ -78,7 +78,7 @@
                             <v-card-text>
                                 <v-row justify="center" no-gutters>
                                   <v-col cols="auto">
-                                    {{product.name}} - <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                                    {{ product.name.length > 30 ? product.name.slice(0, 30) + '...' : product.name }} - <strong>R$ {{ product.price ?? '0,00' }}</strong>
                                   </v-col>
                                 </v-row>
                                 
