@@ -1,21 +1,30 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="align-center fill-height ms-0 me-auto" max-width="100%">
-      <div v-if="!loadFailed && pageContent" class="px-2 px-sm-4 align-center">
+      <div v-if="!loadFailed && pageContent" class="px-2 px-sm-10 align-center">
         <!-- HERO -->
         <v-row justify="center" class="my-0">
           <v-col>
-            <v-card elevation="4" :color="pageBackgroundColor" class="rounded-lg overflow-hidden hero-card"
+            <v-card elevation="4" :color="pageBackgroundColor" class="rounded-xl overflow-hidden hero-card"
               v-if="pageBackgroundColor || pageImage">
-              <v-img :src="pageImage" :alt="pageTitle" max-height="320" height="100%" class="mx-auto d-block" />
-              <v-card-text class="py-0 text-center" v-if="pageHeroTitle || pageHeroSubTitle">
-                <div class="text-h6 text-sm-h4 font-weight-bold">
-                  {{ pageHeroTitle }}
-                </div>
-                <div class="text-body-2 text-sm-body-1">
-                  {{ pageHeroSubTitle }}
-                </div>
-              </v-card-text>
+              <v-row no-gutters align="center">
+                <v-col v-if="pageHeroTitle || pageHeroSubTitle" cols="12" md="6" class="px-4">
+                  <v-card-text class="py-0 text-center">
+                    <div class="text-h6 text-sm-h4 font-weight-bold">
+                      {{ pageHeroTitle }}
+                    </div>
+                    <div class="text-body-2 text-sm-body-1">
+                      {{ pageHeroSubTitle }}
+                    </div>
+                  </v-card-text>
+                </v-col>
+
+
+                <v-col cols="12" md="6">
+                  <v-img :src="pageImage" :alt="pageTitle" max-height="450"  class="mx-auto d-block" />
+                </v-col>
+
+              </v-row>
 
               <!-- Botões Hero -->
               <v-card-text v-if="pageHeroButtons && pageHeroButtons.length >= 1"
@@ -38,11 +47,11 @@
         </v-row>
 
         <!-- Produtos -->
-        <div class="mt-14 d-flex justify-center flex-wrap" >
+        <div class="mt-14 d-flex justify-center flex-wrap">
           <v-row justify="center" class="my-2">
             <v-col cols="12" sm="12" md="10" lg="6">
               <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" interval="750000"
-                v-model="activeIndex"  max-height="100%" height="400">
+                v-model="activeIndex" max-height="100%" height="400">
                 <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
                   <v-row justify="center" class="pa-2" dense>
                     <v-col v-for="product in chunk" :key="product.name" cols="12" sm="6" md="6">
@@ -83,8 +92,13 @@
         <div>
           <v-row no-gutters>
             <v-col>
-              <v-card class="pa-2" elevation="0" max-height="100%" >
-                <v-card-title class="text-h8 text-md-h8 text-sm-h8">Por que comprar com a Rua11Store</v-card-title>
+              <v-card class="pa-2" elevation="0" max-height="100%">
+                <v-card-title class="text-left white--text">
+                  <span class="d-block title-responsive">
+                    Por que escolher a Rua11Store?
+                  </span>
+                </v-card-title>
+
                 <v-card-text>
                   <v-row justify="center" align="center" class="text-center" no-gutters>
                     <v-col cols="12" sm="6" md="3" class="mb-4">
@@ -121,48 +135,50 @@
           <v-row no-gutters>
             <v-col>
               <v-card class="pa-2" elevation="0" max-height="90%" height="300">
-                <v-card-title>O que nossos clientes estão dizendo</v-card-title>
+                <v-card-title class="text-left white--text">
+                  <span class="d-block title-responsive">O que nossos clientes estão dizendo</span></v-card-title>
                 <v-card-text>
                   <div class="d-flex justify-center flex-wrap">
-                <v-row no-gutters>
-                  <v-col cols="12">
-                    <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000" v-model="activeCommentIndex">
-                      <v-carousel-item v-for="(pair, pairIndex) in chunkedComments" :key="pairIndex">
-                        <v-row>
-                          <v-col v-for="(comment, index) in pair" :key="comment.id" cols="auto" md="6" class="mb-2">
-                            <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" elevation="1">
-                              <v-row class="align-center" no-gutters>
-                                <v-col cols="auto" class="pr-8">
-                                  <v-avatar size="60">
-                                    <v-img :src="comment.avatar_url" alt="Avatar" />
-                                  </v-avatar>
-                                </v-col>
-                                <v-col>
-                                  <div style="font-style: italic; font-size: 14px; margin-top: 4px; color: gray;">
-                                    <p>
-                                      "{{ comment.comment }}" -
-                                      <strong style="font-size: 12px; color: black">
-                                        {{ comment.user_name }}
-                                      </strong>
-                                    </p>
-                                  </div>
-                                </v-col>
-                              </v-row>
-                            </v-card>
-                          </v-col>
-                        </v-row>
-                      </v-carousel-item>
-                    </v-carousel>
-                  </v-col>
-                </v-row>
-              </div>
+                    <v-row no-gutters>
+                      <v-col cols="12">
+                        <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000"
+                          v-model="activeCommentIndex">
+                          <v-carousel-item v-for="(pair, pairIndex) in chunkedComments" :key="pairIndex">
+                            <v-row>
+                              <v-col v-for="(comment, index) in pair" :key="comment.id" cols="auto" md="6" class="mb-2">
+                                <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" elevation="1">
+                                  <v-row class="align-center" no-gutters>
+                                    <v-col cols="auto" class="pr-8">
+                                      <v-avatar size="60">
+                                        <v-img :src="comment.avatar_url" alt="Avatar" />
+                                      </v-avatar>
+                                    </v-col>
+                                    <v-col>
+                                      <div style="font-style: italic; font-size: 14px; margin-top: 4px; color: gray;">
+                                        <p>
+                                          "{{ comment.comment }}" -
+                                          <strong style="font-size: 12px; color: black">
+                                            {{ comment.user_name }}
+                                          </strong>
+                                        </p>
+                                      </div>
+                                    </v-col>
+                                  </v-row>
+                                </v-card>
+                              </v-col>
+                            </v-row>
+                          </v-carousel-item>
+                        </v-carousel>
+                      </v-col>
+                    </v-row>
+                  </div>
                 </v-card-text>
               </v-card>
-              
+
             </v-col>
           </v-row>
         </div>
-        
+
       </div>
       <!-- Loader -->
       <div v-else class="text-center pa-4">
@@ -384,8 +400,8 @@ onMounted(() => {
 .hero-card {
   background-image:
     radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05) 10px, transparent 10px, transparent 20px),
-    repeating-conic-gradient(rgba(255, 255, 255, 0.05) 0deg 5deg, transparent 5deg 10deg);
+    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.09) 1px, transparent 1px, transparent 2px),
+    repeating-conic-gradient(rgba(255, 255, 255, 0.05) 0deg 4deg, transparent 0deg 10deg);
   background-size: cover;
   color: white;
   min-height: 375px;
@@ -463,5 +479,28 @@ onMounted(() => {
   max-width: 100%;
   padding-left: 10px;
   padding-right: 10px;
+}
+
+.title-responsive {
+  font-weight: bold;
+  font-size: 1.2rem;
+  /* desktop */
+  line-height: 1.2;
+}
+
+@media (max-width: 960px) {
+  .title-responsive {
+    font-size: 1.2rem;
+    /* tablet */
+  }
+}
+
+@media (max-width: 600px) {
+  .title-responsive {
+    font-size: 1.0rem;
+    /* mobile */
+    word-break: break-word;
+    /* garante quebra de linha */
+  }
 }
 </style>
