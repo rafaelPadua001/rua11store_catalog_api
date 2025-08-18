@@ -38,29 +38,37 @@
         </v-row>
 
         <!-- Produtos -->
-        <div class="mt-14 d-flex justify-center flex-wrap">
+        <div class="mt-14 d-flex justify-center flex-wrap" >
           <v-row justify="center" class="my-2">
             <v-col cols="12" sm="12" md="10" lg="6">
               <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" interval="750000"
-                v-model="activeIndex">
+                v-model="activeIndex"  max-height="100%" height="400">
                 <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
                   <v-row justify="center" class="pa-2" dense>
                     <v-col v-for="product in chunk" :key="product.name" cols="12" sm="6" md="6">
                       <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
-                        <v-card elevation="0">
+                        <v-card class="pa-4 align-center" elevation="0">
                           <v-card-text>
                             <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
                               target="_blank" rel="noopener noreferrer">
-
                               <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer"
-                                cover>
-                                <v-chip class="ma-0" color="primary" text-color="white"
-                                  style="position: absolute; top: 0; right: 0;">
+                                contain max-height="250">
+                                <v-chip class="ma-0" color="deep-purple" text-color="white"
+                                  style="position: absolute; bottom: 0; right: 0;">
                                   <strong>R$ {{ product.price ?? '0,00' }}</strong>
                                 </v-chip>
                               </v-img>
                             </a>
+
+
                           </v-card-text>
+                          <v-card-text class="text-center">
+                            <span class="text-h8"><strong>{{ product.name }}</strong></span>
+                          </v-card-text>
+
+                          <!--<v-card-text class="text-center">
+                            <v-btn color="primary">Comprar</v-btn>
+                          </v-card-text> -->
 
                         </v-card>
                       </template>
@@ -72,42 +80,91 @@
           </v-row>
         </div>
 
-        <!-- Carousel Comentários -->
-        <h3 class="text-center">Testimonials</h3>
-        <v-divider></v-divider>
-        <div class="d-flex justify-center flex-wrap">
-          <v-row justify="center">
-            <v-col cols="12" sm="10" md="8" lg="6">
-              <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000" v-model="activeCommentIndex">
-                <v-carousel-item v-for="(comment, index) in comments" :key="comment.id">
-                  <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" max-width="100%" elevation="0">
-                    <v-row no-gutters class="align-center">
-                      <v-col cols="auto" class="pr-4">
-                        <v-avatar size="60">
-                          <v-img :src="comment.avatar_url" alt="Avatar" />
-                        </v-avatar>
-                      </v-col>
-                      <v-col>
-                        <div style="font-style: italic; font-size: 16px; margin-top: 4px; color: gray;">
-                          <p>
-                            "{{ comment.comment }}" -
-                            <strong style="font-size: 12px; color: black">
-                              {{ comment.user_name }}
-                            </strong>
-                          </p>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </v-card>
-                </v-carousel-item>
-              </v-carousel>
+        <div>
+          <v-row no-gutters>
+            <v-col>
+              <v-card class="pa-2" elevation="0" max-height="100%" >
+                <v-card-title class="text-h8 text-md-h8 text-sm-h8">Por que comprar com a Rua11Store</v-card-title>
+                <v-card-text>
+                  <v-row justify="center" align="center" class="text-center" no-gutters>
+                    <v-col cols="12" sm="6" md="3" class="mb-4">
+                      <span><v-icon size="x-large" class="mb-2 white--text"
+                          color="primary">mdi-truck-fast</v-icon></span>
+                      <div class="white--text font-weight-medium">Entrega rápida e segura</div>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="3" class="mb-4">
+                      <v-icon size="x-large" class="mb-2 white--text" color="success">mdi-lock-check</v-icon>
+                      <div class="white--text font-weight-medium">Pagamento Seguro</div>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="3" class="mb-4">
+                      <v-icon size="x-large" class="mb-2 white--text" color="primary">mdi-thumb-up</v-icon>
+                      <div class="white--text font-weight-medium">Qualidade Garantida</div>
+                    </v-col>
+
+                    <v-col cols="12" sm="6" md="3" class="mb-4">
+                      <v-icon size="x-large" class="mb-2 white--text" color="deep-purple">mdi-gift-open</v-icon>
+                      <div class="white--text font-weight-medium">Promoções exclusivas</div>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+
+              </v-card>
             </v-col>
-
           </v-row>
-
         </div>
+
+
+        <v-spacer></v-spacer>
+        <v-spacer></v-spacer>
+
+        <div>
+          <v-row no-gutters>
+            <v-col>
+              <v-card class="pa-2" elevation="0" max-height="90%" height="300">
+                <v-card-title>O que nossos clientes estão dizendo</v-card-title>
+                <v-card-text>
+                  <div class="d-flex justify-center flex-wrap">
+                <v-row no-gutters>
+                  <v-col cols="12">
+                    <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000" v-model="activeCommentIndex">
+                      <v-carousel-item v-for="(pair, pairIndex) in chunkedComments" :key="pairIndex">
+                        <v-row>
+                          <v-col v-for="(comment, index) in pair" :key="comment.id" cols="auto" md="6" class="mb-2">
+                            <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" elevation="1">
+                              <v-row class="align-center" no-gutters>
+                                <v-col cols="auto" class="pr-8">
+                                  <v-avatar size="60">
+                                    <v-img :src="comment.avatar_url" alt="Avatar" />
+                                  </v-avatar>
+                                </v-col>
+                                <v-col>
+                                  <div style="font-style: italic; font-size: 14px; margin-top: 4px; color: gray;">
+                                    <p>
+                                      "{{ comment.comment }}" -
+                                      <strong style="font-size: 12px; color: black">
+                                        {{ comment.user_name }}
+                                      </strong>
+                                    </p>
+                                  </div>
+                                </v-col>
+                              </v-row>
+                            </v-card>
+                          </v-col>
+                        </v-row>
+                      </v-carousel-item>
+                    </v-carousel>
+                  </v-col>
+                </v-row>
+              </div>
+                </v-card-text>
+              </v-card>
+              
+            </v-col>
+          </v-row>
+        </div>
+        
       </div>
-     <!-- Loader -->
+      <!-- Loader -->
       <div v-else class="text-center pa-4">
         <v-progress-circular indeterminate color="primary" size="64" />
         <p v-if="slowServer" class="mt-2 text-grey">
@@ -275,6 +332,8 @@ async function loadProductsToCarousel() {
   }
 }
 
+
+
 const { smAndDown } = useDisplay()
 const chunkSize = computed(() => (smAndDown.value ? 1 : 2))
 
@@ -283,6 +342,16 @@ const chunkedProducts = computed(() => {
   for (let i = 0; i < productsData.value.length; i += chunkSize.value) {
     chunks.push(productsData.value.slice(i, i + chunkSize.value))
   }
+  return chunks
+})
+
+const chunkedComments = computed(() => {
+  const size = smAndDown.value ? 1 : 2
+  const chunks: Comment[][] = []
+  for (let i = 0; i < comments.value.length; i++) {
+    chunks.push(comments.value.slice(i, i + size))
+  }
+
   return chunks
 })
 
