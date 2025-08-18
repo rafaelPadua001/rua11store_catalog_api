@@ -9,7 +9,7 @@
               </v-card>
               <v-divider></v-divider>
               <v-card elevation="0" :color="page.hero_background_color" width="100%"
-                class="rounded-b-lg rounded-t-0 overflow-hidden" style="height: 400px;" v-if="page.hero_background_color || page.heroImage">
+                class="rounded-b-lg rounded-t-0 overflow-hidden hero-card" style="height: 400px;" v-if="page.hero_background_color || page.heroImage">
               <v-img  :src="page.hero_image" :alt="page.title" height="250" contain
                 class="mx-auto d-block mt-1" />
               <v-card-text class="py-0">
@@ -166,3 +166,17 @@ export default {
   }
 };
 </script>
+
+<style scopped>
+.hero-card{
+  height: 49vh;
+  margin: 0;
+  justify-content: center; 
+  align-items: center;
+  background-color: #4b00b5; /* Roxo base */
+  background-image: radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px),
+    repeating-radial-gradient(circle at center, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px),
+    repeating-conic-gradient(rgba(255,255,255,0.05) 0deg 5deg, transparent 5deg 10deg);
+   background-size: cover;
+}
+</style>
