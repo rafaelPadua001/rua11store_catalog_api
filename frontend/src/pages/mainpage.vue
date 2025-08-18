@@ -280,8 +280,7 @@ onMounted(() => {
 
 <style scoped>
 .hero-card {
-  
-  background-image:
+   background-image:
     radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px),
     repeating-radial-gradient(circle at center, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px),
     repeating-conic-gradient(rgba(255,255,255,0.05) 0deg 5deg, transparent 5deg 10deg);

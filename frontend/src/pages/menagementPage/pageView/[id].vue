@@ -154,17 +154,16 @@ export default {
 </script>
 
 <style scopped>
-.hero-card{
-  height: 51vh;
-  margin: 0;
-  justify-content: center; 
-  align-items: center;
-  background-color: #4b00b5; /* Roxo base */
-  background-image: radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px),
+.hero-card {
+   background-image:
+    radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px),
     repeating-radial-gradient(circle at center, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px),
     repeating-conic-gradient(rgba(255,255,255,0.05) 0deg 5deg, transparent 5deg 10deg);
-   background-size: cover;
+  background-size: cover;
+  color: white;
+  min-height: 375px; /* garante espaço suficiente para botões */
 }
+
 .v-btn {
   margin-left: 1px !important;
   margin-right: 1px !important;
