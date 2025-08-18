@@ -4,7 +4,7 @@
       <v-col cols="12" sm="10" md="8" lg="6" xl="4">
         <v-card class="pa-4" elevation="0">
           <!-- Nome e preço -->
-          <v-card-title class="text-h6 text-sm-h6 text-md-h6">
+          <v-card-title class="text-h6 text-sm-h6 text-md-h8">
 
             {{ product.name }}
 
@@ -139,7 +139,7 @@ export default {
 
     goToWhatsApp() {
       const message = `Olá, tenho interesse no produto: ${this.product.name}`;
-      const phone = "5511999999999"; // seu número aqui
+      const phone = "556191865680"; // seu número aqui
       window.open(
         `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
         "_blank"
