@@ -1,43 +1,37 @@
 <template>
   <v-container class="fill-height">
     <v-row justify="center" no-gutters>
-      <v-col cols="12" sm="10" md="8" lg="10" xl="6">
-        <v-card class="pa-2">
-
+      <v-col cols="12" sm="10" md="8" lg="6" xl="4">
+        <v-card class="pa-4" elevation="0">
           <!-- Nome e preço -->
-          <v-card-title class="d-flex justify-start">
-            <h3 style="font-size: 18px;">
-              {{ product.name }}
-            </h3>
+          <v-card-title class="text-h6 text-sm-h6 text-md-h6">
+
+            {{ product.name }}
+
           </v-card-title>
 
-          <v-divider></v-divider>
-          <v-card-subtitle class="text-h6">
+
+          <v-card-subtitle class="text-subtitle-1 text-sm-h8 text-md-h8">
             R$ {{ product.price }}
           </v-card-subtitle>
 
           <!-- Carrossel de imagens -->
           <v-card-text>
             <v-row justify="center" no-gutters>
-              <v-col>
+              <v-col cols="12" md="12" sm="10" xl="2">
                 <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
-                  <v-sheet class="mx-auto overflow-hidden" rounded="lg">
-                    <v-carousel v-model="currentIndex"  progress="purple"
-                      show-arrows="hover" hide-delimiter>
+                  <v-sheet class="mx-auto overflow-hidden" rounded="xl">
+                    <v-carousel v-model="currentIndex" progress="purple" show-arrows="hover" hide-delimiter
+                      height="auto">
                       <!-- Primeira imagem: thumbnail -->
-                      <v-carousel-item v-if="product.thumbnail_path" :src="product.thumbnail_path"
+                      <v-carousel-item class="carousel-img" v-if="product.thumbnail_path" :src="product.thumbnail_path"
                         :alt="product?.seo?.slug">
-
                       </v-carousel-item>
-
-
 
                       <!-- Outras imagens -->
-                      <v-carousel-item v-for="(img, index) in product.images" :key="index" :src="img.url">
-
+                      <v-carousel-item class="carousel-img" v-for="(img, index) in product.images" :key="index"
+                        :src="img.url">
                       </v-carousel-item>
-
-
                     </v-carousel>
 
                     <!-- Overlay com legenda -->
@@ -51,30 +45,30 @@
                     <v-chip :text="`${currentIndex + 1} / ${product.images.length + 1}`" color="deep-purple"
                       size="small" variant="flat"></v-chip>
                   </div>
-
                 </v-defaults-provider>
-
               </v-col>
             </v-row>
           </v-card-text>
 
           <v-card-text>
-            <p class="text-center">{{ product.description }}</p>
+            <p class="text-body-2 text-sm-body-1 text-center">{{ product.description }}</p>
           </v-card-text>
 
-          <v-divider></v-divider>
+
+          <v-divider class="border-opacity-90" color="deep-purple" :thickness="2"></v-divider>
 
           <!-- Botões -->
           <v-card-actions class="d-flex flex-wrap justify-center" style="gap: 1px;">
-            <v-btn color="success" @click="goToWhatsApp" variant="elevated" size="small">
+            <v-btn color="success" @click="goToWhatsApp" variant="elevated" size="small" :block="$vuetify.display.xs">
               <v-icon left size="large">mdi-whatsapp</v-icon>
             </v-btn>
 
-            <v-btn color="primary" href="https://rua11store-web.vercel.app/" size="small" variant="elevated">
+            <v-btn color="primary" href="https://rua11store-web.vercel.app/" size="small" variant="elevated"
+              :block="$vuetify.display.xs">
               <v-icon left size="large">mdi-storefront</v-icon>
             </v-btn>
 
-            <v-btn color="info" @click="downloadApp" variant="elevated" size="small">
+            <v-btn color="info" @click="downloadApp" variant="elevated" size="small" :block="$vuetify.display.xs">
               <v-icon left size="large">mdi-download</v-icon>
             </v-btn>
           </v-card-actions>
@@ -88,7 +82,7 @@
 <script>
 import axios from "axios";
 import { useSeo } from "@/useSeo";
-import { shallowRef } from "vue";
+
 
 const api = axios.create({
   baseURL:
@@ -161,3 +155,8 @@ export default {
   },
 };
 </script>
+<style>
+.carousel-img {
+  object-fit: contain;
+}
+</style>
