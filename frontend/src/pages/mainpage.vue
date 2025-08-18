@@ -9,7 +9,7 @@
             <v-card elevation="4" :color="pageBackgroundColor" class="rounded-lg overflow-hidden hero-card"
               v-if="pageBackgroundColor || pageImage">
               <v-img :src="pageImage" :alt="pageTitle" max-height="320" height="100%" class="mx-auto d-block" />
-              <v-card-text class="py-0 text-center">
+              <v-card-text class="py-0 text-center" v-if="pageHeroTitle || pageHeroSubTitle">
                 <div class="text-h6 text-sm-h4 font-weight-bold">
                   {{ pageHeroTitle }}
                 </div>
@@ -279,17 +279,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.hero-card{
-  height: 49vh;
-  margin: 0;
-  justify-content: center; 
-  align-items: center;
-  background-color: #4b00b5; /* Roxo base */
-  background-image: radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px),
+.hero-card {
+  
+  background-image:
+    radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px),
     repeating-radial-gradient(circle at center, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px),
     repeating-conic-gradient(rgba(255,255,255,0.05) 0deg 5deg, transparent 5deg 10deg);
-   background-size: cover;
+  background-size: cover;
+  color: white;
+  min-height: 375px; /* garante espaço suficiente para botões */
 }
+
 .v-btn {
   margin-left: 1px !important;
   margin-right: 1px !important;
