@@ -1,20 +1,78 @@
-<!-- PageView.vue -->
 <template>
   <v-container class="fill-height">
-    <v-responsive class="align-center fill-height mx-auto" max-width="900">
-      <div class="text-center" background>
-        <h1 class="text-h3 font-weight-bold">{{ page.title }}</h1>
-        <div class="text-body-2 font-weight-light mb-n1">{{ stripHtml(page.content) }}</div>
+    <v-responsive class="align-center fill-height mx-auto">
+      <div class="text-center">
+        <v-row justify="center" class="mt-0 mb-4" no-gutters>
+          <v-col cols="12">
+              <!--<v-card elevation="0">
+                <v-card-title class="text-left">{{ page.name }}</v-card-title>
+              </v-card>-->
+              <v-divider></v-divider>
+              <v-card elevation="4" :color="page.hero_background_color" width="100%"
+                class="rounded-lg overflow-hidden hero-card" v-if="page.hero_background_color || page.heroImage">
+              <v-img  :src="page.hero_image" :alt="page.title" max-height="320" height="100%" class="mx-auto d-block" />
+              <v-card-text class="py-0" v-if="page.hero_title || page.hero_subtitle">
+                <v-row justify="center" no-gutters>
+                  <v-col cols="auto">
+                    {{ page.hero_title }}
+                  </v-col>
+                </v-row no-gutters>
+                <v-row justify="center" >
+                  <v-col cols="auto">
+                    {{ page.hero_subtitle }}
+                  </v-col>
+                </v-row>
+              </v-card-text>
+              <v-card-text v-if="page.hero_buttons && page.hero_buttons.length >= 1">
+                <v-row justify='center' no-gutters>
+                  <v-col v-for="(button, index) in page.hero_buttons" :key="index">
+                   <v-btn class="mx-0 text-caption hover-btn" size="x-large" target="_blank" block
+                      :color="button.heroButtonBackgroundColor" :href="button.url" variant="elevated">
+                      <v-icon :icon="button.icon.value" class="mr-1" size="large"></v-icon>
+                      {{ button.label }}
+                    </v-btn>
+                   
+                  </v-col>
+                </v-row>
+
+              </v-card-text>
+
+            </v-card>
+
+          </v-col>
+        </v-row>
+        
+        <div class="mt-0 mb-1 d-flex justify-center flex-wrap" v-if="page.carousel_image && page.carousel_image.length >= 1">
+          <v-row justify="center" class="my-2">
+            <v-col cols="12" sm="10" md="8" lg="6">
+              <v-carousel :show-arrows="false" cycle hide-delimiters height="350" interval="5000" v-model="activeIndex">
+                <v-carousel-item v-for="(img, index) in page.carousel_image" :key="index">
+                  <v-card elevation="0">
+                    <v-img :src="img" width="300" height="300" contain class="mx-auto" />
+                  </v-card>
+                </v-carousel-item>
+              </v-carousel>
+            </v-col>
+          </v-row>
+        </div>
+
+       
+       <!-- {{ page.name }} -->
+         <v-card v-if="page.content">
+          <v-card-text>
+             <v-card-title class="text-left">{{ page.name }}</v-card-title>
+             <v-divider></v-divider>
+            <div class="text-body-2 text-left font-weight-light mb-n1" v-html="page.content"></div>
+          </v-card-text>
+         </v-card>
       </div>
     </v-responsive>
   </v-container>
-
 </template>
 
 <script>
 import axios from "axios";
 import { useSeo } from '../../../useSeo';
-
 
 const api = axios.create({
   baseURL: window.location.hostname === "localhost"
@@ -24,10 +82,19 @@ const api = axios.create({
 });
 
 const { setSeo } = useSeo()
+
 export default {
   data() {
     return {
-      page: {}
+      page: {
+        carousel_image: [],
+        hero_image: "",
+        hero_title: "",
+        hero_subtitle: "",
+        title: "",
+        content: ""
+      },
+      activeIndex: 0
     };
   },
   async created() {
@@ -48,12 +115,12 @@ export default {
       const pageId = this.$route.params.id;
       try {
         const response = await api.get(`/pages/pages/${pageId}`);
-        this.page = response.data;
+        // mantém reatividade
+        Object.assign(this.page, response.data);
         await this.loadComponentFromAPI();
       } catch (error) {
-        console.log('Erro ao buscar página');
+        console.log('Erro ao buscar página', error);
       }
-
     },
 
     stripHtml(html) {
@@ -61,30 +128,23 @@ export default {
       div.innerHTML = html;
       return div.textContent || div.innerText || "";
     },
+
     async loadComponentFromAPI() {
       try {
-        const pageName = this.page.title;
-        const encodedPageName = encodeURIComponent(pageName);
-        const response = await api.get(`/pages/pages/${encodedPageName}`);
-
-        // pageTitle.value = response.data.title;
-        // pageContent.value = response.data.content;
-        // pageId = response.data.id;
-        //loadFailed.value = false;
-
+        const pageTitle = this.page.title;
+        const encodedPageTitle = encodeURIComponent(pageTitle);
+        const response = await api.get(`/pages/pages/${encodedPageTitle}`);
         await this.loadSeoFromAPI(response.data.id);
-
       } catch (error) {
         console.error('Erro ao buscar componente:', error);
-        // loadFailed.value = true;
       }
     },
+
     async loadSeoFromAPI(pageId) {
       try {
         const response = await api.get(`/seo/seo/${pageId}`);
         const seoData = response.data.seo;
-
-        setSeo(seoData);  // atualiza SEO via composable
+        setSeo(seoData);
       } catch (error) {
         console.error('Erro ao buscar SEO:', error);
       }
@@ -92,3 +152,34 @@ export default {
   }
 };
 </script>
+
+<style scopped>
+.hero-card {
+   background-image:
+    radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px),
+    repeating-radial-gradient(circle at center, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px),
+    repeating-conic-gradient(rgba(255,255,255,0.05) 0deg 5deg, transparent 5deg 10deg);
+  background-size: cover;
+  color: white;
+  min-height: 375px; /* garante espaço suficiente para botões */
+}
+
+.v-btn {
+  margin-left: 1px !important;
+  margin-right: 1px !important;
+}
+
+.hover-btn {
+  transition: transform 0.2s, box-shadow 0.2s;
+  /* animação suave */
+}
+
+.hover-btn:hover {
+  transform: translateY(-3px);
+  /* leve "subida" do botão */
+  box-shadow: 0px 8px 25px rgba(92, 92, 92, 0.3);
+  /* sombra maior no hover */
+  opacity: 0.90
+}
+
+</style>

@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, get_jwt
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jwt
+from itsdangerous import URLSafeTimedSerializer
 import sqlite3
 import datetime
 from models.userProfile import UserProfile
@@ -14,14 +15,13 @@ from flask_sqlalchemy import SQLAlchemy
 from models.user import User
 from models.userProfile import UserProfile, get_user_profile_by_user_id
 from models.tokenBlockList import TokenBlocklist
+from controllers.emailController import EmailController
 from database import db
 
 
-# Criando o Blueprint para autenticação
-# Adiciona o diretório pai ao caminho de importação
 sys.path.append(str(Path(__file__).parent.parent))
 
-# Agora importe o UserProfile
+
 from models.userProfile import UserProfile
 
 auth_bp = Blueprint("auth", __name__)
@@ -41,6 +41,7 @@ CORS(
 # Configuração do JWTManager
 jwt = JWTManager()
 
+serializer = URLSafeTimedSerializer(os.getenv("SECRET_KEY", "your-secret-key"))
 
 
 # Função para criar a conexão com o banco de dados
@@ -109,7 +110,7 @@ def get_profile():
     try:
         # 1. Obter e validar o user_id do token
         user_id = get_jwt_identity()
-        print(f"[DEBUG] Token user_id: {user_id} (type: {type(user_id)})")  # Log para diagnóstico
+       # print(f"[DEBUG] Token user_id: {user_id} (type: {type(user_id)})")  # Log para diagnóstico
         
         if not user_id:
             return jsonify({"error": "Token inválido - ID de usuário ausente"}), 401
@@ -118,7 +119,7 @@ def get_profile():
         try:
             user_id = int(user_id)
         except (TypeError, ValueError) as e:
-            print(f"[ERROR] Falha ao converter user_id: {e}")
+           # print(f"[ERROR] Falha ao converter user_id: {e}")
             return jsonify({
                 "error": "Formato de ID inválido",
                 "details": f"O ID deve ser numérico (recebido: {user_id})"
@@ -129,7 +130,7 @@ def get_profile():
             return jsonify({"error": "ID de usuário deve ser positivo"}), 400
 
         # 4. Buscar o perfil
-        print(f"[DEBUG] Buscando perfil para user_id: {user_id}")
+        #print(f"[DEBUG] Buscando perfil para user_id: {user_id}")
         profile = get_user_profile_by_user_id(db.session, user_id)
         
         if not profile:
@@ -149,7 +150,7 @@ def get_profile():
             # "email": profile.email 
         }
         
-        print(f"[DEBUG] Perfil encontrado: {response_data}")
+       # print(f"[DEBUG] Perfil encontrado: {response_data}")
         return jsonify(response_data), 200
         
     except sqlite3.Error as e:
@@ -223,9 +224,17 @@ def login():
 
     # Criar o token JWT
     token = create_access_token(identity=str(user.id))
+    refresh_token= create_refresh_token(identity=user.id)
 
-    return jsonify({"message": "Login realizado com sucesso!", "token": token}), 200
+    return jsonify({"message": "Login realizado com sucesso!", "access_token": token, "refresh_token": refresh_token}), 200
 
+#rota refresh token 
+@auth_bp.route('/refresh', methods=['POST'])
+@jwt_required()
+def refresh():
+    current_user = get_jwt_identity()
+    new_access_token = create_access_token(identity=current_user)
+    return jsonify(access_token=new_access_token), 200
 
 # Rota de logout
 @auth_bp.route('/logout', methods=['POST'])
@@ -251,3 +260,60 @@ def logout():
     except Exception as e:
         print(f"Erro ao revogar token: {str(e)}")
         return jsonify({"error": "Erro interno"}), 500
+
+
+@auth_bp.route('/recoveryPassword', methods=['POST'])
+def recovery_password():
+    data = request.json
+    email = data.get('email')
+    if not email:
+        return jsonify({"error": "E-mail é obrigatório"}), 400
+    
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({"error": "Usuário não encontrado"}), 404
+    
+    token = serializer.dumps(email, salt="password-recovery")
+
+
+    # (Opcional) Salvar o token no banco se quiser controle mais rígido
+        # user.recovery_token = token
+        # db.session.commit()
+
+    recovery_link = f"https://rua11store-catalog-api.vercel.app/authenticator/resetPassword?token={token}"
+    EmailController.send_email(
+    "Recuperação de senha",
+    [email], 
+    f"Clique aqui para redefinir sua senha: {recovery_link}",
+    f"<p>Clique <a href='{recovery_link}'>aqui</a> para redefinir sua senha.</p>"
+)
+
+
+    return jsonify({"message": "E-mail de recuperação enviado com sucesso"}), 200
+
+@auth_bp.route('/resetPassword', methods=['POST'])
+def reset_password():
+    data = request.json
+    token = data.get('token')
+    new_password = data.get('newPassword')  # usa 'newPassword' camelCase
+
+    if not token or not new_password:
+        return jsonify({"error": "Token e nova senha são obrigatórios"}), 400
+
+    try:
+        email = serializer.loads(token, salt="password-recovery", max_age=3600)
+    except Exception:
+        return jsonify({"error": "Token inválido ou expirado"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "Usuário não encontrado"}), 404
+
+    hashed_password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+    user.password = hashed_password
+    db.session.commit()
+
+    return jsonify({"message": "Senha redefinida com sucesso"}), 200
+
+

@@ -1,10 +1,59 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response, redirect
 from services.melhorEnvioService import MelhorEnvioService
 import os;
 from flask_cors import cross_origin
+import requests
 
 melhorenvio_bp = Blueprint('melhorEnvio', __name__)
 melhor_envio = MelhorEnvioService()
+
+@melhorenvio_bp.route('/login/')
+def login_melhor_envio():
+    client_id = os.getenv("MELHOR_ENVIO_CLIENT_ID")
+    redirect_uri = os.getenv("MELHOR_ENVIO_REDIRECT_URI")
+    authorize_url = (
+        f"https://www.melhorenvio.com.br/oauth/authorize"
+        f"?client_id={client_id}"
+        f"&redirect_uri={redirect_uri}"
+        f"&response_type=code"
+    )
+    return redirect(authorize_url)
+
+
+@melhorenvio_bp.route('/callback')
+def melhor_envio_callback():
+    code = request.args.get("code")
+    if not code:
+        return jsonify({'error': 'Código de autorização não recebido'}), 400
+    
+    client_id = os.getenv("MELHOR_ENVIO_CLIENT_ID")
+    client_secret = os.getenv("MELHOR_ENVIO_CLIENT_SECRET")
+    redirect_uri = os.getenv("MELHOR_ENVIO_REDIRECT_URI")
+    
+    data = {
+        "grant_type": "authorization_code",
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "code": code,
+        "redirect_uri": redirect_uri
+    }
+
+    token_url = "https://www.melhorenvio.com.br/oauth/token"
+    response = requests.post(token_url, data=data, headers={"Accept": "application/json"})
+
+    if response.status_code == 200:  # corrigido typo: status_code
+        token_data = response.json()
+        access_token = token_data['access_token']
+        refresh_token = token_data['refresh_token']
+
+        # Salvar token no arquivo .env (append com a chave e o valor)
+        with open(".env", "a") as env_file:
+            env_file.write(f"\nMELHOR_ENVIO_TOKEN={access_token}\n")
+            env_file.write(f"MELHOR_ENVIO_REFRESH_TOKEN={refresh_token}\n")
+        
+        return jsonify({"message": "Token obtido com sucesso!", "token": access_token})
+    else:
+        return jsonify({"error": "Falha ao obter token", "details": response.text}), response.status_code
 
 @melhorenvio_bp.route("/calculate-delivery", methods=["POST"])
 def calculate_delivery():

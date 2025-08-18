@@ -84,7 +84,7 @@
                             <div v-for="(product, index) in stocks" :key="index" class="d-flex align-center mb-2">
                                 <!-- Avatar -->
                                 <v-avatar class="me-4" size="69">
-                                    <v-img :src="product.product.image_path"
+                                    <v-img :src="product.product.thumbnail_path"
                                         :alt="product.product.seo?.slug || 'Produto'" cover />
                                 </v-avatar>
 
@@ -140,6 +140,12 @@ const api = axios.create({
             : "https://rua11store-catalog-api-lbp7.onrender.com",
     headers: { "Content-Type": "application/json" },
 });
+
+function isValidJWT(token) {
+  if (!token) return false;
+  const parts = token.split('.');
+  return parts.length === 3;
+}
 
 export default {
     data() {
@@ -197,12 +203,13 @@ export default {
         },
         async waitForToken(retries = 10, delay = 300) {
             for (let i = 0; i < retries; i++) {
-                const token = localStorage.getItem('user_token');
-                if (token) return token;
+                const token = localStorage.getItem('access_token');
+                if (token && isValidJWT(token)) return token;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
             return null; // Se não encontrou o token após as tentativas
         },
+        
         async getProfileUser() {
             try {
                 const token = await this.waitForToken();

@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from models.productSeo import ProductSeo
 from database import db
+from sqlalchemy.orm import joinedload
 
 class ProductSeoController:
     @staticmethod
@@ -78,3 +79,39 @@ class ProductSeoController:
         except Exception as e:
             db.session.rollback()
             return jsonify({"erro": f"Erro ao atualizar SEO: {str(e)}"}), 500
+        
+    @staticmethod
+    def get_by_slug(slug):
+        try:
+            seo = ProductSeo.query.options(joinedload(ProductSeo.product)).filter_by(slug=slug).first()
+
+            if not seo:
+                return None, {"error": "Slug não encontrado"}, 404
+
+            product = seo.product
+
+            if not product:
+                return None, {"error": "Produto não encontrado"}, 404
+
+            return {
+                "product": {
+                    "id": product.id,
+                    "name": product.name,
+                    "price": product.price,
+                    "image_url": product.image_paths,
+                    "thumbnail_path": product.thumbnail_path,
+                    "quantity": product.quantity,
+                    "description": product.description
+                    # outros campos...
+                },
+                "seo": {
+                    "slug": seo.slug,
+                    "meta_title": seo.meta_title,
+                    "meta_description": seo.meta_description,
+                    "meta_keywords": seo.keywords
+                }
+            }, None, None
+
+        except Exception as e:
+            print(f'Erro ao buscar produto por slug: {e}')
+            return None, {"error": "Erro interno"}, 500

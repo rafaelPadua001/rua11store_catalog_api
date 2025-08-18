@@ -2,15 +2,24 @@ import os
 import requests
 import json
 import traceback
+from dotenv import load_dotenv
+from sqlalchemy.orm import Session
+import sqlite3
+import json
+import traceback
 from sqlalchemy.orm import Session
 from models.delivery import Delivery
+from database import db
+
+load_dotenv
+import json
 from database import db
 
 
 class MelhorEnvioService:
     def __init__(self):
         self.token = os.environ.get("MELHOR_ENVIO_TOKEN")
-        self.baseUrl = "https://sandbox.melhorenvio.com.br/api/v2"
+        self.baseUrl = os.environ.get("MELHOR_ENVIO_API")
         self.headers = {
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
@@ -32,7 +41,7 @@ class MelhorEnvioService:
         ]
 
         payload = {
-            "from": {"postal_code": zipcode_origin},
+            "from": {"postal_code": os.getenv("SENDER_POSTAL_CODE")},
             "to": {"postal_code": zipcode_destiny},
             "products": products,
             "services": "",
@@ -114,6 +123,47 @@ class MelhorEnvioService:
         if delivery:
             delivery.melhorenvio_id = shipment_data['id']
             delivery.order_id = shipment_data['protocol']
+            delivery.serviceid = shipment_data['service_id']
+            delivery.agency_id = shipment_data['agency_id']
+            delivery.quote = shipment_data['quote']
+            delivery.coupon = shipment_data['coupon']
+            delivery.discount = shipment_data['discount']
+            delivery.delivery_min = shipment_data['delivery_min']
+            delivery.delivery_max = shipment_data['delivery_max']
+            delivery.status = shipment_data['status']
+           # delivery.weight = shipment_data['weight']
+           # delivery.width = shipment_data['width']
+           # delivery.height = shipment_data['height']
+           # delivery.length = shipment_data['length']
+            delivery.diameter = shipment_data['diameter']
+            delivery.format = shipment_data['format']
+            delivery.billed_weight = shipment_data['billed_weight']
+            delivery.receipt = shipment_data['receipt']
+            delivery.own_hand = shipment_data['own_hand']
+            delivery.collect = shipment_data['collect']
+            delivery.collect_schedule_at = shipment_data.get('collect_schedule_at')
+            delivery.reverse = shipment_data['reverse']
+            delivery.non_commercial = shipment_data['non_commercial']
+            delivery.authorization_code = shipment_data['authorization_code']
+            delivery.tracking = shipment_data['tracking']
+            delivery.self_tracking = shipment_data['self_tracking']
+            delivery.delivery_receipt = shipment_data['delivery_receipt']
+            delivery.additional_info = shipment_data['additional_info']
+            delivery.cte_key = shipment_data['cte_key']
+            delivery.paid_at = shipment_data['paid_at']
+            delivery.generated_at = shipment_data['generated_at']
+            delivery.posted_at = shipment_data['posted_at']
+            delivery.delivered_at = shipment_data['delivered_at']
+            delivery.canceled_at = shipment_data['canceled_at']
+            delivery.suspend_at = shipment_data.get('suspend_at')
+            delivery.expired_at = shipment_data['expired_at']
+            delivery.create_at = shipment_data['created_at']  # cuidado com nome: pode ser 'created_at'
+            delivery.updated_at = shipment_data['updated_at']
+            delivery.parse_api_at = shipment_data.get('parse_api_at')
+            delivery.received_at = shipment_data['received_at']
+            delivery.risk = shipment_data['risk']
+
+            print(f'Shipment Ddata: {shipment_data}')
             print(f"Delivery ID {data['id']} atualizado com melhorenvio_id {shipment_data['id']} e order_id {shipment_data['protocol']}")
             return True
         else:
@@ -133,17 +183,34 @@ class MelhorEnvioService:
         return True  # Pode adicionar a verificação do algoritmo de CNPJ aqui
 
     def build_shipment_payload(self, data, cpf_cnpj):
+        products = data.get("products", [])
+        
+        total_weight = sum(p.get("weight", 0) * p.get("quantity", 1) for p in products)
+        total_height = sum(p.get("height", 0) * p.get("quantity", 1) for p in products)
+        total_width  = sum(p.get("width", 0) * p.get("quantity", 1) for p in products)
+        total_length = sum(p.get("length", 0) * p.get("quantity", 1) for p in products)
+
+        # Se não tiver dimensões por produto, usa os campos genéricos
+        if not total_weight:
+            total_weight = data.get("weight", 0)
+        if not total_height:
+            total_height = data.get("height", 0)
+        if not total_width:
+            total_width = data.get("width", 0)
+        if not total_length:
+            total_length = data.get("length", 0)
+
         return {
             "service": "2",
             "from": {
-                "name": "Rua11Store",
-                "phone": "+556199051731",
-                "email": "rafael.f.p.faria@hotmail.com",
-                "postal_code": "73082180",
-                "address": "QMS 19",
-                "number": "19",
-                "city": "Brasília",
-                "state_abbr": "DF"
+                "name": os.getenv("SENDER_NAME"),
+                "phone": os.getenv("SENDER_PHONE"),
+                "email": os.getenv("SENDER_EMAIL"),
+                "postal_code": os.getenv("SENDER_POSTAL_CODE"),
+                "address": os.getenv("SENDER_ADDRESS"),
+                "number": os.getenv("SENDER_NUMBER"),
+                "city": os.getenv("SENDER_CITY"),
+                "state_abbr": os.getenv("SENDER_STATE")
             },
             "to": {
                 "name": data["recipient_name"],
@@ -162,22 +229,23 @@ class MelhorEnvioService:
                     "quantity": p.get("quantity", 1),
                     "unitary_value": p["price"]
                 }
-                for p in data.get("products", []) if "name" in p and "price" in p
+                for p in products if "name" in p and "price" in p
             ],
             "volumes": [{
-                "height": data["height"],
-                "width": data["width"],
-                "length": data["length"],
-                "weight": data["weight"]
+                "height": round(float(total_height), 2),
+                "width": round(float(total_width), 2),
+                "length": round(float(total_length), 2),
+                "weight": round(float(total_weight), 2)
             }]
         }
+
 
     def make_request(self, url, method, payload=None):
         headers = {
             "Accept": "application/json",
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
-            "User-Agent": "Rua11Store (rafael.f.p.faria@hotmail.com)"
+            "User-Agent": f"({os.getenv('SENDER_NAME')}) ({os.getenv('SENDER_EMAIL')})"
         }
         try:
             if method.lower() == "post":

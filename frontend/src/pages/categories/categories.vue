@@ -1,10 +1,11 @@
 <template>
-  <v-row justify="center">
-    <v-col cols="12" md="12" lg="8" xl="6">
-      <v-card class="pa-4">
+  <v-row justify="center" no-gutters>
+    <v-col cols="12" md="12" lg="10" xl="6">
+      <v-card class="pa-4" elevation="0">
         <v-card-title class="d-flex justify-center">
-          <h1 class="text-h5">Categories Management</h1>
+          <h5>Categories Management</h5>
         </v-card-title>
+        <v-divider></v-divider>
 
         <v-card-actions class="d-flex justify-end mb-4">
           <v-btn color="primary" @click="newItem">
@@ -13,8 +14,8 @@
           </v-btn>
         </v-card-actions>
 
-        <v-data-table :headers="headers" :items="visibleCategories" :items-per-page="10" class="elevation-1" item-key="id"
-          fixed-header height="500" :loading="loading" loading-text="Loading categories...">
+        <v-data-table :headers="headers" :items="visibleCategories" :items-per-page="10" class="elevation-1"
+          item-key="id" fixed-header height="500" :loading="loading" loading-text="Loading categories...">
           <template v-slot:item.name="{ item }">
             <div class="d-flex align-center" :style="{ 'padding-left': item.is_subcategory ? '32px' : '0' }">
 
@@ -55,13 +56,18 @@
             <v-container>
               <v-row>
                 <v-col cols="12">
-                  <v-select v-model="editedItem.is_subcategory" :items="categoryTypes" label="Category Type"
-                    item-text="text" item-title="text" item-value="value" outlined dense></v-select>
+                  <label>Select Category Type:</label>
+                  <v-select v-model="editedItem.is_subcategory" :items="categoryTypes" item-text="title"
+                    item-title="title" item-value="key" label="Category Type" outlined dense></v-select>
+
                 </v-col>
+                
                 <v-col cols="12" v-if="editedItem.is_subcategory">
+                  <label>Select Subcategory:</label>
                   <v-select v-model="editedItem.parent_id" :items="mainCategories" label="Parent Category"
                     item-title="name" item-text="name" item-value="id" outlined dense></v-select>
                 </v-col>
+                <label>Category Name:</label>
                 <v-col cols="12">
                   <v-text-field v-model="editedItem.name" label="Category Name" outlined dense></v-text-field>
                 </v-col>
@@ -96,8 +102,8 @@ export default {
       expandedCategories: [],
       dialog: false,
       editedIndex: -1,
-      editedItem: { id: null, name: '', is_subcategory: false, parent_id: null },
-      defaultItem: { id: null, name: '', is_subcategory: false, parent_id: null },
+      editedItem: { id: null, name: '', is_subcategory: null, parent_id: null },
+      defaultItem: { id: null, name: '', is_subcategory: null, parent_id: null },
       headers: [
         // { text: 'ID', value: 'id', width: '80px', align: 'center' },
         { title: 'Name', key: 'name', width: '250px' },
@@ -110,6 +116,13 @@ export default {
       ],
       categories: []
     };
+  },
+  watch: {
+    'editedItem.is_subcategory'(newVal) {
+      if (!newVal) {
+        this.editedItem.parent_id = null;
+      }
+    }
   },
   computed: {
     allCategories() {
@@ -124,8 +137,8 @@ export default {
     mainCategories() {
       return this.categories.filter(c => !c.is_subcategory);
     },
-    visibleCategories(){
-      return this.allCategories.filter(c => 
+    visibleCategories() {
+      return this.allCategories.filter(c =>
         !c.is_subcategory || this.expandedCategories.includes(c.parent_id)
       );
     },
@@ -148,13 +161,13 @@ export default {
         this.loading = false;
       }
     },
-    toggleCategory(categoryId){
+    toggleCategory(categoryId) {
       const index = this.expandedCategories.indexOf(categoryId);
 
-      if(index === -1){
+      if (index === -1) {
         this.expandedCategories.push(categoryId);
       }
-      else{
+      else {
         this.expandedCategories.splice(index, 1);
       }
     },
@@ -167,33 +180,33 @@ export default {
       this.editedItem = { ...item };
       this.dialog = true;
     },
-   async save() {
-  try {
-    const token = localStorage.getItem('user_token');
-    
-    if (!token) return this.$router.push('/login');
+    async save() {
+      try {
+        const token = localStorage.getItem('access_token');
 
-    const config = { headers: { 'Authorization': `Bearer ${token}` } };
-    
-    
-    let payload = { ...this.editedItem };
-    if (typeof payload.is_subcategory === 'object' && payload.is_subcategory !== null) {
-      payload.is_subcategory = payload.is_subcategory.key;
-    }
+        if (!token) return this.$router.push('/login');
 
-    let response;
-    if (this.editedIndex === -1) {
-      response = await api.post('/categories/', payload, config);
-      this.categories.push(response.data.category);
-    } else {
-      response = await api.put(`/categories/${this.editedItem.id}`, payload, config);
-      Object.assign(this.categories[this.editedIndex], response.data.category);
-    }
-    this.close();
-  } catch (error) {
-    console.error("Error saving category:", error.response?.data || error.message);
-  }
-},
+        const config = { headers: { 'Authorization': `Bearer ${token}` } };
+
+
+        let payload = { ...this.editedItem };
+        if (typeof payload.is_subcategory === 'object' && payload.is_subcategory !== null) {
+          payload.is_subcategory = payload.is_subcategory.key;
+        }
+
+        let response;
+        if (this.editedIndex === -1) {
+          response = await api.post('/categories/', payload, config);
+          this.categories.push(response.data.category);
+        } else {
+          response = await api.put(`/categories/${this.editedItem.id}`, payload, config);
+          Object.assign(this.categories[this.editedIndex], response.data.category);
+        }
+        this.close();
+      } catch (error) {
+        console.error("Error saving category:", error.response?.data || error.message);
+      }
+    },
     async deleteItem(item) {
       if (!confirm('Are you sure you want to delete this item?')) return;
       try {

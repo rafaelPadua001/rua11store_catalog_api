@@ -1,11 +1,11 @@
 <template>
-    <v-row justify="center">
-        <v-col cols="12" md="12" lg="12" xl="12">
-            <v-card class="pa-4">
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" sm="12" md="10" lg="10" xl="6">
+            <v-card class="pa-4" elevation="0">
                 <v-card-title class="d-flex justify-center">
-                    <h1 class="text-h5">SEO Management</h1>
+                    <h5>SEO Management</h5>
                 </v-card-title>
-
+                <v-divider></v-divider>
                 <v-card-actions class="d-flex justify-end mb-4">
                     <v-btn color="primary" @click="newSeoItem" class="mb-2">
                         <v-icon left>mdi-plus</v-icon>
@@ -115,11 +115,11 @@ export default {
                 { title: "Meta Title", key: "metaTitle" },
                 { title: "Meta Description", key: "metaDescription" },
                 { title: "Meta Keywords", key: "metaKeywords" },
-                { title: "OG Title", key: "ogTitle" },
-                { title: "OG Description", key: "ogDescription" },
+                //{ title: "OG Title", key: "ogTitle" },
+               // { title: "OG Description", key: "ogDescription" },
                 { title: "OG Image", key: "ogImage" },
-                { title: "Title", key: "title" },
-                { title: "Content", key: "content", align: "right" },
+               // { title: "Title", key: "title" },
+                //{ title: "Content", key: "content", align: "right" },
                 { title: "Actions", key: "actions", width: "120px", align: "center", sortable: false },
             ],
             isPaymentButtonPayTagDisabled: true,
@@ -247,7 +247,7 @@ export default {
         async saveSeo() {
             this.loading = true;
             try {
-                const token = localStorage.getItem('user_token');
+                const token = localStorage.getItem('access_token');
 
                 if (!token) return this.$router.push('/login');
 
@@ -301,7 +301,7 @@ export default {
             if (!confirm("Tem certeza que deseja remover este item de SEO permanentemente ?")) return;
 
             try {
-                const token = localStorage.getItem('user_token')
+                const token = localStorage.getItem('access_token')
                 if (!token) return this.$router.push('/login')
 
                 await api.delete(`/seo/seo/${seoId}`, {
