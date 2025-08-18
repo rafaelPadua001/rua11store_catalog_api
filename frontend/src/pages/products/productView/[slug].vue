@@ -1,10 +1,8 @@
 <template>
   <v-container class="fill-height">
-    <v-row justify="center">
+    <v-row justify="center" no-gutters>
       <v-col cols="12" sm="10" md="8" lg="10" xl="6">
         <v-card class="pa-2">
-          <!-- Imagem do produto -->
-
 
           <!-- Nome e preço -->
           <v-card-title class="d-flex justify-start">
@@ -12,77 +10,72 @@
               {{ product.name }}
             </h3>
           </v-card-title>
-       
+
           <v-divider></v-divider>
           <v-card-subtitle class="text-h6">
             R$ {{ product.price }}
           </v-card-subtitle>
 
-          <!-- <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
-            <v-sheet class="overflow-hidden" max-width="700" rounded="xl">
-              <v-carousel
-                v-model="currentIndex"
-                direction="vertical"
-                height="400"
-                progress="red"
-                vertical-arrows="left"
-                vertical-delimiters="right"
-                hide-delimiters-backgrund
-              >
-                <v-carousel-item
-                  v-for="(img, index) in product.images"
-                ></v-carousel-item>
-              </v-carousel>
-            </v-sheet>
-          </v-defaults-provider> -->
-          <v-img :src="product.thumbnail_path" :alt="product?.seo?.slug" max-height="500" contain>
-<template v-slot:placeholder>
-      <div class="d-flex align-center justify-center fill-height">
-        <v-progress-circular
-          color="grey-lighten-4"
-          indeterminate
-        ></v-progress-circular>
-      </div>
-    </template>
-          </v-img>
-          <!-- Descrição e palavras-chave -->
-          <!--<v-card-text class="text-justify">
-            <v-row v-if="product?.seo?.meta_keywords">
-              <v-col v-for="(keyword, index) in product.seo.meta_keywords.split(',')" :key="index">
-                <v-chip-group column>
-                  <v-chip>
-                    {{ keyword.trim() }}
-                  </v-chip>
-                </v-chip-group>
+          <!-- Carrossel de imagens -->
+          <v-card-text>
+            <v-row justify="center" no-gutters>
+              <v-col>
+                <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
+                  <v-sheet class="mx-auto overflow-hidden" rounded="lg">
+                    <v-carousel v-model="currentIndex"  progress="purple"
+                      show-arrows="hover" hide-delimiter>
+                      <!-- Primeira imagem: thumbnail -->
+                      <v-carousel-item v-if="product.thumbnail_path" :src="product.thumbnail_path"
+                        :alt="product?.seo?.slug">
+
+                      </v-carousel-item>
+
+
+
+                      <!-- Outras imagens -->
+                      <v-carousel-item v-for="(img, index) in product.images" :key="index" :src="img.url">
+
+                      </v-carousel-item>
+
+
+                    </v-carousel>
+
+                    <!-- Overlay com legenda -->
+                    <v-overlay :scrim="false"
+                      content-class="d-flex flex-column align-center justify-space-between pointer-pass-through py-3"
+                      contained model-value no-click-animation persistent>
+
+                    </v-overlay>
+                  </v-sheet>
+                  <div class="text-center">
+                    <v-chip :text="`${currentIndex + 1} / ${product.images.length + 1}`" color="deep-purple"
+                      size="small" variant="flat"></v-chip>
+                  </div>
+
+                </v-defaults-provider>
+
               </v-col>
             </v-row>
-
-
-
-
-
           </v-card-text>
-          <v-divider></v-divider> -->
 
           <v-card-text>
             <p class="text-center">{{ product.description }}</p>
           </v-card-text>
+
           <v-divider></v-divider>
+
           <!-- Botões -->
           <v-card-actions class="d-flex flex-wrap justify-center" style="gap: 1px;">
             <v-btn color="success" @click="goToWhatsApp" variant="elevated" size="small">
               <v-icon left size="large">mdi-whatsapp</v-icon>
-
             </v-btn>
 
             <v-btn color="primary" href="https://rua11store-web.vercel.app/" size="small" variant="elevated">
               <v-icon left size="large">mdi-storefront</v-icon>
-
             </v-btn>
 
             <v-btn color="info" @click="downloadApp" variant="elevated" size="small">
               <v-icon left size="large">mdi-download</v-icon>
-
             </v-btn>
           </v-card-actions>
 
@@ -95,6 +88,7 @@
 <script>
 import axios from "axios";
 import { useSeo } from "@/useSeo";
+import { shallowRef } from "vue";
 
 const api = axios.create({
   baseURL:
@@ -107,11 +101,21 @@ const api = axios.create({
 export default {
   data() {
     return {
-      product: {},
+      product: { images: [] },
+      currentIndex: 0,
     };
   },
   async created() {
     await this.loadProduct();
+  },
+  computed: {
+    currentImage() {
+      // primeira é thumbnail, depois imagens
+      if (this.currentIndex === 0) {
+        return { url: this.product.thumbnail_path, label: this.product.name };
+      }
+      return this.product.images[this.currentIndex - 1] || null;
+    },
   },
   watch: {
     "$route.params.slug": {
@@ -130,7 +134,6 @@ export default {
         const response = await api.get(`/products/product/${pageSlug}`);
         this.product = response.data;
 
-        // Carregar SEO do produto
         if (this.product.seo) {
           const { setSeo } = useSeo();
           setSeo(this.product);

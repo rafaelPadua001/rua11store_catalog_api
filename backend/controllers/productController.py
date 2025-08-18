@@ -9,6 +9,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_req
 from decimal import Decimal, ROUND_HALF_UP
 from controllers.productImageController import ProductImageController
 from controllers.productVideoController import ProductVideoController
+from models.productImage import ProductImage
 import cloudinary
 import cloudinary.uploader
 from datetime import datetime
@@ -134,6 +135,17 @@ class ProductController:
         product_data = data["product"]
         seo_data = data["seo"]
 
+        #found relation images
+        product_id = product_data['id']
+        images = ProductImage.query.filter_by(product_id=product_id).all()
+        image_list = [
+            {
+                "id": img.id,
+                "url": img.image_path
+            }
+            for img in images
+        ]
+
         return jsonify({
             "id": product_data["id"],
             "name": product_data["name"],
@@ -148,6 +160,7 @@ class ProductController:
                 "meta_description": seo_data["meta_description"],
                 "meta_keywords": seo_data['meta_keywords'] 
             },
+            "images": image_list,
             # Se quiser os comentários, precisa buscá-los separadamente
             # Ou incluir na consulta original
             # "comments": [...]
