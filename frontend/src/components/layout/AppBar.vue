@@ -1,18 +1,16 @@
 <template>
   <v-container>
-    <v-row>
-      <v-col cols="12" md="10" sm="8">
-        <v-app-bar color="purple-darken-3" density="comfortable">
-          <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated"></v-app-bar-nav-icon>
-          <v-app-bar-title>
+    <v-app-bar color="purple-darken-3" density="comfortable" flat>
+          <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated" />
+          <v-app-bar-title class="d-flex align-center mx-auto">
             <template v-if="logoUrl">
-              <v-img :src="logoUrl" alt="Logo" width="60" contain class="my-auto" style="cursor: pointer;"
+              <v-img :src="logoUrl" alt="Logo" width="50" contain class="mr-2" style="cursor: pointer"
                 @click="$router.push('/')" />
             </template>
 
-            <template v-else>
+            <span v-else>
               Rua11Store
-            </template>
+            </span>
           </v-app-bar-title>
 
           <v-spacer></v-spacer>
@@ -20,7 +18,7 @@
           <v-menu offset-y :nudge-y="20" content-class="custom-menu">
             <template #activator="{ props }">
               <v-btn icon v-bind="props" @click="showNotifications">
-                <v-icon>mdi-bell</v-icon>
+                <v-icon size="18">mdi-bell</v-icon>
                 <div v-if="hasNewNotifications" class="red-dot"></div>
               </v-btn>
             </template>
@@ -45,21 +43,19 @@
               </v-list-item>
             </v-list>
           </v-menu>
-          <v-snackbar v-model="snackbar.show" :timeout="3000" color="success">
+          <v-snackbar v-model="snackbar.show" :timeout="5000" color="success">
             {{ snackbar.text }}
           </v-snackbar>
           <v-btn icon @click="navigateTo('/')">
-            <v-icon>mdi-domain</v-icon>
+            <v-icon size="18">mdi-domain</v-icon>
           </v-btn>
         </v-app-bar>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="10" sm="8">
+    
+        
         <v-navigation-drawer v-model="drawer" class="bg-purple-darken-3" theme="dark" temporary>
-          <v-list>
+          <v-list dense>
             <v-list-item>
-              <v-list-item-title class="text-h6">Menu</v-list-item-title>
+              <v-list-item-title class="text-h8">Menu</v-list-item-title>
             </v-list-item>
 
             <v-divider></v-divider>
@@ -98,8 +94,7 @@
             </div>
           </v-list>
         </v-navigation-drawer>
-      </v-col>
-    </v-row>
+  
 
 
 
