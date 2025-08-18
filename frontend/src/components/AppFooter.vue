@@ -1,19 +1,24 @@
 <template>
-  <v-footer height="40" app color="purple-darken-4" class="d-flex align-center justify-between px-4">
-    <a v-for="item in social_links" :key="item.title" :href="item.href" :title="item.title"
-      class="d-inline-block mx-2 social-link " rel="noopener noreferrer" target="_blank">
+  <v-footer color="purple-darken-4" class="text-center d-flex flex-column ga-2 py-4">
+    <div class="d-flex ga-3">
+      <a v-for="item in social_links" :key="item.title" :href="item.href" :title="item.title"
+          class="d-inline-block social-link " rel="noopener noreferrer" target="_blank" >
       <v-icon :icon="item.icon" :size="item.icon === '$vuetify' ? 24 : 16" />
     </a>
-
-    <div class="d-flex align-center justify-start ga-2 flex-wrap flex-grow-1 py-3 text-disabled " color="surface-light">
-      <v-btn v-for="link in items" :key="link.title" :text="link.name" variant="text" rounded size="x-small"
-        class="social-link-btn" @click="navigateToPage(link)"></v-btn>
+    </div>
+    
+    <v-divider class="my-0" thickness="2" width="50"></v-divider>
+    
+    <div class="text-caption font-weight-regular opacity-60" color="surface-light">
+      <v-btn v-for="link in items" :key="link.title" :text="link.name" variant="text" rounded 
+        class="" @click="navigateToPage(link)"></v-btn>
 
     </div>
+    <v-divider></v-divider>
 
-    <div class="text-caption text-disabled" style="position: absolute; right: 16px;">
-  &copy; 2022-{{ (new Date()).getFullYear() }} <span class="d-none d-sm-inline-block">Rua11Store</span>
-</div>
+    <div>
+        <span class="d-none d-sm-inline-block">Rua11Store</span>  &copy; 2022-{{ (new Date()).getFullYear() }} 
+    </div>
 
   </v-footer>
 </template>
