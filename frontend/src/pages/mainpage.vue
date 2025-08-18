@@ -2,7 +2,6 @@
   <v-container class="fill-height">
     <v-responsive class="align-center fill-height ms-0 me-auto" max-width="100%">
       <div v-if="!loadFailed && pageContent" class="px-2 px-sm-4 align-center">
-
         <!-- HERO -->
         <v-row justify="center" class="my-0">
           <v-col>
@@ -103,11 +102,12 @@
                 </v-carousel-item>
               </v-carousel>
             </v-col>
+
           </v-row>
+
         </div>
       </div>
-
-      <!-- Loader -->
+     <!-- Loader -->
       <div v-else class="text-center pa-4">
         <v-progress-circular indeterminate color="primary" size="64" />
         <p v-if="slowServer" class="mt-2 text-grey">
@@ -117,13 +117,24 @@
       </div>
     </v-responsive>
 
-    <!-- WhatsApp -->
-    <v-btn color="deep-purple" dark class="whatsapp-btn" href="https://wa.me/556191865680" target="_blank"
-      elevation="10" icon>
-      <v-icon size="28">mdi-whatsapp</v-icon>
-    </v-btn>
+    <!-- FAB Customizado -->
+    <div class="fab-container">
+      <!-- Botão principal -->
+      <button class="fab-main" @click="fab = !fab">
+        <v-icon>mdi-chat</v-icon>
+      </button>
+
+      <!-- Botões filhos -->
+      <transition-group name="fab" tag="div">
+        <a v-for="btn in fabButtons" :key="btn.key" v-show="fab" :href="btn.href" target="_blank" class="fab-child"
+          :style="{ backgroundColor: btn.color }">
+          <v-icon>{{ btn.icon }}</v-icon>
+        </a>
+      </transition-group>
+    </div>
   </v-container>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
@@ -144,6 +155,27 @@ const pageBackgroundColor = ref('')
 const pageImage = ref('')
 const pageHeroButtons = ref<any[]>([])
 const slowServer = ref(false)
+const fab = ref(false)
+const fabButtons = [
+  {
+    key: 'wa',
+    icon: 'mdi-whatsapp',
+    color: 'green',
+    href: 'https://wa.me/556191865680'
+  },
+  {
+    key: 'msg',
+    icon: 'mdi-comment-text',
+    color: 'teal',
+    href: 'https://wa.me/556191865680?text=Ol%C3%A1%2C%20quero%20mais%20informa%C3%A7%C3%B5es!'
+  },
+  {
+    key: 'group',
+    icon: 'mdi-account-group',
+    color: 'blue',
+    href: 'https://chat.whatsapp.com/XXXXXXXXXXXXXXX'
+  }
+]
 
 interface Product {
   name: string
@@ -170,6 +202,7 @@ const productsData = ref<Product[]>([])
 const comments = ref<Comment[]>([])
 const activeIndex = ref(0)
 const activeCommentIndex = ref(0)
+
 
 const api = axios.create({
   baseURL:
@@ -280,13 +313,14 @@ onMounted(() => {
 
 <style scoped>
 .hero-card {
-   background-image:
-    radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px),
-    repeating-radial-gradient(circle at center, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px),
-    repeating-conic-gradient(rgba(255,255,255,0.05) 0deg 5deg, transparent 5deg 10deg);
+  background-image:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05) 10px, transparent 10px, transparent 20px),
+    repeating-conic-gradient(rgba(255, 255, 255, 0.05) 0deg 5deg, transparent 5deg 10deg);
   background-size: cover;
   color: white;
-  min-height: 375px; /* garante espaço suficiente para botões */
+  min-height: 375px;
+  /* garante espaço suficiente para botões */
 }
 
 .v-btn {
@@ -307,20 +341,54 @@ onMounted(() => {
   opacity: 0.90
 }
 
-.whatsapp-btn {
+.fab-container {
   position: fixed;
-  bottom: 50px;
+  bottom: 20px;
   right: 20px;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+}
+
+.fab-main {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  min-width: 56px;
-  padding: 0;
+  background-color: #673ab7;
+  color: white;
+  border: none;
+  cursor: pointer;
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 9999;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+
+.fab-child {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.fab-enter-active,
+.fab-leave-active {
+  transition: all 0.2s;
+}
+
+.fab-enter-from,
+.fab-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
 
 .mx-auto.text-center {
   max-width: 100%;
