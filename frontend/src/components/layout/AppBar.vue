@@ -1,100 +1,98 @@
 <template>
   <v-container>
     <v-app-bar color="purple-darken-3" density="comfortable" flat>
-          <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated" />
-          <v-app-bar-title class="d-flex align-center mx-auto">
-            <template v-if="logoUrl">
-              <v-img :src="logoUrl" alt="Logo" width="50" contain class="mr-2" style="cursor: pointer"
-                @click="$router.push('/')" />
-            </template>
+      <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated" />
+      <v-app-bar-title class="d-flex align-center mx-auto">
+        <template v-if="logoUrl">
+          <v-img :src="logoUrl" alt="Logo" width="50" contain class="mr-2" style="cursor: pointer"
+            @click="$router.push('/')" />
+        </template>
 
-            <span v-else>
-              Rua11Store
-            </span>
-          </v-app-bar-title>
+        <span v-else>
+          Rua11Store
+        </span>
+      </v-app-bar-title>
 
-          <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
 
-          <v-menu offset-y :nudge-y="20" content-class="custom-menu">
-            <template #activator="{ props }">
-              <v-btn icon v-bind="props" @click="showNotifications">
-                <v-icon size="18">mdi-bell</v-icon>
-                <div v-if="hasNewNotifications" class="red-dot"></div>
-              </v-btn>
-            </template>
-
-
-            <v-list>
-              <v-list-item v-for="(notification, index) in notifications" :key="index">
-                <v-list-item-title>
-                  <v-card @click="markAsRead(notification.id)">
-                    <v-card-text>{{ notification.message }}</v-card-text>
-                    <v-card-actions>
-                      <!-- <v-btn text @click="notification.show = true">Ver</v-btn> -->
-                      <v-btn text @click="markAsRead(notification.id)">Marcar</v-btn>
-                      <!-- <v-btn text @click="notification.show = false">Fechar</v-btn> -->
-
-                    </v-card-actions>
-                  </v-card>
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item v-if="notifications.length === 0">
-                <v-list-item-title class="text-grey">Sem notificações</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-          <v-snackbar v-model="snackbar.show" :timeout="5000" color="success">
-            {{ snackbar.text }}
-          </v-snackbar>
-          <v-btn icon @click="navigateTo('/')">
-            <v-icon size="18">mdi-domain</v-icon>
+      <v-menu offset-y :nudge-y="20" content-class="custom-menu">
+        <template #activator="{ props }">
+          <v-btn icon v-bind="props" @click="showNotifications">
+            <v-icon size="18">mdi-bell</v-icon>
+            <div v-if="hasNewNotifications" class="red-dot"></div>
           </v-btn>
-        </v-app-bar>
-    
-        
-        <v-navigation-drawer v-model="drawer" class="bg-purple-darken-3" theme="dark" temporary>
-          <v-list dense>
-            <v-list-item>
-              <v-list-item-title class="text-h8">Menu</v-list-item-title>
-            </v-list-item>
+        </template>
 
-            <v-divider></v-divider>
 
-            <div v-if="isAuthenticated">
-              <v-list-item link @click="navigateTo('/authenticator/dashboard')" prepend-icon="mdi-home"
-                title="Dashboard"></v-list-item>
-              <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
-                title="Pages"></v-list-item>
-              <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
-              <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
-                title="Categories"></v-list-item>
-              <v-list-item link @click="navigateTo('/products/products')" prepend-icon="mdi-cart"
-                title="Products"></v-list-item>
-              <v-list-item link @click="navigateTo('/stock/stock')" prepend-icon="mdi-finance"
-                title="Stock"></v-list-item>
-              <v-list-item link @click="navigateTo('/payments/payments')" prepend-icon="mdi-wallet"
-                title="Payments"></v-list-item>
-              <v-list-item link @click="navigateTo('/delivery/delivery')" prepend-icon="mdi-moped"
-                title="Delivery"></v-list-item>
-              <v-list-item link @click="navigateTo('/orders/orders')" prepend-icon="mdi-package"
-                title="Orders"></v-list-item>
-              <v-list-item link @click="navigateTo('/coupons/coupons')" prepend-icon="mdi-bookmark"
-                title="Coupons"></v-list-item>
-              <v-list-item link @click="navigateTo('/comments/comment')" prepend-icon="mdi-comment-multiple"
-                title="Comments"></v-list-item>
-              <v-list-item link @click="navigateTo('/authenticator/profile')" prepend-icon="mdi-account"
-                title="Profile"></v-list-item>
-              <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
-            </div>
+        <v-list>
+          <v-list-item v-for="(notification, index) in notifications" :key="index">
+            <v-list-item-title>
+              <v-card @click="markAsRead(notification.id)">
+                <v-card-text>{{ notification.message }}</v-card-text>
+                <v-card-actions>
+                  <!-- <v-btn text @click="notification.show = true">Ver</v-btn> -->
+                  <v-btn text @click="markAsRead(notification.id)">Marcar</v-btn>
+                  <!-- <v-btn text @click="notification.show = false">Fechar</v-btn> -->
 
-            <div v-else>
-              <v-list-item link @click="navigateTo('/')" prepend-icon="mdi-home" title="Home"></v-list-item>
-              <v-list-item link @click="navigateTo('/authenticator/login')" prepend-icon="mdi-login"
-                title="Login"></v-list-item>
-            </div>
-          </v-list>
-        </v-navigation-drawer>
-  
+                </v-card-actions>
+              </v-card>
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item v-if="notifications.length === 0">
+            <v-list-item-title class="text-grey">Sem notificações</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-snackbar v-model="snackbar.show" :timeout="5000" color="success">
+        {{ snackbar.text }}
+      </v-snackbar>
+      <v-btn icon @click="navigateTo('/')">
+        <v-icon size="18">mdi-domain</v-icon>
+      </v-btn>
+    </v-app-bar>
+
+    <v-navigation-drawer v-model="drawer" class="bg-purple-darken-3" theme="dark" temporary>
+      <v-list dense>
+        <v-list-item>
+          <v-list-item-title class="text-h8">Menu</v-list-item-title>
+        </v-list-item>
+
+        <v-divider></v-divider>
+
+        <div v-if="isAuthenticated">
+          <v-list-item link @click="navigateTo('/authenticator/dashboard')" prepend-icon="mdi-home"
+            title="Dashboard"></v-list-item>
+          <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
+            title="Pages"></v-list-item>
+          <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
+          <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
+            title="Categories"></v-list-item>
+          <v-list-item link @click="navigateTo('/products/products')" prepend-icon="mdi-cart"
+            title="Products"></v-list-item>
+          <v-list-item link @click="navigateTo('/stock/stock')" prepend-icon="mdi-finance" title="Stock"></v-list-item>
+          <v-list-item link @click="navigateTo('/payments/payments')" prepend-icon="mdi-wallet"
+            title="Payments"></v-list-item>
+          <v-list-item link @click="navigateTo('/delivery/delivery')" prepend-icon="mdi-moped"
+            title="Delivery"></v-list-item>
+          <v-list-item link @click="navigateTo('/orders/orders')" prepend-icon="mdi-package"
+            title="Orders"></v-list-item>
+          <v-list-item link @click="navigateTo('/coupons/coupons')" prepend-icon="mdi-bookmark"
+            title="Coupons"></v-list-item>
+          <v-list-item link @click="navigateTo('/comments/comment')" prepend-icon="mdi-comment-multiple"
+            title="Comments"></v-list-item>
+          <v-list-item link @click="navigateTo('/authenticator/profile')" prepend-icon="mdi-account"
+            title="Profile"></v-list-item>
+          <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
+        </div>
+
+        <div v-else>
+          <v-list-item link @click="navigateTo('/')" prepend-icon="mdi-home" title="Home"></v-list-item>
+          <v-list-item link @click="navigateTo('/authenticator/login')" prepend-icon="mdi-login"
+            title="Login"></v-list-item>
+        </div>
+      </v-list>
+    </v-navigation-drawer>
+
 
 
 
