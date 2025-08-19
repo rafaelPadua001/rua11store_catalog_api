@@ -117,7 +117,7 @@
                     Por que escolher a Rua11Store?
                   </span>
                 </v-card-title>
-
+                <v-divider class="border-opacity-20" thickness="2" color="grey"></v-divider>
                 <v-card-text>
                   <v-row justify="center" align="center" class="text-center" no-gutters>
                     <v-col cols="12" sm="6" md="3" class="mb-4">
