@@ -21,7 +21,7 @@
 
 
                 <v-col cols="12" md="6">
-                  <v-img :src="pageImage" :alt="pageTitle" max-height="450"  class="mx-auto d-block" />
+                  <v-img :src="pageImage" :alt="pageTitle" max-height="450" class="mx-auto d-block" />
                 </v-col>
 
               </v-row>
@@ -45,54 +45,73 @@
             </v-card>
           </v-col>
         </v-row>
-
+        <br></br>
+        <br></br>
         <!-- Produtos -->
-        <div class="mt-14 d-flex justify-center flex-wrap">
-          <v-row justify="center" class="my-2">
-            <v-col cols="12" sm="12" md="10" lg="6">
-              <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" interval="750000"
-                v-model="activeIndex" max-height="100%" height="400">
-                <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
-                  <v-row justify="center" class="pa-2" dense>
-                    <v-col v-for="product in chunk" :key="product.name" cols="12" sm="6" md="6">
-                      <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
-                        <v-card class="pa-4 align-center" elevation="0">
-                          <v-card-text>
-                            <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
-                              target="_blank" rel="noopener noreferrer">
-                              <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer"
-                                contain max-height="250">
-                                <v-chip class="ma-0" color="deep-purple" text-color="white"
-                                  style="position: absolute; bottom: 0; right: 0;">
-                                  <strong>R$ {{ product.price ?? '0,00' }}</strong>
-                                </v-chip>
-                              </v-img>
-                            </a>
+        <div>
+          <v-card class="rounded-xl overflow-hidden hero-card" elevation="4" width="100%" color="#b48a17">
+            <v-card-title>Conheça nosso produtos</v-card-title>
+            <v-divider class="border-opacity-50" thickness="2" color="deep-purple"></v-divider>
+
+            <v-card-text>
+              <v-row justify="center" class="my-1">
+                <v-col cols="auto" md="12" sm="12">
+                  <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" height="300" interval="750000"
+                    v-model="activeIndex" max-height="100%">
+                    <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
+                      <v-row justify="center">
+                        <v-col cols="12" sm="4" md="4" v-for="product in chunk" :key="product.name">
+                          <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
+                            <v-card class="pa-2 align-center rounded-lg overflow-hidden" elevation="0"
+                              style="background-color: rgba(255, 255, 255, 0.1);">
+                              <v-card-text>
+                                <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
+                                  target="_blank" rel="noopener noreferrer">
+                                  <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer"
+                                    contain max-height="170">
+                                    <v-chip class="ma-0" color="deep-purple" text-color="white"
+                                      style="position: absolute; bottom: 0; right: 0;">
+                                      <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                                    </v-chip>
+                                  </v-img>
+                                </a>
 
 
-                          </v-card-text>
-                          <v-card-text class="text-center">
-                            <span class="text-h8"><strong>{{ product.name }}</strong></span>
-                          </v-card-text>
+                              </v-card-text>
 
-                          <!--<v-card-text class="text-center">
+
+                              <!--<v-card-text class="text-center">
                             <v-btn color="primary">Comprar</v-btn>
                           </v-card-text> -->
 
-                        </v-card>
-                      </template>
-                    </v-col>
-                  </v-row>
-                </v-carousel-item>
-              </v-carousel>
-            </v-col>
-          </v-row>
+                            </v-card>
+                            <span class="d-block text-truncate " style="max-width: 100%; overflow: hidden;">
+                              <strong>{{ product.name }}</strong>
+                            </span>
+
+                          </template>
+
+                        </v-col>
+                      </v-row>
+                    </v-carousel-item>
+                  </v-carousel>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-divider class="border-opacity-50" thickness="2" color="deep-purple"></v-divider>
+            <v-card-actions>
+              <v-btn block>Ver tudo</v-btn>
+            </v-card-actions>
+          </v-card>
+
         </div>
+        <br></br>
+        <br></br>
 
         <div>
           <v-row no-gutters>
             <v-col>
-              <v-card class="pa-2" elevation="0" max-height="100%">
+              <v-card class="overflow-hidden" elevation="4" max-height="100%" color="trasparent">
                 <v-card-title class="text-left white--text">
                   <span class="d-block title-responsive">
                     Por que escolher a Rua11Store?
@@ -126,18 +145,21 @@
             </v-col>
           </v-row>
         </div>
-
-
-        <v-spacer></v-spacer>
-        <v-spacer></v-spacer>
+        <br></br>
+        <br></br>
 
         <div>
           <v-row no-gutters>
             <v-col>
-              <v-card class="pa-2" elevation="0" max-height="90%" height="300">
+              <v-card class="rounded-xl overflow-hidden hero-card" elevation="4" max-height="275" color="grey">
                 <v-card-title class="text-left white--text">
                   <span class="d-block title-responsive">O que nossos clientes estão dizendo</span></v-card-title>
                 <v-card-text>
+
+                <v-divider></v-divider>
+                <br></br>
+               
+
                   <div class="d-flex justify-center flex-wrap">
                     <v-row no-gutters>
                       <v-col cols="12">
@@ -146,7 +168,7 @@
                           <v-carousel-item v-for="(pair, pairIndex) in chunkedComments" :key="pairIndex">
                             <v-row>
                               <v-col v-for="(comment, index) in pair" :key="comment.id" cols="auto" md="6" class="mb-2">
-                                <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" elevation="1">
+                                <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" elevation="1"  style="background-color: rgba(255, 255, 255, 0.7);">
                                   <v-row class="align-center" no-gutters>
                                     <v-col cols="auto" class="pr-8">
                                       <v-avatar size="60">
@@ -351,7 +373,7 @@ async function loadProductsToCarousel() {
 
 
 const { smAndDown } = useDisplay()
-const chunkSize = computed(() => (smAndDown.value ? 1 : 2))
+const chunkSize = computed(() => (smAndDown.value ? 1 : 3))
 
 const chunkedProducts = computed(() => {
   const chunks = []
@@ -362,7 +384,7 @@ const chunkedProducts = computed(() => {
 })
 
 const chunkedComments = computed(() => {
-  const size = smAndDown.value ? 1 : 2
+  const size = smAndDown.value ? 1 : 4
   const chunks: Comment[][] = []
   for (let i = 0; i < comments.value.length; i++) {
     chunks.push(comments.value.slice(i, i + size))
