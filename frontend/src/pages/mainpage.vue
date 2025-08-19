@@ -50,7 +50,7 @@
         <!-- Produtos -->
         <div>
           <v-card class="rounded-xl overflow-hidden hero-card" elevation="4" width="100%" color="#b48a17">
-            <v-card-title>Conheça nosso produtos</v-card-title>
+            <v-card-title>Conheça nossos produtos !</v-card-title>
             <v-divider class="border-opacity-50" thickness="2" color="deep-purple"></v-divider>
 
             <v-card-text>
@@ -100,7 +100,10 @@
             </v-card-text>
             <v-divider class="border-opacity-50" thickness="2" color="deep-purple"></v-divider>
             <v-card-actions>
-              <v-btn block>Ver tudo</v-btn>
+              <v-btn block href="https://rua11store-web.vercel.app/" target="_blank" icon>
+                <!--<v-icon>mdi-eye</v-icon>-->
+                <span>Ver tudo</span>
+              </v-btn>
             </v-card-actions>
           </v-card>
 
@@ -114,7 +117,7 @@
               <v-card class="overflow-hidden" elevation="4" max-height="100%" color="trasparent">
                 <v-card-title class="text-left white--text">
                   <span class="d-block title-responsive">
-                    Por que escolher a Rua11Store?
+                    Por que escolher a Rua11Store ?
                   </span>
                 </v-card-title>
                 <v-divider class="border-opacity-20" thickness="2" color="grey"></v-divider>
@@ -153,7 +156,7 @@
             <v-col>
               <v-card class="rounded-xl overflow-hidden hero-card" elevation="4" max-height="275" color="grey">
                 <v-card-title class="text-left white--text">
-                  <span class="d-block title-responsive">O que nossos clientes estão dizendo</span></v-card-title>
+                  <span class="d-block title-responsive">O que nossos clientes estão dizendo:</span></v-card-title>
                 <v-card-text>
 
                 <v-divider></v-divider>
