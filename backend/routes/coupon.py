@@ -39,6 +39,7 @@ def create_coupon():
     user_id = get_jwt_identity()
 
     client_id = request.form.get('client_id')
+    client_username = request.form.get('client_username')
     title = request.form.get('title')
     code = request.form.get('code')
     discount = request.form.get('discount')
@@ -60,6 +61,7 @@ def create_coupon():
         coupon = coupon_controller.create_coupon(
             user_id=user_id,
             client_id=client_id,
+            client_username=client_username,
             title=title,
             code=code,
             discount=discount,

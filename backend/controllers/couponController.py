@@ -21,15 +21,11 @@ class CouponController:
         user_coupons = self.db_session.query(CouponUser).filter_by(client_id=user_id).all()
         return [coupon.to_dict() for coupon in user_coupons]
     
-    def create_coupon(self, user_id, client_id, title, code, discount, start_date, end_date, image_path=None):
+    def create_coupon(self, user_id, client_id, client_username, title, code, discount, start_date, end_date, image_path=None):
         # Converter client_id para int ou None
         if client_id == '' or client_id is None:
             client_id = None
-        else:
-            try:
-                client_id = int(client_id)
-            except ValueError:
-                raise Exception("client_id inválido, deve ser um número inteiro.")
+      
 
         # mesmo para user_id e discount se vierem como strings
         if user_id == '' or user_id is None:
@@ -51,6 +47,7 @@ class CouponController:
         new_coupon = Coupon(
             user_id=user_id,
             client_id=client_id,
+            client_username=client_username,
             title=title,
             code=code,
             discount=discount,

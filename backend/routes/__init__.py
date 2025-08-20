@@ -19,6 +19,7 @@ from routes.comments import comments_bp
 from routes.sitemap import sitemap_bp
 from routes.config import config_bp
 from routes.uploadImages import upload_images_bp
+from routes.supabaseUsers import supabaseUsers_bp
 
 def register_routes(app):
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -41,3 +42,4 @@ def register_routes(app):
     app.register_blueprint(sitemap_bp, url_prefix='/sitemap')
     app.register_blueprint(config_bp, url_prefix='/config')
     app.register_blueprint(upload_images_bp, url_prefix='/uploadImages')
+    app.register_blueprint(supabaseUsers_bp, url_prefix='/supabaseUsers')

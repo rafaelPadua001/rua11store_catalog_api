@@ -1,4 +1,5 @@
 from datetime import datetime
+import sqlalchemy.dialects.postgresql as pg
 from database import db
 
 class Coupon(db.Model):
@@ -6,7 +7,8 @@ class Coupon(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
-    client_id = db.Column(db.Integer, nullable=False)
+    client_id = db.Column(pg.UUID(as_uuid=True), nullable=False)
+    client_username = db.Column(db.String, nullable=True) 
     title = db.Column(db.String, nullable=False)
     code = db.Column(db.String, nullable=False, unique=True)
     discount = db.Column(db.Float, nullable=False)
@@ -21,6 +23,7 @@ class Coupon(db.Model):
             'id': self.id,
             'user_id': self.user_id,
             'client_id': self.client_id,
+            'client_username': self.client_username,
             'title': self.title,
             'code': self.code,
             'discount': self.discount,
@@ -37,6 +40,7 @@ class Coupon(db.Model):
             id=data.get("id"),
             user_id=data["user_id"],
             client_id=data["client_id"],
+            client_username=data.get("client_username"),
             title=data["title"],
             code=data["code"],
             discount=data["discount"],
