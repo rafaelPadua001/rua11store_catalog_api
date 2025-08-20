@@ -2,9 +2,13 @@ from datetime import datetime
 from models.coupon import Coupon
 from models.couponUser import CouponUser
 from controllers.couponUserController import CouponUserController
+from controllers.emailController import EmailController
 from flask import jsonify
 from database import db  # flask_sqlalchemy.SQLAlchemy instance
 import uuid
+from flask_mail import Mail
+
+mail = Mail() 
 
 class CouponController:
     def __init__(self):
@@ -32,7 +36,7 @@ class CouponController:
         except Exception:
             raise ValueError(f"Invalid UUID: {value}")
     
-    def create_coupon(self, user_id, client_id, client_username, title, code, discount, start_date, end_date, image_path=None):
+    def create_coupon(self, user_id, client_id, client_username, client_email, title, code, discount, start_date, end_date, image_path=None):
         try:
             user_id = int(user_id)
         except ValueError:
@@ -82,6 +86,18 @@ class CouponController:
                 now
             )
 
+            html_content = f"""
+            <p>Olá {client_username},</p>
+            <p>Você recebeu um cupom com código <strong>{code}</strong> de desconto de {discount}% válido de {start_date} até {end_date}.</p>
+            <p>Aproveite!</p>
+            """
+            send_mail = EmailController(mail)
+            send_mail.send_email(
+                subject=f"Você recebeu um novo cupom: {title}",
+                recipients=[client_email],
+                body=f"Olá {client_username}, você recebeu um novo cupom!",
+                html=html_content
+            )
         return new_coupon.to_dict()
 
 
