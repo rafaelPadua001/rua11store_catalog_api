@@ -91,7 +91,7 @@ def update_coupon(coupon_id):
             data = request.form
 
         client_id_raw = data.get('client_id')
-        client_id = int(client_id_raw) if client_id_raw not in [None, '', 'null'] else None
+        client_id = client_id_raw if client_id_raw not in [None, '', 'null'] else None
 
         title = data.get('title')
         code = data.get('code')
