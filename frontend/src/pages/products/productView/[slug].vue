@@ -18,7 +18,7 @@
           <!-- Carrossel de imagens -->
           <v-card-text>
             <v-row justify="center" no-gutters>
-              <v-col cols="12" md="12" sm="10" xl="2">
+              <v-col cols="12" md="12" sm="10" xl="10">
                 <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
                   <v-sheet class="mx-auto overflow-hidden" rounded="xl">
                     <v-carousel v-model="currentIndex"  class="mx-auto" progress="purple" show-arrows="hover" hide-delimiter
