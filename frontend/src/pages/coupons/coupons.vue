@@ -14,29 +14,14 @@
 
                 <v-divider></v-divider>
 
-                <v-data-table 
-                    :headers="headers" 
-                    :items="coupons" 
-                    :items-per-page="10" 
-                    class="elevation-1" 
-                    item-key="id"
-                    fixed-header 
-                    height="500" 
-                    :loading="loading" 
-                    loading-text="Loading coupons...">
+                <v-data-table :headers="headers" :items="coupons" :items-per-page="10" class="elevation-1" item-key="id"
+                    fixed-header height="500" :loading="loading" loading-text="Loading coupons...">
 
                     <!-- Exibe imagens de cupons -->
                     <template v-slot:item.image_path="{ item }">
-                        <v-img 
-                            v-if="item.image_path" 
-                            :src="getCouponImage(item.image_path, item.id)"
-                            alt="Imagem do Cupom" 
-                            contain 
-                            min-width="60" 
-                            max-width="70" 
-                            min-height="10"
-                            class="rounded-lg"
-                        ></v-img>
+                        <v-img v-if="item.image_path" :src="getCouponImage(item.image_path, item.id)"
+                            alt="Imagem do Cupom" contain min-width="60" max-width="70" min-height="10"
+                            class="rounded-lg"></v-img>
                         <span v-else>Sem Imagem</span>
                     </template>
 
@@ -44,11 +29,11 @@
                     <template v-slot:item.actions="{ item }">
                         <v-icon small color="primary" @click="editDialog(item)">
                             mdi-pencil
-                        </v-icon> 
+                        </v-icon>
 
                         <v-icon small color="error" @click="deleteCoupon(item)">
                             mdi-delete
-                        </v-icon> 
+                        </v-icon>
                     </template>
                 </v-data-table>
 
@@ -63,30 +48,21 @@
                                 <v-text-field v-model="editedCoupon.title" label="Título do Cupom" required />
                                 <v-text-field v-model="editedCoupon.code" label="Código do Cupom" required />
                                 <v-text-field v-model="editedCoupon.discount" label="Desconto" required />
-                                <v-autocomplete
-                                    v-model="editedCoupon.client_username"
-                                    v-model:search="searchUser"
-                                    :items="users"
-                                    item-title="display_name"
-                                    item-value="id"
-                                    label="Buscar Cliente"
-                                    prepend-inner-icon="mdi-magnify"
-                                    clearable
-                                    :loading="loadingUsers"
-                                    no-data-text="Nenhum cliente encontrado"
-                                    />
+                                <v-autocomplete v-model="editedCoupon.client_id" v-model:search="searchUser"
+                                    :items="users" item-title="display_name" item-value="id" label="Buscar Cliente"
+                                    prepend-inner-icon="mdi-magnify" clearable :loading="loadingUsers"
+                                    no-data-text="Nenhum cliente encontrado" />
 
 
-                                <v-text-field v-model="editedCoupon.start_date" label="Data de Início" type="date" required />
-                                <v-text-field v-model="editedCoupon.end_date" label="Data de Fim" type="date" required />
+
+                                <v-text-field v-model="editedCoupon.start_date" label="Data de Início" type="date"
+                                    required />
+                                <v-text-field v-model="editedCoupon.end_date" label="Data de Fim" type="date"
+                                    required />
 
                                 <!-- Upload de Imagem -->
-                                <v-file-input 
-                                    label="Imagem do Cupom" 
-                                    v-model="editedCoupon.image" 
-                                    accept="image/*"
-                                    prepend-icon="mdi-image" 
-                                />
+                                <v-file-input label="Imagem do Cupom" v-model="editedCoupon.image" accept="image/*"
+                                    prepend-icon="mdi-image" />
                             </v-form>
                         </v-card-subtitle>
 
@@ -128,7 +104,7 @@ export default {
                 { title: "Init Date", key: "start_date" },
                 { title: "End Date", key: "end_date" },
                 { title: "Ações", key: "actions", sortable: false }
-                
+
             ],
             couponDialog: false,
             coupons: [],
@@ -151,31 +127,31 @@ export default {
     created() {
         this.loadCoupons();
     },
-    watch:{
-        async searchUser(val){
-            if(!val || val.length < 2){
+    watch: {
+        async searchUser(val) {
+            if (!val || val.length < 2) {
                 this.users = [];
                 return;
             }
 
             this.loadingUsers = true;
-            try{
+            try {
                 const token = localStorage.getItem('access-token');
                 const config = {
-                    headers: {Authorization: `Bearer ${token}`},
+                    headers: { Authorization: `Bearer ${token}` },
                 };
 
                 const response = await api.get("/supabaseUsers/search_users", {
-                    params: {q: val},
+                    params: { q: val },
                     ...config
                 });
 
                 this.users = response.data;
             }
-            catch(error){
+            catch (error) {
                 console.error(error);
             }
-            finally{
+            finally {
                 this.loadingUsers = false;
             }
         }
@@ -194,7 +170,7 @@ export default {
             try {
                 const response = await api.get("/coupon/coupons", config);
                 this.coupons = response.data;
-               // console.log(this.coupons);
+                // console.log(this.coupons);
             } catch (error) {
                 console.error("Error loading coupons:", error);
             } finally {
@@ -224,7 +200,7 @@ export default {
             formData.append('code', this.editedCoupon.code);
             formData.append('discount', this.editedCoupon.discount);
 
-            const selectedUser = this.users.find(u => u.id === this.editedCoupon.client_username);
+            const selectedUser = this.users.find(u => u.id === this.editedCoupon.client_id);
             formData.append('client_id', selectedUser?.id || '');
             formData.append('client_username', selectedUser?.display_name || '');
             formData.append('client_email', selectedUser?.email || '');
@@ -263,7 +239,7 @@ export default {
                         this.coupons.push(response.data.coupon);
                         alert('Cupom criado com sucesso!');
                     } else {
-                       // this.coupons.splice(this.editedIndex, 1, response.data.coupon);
+                        // this.coupons.splice(this.editedIndex, 1, response.data.coupon);
                         alert('Cupom atualizado com sucesso!');
                     }
                 } else {
@@ -289,7 +265,11 @@ export default {
             return `${baseUrl}${path}`;
         },
         editDialog(item) {
-            this.editedCoupon = { ...item, image: null }; // Limpa campo image para upload, para evitar problemas
+            this.editedCoupon = {
+                ...item,
+                image: null,
+                client_id: item.client_id // garante que autocomplete mostre o usuário
+            };
             this.editedIndex = this.coupons.indexOf(item);
             this.couponDialog = true;
         },

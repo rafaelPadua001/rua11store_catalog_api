@@ -1,9 +1,10 @@
 from datetime import datetime
 from models.coupon import Coupon
 from models.couponUser import CouponUser
+from controllers.couponUserController import CouponUserController
 from flask import jsonify
 from database import db  # flask_sqlalchemy.SQLAlchemy instance
-
+import uuid
 
 class CouponController:
     def __init__(self):
@@ -21,32 +22,38 @@ class CouponController:
         user_coupons = self.db_session.query(CouponUser).filter_by(client_id=user_id).all()
         return [coupon.to_dict() for coupon in user_coupons]
     
+    def normalize_uuid(self, value):
+        if not value:
+            return None
+        if isinstance(value, uuid.UUID):
+            return value
+        try:
+            return uuid.UUID(str(value))
+        except Exception:
+            raise ValueError(f"Invalid UUID: {value}")
+    
     def create_coupon(self, user_id, client_id, client_username, title, code, discount, start_date, end_date, image_path=None):
-        # Converter client_id para int ou None
-        if client_id == '' or client_id is None:
-            client_id = None
-      
-
-        # mesmo para user_id e discount se vierem como strings
-        if user_id == '' or user_id is None:
-            raise Exception("user_id é obrigatório.")
-        else:
+        try:
             user_id = int(user_id)
+        except ValueError:
+            raise Exception("user_id deve ser um número inteiro.")
 
         try:
             discount = float(discount)
         except ValueError:
             raise Exception("discount inválido, deve ser número.")
 
-        # resto do código...
         existing = self.db_session.query(Coupon).filter_by(code=code).first()
         if existing:
             raise Exception("Já existe um cupom com esse código.")
 
         now = datetime.utcnow()
+        client_id_uuid = self.normalize_uuid(client_id)  
+
+
         new_coupon = Coupon(
             user_id=user_id,
-            client_id=client_id,
+            client_id=client_id_uuid,
             client_username=client_username,
             title=title,
             code=code,
@@ -59,31 +66,68 @@ class CouponController:
         )
         self.db_session.add(new_coupon)
         self.db_session.commit()
+
+        if client_id_uuid and client_username:
+            user_coupon = CouponUserController()
+            user_coupon.create_user_coupon(
+                new_coupon.id,
+                client_id_uuid,
+                client_username,
+                title,
+                code,
+                discount,
+                start_date,
+                end_date,
+                now,
+                now
+            )
+
         return new_coupon.to_dict()
 
 
-    def update_coupon(self, coupon_id, user_id, client_id, title, code, discount, start_date, end_date, image_path=None):
+    def update_coupon(self, coupon_id, current_user_id, client_id, title, code, discount, start_date, end_date, image_path=None):
         coupon = self.db_session.query(Coupon).filter_by(id=coupon_id).first()
         if not coupon:
             return None
 
-        coupon.user_id = user_id
-        coupon.client_id = client_id
+        # Usa o user_id da sessão atual
+        coupon.user_id = current_user_id  # já é int, obtido da sessão Flask
+        coupon.client_id = self.normalize_uuid(client_id)  # sempre UUID
         coupon.title = title
         coupon.code = code
-        coupon.discount = discount
+        coupon.discount = float(discount)
         coupon.start_date = start_date
         coupon.end_date = end_date
         coupon.image_path = image_path
         coupon.updated_at = datetime.utcnow()
 
         self.db_session.commit()
+
+        if coupon.client_id and coupon.client_username:
+            user_coupon = CouponUserController()
+            user_coupon.update_user_coupon(
+                coupon_id=coupon_id,
+                user_id=current_user_id,
+                client_id=self.normalize_uuid(coupon.client_id),
+                client_username=coupon.client_username,
+                title=title,
+                code=code,
+                discount=float(discount),
+                start_date=start_date,
+                end_date=end_date
+            )
+
         return coupon.to_dict()
+
+
 
     def delete_coupon(self, coupon_id):
         coupon = self.db_session.query(Coupon).filter_by(id=coupon_id).first()
         if not coupon:
             return None
+
+        coupon_user = CouponUserController()
+        coupon_user.delete_user_coupon(coupon_id)
 
         self.db_session.delete(coupon)
         self.db_session.commit()
@@ -110,7 +154,8 @@ class CouponController:
         if not coupon:
             return {'error': 'Cupom não encontrado.'}, 404
 
-        existing = self.db_session.query(CouponUser).filter_by(client_id=client_id, coupon_id=coupon.id).first()
+        existing = self.db_session.query(CouponUser).filter_by(client_id=self.normalize_uuid(client_id), coupon_id=coupon.id).first()
+
         if existing:
             return existing.to_dict(), 200
 
