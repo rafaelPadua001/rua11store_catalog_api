@@ -63,7 +63,20 @@
                                 <v-text-field v-model="editedCoupon.title" label="Título do Cupom" required />
                                 <v-text-field v-model="editedCoupon.code" label="Código do Cupom" required />
                                 <v-text-field v-model="editedCoupon.discount" label="Desconto" required />
-                                <v-text-field v-model="editedCoupon.client_id" label="ID do Cliente" required />
+                                <v-autocomplete
+                                    v-model="editedCoupon.client_username"
+                                    v-model:search="searchUser"
+                                    :items="users"
+                                    item-title="display_name"
+                                    item-value="id"
+                                    label="Buscar Cliente"
+                                    prepend-inner-icon="mdi-magnify"
+                                    clearable
+                                    :loading="loadingUsers"
+                                    no-data-text="Nenhum cliente encontrado"
+                                    />
+
+
                                 <v-text-field v-model="editedCoupon.start_date" label="Data de Início" type="date" required />
                                 <v-text-field v-model="editedCoupon.end_date" label="Data de Fim" type="date" required />
 
@@ -124,15 +137,48 @@ export default {
                 code: '',
                 discount: '',
                 client_id: '',
+                client_username: '',
                 start_date: '',
                 end_date: '',
                 image: null
             },
             editedIndex: -1,
+            searchUser: "",
+            users: [],
+            loadUsers: false,
         };
     },
     created() {
         this.loadCoupons();
+    },
+    watch:{
+        async searchUser(val){
+            if(!val || val.length < 2){
+                this.users = [];
+                return;
+            }
+
+            this.loadingUsers = true;
+            try{
+                const token = localStorage.getItem('access-token');
+                const config = {
+                    headers: {Authorization: `Bearer ${token}`},
+                };
+
+                const response = await api.get("/supabaseUsers/search_users", {
+                    params: {q: val},
+                    ...config
+                });
+
+                this.users = response.data;
+            }
+            catch(error){
+                console.error(error);
+            }
+            finally{
+                this.loadingUsers = false;
+            }
+        }
     },
     methods: {
         async loadCoupons() {
@@ -161,6 +207,7 @@ export default {
                 code: '',
                 discount: '',
                 client_id: '',
+                client_username: '',
                 start_date: '',
                 end_date: '',
                 image: null
@@ -176,7 +223,12 @@ export default {
             formData.append('title', this.editedCoupon.title);
             formData.append('code', this.editedCoupon.code);
             formData.append('discount', this.editedCoupon.discount);
-            formData.append('client_id', this.editedCoupon.client_id);
+
+            const selectedUser = this.users.find(u => u.id === this.editedCoupon.client_username);
+            formData.append('client_id', selectedUser?.id || '');
+            formData.append('client_username', selectedUser?.display_name || '');
+            formData.append('client_email', selectedUser?.email || '');
+
             formData.append('start_date', this.editedCoupon.start_date);
             formData.append('end_date', this.editedCoupon.end_date);
             if (this.editedCoupon.image) {
