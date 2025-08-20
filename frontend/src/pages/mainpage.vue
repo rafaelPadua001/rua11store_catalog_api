@@ -1,22 +1,30 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="align-center fill-height ms-0 me-auto" max-width="100%">
-      <div v-if="!loadFailed && pageContent" class="px-2 px-sm-4 align-center">
-
+      <div v-if="!loadFailed && pageContent" class="px-2 px-sm-10 align-center">
         <!-- HERO -->
         <v-row justify="center" class="my-0">
           <v-col>
-            <v-card elevation="4" :color="pageBackgroundColor" class="rounded-lg overflow-hidden"
+            <v-card elevation="4" :color="pageBackgroundColor" class="rounded-xl overflow-hidden hero-card"
               v-if="pageBackgroundColor || pageImage">
-              <v-img :src="pageImage" :alt="pageTitle" max-height="320" height="100%" class="mx-auto d-block" />
-              <v-card-text class="py-0 text-center">
-                <div class="text-h6 text-sm-h4 font-weight-bold">
-                  {{ pageHeroTitle }}
-                </div>
-                <div class="text-body-2 text-sm-body-1">
-                  {{ pageHeroSubTitle }}
-                </div>
-              </v-card-text>
+              <v-row no-gutters align="center">
+                <v-col v-if="pageHeroTitle || pageHeroSubTitle" cols="12" md="6" class="px-4">
+                  <v-card-text class="py-0 text-center">
+                    <div class="text-h6 text-sm-h4 font-weight-bold">
+                      {{ pageHeroTitle }}
+                    </div>
+                    <div class="text-body-2 text-sm-body-1">
+                      {{ pageHeroSubTitle }}
+                    </div>
+                  </v-card-text>
+                </v-col>
+
+
+                <v-col cols="12" md="6">
+                  <v-img :src="pageImage" :alt="pageTitle" max-height="450" class="mx-auto d-block" />
+                </v-col>
+
+              </v-row>
 
               <!-- Botões Hero -->
               <v-card-text v-if="pageHeroButtons && pageHeroButtons.length >= 1"
@@ -37,76 +45,166 @@
             </v-card>
           </v-col>
         </v-row>
-
+        <br></br>
+        <br></br>
         <!-- Produtos -->
-        <div class="mt-14 d-flex justify-center flex-wrap">
-          <v-row justify="center" class="my-2">
-            <v-col cols="12" sm="12" md="10" lg="6">
-              <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" interval="750000"
-                v-model="activeIndex">
-                <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
-                  <v-row justify="center" class="pa-2" dense>
-                    <v-col v-for="product in chunk" :key="product.name" cols="12" sm="6" md="6">
-                      <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
-                        <v-card elevation="0">
-                          <v-card-text>
-                            <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
-                              target="_blank" rel="noopener noreferrer">
+        <div>
+          <v-card class="rounded-xl overflow-hidden hero-card" elevation="4" width="100%" color="#b48a17">
+            <v-card-title>Conheça nossos produtos !</v-card-title>
+            <v-divider class="border-opacity-50" thickness="2" color="deep-purple"></v-divider>
 
-                              <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer"
-                                cover>
-                                <v-chip class="ma-0" color="primary" text-color="white"
-                                  style="position: absolute; top: 0; right: 0;">
-                                  <strong>R$ {{ product.price ?? '0,00' }}</strong>
-                                </v-chip>
-                              </v-img>
-                            </a>
-                          </v-card-text>
+            <v-card-text>
+              <v-row justify="center" class="my-1">
+                <v-col cols="auto" md="12" sm="12">
+                  <v-carousel :show-arrows="false" cycle hide-delimiters max-width="100%" height="300" interval="750000"
+                    v-model="activeIndex" max-height="100%">
+                    <v-carousel-item v-for="(chunk, index) in chunkedProducts" :key="index">
+                      <v-row justify="center">
+                        <v-col cols="12" sm="4" md="4" v-for="product in chunk" :key="product.name">
+                          <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
+                            <v-card class="pa-2 align-center rounded-lg overflow-hidden" elevation="0"
+                              style="background-color: rgba(255, 255, 255, 0.1);">
+                              <v-card-text>
+                                <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
+                                  target="_blank" rel="noopener noreferrer">
+                                  <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer"
+                                    contain max-height="170">
+                                    <v-chip class="ma-0" color="deep-purple" text-color="white"
+                                      style="position: absolute; bottom: 0; right: 0;">
+                                      <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                                    </v-chip>
+                                  </v-img>
+                                </a>
 
-                        </v-card>
-                      </template>
+
+                              </v-card-text>
+
+
+                              <!--<v-card-text class="text-center">
+                            <v-btn color="primary">Comprar</v-btn>
+                          </v-card-text> -->
+
+                            </v-card>
+                            <span class="d-block text-truncate " style="max-width: 100%; overflow: hidden;">
+                              <strong>{{ product.name }}</strong>
+                            </span>
+
+                          </template>
+
+                        </v-col>
+                      </v-row>
+                    </v-carousel-item>
+                  </v-carousel>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-divider class="border-opacity-50" thickness="2" color="deep-purple"></v-divider>
+            <v-card-actions>
+              <v-btn block href="https://rua11store-web.vercel.app/" target="_blank" icon>
+                <!--<v-icon>mdi-eye</v-icon>-->
+                <span>Ver tudo</span>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+
+        </div>
+        <br></br>
+        <br></br>
+
+        <div>
+          <v-row no-gutters>
+            <v-col>
+              <v-card class="overflow-hidden" elevation="4" max-height="100%" color="trasparent">
+                <v-card-title class="text-left white--text">
+                  <span class="d-block title-responsive">
+                    Por que escolher a Rua11Store ?
+                  </span>
+                </v-card-title>
+                <v-divider class="border-opacity-20" thickness="2" color="grey"></v-divider>
+                <v-card-text>
+                  <v-row justify="center" align="center" class="text-center" no-gutters>
+                    <v-col cols="12" sm="6" md="3" class="mb-4">
+                      <span><v-icon size="x-large" class="mb-2 white--text"
+                          color="primary">mdi-truck-fast</v-icon></span>
+                      <div class="white--text font-weight-medium">Entrega rápida e segura</div>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="3" class="mb-4">
+                      <v-icon size="x-large" class="mb-2 white--text" color="success">mdi-lock-check</v-icon>
+                      <div class="white--text font-weight-medium">Pagamento Seguro</div>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="3" class="mb-4">
+                      <v-icon size="x-large" class="mb-2 white--text" color="primary">mdi-thumb-up</v-icon>
+                      <div class="white--text font-weight-medium">Qualidade Garantida</div>
+                    </v-col>
+
+                    <v-col cols="12" sm="6" md="3" class="mb-4">
+                      <v-icon size="x-large" class="mb-2 white--text" color="deep-purple">mdi-gift-open</v-icon>
+                      <div class="white--text font-weight-medium">Promoções exclusivas</div>
                     </v-col>
                   </v-row>
-                </v-carousel-item>
-              </v-carousel>
+                </v-card-text>
+
+              </v-card>
             </v-col>
           </v-row>
         </div>
+        <br></br>
+        <br></br>
 
-        <!-- Carousel Comentários -->
-        <h3 class="text-center">Testimonials</h3>
-        <v-divider></v-divider>
-        <div class="d-flex justify-center flex-wrap">
-          <v-row justify="center">
-            <v-col cols="12" sm="10" md="8" lg="6">
-              <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000" v-model="activeCommentIndex">
-                <v-carousel-item v-for="(comment, index) in comments" :key="comment.id">
-                  <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" max-width="100%" elevation="0">
-                    <v-row no-gutters class="align-center">
-                      <v-col cols="auto" class="pr-4">
-                        <v-avatar size="60">
-                          <v-img :src="comment.avatar_url" alt="Avatar" />
-                        </v-avatar>
-                      </v-col>
-                      <v-col>
-                        <div style="font-style: italic; font-size: 16px; margin-top: 4px; color: gray;">
-                          <p>
-                            "{{ comment.comment }}" -
-                            <strong style="font-size: 12px; color: black">
-                              {{ comment.user_name }}
-                            </strong>
-                          </p>
-                        </div>
+        <div>
+          <v-row no-gutters>
+            <v-col>
+              <v-card class="rounded-xl overflow-hidden hero-card" elevation="4" max-height="275" color="grey">
+                <v-card-title class="text-left white--text">
+                  <span class="d-block title-responsive">O que nossos clientes estão dizendo:</span></v-card-title>
+                <v-card-text>
+
+                <v-divider></v-divider>
+                <br></br>
+               
+
+                  <div class="d-flex justify-center flex-wrap">
+                    <v-row no-gutters>
+                      <v-col cols="12">
+                        <v-carousel cycle hide-delimiters :show-arrows="false" interval="7000"
+                          v-model="activeCommentIndex">
+                          <v-carousel-item v-for="(pair, pairIndex) in chunkedComments" :key="pairIndex">
+                            <v-row>
+                              <v-col v-for="(comment, index) in pair" :key="comment.id" cols="auto" md="6" class="mb-2">
+                                <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" elevation="1"  style="background-color: rgba(255, 255, 255, 0.7);">
+                                  <v-row class="align-center" no-gutters>
+                                    <v-col cols="auto" class="pr-8">
+                                      <v-avatar size="60">
+                                        <v-img :src="comment.avatar_url" alt="Avatar" />
+                                      </v-avatar>
+                                    </v-col>
+                                    <v-col>
+                                      <div style="font-style: italic; font-size: 14px; margin-top: 4px; color: gray;">
+                                        <p>
+                                          "{{ comment.comment }}" -
+                                          <strong style="font-size: 12px; color: black">
+                                            {{ comment.user_name }}
+                                          </strong>
+                                        </p>
+                                      </div>
+                                    </v-col>
+                                  </v-row>
+                                </v-card>
+                              </v-col>
+                            </v-row>
+                          </v-carousel-item>
+                        </v-carousel>
                       </v-col>
                     </v-row>
-                  </v-card>
-                </v-carousel-item>
-              </v-carousel>
+                  </div>
+                </v-card-text>
+              </v-card>
+
             </v-col>
           </v-row>
         </div>
-      </div>
 
+      </div>
       <!-- Loader -->
       <div v-else class="text-center pa-4">
         <v-progress-circular indeterminate color="primary" size="64" />
@@ -117,13 +215,24 @@
       </div>
     </v-responsive>
 
-    <!-- WhatsApp -->
-    <v-btn color="deep-purple" dark class="whatsapp-btn" href="https://wa.me/556191865680" target="_blank"
-      elevation="10" icon>
-      <v-icon size="28">mdi-whatsapp</v-icon>
-    </v-btn>
+    <!-- FAB Customizado -->
+    <div class="fab-container">
+      <!-- Botão principal -->
+      <button class="fab-main" @click="fab = !fab">
+        <v-icon>mdi-chat</v-icon>
+      </button>
+
+      <!-- Botões filhos -->
+      <transition-group name="fab" tag="div">
+        <a v-for="btn in fabButtons" :key="btn.key" v-show="fab" :href="btn.href" target="_blank" class="fab-child"
+          :style="{ backgroundColor: btn.color }">
+          <v-icon>{{ btn.icon }}</v-icon>
+        </a>
+      </transition-group>
+    </div>
   </v-container>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
@@ -144,6 +253,27 @@ const pageBackgroundColor = ref('')
 const pageImage = ref('')
 const pageHeroButtons = ref<any[]>([])
 const slowServer = ref(false)
+const fab = ref(false)
+const fabButtons = [
+  {
+    key: 'wa',
+    icon: 'mdi-whatsapp',
+    color: 'green',
+    href: 'https://wa.me/556191865680'
+  },
+  {
+    key: 'msg',
+    icon: 'mdi-comment-text',
+    color: 'teal',
+    href: 'https://wa.me/556191865680?text=Ol%C3%A1%2C%20quero%20mais%20informa%C3%A7%C3%B5es!'
+  },
+  {
+    key: 'group',
+    icon: 'mdi-account-group',
+    color: 'blue',
+    href: 'https://chat.whatsapp.com/XXXXXXXXXXXXXXX'
+  }
+]
 
 interface Product {
   name: string
@@ -170,6 +300,7 @@ const productsData = ref<Product[]>([])
 const comments = ref<Comment[]>([])
 const activeIndex = ref(0)
 const activeCommentIndex = ref(0)
+
 
 const api = axios.create({
   baseURL:
@@ -242,14 +373,26 @@ async function loadProductsToCarousel() {
   }
 }
 
+
+
 const { smAndDown } = useDisplay()
-const chunkSize = computed(() => (smAndDown.value ? 1 : 2))
+const chunkSize = computed(() => (smAndDown.value ? 1 : 3))
 
 const chunkedProducts = computed(() => {
   const chunks = []
   for (let i = 0; i < productsData.value.length; i += chunkSize.value) {
     chunks.push(productsData.value.slice(i, i + chunkSize.value))
   }
+  return chunks
+})
+
+const chunkedComments = computed(() => {
+  const size = smAndDown.value ? 1 : 4
+  const chunks: Comment[][] = []
+  for (let i = 0; i < comments.value.length; i++) {
+    chunks.push(comments.value.slice(i, i + size))
+  }
+
   return chunks
 })
 
@@ -279,6 +422,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.hero-card {
+  background-image:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.09) 1px, transparent 1px, transparent 2px),
+    repeating-conic-gradient(rgba(255, 255, 255, 0.05) 0deg 4deg, transparent 0deg 10deg);
+  background-size: cover;
+  color: white;
+  min-height: 375px;
+  /* garante espaço suficiente para botões */
+}
+
 .v-btn {
   margin-left: 1px !important;
   margin-right: 1px !important;
@@ -297,24 +451,81 @@ onMounted(() => {
   opacity: 0.90
 }
 
-.whatsapp-btn {
+.fab-container {
   position: fixed;
-  bottom: 50px;
+  bottom: 20px;
   right: 20px;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+}
+
+.fab-main {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  min-width: 56px;
-  padding: 0;
+  background-color: #673ab7;
+  color: white;
+  border: none;
+  cursor: pointer;
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 9999;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+
+.fab-child {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.fab-enter-active,
+.fab-leave-active {
+  transition: all 0.2s;
+}
+
+.fab-enter-from,
+.fab-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
 
 .mx-auto.text-center {
   max-width: 100%;
   padding-left: 10px;
   padding-right: 10px;
+}
+
+.title-responsive {
+  font-weight: bold;
+  font-size: 1.2rem;
+  /* desktop */
+  line-height: 1.2;
+}
+
+@media (max-width: 960px) {
+  .title-responsive {
+    font-size: 1.2rem;
+    /* tablet */
+  }
+}
+
+@media (max-width: 600px) {
+  .title-responsive {
+    font-size: 1.0rem;
+    /* mobile */
+    word-break: break-word;
+    /* garante quebra de linha */
+  }
 }
 </style>
