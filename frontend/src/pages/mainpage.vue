@@ -238,7 +238,7 @@
     <v-sheet elevation="12" rounded="lg" max-width="400" width="100%"
       style="position: fixed; bottom: 150px; right: 20px; z-index: 9999; overflow: hidden; height: 350px;">
       <!-- Imagem de fundo -->
-      <v-img :src="`${api.defaults.baseURL}${coupon.image_path}`" cover class="absolute inset-2"
+      <v-img :src="`${api.defaults.baseURL}${coupon.image_path.replace(/^\/+/, '')}`" cover class="absolute inset-2"
         style="z-index: 0;"></v-img>
 
       <!-- Overlay semitransparente -->
