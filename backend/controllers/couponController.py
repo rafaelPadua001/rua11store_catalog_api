@@ -30,7 +30,7 @@ class CouponController:
     def get_promotional_coupons(self, limit=5):
         coupons = (
             self.db_session.query(Coupon).filter(Coupon.client_id.is_(None))
-            .order_By(func.random())
+            .order_by(func.random())
             .limit(limit)
             .all
            
