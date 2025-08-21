@@ -152,6 +152,10 @@ def serve_uploads(filename):
     uploads_dir = os.path.join(os.path.dirname(__file__), '..', 'uploads')
     return send_from_directory(uploads_dir, filename)
 
+@coupon_bp.route('/uploads/coupons/<path:filename>')
+def serve_coupon_uploads(filename):
+    uploads_dir = os.path.join(current_app.root_path, 'uploads', 'coupons')
+    return send_from_directory(uploads_dir, filename)
 
 @coupon_bp.route('/pick_up_coupon', methods=['POST'])
 def pick_up_coupon():
