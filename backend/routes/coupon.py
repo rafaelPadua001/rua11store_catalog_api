@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session, current_app, send_from_directory
+from flask import Blueprint, request, jsonify, session, current_app, send_from_directory, make_response
 from controllers.couponController import CouponController
 import os
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -152,6 +152,12 @@ def serve_uploads(filename):
     uploads_dir = os.path.join(os.path.dirname(__file__), '..', 'uploads')
     return send_from_directory(uploads_dir, filename)
 
+@coupon_bp.route('/uploads/coupons/<path:filename>')
+def serve_coupon_uploads(filename):
+    uploads_dir = os.path.join(current_app.root_path, 'uploads', 'coupons')
+    response = make_response(send_from_directory(uploads_dir, filename))
+    response.headers['Access-Control-Allow-Origin'] = '*'  # Ou seu front-end específico
+    return response
 
 @coupon_bp.route('/pick_up_coupon', methods=['POST'])
 def pick_up_coupon():
