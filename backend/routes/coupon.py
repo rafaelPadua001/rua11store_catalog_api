@@ -17,6 +17,16 @@ def get_coupons():
         return jsonify(coupons_dict)
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+    
+@coupon_bp.route('/promotional_coupons', methods=['GET'])
+def get_promotional_coupons():
+    coupon_controller = CouponController()
+    try:
+        coupons = coupon_controller.get_promotional_coupons()
+        coupons_dict = [coupon.to_dict() for coupon in coupons]
+        return jsonify(coupons_dict)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 @coupon_bp.route('/get-all-client-coupons', methods=['GET'])
 def get_coupons_all():

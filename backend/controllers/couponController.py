@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy.sql.expression import func
 from models.coupon import Coupon
 from models.couponUser import CouponUser
 from controllers.couponUserController import CouponUserController
@@ -25,6 +26,19 @@ class CouponController:
     def get_coupons_by_user(self, user_id):
         user_coupons = self.db_session.query(CouponUser).filter_by(client_id=user_id).all()
         return [coupon.to_dict() for coupon in user_coupons]
+    
+    def get_promotional_coupons(self, limit=5):
+        coupons = (
+            self.db_session.query(Coupon).filter(Coupon.client_id.is_(None))
+            .order_By(func.random())
+            .limit(limit)
+            .all
+           
+        )
+        return [
+                coupon if hasattr(coupon, 'to_dict') else coupon
+                for coupon in coupons
+            ]
     
     def normalize_uuid(self, value):
         if not value:
