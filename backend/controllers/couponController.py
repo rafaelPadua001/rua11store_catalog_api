@@ -28,8 +28,10 @@ class CouponController:
         return [coupon.to_dict() for coupon in user_coupons]
     
     def get_promotional_coupons(self, limit=5):
+        now = datetime.utcnow()
         coupons = (
-            self.db_session.query(Coupon).filter(Coupon.client_id.is_(None))
+            self.db_session.query(Coupon)
+            .filter(Coupon.client_id.is_(None), Coupon.end_date >= now)
             .order_by(func.random())
             .limit(limit)
             .all()
