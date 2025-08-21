@@ -233,39 +233,38 @@
   </v-container>
 
   <!-- Coupons window: fora do container -->
-  <transition name="slide-up">
-    <v-sheet v-if="showNotify" class="pa-4 text-center fixed" elevation="12" max-width="400" rounded="lg" width="100%"
-      style="
-      position: fixed;
-      bottom: 20px;   
-      right: 2px;    
-      z-index: 9999;
-    ">
-      <v-icon class="mb-3" color="deep-purple-accent-4" icon="mdi-gift" size="80"></v-icon>
 
-      <h2 class="text-h5 font-weight-bold mb-3">🎉 Cupom Especial!</h2>
+  <transition name="slide-up-enter-from" v-if="coupon && showNotify">
+    <v-sheet elevation="12" rounded="lg" max-width="400" width="100%"
+      style="position: fixed; bottom: 150px; right: 20px; z-index: 9999; overflow: hidden; height: 350px;">
+      <!-- Imagem de fundo -->
+      <v-img :src="`${api.defaults.baseURL}${coupon.image_path}`" cover class="absolute inset-2"
+        style="z-index: 0;"></v-img>
 
-      <p class="mb-4 text-medium-emphasis text-body-2">
-        Use o cupom abaixo e ganhe <b>15% OFF</b> na sua próxima compra:
-      </p>
+      <!-- Overlay semitransparente -->
+      <div style="position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 0;"></div>
 
-      <v-sheet color="deep-purple-accent-1" class="pa-3 text-center rounded-lg mb-4 font-weight-bold text-h6"
-        elevation="2">
-        CUPOM15
-      </v-sheet>
+      <!-- Conteúdo do cupom sobre a imagem -->
+      <div
+        style="position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 16px;">
+        <v-icon class="mb-2" color="yellow" size="50" icon="mdi-gift"></v-icon>
+        <h3 class="mb-2 font-weight-bold">🎉 Cupom Especial!</h3>
+        <p class="mb-4">Use o cupom <b>{{ coupon.code }}</b> e ganhe <b>{{ coupon.discount }}% OFF</b>!</p>
 
-      <v-divider class="mb-4"></v-divider>
-
-      <div class="text-end">
-        <v-btn class="text-none" color="deep-purple-accent-4" variant="flat" rounded @click="copyCoupon('CUPOM15')">
-          Copiar
-        </v-btn>
-        <v-btn class="text-none ml-2" color="success" variant="flat" rounded @click="showNotify = false">
-          Fechar
-        </v-btn>
+        <div class="d-flex justify-end w-100">
+          <v-btn color="deep-purple-accent-4" variant="flat" rounded @click="copyCoupon(coupon.code)">
+            Copiar
+          </v-btn>
+          <v-btn color="success" variant="flat" rounded class="ml-2" @click="showNotify = false">
+            Fechar
+          </v-btn>
+        </div>
       </div>
     </v-sheet>
   </transition>
+
+
+
 
 </template>
 
@@ -281,6 +280,7 @@ const route = useRoute()
 const slug = (route.params as any).slug
 
 const loadFailed = ref(false)
+const coupon = ref<any | null>(null)
 const showNotify = ref(false)
 const pageTitle = ref('')
 const pageContent = ref('')
@@ -324,6 +324,7 @@ interface Product {
   }
   comments?: Comment[]
 }
+
 interface Comment {
   id: number
   avatar_url: string
@@ -332,9 +333,19 @@ interface Comment {
   user_name: string
   status: string
 }
+interface Coupons {
+  id: number
+  title: string
+  code: string
+  discount: string
+  end_date: string
+  image_path: string
+  client_id: string
+}
 
 const productsData = ref<Product[]>([])
 const comments = ref<Comment[]>([])
+let coupons = ref<Coupons[]>([])
 const activeIndex = ref(0)
 const activeCommentIndex = ref(0)
 
@@ -410,6 +421,22 @@ async function loadProductsToCarousel() {
   }
 }
 
+async function loadCoupons() {
+  try {
+    const response = await api.get('coupon/promotional_coupons')
+    let coupons = response.data
+
+    if (coupons.length > 0) {
+      coupon.value = coupons[Math.floor(Math.random() * coupons.length)]
+      // showNotify.value = true
+    }
+
+  }
+  catch (error) {
+    console.log('erro ao buscar cupons:', error);
+  }
+}
+
 const { smAndDown } = useDisplay()
 const chunkSize = computed(() => (smAndDown.value ? 1 : 3))
 
@@ -458,11 +485,13 @@ onMounted(() => {
       slowServer.value = true
       loadComponentFromAPI()
       loadProductsToCarousel()
+      loadCoupons()
     }
   }, 5000)
 
   loadComponentFromAPI()
   loadProductsToCarousel()
+  loadCoupons()
 
   setInterval(() => {
     const maxIndex = chunkedProducts.value.length - 1
