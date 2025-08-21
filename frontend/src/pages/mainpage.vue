@@ -239,7 +239,34 @@
       style="position: fixed; bottom: 150px; right: 20px; z-index: 9999; overflow: hidden; height: 350px;">
       <!-- Imagem de fundo -->
       <v-img :src="`${coupon.image_path}`" cover class="absolute inset-2"
-        style="z-index: 0;"></v-img>
+        style="z-index: 0;">
+      
+        <template #placeholder>
+    <v-row
+      class="fill-height ma-0"
+      align="center"
+      justify="center"
+      style="background-color: rgba(0,0,0,0.05);"
+    >
+      <v-progress-circular
+        indeterminate
+        color="deep-purple accent-4"
+      ></v-progress-circular>
+    </v-row>
+  </template>
+
+  <!-- Caso haja erro ao carregar a imagem -->
+  <template #error>
+    <v-row
+      class="fill-height ma-0"
+      align="center"
+      justify="center"
+      style="background-color: rgba(255,0,0,0.1);"
+    >
+      <span class="text-center">Imagem não disponível</span>
+    </v-row>
+  </template>
+      </v-img>
 
       <!-- Overlay semitransparente -->
       <div style="position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 0;"></div>
