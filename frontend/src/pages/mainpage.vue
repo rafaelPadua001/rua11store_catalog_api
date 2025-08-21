@@ -159,9 +159,9 @@
                   <span class="d-block title-responsive">O que nossos clientes estão dizendo:</span></v-card-title>
                 <v-card-text>
 
-                <v-divider></v-divider>
-                <br></br>
-               
+                  <v-divider></v-divider>
+                  <br></br>
+
 
                   <div class="d-flex justify-center flex-wrap">
                     <v-row no-gutters>
@@ -171,7 +171,8 @@
                           <v-carousel-item v-for="(pair, pairIndex) in chunkedComments" :key="pairIndex">
                             <v-row>
                               <v-col v-for="(comment, index) in pair" :key="comment.id" cols="auto" md="6" class="mb-2">
-                                <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" elevation="1"  style="background-color: rgba(255, 255, 255, 0.7);">
+                                <v-card v-if="comment.status === 'ativo'" class="mx-auto pa-8" elevation="1"
+                                  style="background-color: rgba(255, 255, 255, 0.7);">
                                   <v-row class="align-center" no-gutters>
                                     <v-col cols="auto" class="pr-8">
                                       <v-avatar size="60">
@@ -199,12 +200,11 @@
                   </div>
                 </v-card-text>
               </v-card>
-
             </v-col>
           </v-row>
         </div>
-
       </div>
+
       <!-- Loader -->
       <div v-else class="text-center pa-4">
         <v-progress-circular indeterminate color="primary" size="64" />
@@ -231,6 +231,42 @@
       </transition-group>
     </div>
   </v-container>
+
+  <!-- Coupons window: fora do container -->
+  <transition name="slide-up">
+    <v-sheet v-if="showNotify" class="pa-4 text-center fixed" elevation="12" max-width="400" rounded="lg" width="100%"
+      style="
+      position: fixed;
+      bottom: 20px;   
+      right: 2px;    
+      z-index: 9999;
+    ">
+      <v-icon class="mb-3" color="deep-purple-accent-4" icon="mdi-gift" size="80"></v-icon>
+
+      <h2 class="text-h5 font-weight-bold mb-3">🎉 Cupom Especial!</h2>
+
+      <p class="mb-4 text-medium-emphasis text-body-2">
+        Use o cupom abaixo e ganhe <b>15% OFF</b> na sua próxima compra:
+      </p>
+
+      <v-sheet color="deep-purple-accent-1" class="pa-3 text-center rounded-lg mb-4 font-weight-bold text-h6"
+        elevation="2">
+        CUPOM15
+      </v-sheet>
+
+      <v-divider class="mb-4"></v-divider>
+
+      <div class="text-end">
+        <v-btn class="text-none" color="deep-purple-accent-4" variant="flat" rounded @click="copyCoupon('CUPOM15')">
+          Copiar
+        </v-btn>
+        <v-btn class="text-none ml-2" color="success" variant="flat" rounded @click="showNotify = false">
+          Fechar
+        </v-btn>
+      </div>
+    </v-sheet>
+  </transition>
+
 </template>
 
 
@@ -245,6 +281,7 @@ const route = useRoute()
 const slug = (route.params as any).slug
 
 const loadFailed = ref(false)
+const showNotify = ref(false)
 const pageTitle = ref('')
 const pageContent = ref('')
 const pageHeroTitle = ref('')
@@ -373,8 +410,6 @@ async function loadProductsToCarousel() {
   }
 }
 
-
-
 const { smAndDown } = useDisplay()
 const chunkSize = computed(() => (smAndDown.value ? 1 : 3))
 
@@ -394,6 +429,27 @@ const chunkedComments = computed(() => {
   }
 
   return chunks
+})
+
+function copyCoupon(code: string) {
+  navigator.clipboard.writeText(code)
+  alert(`Coupon ${code} copiado!`)
+}
+
+function handleScroll() {
+  const bottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 10
+  if (bottom) {
+    showNotify.value = true
+    window.removeEventListener("scroll", handleScroll)
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("scroll", handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll)
 })
 
 onMounted(() => {
@@ -513,6 +569,18 @@ onMounted(() => {
   line-height: 1.2;
 }
 
+/* Animação personalizada */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
 @media (max-width: 960px) {
   .title-responsive {
     font-size: 1.2rem;
@@ -526,6 +594,14 @@ onMounted(() => {
     /* mobile */
     word-break: break-word;
     /* garante quebra de linha */
+  }
+}
+
+@media (max-width: 600px) {
+  .floating-coupon {
+    max-width: 90%;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 </style>
