@@ -32,8 +32,7 @@ class CouponController:
             self.db_session.query(Coupon).filter(Coupon.client_id.is_(None))
             .order_by(func.random())
             .limit(limit)
-            .all
-           
+            .all()
         )
         return [
                 coupon if hasattr(coupon, 'to_dict') else coupon
