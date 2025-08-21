@@ -1,10 +1,18 @@
 from flask import Blueprint, request, jsonify, session, current_app, send_from_directory, make_response
 from controllers.couponController import CouponController
 import os
+import cloudinary.uploader
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 
+
 coupon_bp = Blueprint('coupon', __name__)
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 
 @coupon_bp.route('/coupons', methods=['GET'])
 @jwt_required()
@@ -60,12 +68,19 @@ def create_coupon():
 
     image_path = None
     if image and image.filename:
-        filename = secure_filename(image.filename)
-        image_folder = os.path.join(current_app.root_path, 'uploads/coupons')
-        os.makedirs(image_folder, exist_ok=True)
-        full_path = os.path.join(image_folder, filename)
-        image.save(full_path)
-        image_path = f'/uploads/coupons/{filename}'
+        upload_result = cloudinary.uploader.upload(
+            image, 
+            folder="coupons",
+            public_id=None,
+            ovewrite=True
+        )
+        image_url = upload_result.get('secure_url')
+       # filename = secure_filename(image.filename)
+       # image_folder = os.path.join(current_app.root_path, 'uploads/coupons')
+       # os.makedirs(image_folder, exist_ok=True)
+       # full_path = os.path.join(image_folder, filename)
+       # image.save(full_path)
+       # image_path = f'/uploads/coupons/{filename}'
 
     coupon_controller = CouponController()
     try:
@@ -79,7 +94,7 @@ def create_coupon():
             discount=discount,
             start_date=start_date,
             end_date=end_date,
-            image_path=image_path
+            image_path=image_url
         )
         return jsonify({
             'message': 'Cupom criado com sucesso!',
@@ -117,15 +132,17 @@ def update_coupon(coupon_id):
         image_file = request.files.get('image')
         image_path = None
 
-        if image_file:
-            filename = secure_filename(image_file.filename)
-            upload_dir = os.path.join(os.getcwd(), 'uploads/coupons')
-            os.makedirs(upload_dir, exist_ok=True)
-            full_image_path = os.path.join(upload_dir, filename)
-            image_file.save(full_image_path)
+        if image_file and image_file.filename:
+            upload_result = cloudinary.uploader.upload(
+                image_file, 
+                folder="coupons",
+                public_id=None,
+                ovewrite=True
+            )
+            image_url = upload_result.get('secure_url')
 
             # Mas grava no banco só o caminho relativo
-            image_path = f'/uploads/coupons/{filename}'
+          #  image_path = f'/uploads/coupons/{filename}'
 
         coupon = coupon_controller.update_coupon(
             coupon_id,
@@ -136,7 +153,7 @@ def update_coupon(coupon_id):
             discount,
             start_date,
             end_date,
-            image_path
+            image_url
         )
 
         if not coupon:
