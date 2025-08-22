@@ -176,8 +176,9 @@ class CouponController:
     
     def pick_up_coupon_by_client_id(self, data):
         client_id = data.get('client_id')
+        client_username = data.get('client_username')
         coupon_title = data.get('coupon_title')
-
+        
         if not client_id or not coupon_title:
             return {'error': 'client_id e coupon_title são obrigatórios.'}, 400
 
@@ -193,6 +194,7 @@ class CouponController:
         now = datetime.utcnow()
         new_coupon_user = CouponUser(
             client_id=client_id,
+            client_username=client_username,
             coupon_id=coupon.id,
             title=coupon.title,
             code=coupon.code,
