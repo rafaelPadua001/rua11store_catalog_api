@@ -3,7 +3,8 @@ import os
 from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 from models.payment import Payment
-import uuid, uuid4
+import uuid
+from uuid import uuid4
 import requests
 import re
 from datetime import datetime
