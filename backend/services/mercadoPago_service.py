@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 from models.payment import Payment
 import uuid
-from uuid import uuid4
 import requests
 import re
 from datetime import datetime
@@ -240,11 +239,11 @@ class PixPayment(PaymentStrategy):
         response = sdk.payment().create(payment_data)['response']
 
         pix_info = {
-            "id": response.get("id") or str(uuid4()),  # Gera UUID se id for None
-            "status": response.get("status") or "pending",  # fallback para sandbox
+            "id": response.get("id"),
+            "status": response.get("status"),
             "status_detail": response.get("status_detail"),
-            "qr_code": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code") or "",
-            "qr_code_base64": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64") or ""
+            "qr_code": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code"),
+            "qr_code_base64": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64")
         }
 
         # Aqui: criar um objeto do seu model de pagamento
