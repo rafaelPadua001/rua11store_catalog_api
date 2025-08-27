@@ -144,10 +144,10 @@ class DebitCardPayment(PaymentStrategy):
     payment_data = {
         "transaction_amount": float(data["total"]),
         "token": data["card_token"],
-        "description": data.get("description", "Compra com cartão de crédito"),
-        "installments": int(data["installments"]),  # 1 se for débito simulado
-        "payment_type_id": "debit_card",
-        "payment_method_id": data.get("payment_method_id", "visa"),  # "visa", "master", etc
+        "description": data.get("description", "Compra com cartão de débito"),
+        "installments": 1,  # 1 se for débito simulado
+       # "payment_type_id": "debit_card",
+        "payment_method_id": data["payment_method_id"],  # "visa", "master", etc
         "payer": {
             "email": data["payer_email"],
             "identification": {
@@ -260,6 +260,7 @@ class PixPayment(PaymentStrategy):
             payment_type="pix",
             cpf=data["payer_cpf"],
             email=data["payer_email"],
+            name=data["payer_name"],
             usuario_id=data["userId"],
             products=data["products"],
             address=data.get("address"),
