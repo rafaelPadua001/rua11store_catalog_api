@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 from models.payment import Payment
 import uuid
+from uuid import uuid4
 import requests
 import re
 from datetime import datetime
@@ -238,17 +239,26 @@ class PixPayment(PaymentStrategy):
 
         response = sdk.payment().create(payment_data)['response']
 
+        transaction_data = (
+            response.get("point_of_interaction", {}).get("transaction_data", {})
+        )
+
         pix_info = {
-            "id": response.get("id"),
-            "status": response.get("status"),
+            "id": response.get("id"),  # Gera UUID se id for None
+            "status": response.get("status") or "pending",  # fallback para sandbox
             "status_detail": response.get("status_detail"),
-            "qr_code": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code"),
-            "qr_code_base64": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64")
+            "qr_code": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code") or "",
+            "qr_code_base64": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64") or ""
         }
 
+        if transaction_data:
+            pix_info["transaction_data"] = transaction_data.get("qr_code")
+            pix_info["transaction_data_base64"] = transaction_data.get("qr_code_base64")
+
+        payment_id = response.get("id") or str(uuid4())
         # Aqui: criar um objeto do seu model de pagamento
         payment = Payment(
-            payment_id=pix_info["id"],
+            payment_id=payment_id,
             status=pix_info["status"],
           #  status_detail=pix_info["status_detail"],
             #qr_code=pix_info["qr_code"],
