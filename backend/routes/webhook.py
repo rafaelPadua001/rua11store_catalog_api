@@ -26,7 +26,8 @@ def handle_webhook():
     if not data or data.get('type') != 'payment':
         return jsonify({'status': 'error', 'message': 'Invalid or unsupported webhook event'}), 400
 
-    payment_id = data.get('data', {}).get('id')
+    payment_data = data.get('data', {})
+    payment_id = payment_data.get('id')
     if not payment_id:
         return jsonify({'status': 'error', 'message': 'Missing payment ID'}), 400
 
@@ -36,7 +37,7 @@ def handle_webhook():
     if not isinstance(payment, dict):
         return jsonify({'status': 'error', 'message': 'Invalid payment data returned'}), 400
 
-    status = payment.get('status')
+    status = payment.get('status', 'pending')
     external_reference = payment.get('external_reference')
     transaction_amount = payment.get('transaction_amount')
 
