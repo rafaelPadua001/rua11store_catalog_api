@@ -16,9 +16,9 @@ def handle_webhook():
 
     # Verificação opcional de assinatura
     expected_token = os.getenv("MP_WEBHOOK_SECRET")
-    # if expected_token and request.headers.get("x-mp-signature") != expected_token:
-    #     print("Webhook rejeitado: token inválido")
-    #     return jsonify({'status': 'unauthorized'}), 401
+    #if expected_token and request.headers.get("x-mp-signature") != expected_token:
+    #    print("Webhook rejeitado: token inválido")
+    #    return jsonify({'status': 'unauthorized'}), 401
 
     data = request.get_json()
     print("📥 Webhook recebido:", data)
@@ -31,24 +31,15 @@ def handle_webhook():
     if not payment_id:
         return jsonify({'status': 'error', 'message': 'Missing payment ID'}), 400
 
-    # Retry para buscar o pagamento (caso ainda não esteja disponível)
-    payment = None
-    for attempt in range(5):
-        payment = PaymentController.get_payment(payment_id)
-        if isinstance(payment, dict):
-            break
-        print(f"⚠️ Pagamento não encontrado, retry {attempt + 1}/5")
-        import time
-        time.sleep(2)
+    payment = PaymentController.get_payment(payment_id)
+    print("🔍 Pagamento retornado:", payment)
 
     if not isinstance(payment, dict):
-        # Retorna 202 Accepted para que o webhook possa ser reprocessado
-        return jsonify({'status': 'ignored', 'message': 'Payment not found yet'}), 202
+        return jsonify({'status': 'error', 'message': 'Invalid payment data returned'}), 400
 
-    # Garante valores default caso faltem campos
     status = payment.get('status', 'pending')
-    external_reference = payment.get('external_reference', '')
-    transaction_amount = payment.get('transaction_amount', 0.0)
+    external_reference = payment.get('external_reference')
+    transaction_amount = payment.get('transaction_amount')
 
     print(f"✅ Payment ID: {payment_id} | Status: {status}")
 
@@ -63,8 +54,8 @@ def handle_webhook():
             'transaction_amount': transaction_amount
         }), 200
 
-    # Status desconhecido ou ainda pendente
     return jsonify({'status': 'ignored', 'message': f'Status {status} não tratado'}), 200
+
 
 @webhook_bp.route('/melhor-envio/webhook', methods=['POST'])
 def handle_melhorEnvio_webhook():
