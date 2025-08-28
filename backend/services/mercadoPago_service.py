@@ -208,28 +208,39 @@ class DebitCardPayment(PaymentStrategy):
         "error": result
     }
 
+
+
 class PixPayment(PaymentStrategy):
     def create_payment(self, data):
+        # Valores do cupom
         coupon_amount = float(data.get("coupon_amount", 0))
         coupon_code = data.get("coupon_code")
+
+        # Separar nome e sobrenome
+        full_name = data.get("payer_name", "")
+        first_name, last_name = (full_name.split(" ")[0], " ".join(full_name.split(" ")[1:])) if full_name else ("Cliente", "")
+
+        # Monta dados do pagamento
         payment_data = {
             "transaction_amount": float(data["total"]),
             "description": data.get("description", "Pagamento via Pix"),
             "payment_method_id": "pix",
             "payer": {
                 "email": data["payer_email"],
+                "first_name": first_name,
+                "last_name": last_name,
                 "identification": {
                     "type": "CPF",
                     "number": data["payer_cpf"]
                 },
-                "address": {
-                    "zip_code": "06233200",
-                    "street_name": "Av. das Nações Unidas",
-                    "street_number": "3003",
-                    "neighborhood": "Bonfim",
-                    "city": "Osasco",
-                    "federal_unit": "SP"
-                }
+                "address": data.get("address", {
+                    "zip_code": "00000000",
+                    "street_name": "Desconhecido",
+                    "street_number": "0",
+                    "neighborhood": "Desconhecido",
+                    "city": "Desconhecido",
+                    "federal_unit": "XX"
+                })
             },
             "metadata": {
                 "coupon_code": coupon_code,
@@ -237,36 +248,30 @@ class PixPayment(PaymentStrategy):
             },
         }
 
+        # Chama API do Mercado Pago
         response = sdk.payment().create(payment_data)['response']
 
-        transaction_data = (
-            response.get("point_of_interaction", {}).get("transaction_data", {})
-        )
+        # Pega dados do Pix
+        transaction_data = response.get("point_of_interaction", {}).get("transaction_data", {})
+        qr_code = transaction_data.get("qr_code")
+        qr_code_base64 = transaction_data.get("qr_code_base64")
+
+        # Se a API não gerar ID, cria UUID temporário
+        payment_id = response.get("id") or str(uuid4())
 
         pix_info = {
-            "id": response.get("id") or str(uuid4()),
-            "status": response.get("status") or "pending",
+            "id": payment_id,
+            "status": response.get("status", "pending"),
             "status_detail": response.get("status_detail"),
-            "qr_code": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code") or "",
-            "qr_code_base64": response.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code_base64") or ""
+            "qr_code": qr_code,
+            "qr_code_base64": qr_code_base64
         }
 
-
-        if transaction_data:
-            pix_info["transaction_data"] = transaction_data.get("qr_code")
-            pix_info["transaction_data_base64"] = transaction_data.get("qr_code_base64")
-
-        payment_id = response.get("id") or str(uuid4())
-        # Aqui: criar um objeto do seu model de pagamento
+        # Cria Payment real
         payment = Payment(
             payment_id=payment_id,
             status=pix_info["status"],
-          #  status_detail=pix_info["status_detail"],
-            #qr_code=pix_info["qr_code"],
-            #qr_code_base64=pix_info["qr_code_base64"],
             total_value=payment_data["transaction_amount"],
-            #payer_email=data["payer_email"],
-            #description=payment_data["description"],
             payment_date=datetime.now(),
             payment_type="pix",
             cpf=data["payer_cpf"],
