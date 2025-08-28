@@ -27,7 +27,7 @@
           </template>
 
           <!--Exibe order date -->
-          <template v-slot:item.order_date="{item}">
+          <template v-slot:item.order_date="{ item }">
             {{ new Date(item.order_date).toLocaleDateString('pt-BR') }}
           </template>
 
@@ -46,11 +46,11 @@
           </template>
 
           <!--Exibe total amount -->
-          <template v-slot:item.total_amount="{item}">
+          <template v-slot:item.total_amount="{ item }">
             R$ {{ item.total_amount }}
           </template>
 
-          
+
           <!-- Ações -->
           <template v-slot:item.actions="{ item }">
             <!-- Botão buscar item no carrinho -->
@@ -144,17 +144,38 @@
                 <v-divider></v-divider>
               </v-col>
 
-              <v-col cols="12" sm="2">
-                <v-card width="200">
-                  <v-img v-if="selectedOrderItems[0]?.product_image" :src="selectedOrderItems[0].product_image"
-                    :alt="selectedOrderItems[0].seo?.slug || selectedOrderItems[0]?.name" max-width="200"
-                    max-height="200" cover class="rounded-sm" />
+              <v-col cols="12" v-for="(orderItem, index) in selectedOrderItems" :key="index">
+                <v-card class="pa-3 mb-2" outlined>
+                  <v-row>
+                    <v-col cols="3">
+                      <v-img :src="orderItem.product_image" max-width="80" max-height="80" contain />
+                    </v-col>
+                    <v-col cols="12" sm="2">
+                      <strong>Product Name:</strong> {{ selectedOrderItems[0]?.name }}
+                    </v-col>
+                    <v-col cols="12" sm="2">
+                      <strong>Unit Value:</strong> R$ {{ Number(selectedOrderItems[0]?.unit_price).toFixed(2) }}
+                    </v-col>
+                    <v-col cols="12" sm="2">
+                      <strong>Total Value:</strong> R$ {{ Number(selectedOrderItems[0]?.total_price).toFixed(2) }}
+                    </v-col>
+                  </v-row>
                 </v-card>
               </v-col>
 
+
+              <!-- <v-col cols="12" sm="2">
+                <v-card width="200">
+                  
+                  <v-img v-if="orderItens.product_image" :src="orderItens.product_image"
+                    :alt="orderItens.seo?.slug || orderItens?.name" max-width="200"
+                    max-height="200" cover class="rounded-sm" />
+                </v-card>
+              </v-col>-->
+
               <!-- <v-col cols="12" sm="2">
                 <strong>OrderId:</strong> #{{ selectedOrder.id }}
-              </v-col> -->
+              </v-col> 
               <v-col cols="12" sm="2">
                 <strong>Product Name:</strong> {{ selectedOrderItems[0]?.name }}
               </v-col>
@@ -202,12 +223,7 @@
             -->
 
             <v-card-actions>
-              <!-- Botão compra etiqueta no carrinho -->
-              <!-- 
-              <v-btn small @click.stop="shipmentCheckout(cartItems.data)">
-                checkout
-              </v-btn> 
-              -->
+             
               <v-spacer></v-spacer>
               <v-btn color="green" text @click="dialogCheckItems = false">Close</v-btn>
             </v-card-actions>
@@ -278,7 +294,7 @@ export default {
         // Garante que sempre será um array simples
         const ordersArray = Array.isArray(response.data) ? response.data.flat() : [];
 
-     //   console.log("Orders recebidos:", ordersArray);
+        //   console.log("Orders recebidos:", ordersArray);
 
         this.orders = ordersArray.map(order => {
           const items = (order.products || []).map((prod, index) => ({
