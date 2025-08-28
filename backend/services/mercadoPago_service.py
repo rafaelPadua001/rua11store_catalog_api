@@ -252,6 +252,7 @@ class PixPayment(PaymentStrategy):
         response = sdk.payment().create(payment_data)['response']
 
         # Pega dados do Pix
+        # Pega dados do Pix
         transaction_data = response.get("point_of_interaction", {}).get("transaction_data", {})
         qr_code = transaction_data.get("qr_code")
         qr_code_base64 = transaction_data.get("qr_code_base64")
