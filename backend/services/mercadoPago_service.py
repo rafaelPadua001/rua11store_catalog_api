@@ -208,8 +208,6 @@ class DebitCardPayment(PaymentStrategy):
         "error": result
     }
 
-
-
 class PixPayment(PaymentStrategy):
     def create_payment(self, data):
         # Valores do cupom
@@ -233,14 +231,14 @@ class PixPayment(PaymentStrategy):
                     "type": "CPF",
                     "number": data["payer_cpf"]
                 },
-                "address": data.get("address", {
-                    "zip_code": "00000000",
-                    "street_name": "Desconhecido",
-                    "street_number": "0",
-                    "neighborhood": "Desconhecido",
-                    "city": "Desconhecido",
-                    "federal_unit": "XX"
-                })
+               # "address": data.get("address", {
+               #     "zip_code": "00000000",
+               #     "street_name": "Desconhecido",
+               #     "street_number": "0",
+               #     "neighborhood": "Desconhecido",
+               #     "city": "Desconhecido",
+               #     "federal_unit": "XX"
+               # })
             },
             "metadata": {
                 "coupon_code": coupon_code,
@@ -251,7 +249,6 @@ class PixPayment(PaymentStrategy):
         # Chama API do Mercado Pago
         response = sdk.payment().create(payment_data)['response']
 
-        # Pega dados do Pix
         # Pega dados do Pix
         transaction_data = response.get("point_of_interaction", {}).get("transaction_data", {})
         qr_code = transaction_data.get("qr_code")
