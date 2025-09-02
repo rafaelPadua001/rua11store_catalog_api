@@ -14,13 +14,16 @@ from routes import register_routes
 from controllers.emailController import EmailController
 from extensions import socketio, mail, email_controller
 from routes.notification import notification_bp, register_socketio_events
-
+from apscheduler.schedulers.background import BackgroundScheduler
+from services.recovery_service import RecoveryService
 from dotenv import load_dotenv
+
 import os
 import socket
 import re
 import cloudinary
 import cloudinary.uploader
+
 
 
 # Carrega variáveis do .env
@@ -83,9 +86,21 @@ app.config.update(
     MAIL_DEFAULT_SENDER=os.getenv('MAIL_DEFAULT_SENDER')
 )
 mail.init_app(app)
+
+
+
 email_ctrl = EmailController(mail)
 import extensions
 extensions.email_controller = email_ctrl
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(
+    func=lambda: RecoveryService.check_and_send_recovery_emails(hours=1),
+    trigger="interval",
+    minutes=30
+)
+
+scheduler.start()
 
 cloudinary.config(
     cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
