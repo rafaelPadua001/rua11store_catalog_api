@@ -6,11 +6,12 @@ from extensions import email_controller
 import logging
 
 logger = logging.getLogger("recovery_service")
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-formatter = logging.Formatter('[%(asctime)s] %(levelname)s in %(name)s: %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+if not logger.hasHandlers():
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('[%(asctime)s] %(levelname)s in %(name)s: %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 class RecoveryService:
     @staticmethod
