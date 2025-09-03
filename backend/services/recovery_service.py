@@ -11,7 +11,14 @@ class RecoveryService:
         limit_time = datetime.utcnow() - timedelta(hours=hours)
 
         # Busca todos os carrinhos ativos
-        all_carts = supabase.table("cart").select("*").filter("status", "eq", "active").execute().data
+        all_carts = (
+            supabase.table("cart")
+            .select("*")
+            .eq('status', 'active')
+            .is_("recovery_sent_at", None)
+            .execute()
+            .data
+        )
         abandoned_carts = []
 
         for c in all_carts:
@@ -46,9 +53,15 @@ class RecoveryService:
 
             try:
                 EmailController.send_email(subject, recipients, body, html)
+
+                #match cart with processed
+                supabase.table("cart").update({
+                    "status": "abandoned",
+                    "recovery_sent_at": datetime.utcnow().isoformat()
+                }).eq("id", cart['id']).execute()
+
+                
                 current_app.logger.info(f"E-mail enviado para {user['email']} - carrinho {cart['id']}")
             except Exception as e:
                 current_app.logger.error(f"Falha ao enviar email para {user['email']}: {e}")
-
-            # Atualiza status só depois do envio
-            supabase.table("cart").update({"status": "abandoned"}).eq("id", cart["id"]).execute()
+            
