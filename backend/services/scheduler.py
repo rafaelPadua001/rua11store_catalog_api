@@ -4,7 +4,7 @@ from app import app
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=lambda: run_with_app_context, trigger="interval", minutes=30)
+    scheduler.add_job(func=run_with_app_context(), trigger="interval", minutes=30)
     scheduler.start()
 
 def run_with_app_context():
