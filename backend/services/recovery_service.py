@@ -4,7 +4,7 @@ from services.cart_service import get_supabase
 from controllers.emailController import EmailController
 from extensions import email_controller
 import logging
-from app import app
+
 
 logger = logging.getLogger("recovery_service")
 if not logger.hasHandlers():
@@ -51,7 +51,7 @@ class RecoveryService:
                              Finalizar Compra</a></p>"""
 
             try:
-                with app.app_context():
+                with current_app.app_context():
                     EmailController.send_email(subject, recipients, body, html)
 
                 supabase.table("cart").update({
