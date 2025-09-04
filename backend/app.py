@@ -95,9 +95,11 @@ extensions.email_controller = email_ctrl
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(
-    func=lambda: RecoveryService.check_and_send_recovery_emails(hours=1),
+    func=RecoveryService.check_and_send_recovery_emails,
     trigger="interval",
-    minutes=15
+    minutes=1,
+    args=[app],
+    kwargs={"hours": 1}
 )
 
 scheduler.start()
