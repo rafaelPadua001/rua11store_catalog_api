@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from flask import current_app
 from services.cart_service import get_supabase
 from controllers.emailController import EmailController
 from extensions import email_controller
@@ -51,8 +50,8 @@ class RecoveryService:
                              Finalizar Compra</a></p>"""
 
             try:
-                with current_app.app_context():
-                    EmailController.send_email(subject, recipients, body, html)
+                # with current_app.app_context():
+                EmailController.send_email(subject, recipients, body, html)
 
                 supabase.table("cart").update({
                     "status": "abandoned",
@@ -61,4 +60,5 @@ class RecoveryService:
 
                 logger.info(f"E-mail enviado para {user['email']} - carrinho {cart['id']}")
             except Exception as e:
-                logger.error(f"Falha ao enviar email para {user['email']}: {e}")
+                logger.error(f"Falha ao enviar email para {user['email']}", exc_info=True)
+
