@@ -59,6 +59,21 @@ class RecoveryService:
                         Finalizar Compra</a></p>
                 """
 
+                #lock cart
+                updated = (
+                    supabase.table('cart').update({
+                        "status": "pending_recovery",
+                        "recovery_sent_at": datetime.utcnow().isoformat()
+                    })
+                    .eq("id", cart["id"])
+                    .execute()
+                    .data
+                )
+
+                if not updated:
+                    # other work get this cart
+                    continue
+                
                 try:
                     EmailController.send_email(subject, recipients, body, html)
 
@@ -69,4 +84,10 @@ class RecoveryService:
 
                     logger.info(f"E-mail enviado para {user['email']} - carrinho {cart['id']}")
                 except Exception:
+                    # revert lock if fail
+                    supabase.table('cart').update({
+                        "status": "active",
+                        "recovery_sent_at": None
+                    }).eq("id", cart['id']).execute()
+
                     logger.error(f"Falha ao enviar email para {user['email']}", exc_info=True)
