@@ -63,9 +63,11 @@ class RecoveryService:
                 updated = (
                     supabase.table('cart').update({
                         "status": "pending_recovery",
-                        "recovery_sent_at": datetime.utcnow().isoformat()
+                        "recovery_sent_at": datetime.utcnow().isoformat(),
+                        "lock": True
                     })
                     .eq("id", cart["id"])
+                    .eq("lock", False)
                     .execute()
                     .data
                 )

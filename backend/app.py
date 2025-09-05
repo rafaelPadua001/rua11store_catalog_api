@@ -97,7 +97,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(
     func=RecoveryService.check_and_send_recovery_emails,
     trigger="interval",
-    minutes=15,
+    minutes=1,
     args=[app],
     kwargs={"hours": 1}
 )
