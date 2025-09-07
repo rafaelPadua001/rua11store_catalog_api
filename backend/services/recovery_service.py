@@ -54,7 +54,7 @@ class RecoveryService:
                     <p>Olá {user.get('full_name', '')} 👋</p>
                     <p>Você deixou o seguinte item no seu carrinho:</p>
                     <ul><li>{cart['product_name']} - R$ {cart['price']/100:.2f}</li></ul>
-                    <p><a href="https://rua11store.com/carrinho/{cart['id']}"
+                    <p><a href="https://rua11store-web.vercel.app/"
                         style="background:#000;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">
                         Finalizar Compra</a></p>
                 """
