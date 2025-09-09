@@ -21,19 +21,23 @@ class RecoveryService:
             limit_time = datetime.utcnow() - timedelta(hours=hours)
 
             all_carts = (
-                supabase.table("cart")
+                supabase.table("carts")
                 .select("*")
                 .eq('status', 'active')
                 .is_("recovery_sent_at", None)
                 .execute()
                 .data
             )
+            
+
 
             abandoned_carts = []
             for c in all_carts:
                 updated_at = datetime.fromisoformat(c['updated_at'].split('+')[0])
                 if updated_at < limit_time:
                     abandoned_carts.append(c)
+
+            
 
             for cart in abandoned_carts:
                 user = (
@@ -44,16 +48,36 @@ class RecoveryService:
                     .execute()
                     .data
                 )
+                
+                
                 if not user or not user.get("email"):
+                    print(f"[DEBUG] Carrinho {cart['id']} ignorado: usuário sem email")
                     continue
 
+                cart_items = (
+                    supabase.table('cart_items')
+                    .select('*')
+                    .eq('cart_id', cart['id'])
+                    .execute()
+                    .data
+                )
+
+                if not cart_items:
+                    continue
+
+                items_list_html = ""
+                for item in cart_items:
+                    item_name = item.get('product_name', 'Produto')
+                    item_price = item.get('price', 0)
+                    quantity = item.get("quantity", 1)
+                    items_list_html += f"<li>{item_name} - R$ {item_price:.2f} (Qtd: {quantity})</li>"
                 subject = "🛒 Você esqueceu seu carrinho na Rua11Store!"
                 recipients = [user["email"]]
                 body = f"Olá {user.get('full_name', '')}, você deixou alguns itens no carrinho."
                 html = f"""
                     <p>Olá {user.get('full_name', '')} 👋</p>
                     <p>Você deixou o seguinte item no seu carrinho:</p>
-                    <ul><li>{cart['product_name']} - R$ {cart['price']/100:.2f}</li></ul>
+                    <ul><li>{items_list_html}</li></ul>
                     <p><a href="https://rua11store-web.vercel.app/"
                         style="background:#000;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">
                         Finalizar Compra</a></p>
@@ -61,7 +85,7 @@ class RecoveryService:
 
                 #lock cart
                 updated = (
-                    supabase.table('cart').update({
+                    supabase.table('carts').update({
                         "status": "pending_recovery",
                         "recovery_sent_at": datetime.utcnow().isoformat(),
                         "lock": True
@@ -71,6 +95,7 @@ class RecoveryService:
                     .execute()
                     .data
                 )
+               
 
                 if not updated:
                     # other work get this cart
@@ -79,7 +104,7 @@ class RecoveryService:
                 try:
                     EmailController.send_email(subject, recipients, body, html)
 
-                    supabase.table("cart").update({
+                    supabase.table("carts").update({
                         "status": "abandoned",
                         "recovery_sent_at": datetime.utcnow().isoformat()
                     }).eq("id", cart['id']).execute()
@@ -87,7 +112,7 @@ class RecoveryService:
                     logger.info(f"E-mail enviado para {user['email']} - carrinho {cart['id']}")
                 except Exception:
                     # revert lock if fail
-                    supabase.table('cart').update({
+                    supabase.table('carts').update({
                         "status": "active",
                         "recovery_sent_at": None
                     }).eq("id", cart['id']).execute()
