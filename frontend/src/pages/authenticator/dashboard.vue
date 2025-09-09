@@ -235,7 +235,7 @@ export default {
         async loadCarts() {
             try {
                 const { data, error } = await supabase
-                    .from('cart')
+                    .from('carts')
                     .select('*')
 
                 if (error) throw error
