@@ -5,5 +5,5 @@ class AbandonedCart:
     @staticmethod
     def get_abandoned_cart(hours: int = 24):
         supabase = get_supabase(service=True)
-        response = supabase.table("public.cart").select("*").execute()
+        response = supabase.table("public.carts").select("*").execute()
       
