@@ -29,7 +29,7 @@ class Product(db.Model):
     user_id = db.Column(db.Integer)
 
     stock = db.relationship('Stock', back_populates='product', uselist=False)
-    categories = db.relationship('Category', back_populates="products")
+    categories = db.relationship('Category', back_populates="products", uselist=False)
     seo = db.relationship('ProductSeo', uselist=False, back_populates='product', cascade="all, delete-orphan")
     images = db.relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
     
