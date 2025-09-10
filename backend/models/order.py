@@ -66,6 +66,13 @@ class Order(db.Model):
                 }
                 for item in self.items if item.product.seo
             ],
+            'categories': [
+                {
+                    'id': item.product.categories.id if item.product and item.product.categories else None,
+                    "name": item.product.categories.name if item.product and item.product.categories else None,
+                }
+                for item in self.items if item.product.categories
+            ],
            'delivery': 
                {
                 'id': self.delivery.id if self.delivery else None,
