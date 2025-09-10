@@ -3,7 +3,7 @@ from database import db
 class Category(db.Model):
     __tablename__ = 'categories'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, nullable=False)
     is_subcategory = db.Column(db.Boolean, default=False)
     parent_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
@@ -11,6 +11,8 @@ class Category(db.Model):
 
     # Relacionamento opcional para subcategorias
     subcategories = db.relationship('Category', backref=db.backref('parent', remote_side=[id]), lazy='dynamic')
+
+    products = db.relationship('Product', back_populates="categories", cascade="all, delete-orphan")
 
     def save(self):
         """Salva ou atualiza a categoria"""

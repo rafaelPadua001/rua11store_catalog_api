@@ -16,7 +16,7 @@ class SubCategory:
             conn = self.get_db_connection()
             cursor = conn.cursor
 
-            if seld.id:
+            if self.id:
                 cursor.execute("""
                     UPDATE subcategories 
                     SET name = ?, category_id = ? 
