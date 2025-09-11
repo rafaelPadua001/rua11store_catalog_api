@@ -1,43 +1,65 @@
 # services/fcm_service.py
-import requests
 import os
+import requests
 from supabase import create_client, Client
 from dotenv import load_dotenv
+from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+
 
 # Carrega variáveis do .env
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_PROJECT_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_PUBLIC_ANON_KEY")
-FCM_SERVER_KEY = os.getenv("FCM_SERVER_KEY")
+PROJECT_ID = os.getenv("PROJECT_ID")
+SERVICE_ACCOUNT_FILE = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")  # caminho JSON da conta de serviço
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-FCM_URL = "https://fcm.googleapis.com/v1/projects/rua11store-notifications-24f29/messages:send"
 
-def send_fcm_notification(token: str, title: str, body: str, link: str):
+# URL base do FCM v1
+FCM_URL = f"https://fcm.googleapis.com/v1/projects/rua11store-notifications-24f29/messages:send"
+
+
+def get_access_token():
+    """Gera o access_token do service account para autenticar no FCM v1"""
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
+        scopes=["https://www.googleapis.com/auth/firebase.messaging"]
+    )
+    auth_req = Request()
+    creds.refresh(auth_req)
+    return creds.token
+
+
+def send_fcm_notification(token: str, title: str, body: str, link: str, data: dict = None):
     headers = {
-        "Authorization": f"key={FCM_SERVER_KEY}",
+        "Authorization": f"Bearer {get_access_token()}",
         "Content-Type": "application/json"
     }
     payload = {
-        "to": token,
-        "notification": {
-            "title": title,
-            "body": body
-        },
-        "webpush": {
-            "fcm_options": {
-                "link": link
-            }
+        "message": {
+            "token": token,
+            "notification": {
+                "title": title,
+                "body": body
+            },
+            "webpush": {
+                "fcm_options": {
+                    "link": link
+                }
+            },
+            "data": data or {}
         }
     }
     resp = requests.post(FCM_URL, headers=headers, json=payload)
     return resp
 
+
 def send_notification_to_all_users(title: str, body: str, link: str):
     response = supabase.table("user_devices").select("device_token").execute()
     tokens = [row["device_token"] for row in response.data if row.get("device_token")]
-    
+
     for token in tokens:
         resp = send_fcm_notification(token, title, body, link)
-        print(f"Enviando para {token[:8]}..., status: {resp.status_code}")
+        print(f"Enviando para {token[:8]}..., status: {resp.status_code}, resp: {resp.text}")

@@ -2,8 +2,10 @@ from datetime import datetime, timedelta
 from services.cart_service import get_supabase
 from controllers.emailController import EmailController
 from extensions import email_controller
+from services.fcm_service import send_fcm_notification
 import logging
-
+import requests
+import json
 
 logger = logging.getLogger("recovery_service")
 if not logger.hasHandlers():
@@ -29,16 +31,12 @@ class RecoveryService:
                 .data
             )
             
-
-
             abandoned_carts = []
             for c in all_carts:
                 updated_at = datetime.fromisoformat(c['updated_at'].split('+')[0])
                 if updated_at < limit_time:
                     abandoned_carts.append(c)
-
             
-
             for cart in abandoned_carts:
                 user = (
                     supabase.table("user_profiles")
@@ -104,10 +102,35 @@ class RecoveryService:
                 try:
                     EmailController.send_email(subject, recipients, body, html)
 
-                    supabase.table("carts").update({
-                        "status": "abandoned",
-                        "recovery_sent_at": datetime.utcnow().isoformat()
-                    }).eq("id", cart['id']).execute()
+                    tokens = (
+                        supabase.table('user_devices')
+                            .select('device_token')
+                            .eq('user_id', cart['user_id'])
+                            .execute()
+                            .data
+                    )
+                   
+
+                    if user.get('device_token'):
+                        supabase.table("carts").update({
+                            "status": "abandoned",
+                            "recovery_sent_at": datetime.utcnow().isoformat()
+                        }).eq("id", cart['id']).execute()
+                    
+                    if tokens:
+                        for token in tokens:
+                            device_token = token.get("device_token")
+                            if not device_token:
+                                continue
+                            
+                            send_fcm_notification(
+                                token=device_token,
+                                title="🛒 Você esqueceu seu carrinho!" ,
+                                body="Finalize sua compra antes que acabe o estoque 🚀",
+                                data={"cart_id": cart["id"]},
+                                link="google.com"
+                            )
+
 
                     logger.info(f"E-mail enviado para {user['email']} - carrinho {cart['id']}")
                 except Exception:
