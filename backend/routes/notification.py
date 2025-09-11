@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_socketio import emit
 from utils.notifications_utils import create_notification, get_unread_notifications, mark_notification_as_read
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+from services.fcm_service import send_fcm_notification
 
 notification_bp = Blueprint('notifications', __name__)
 connected_users = {}
@@ -45,6 +46,20 @@ def notify():
 
     return jsonify({'status': 'sent'})
 
+@notification_bp.route('/send-notification', methods=['POST'])
+def send_notification():
+    data = request.json
+    token = data.get('token')
+    title = data.get('title', 'Nova Notificação')
+    body = data.get('body', '')
+    link = data.get('link', 'https://rua11store-web.vercel.app/')
+
+    if not token:
+        return jsonify({"error": "Token não informado"}), 400
+    
+    resp = send_fcm_notification(token, title, body, link)
+    return jsonify({"status": resp.status_code, "response": resp.json})
+
 def register_socketio_events(sio):
     global socketio
     socketio = sio  # guarda a instância do socketio para usar nas rotas
@@ -60,3 +75,5 @@ def register_socketio_events(sio):
         for user_id, sid in list(connected_users.items()):
             if sid == request.sid:
                 del connected_users[user_id]
+
+
