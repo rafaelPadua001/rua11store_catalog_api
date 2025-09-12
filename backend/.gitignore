@@ -14,3 +14,7 @@ __pycache__/
 .vscode/
 .idea/
 *.swp
+
+
+# Ignorar JSON da service account
+config/rua11store-notifications-24f29-firebase-adminsdk-fbsvc-0ab3a68aa0.json

@@ -5,6 +5,9 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from google.oauth2 import service_account
 from google.auth.transport.requests import Request
+from tempfile import NamedTemporaryFile
+import json
+
 
 
 # Carrega variáveis do .env
@@ -16,6 +19,18 @@ PROJECT_ID = os.getenv("PROJECT_ID")
 SERVICE_ACCOUNT_FILE = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")  # caminho JSON da conta de serviço
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+service_account_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+if service_account_json:
+    try:
+        # valida que é JSON válido
+        creds_dict = json.loads(service_account_json)
+        with NamedTemporaryFile(delete=False, suffix=".json") as f:
+            f.write(json.dumps(creds_dict).encode())
+            f.flush()
+            SERVICE_ACCOUNT_FILE = f.name
+    except json.JSONDecodeError:
+        raise ValueError("GOOGLE_APPLICATION_CREDENTIALS no .env não está em formato JSON válido")
 
 # URL base do FCM v1
 FCM_URL = f"https://fcm.googleapis.com/v1/projects/rua11store-notifications-24f29/messages:send"
@@ -45,9 +60,8 @@ def send_fcm_notification(token: str, title: str, body: str, link: str, data: di
                 "body": body
             },
             "webpush": {
-                "fcm_options": {
-                    "link": link
-                }
+                "fcm_options": {"link": link},
+                "notification": {"click_action": link}
             },
             "data": data or {}
         }
