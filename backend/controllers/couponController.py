@@ -4,6 +4,8 @@ from models.coupon import Coupon
 from models.couponUser import CouponUser
 from controllers.couponUserController import CouponUserController
 from controllers.emailController import EmailController
+from services.fcm_service import send_fcm_notification, send_notification_to_all_users
+from services.cart_service import get_supabase
 from flask import jsonify
 from database import db  # flask_sqlalchemy.SQLAlchemy instance
 import uuid
@@ -113,6 +115,45 @@ class CouponController:
                 body=f"Olá {client_username}, você recebeu um novo cupom!",
                 html=html_content
             )
+
+             # ----- PUSH NOTIFICATION -----
+            try:
+                supabase = get_supabase(service=True)
+                tokens = (
+                    supabase.table("user_devices")
+                    .select("device_token")
+                    .eq("user_id", client_id_uuid)
+                    .execute()
+                    .data
+                )
+                #print(f"[DEBUG] Tokens encontrados para {client_username}: {tokens}? {client_id}")
+                for token in tokens:
+                    device_token = token.get("device_token")
+                    if not device_token:
+                        continue
+
+                    send_fcm_notification(
+                        token=device_token,
+                        title="🎁 Você recebeu um cupom!",
+                        body=f"{discount}% OFF com o código {code} válido até {end_date}.",
+                        data={"coupon_id": str(new_coupon.id), "code": code},
+                        link="https://rua11store-web.vercel.app/coupons"
+                    )
+                    print(f"📲 Notificação enviada para {client_username}")
+            except Exception as e:
+                print(f"❌ Erro ao enviar notificação push: {e}")
+        else:
+            # ----- CUPOM GERAL -----
+            try:
+                send_notification_to_all_users(
+                    title="🎁 Novo cupom disponível!",
+                    body=f"Use o código {code} e ganhe {discount}% OFF até {end_date}!",
+                    data={"coupon_id": str(new_coupon.id), "code": code},
+                    link="https://rua11store-web.vercel.app/coupons"
+                )
+                print("📢 Notificação enviada para todos os usuários")
+            except Exception as e:
+                print(f"❌ Erro ao enviar notificação em massa: {e}")    
         return new_coupon.to_dict()
 
 

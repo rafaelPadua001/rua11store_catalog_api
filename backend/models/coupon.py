@@ -5,7 +5,7 @@ from database import db
 class Coupon(db.Model):
     __tablename__ = 'coupons'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, nullable=False)
     client_id = db.Column(pg.UUID(as_uuid=True), nullable=False)
     client_username = db.Column(db.String, nullable=True) 
@@ -37,7 +37,7 @@ class Coupon(db.Model):
     @classmethod
     def from_dict(cls, data):
         return cls(
-            id=data.get("id"),
+           # id=data.get("id"),
             user_id=data["user_id"],
             client_id=data["client_id"],
             client_username=data.get("client_username"),
