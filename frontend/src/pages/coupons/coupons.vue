@@ -121,7 +121,7 @@ export default {
             editedIndex: -1,
             searchUser: "",
             users: [],
-            loadUsers: false,
+            loadingUsers: false,
         };
     },
     created() {

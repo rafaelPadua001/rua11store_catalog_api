@@ -8,7 +8,7 @@ from datetime import datetime
 class CouponUser(db.Model):
     __tablename__ = 'coupons_user'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     coupon_id = Column(Integer, ForeignKey('coupons.id'), nullable=False)
     client_id = Column(pg.UUID(as_uuid=True), nullable=False)
     client_username = Column(db.String, nullable=True) 
@@ -28,16 +28,11 @@ class CouponUser(db.Model):
             if isinstance(date_value, datetime):
                 return date_value.isoformat()
             try:
-                # Tenta converter de string no formato RFC 2822
-                dt = datetime.strptime(date_value, '%a, %d %b %Y %H:%M:%S %Z')
+                # Tenta converter de string no formato ISO
+                dt = datetime.fromisoformat(date_value)
                 return dt.isoformat()
             except Exception:
-                try:
-                    # Tenta converter de string no formato ISO
-                    dt = datetime.fromisoformat(date_value)
-                    return dt.isoformat()
-                except:
-                    return str(date_value)  # Retorna como string se falhar
+                return str(date_value)  # Retorna como string se falhar
 
         return {
             'id': self.id,
@@ -48,5 +43,6 @@ class CouponUser(db.Model):
             'discount': self.discount,
             'start_date': parse_to_iso(self.start_date),
             'end_date': parse_to_iso(self.end_date),
-            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'created_at': parse_to_iso(self.created_at),
+            'updated_at': parse_to_iso(self.updated_at),
         }

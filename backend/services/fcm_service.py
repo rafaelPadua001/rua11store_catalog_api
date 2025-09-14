@@ -70,10 +70,10 @@ def send_fcm_notification(token: str, title: str, body: str, link: str, data: di
     return resp
 
 
-def send_notification_to_all_users(title: str, body: str, link: str):
+def send_notification_to_all_users(title: str, body: str, link: str, data: dict = None):
     response = supabase.table("user_devices").select("device_token").execute()
     tokens = [row["device_token"] for row in response.data if row.get("device_token")]
 
     for token in tokens:
-        resp = send_fcm_notification(token, title, body, link)
+        resp = send_fcm_notification(token, title, body, link,)
         print(f"Enviando para {token[:8]}..., status: {resp.status_code}, resp: {resp.text}")
