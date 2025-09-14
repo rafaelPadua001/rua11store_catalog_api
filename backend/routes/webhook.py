@@ -5,6 +5,8 @@ from models.delivery import Delivery
 from database import db
 from models import Delivery, Order, Payment
 from controllers.emailController import EmailController
+from services.cart_service import get_supabase
+from services.fcm_service import send_fcm_notification
 
 
 webhook_bp = Blueprint('webhook', __name__)
@@ -55,6 +57,60 @@ def handle_webhook():
     if status in ['approved', 'in_process', 'rejected']:
         response, status_code = PaymentController.update_status_payment(payment_id, status)
         print("🔄 Status atualizado:", response)
+
+        supabase = get_supabase(service=True)
+        user = (
+            supabase.table("user_profiles")
+            .select("email, full_name")
+            .eq("user_id", external_reference)
+            .maybe_single()
+            .execute()
+            .data
+        )
+
+        if user:
+            # 1. Enviar e-mail
+            try:
+                subject = "📢 Atualização no seu pagamento"
+                body = f"O status do seu pagamento foi atualizado para: {status}"
+                html = f"<p>Olá {user.get('full_name', '')},</p><p>{body}</p>"
+
+                EmailController.send_email(
+                    recipients=[user["email"]],
+                    subject=subject,
+                    body=body,
+                    html=html
+                )
+                print(f"📧 Email enviado para {user['email']}")
+            except Exception as e:
+                print(f"❌ Erro ao enviar email: {e}")
+
+            # 2. Enviar push notification
+            try:
+                tokens = (
+                    supabase.table("user_devices")
+                    .select("device_token")
+                    .eq("user_id", external_reference)
+                    .execute()
+                    .data
+                )
+
+                for token in tokens:
+                    device_token = token.get("device_token")
+                    if not device_token:
+                        continue
+
+                    send_fcm_notification(
+                        token=device_token,
+                        title="📢 Atualização no seu pagamento",
+                        body=f"Status atualizado: {status}",
+                        data={"payment_id": payment_id, "status": status},
+                        link="https://rua11store-web.vercel.app/"
+                    )
+                    print(f"📲 Notificação enviada para user {external_reference}")
+            except Exception as e:
+                print(f"❌ Erro ao enviar notificação push: {e}")
+
         return jsonify({
             'status': 'success',
             'message': f'Webhook processed for payment ID: {payment_id}',
@@ -132,6 +188,30 @@ def handle_melhorEnvio_webhook():
                     body=body_text,
                     html = html_message
                 )
+
+                #send push notification (FCM)
+                tokens = (
+                    get_supabase(service=True)
+                    .table('user_devices')
+                    .select('devicet_token')
+                    .eq('user_id', delivery.user_id)
+                    .execute()
+                    .data()
+                )
+
+                for t in tokens:
+                    token = t.get("device_token")
+                    if token:
+                        send_fcm_notification(
+                            token=token,
+                            title="📦 Atualização de entrega",
+                            data={
+                                "delivery_id": delivery.id,
+                                "status": delivery.status
+                            }
+                        )
+
+
             except Exception as e:
                 print(f"❌ Erro ao enviar email: {e}")
 

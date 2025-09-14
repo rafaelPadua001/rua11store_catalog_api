@@ -5,6 +5,7 @@ from extensions import socketio
 from controllers.stockController import StockController
 from flask import session
 from utils.notifications_utils import create_notification
+from services.fcm_service import send_fcm_notification
 import requests
 import os
 import uuid
@@ -16,6 +17,17 @@ from models.orderItem import OrderItem
 from models.paymentProduct import PaymentProduct
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
+
+
+def trigger_push_notification(order_id, recipient_name, total_value):
+        try:
+            send_fcm_notification(
+                title="📦 Novo Pedido!",
+                body=f"Pedido #{order_id} para {recipient_name} - R${total_value:.2f}",
+                data={"order_id": str(order_id)}
+            )
+        except Exception as e:
+            print(f"Erro ao enviar push notification: {e}")
 
 
 class Payment(db.Model):
@@ -74,6 +86,8 @@ class Payment(db.Model):
             'coupon_code': self.coupon_code,
             'coupon_amount': self.coupon_amount
         }
+    
+    
 
     def save(self):
         try:
@@ -149,6 +163,9 @@ class Payment(db.Model):
                 'order_id': order_id,
                 'is_global': True
             })
+
+           
+
             products_html = "<ul style='list-style: none; padding: 0;'>"
             for product in self.products:
                 if 'id' not in product:
@@ -290,15 +307,23 @@ class Payment(db.Model):
                             </p>
                         """
                     )
+
+                   
                 else:
                     print("Erro: Variável de ambiente SENDER_EMAIL não está definida.")
             except Exception as e:
                 print(f'Erro ao enviar e-mail: {e}')
 
             db.session.commit()
+
+            recipient_name = self.address.get('recipient_name', 'Cliente')
+            trigger_push_notification(order_id, recipient_name, self.total_value)
         except Exception as e:
             print(f"Erro ao salvar o pagamento: {e}")
             db.session.rollback()
+    
+    
+    
 
     @staticmethod
     def update_status(payment_id, status):
