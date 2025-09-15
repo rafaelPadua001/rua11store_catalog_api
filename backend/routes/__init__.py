@@ -1,5 +1,6 @@
 from flask import Blueprint
 from routes.authentication import auth_bp
+from routes.blog import blog_bp
 from routes.pages import pages_bp
 from routes.categories import category_bp
 from routes.products import products_bp
@@ -23,6 +24,7 @@ from routes.supabaseUsers import supabaseUsers_bp
 
 def register_routes(app):
     app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(blog_bp, url_prefix='/blog')
     app.register_blueprint(pages_bp, url_prefix='/pages')
     app.register_blueprint(category_bp, url_prefix='/categories')
     app.register_blueprint(products_bp, url_prefix='/products')

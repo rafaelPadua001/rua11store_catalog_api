@@ -64,6 +64,7 @@
             title="Dashboard"></v-list-item>
           <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
             title="Pages"></v-list-item>
+            <v-list-item link @click="navigateTo('/blog/blogs')" prepend-icon="mdi-post" title="Blog"></v-list-item>
           <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
           <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
             title="Categories"></v-list-item>
