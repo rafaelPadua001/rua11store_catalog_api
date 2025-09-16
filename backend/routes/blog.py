@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template
 from models.blogPost import BlogPost
 from models.page import Page
+from controllers.blogController import BlogController
 #from controllers.categoryController import CategoryController
 from flask_cors import CORS
 
@@ -33,3 +34,11 @@ def blog_index():
 def blog_details(slug):
     post = BlogPost.query.filter_by(slug=slug).first_or_404()
     return render_template("blog/detail.html", post=post, page=post.page)
+
+@blog_bp.route('/posts', methods=['GET'])
+def get_post():
+    return BlogController.get_posts()
+
+@blog_bp.route('/posts', methods=['POST'])
+def create_post():
+    return BlogController.create_post()
