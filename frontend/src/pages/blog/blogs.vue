@@ -55,10 +55,10 @@
                             <v-icon small color="primary">mdi-eye</v-icon>
                         </router-link>-->
 
-                        <v-icon small color="primary" @click.stop="editProduct(item)">
+                        <v-icon small color="primary" @click.stop="editPost(item)">
                             mdi-pencil
                         </v-icon>
-                        <v-icon small color="error" @click.stop="deleteProduct(item.id)">
+                        <v-icon small color="error" @click.stop="deletePost(item.id)">
                             mdi-delete
                         </v-icon>
                     </template> 
@@ -68,8 +68,8 @@
 
             <!-- Modal para Adicionar/Editar Produto -->
             <v-dialog v-model="newPostDialog" max-width="600" fullscreen>
-                <BlogForm :page_id="this.form.page_id" :page_title="formTitle" :form-title="formTitle" @close="close"
-                    @save-post="addPost" />
+                <BlogForm :page_id="this.form.page_id" :page_title="formTitle" :form-title="formTitle" :editedIndex="editedIndex" :editedPost="editedPost"
+                    @save-post="addPost" @update-post="updatePost" @close="close"/>
 
             </v-dialog>
         </v-col>
@@ -100,6 +100,17 @@ export default {
             newPostDialog: false,
             pages: [],
             posts: [],
+            editedIndex: -1,
+            editedPost: {
+                id: null,
+                page_id: null,  // será preenchido com o id da página Blog
+                title: "",
+                slug: "",
+                excerpt: "",
+                content: "",
+                cover_image_file: null,
+                cover_image_preview: null,
+            },
             form: {
                 page_id: null,  // será preenchido com o id da página Blog
                 title: "",
@@ -122,7 +133,9 @@ export default {
         };
     },
     computed: {
-
+        formTitle(){
+            return this.editedIndex == -1 ? "New Post" : "Edit Post"
+        }
 
     },
     created() {
@@ -159,16 +172,47 @@ export default {
             }
         },
         newPost() {
-            // this.editedProduct = { ...this.defaultProduct, seo: { ...this.defaultProduct.seo } };
+            this.editedPost = { ...this.defaultProduct, /*seo: { ...this.editedPostProduct.seo }*/ };
             this.newPostDialog = true;
         },
         addPost(post) {
-            this.posts.push(post);
+            return this.posts.push(post);
+        },
+        editPost(item) {
+            this.editedIndex = this.posts.findIndex((p) => p.id === item.id);
+            this.editedPost = { ...item, /*seo: item.seo ? { ...item.seo } : { meta_title: "", meta_description: "", slug: "", keywords: "" }*/ };
+            this.newPostDialog = true;
+        },
+        updatePost(updatedPost){
+            return Object.assign(this.posts[this.editedIndex], updatedPost);
         },
         close() {
             this.newPostDialog = false;
-            // this.editedProduct = { ...this.defaultProduct }; // Mantém um objeto válido
-            // this.editedIndex = -1;
+            this.editedPost = { ...this.defaultProduct }; // Mantém um objeto válido
+            this.editedIndex = -1;
+        },
+        async deletePost(postId) {
+            if (!confirm("Tem certeza que deseja remover este produto permanentemente ?")) return;
+
+            try {
+                const token = localStorage.getItem('access_token')
+                if (!token) return this.$router.push('/login')
+
+                await api.delete(`/blog/posts/${postId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                //Remove product from local list
+                this.posts = this.posts.filter(p => p.id !== postId);
+
+                console.log('Produto removido com sucesso');
+            }
+            catch (error) {
+                console.log("Error deleting product:", error);
+                //   this.$toast.error("Erro ao excluir produto");
+            }
         },
 
     },

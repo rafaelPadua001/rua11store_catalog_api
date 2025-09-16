@@ -42,3 +42,15 @@ def get_post():
 @blog_bp.route('/posts', methods=['POST'])
 def create_post():
     return BlogController.create_post()
+
+@blog_bp.route('/posts/<int:postId>', methods=['PUT'])
+def update_post(postId):
+    if request.is_json:
+        data = request.get_json()
+    else:
+        data = {**request.form.to_dict(), **request.files.to_dict()}
+    return BlogController.update_post(postId, data)
+
+@blog_bp.route('/posts/<int:postId>', methods=['DELETE'])
+def delete_post(postId):
+    return BlogController.delete_post(postId)

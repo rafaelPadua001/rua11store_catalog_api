@@ -45,9 +45,18 @@
 <script>
 import axios from "axios";
 
+const api = axios.create({
+    baseURL:
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://rua11store-catalog-api-lbp7.onrender.com",
+    headers: { "Content-Type": "application/json" },
+});
+
 export default {
     props: {
         formTitle: { type: String, default: "Novo Post" },
+        editedIndex: { type: Number },
         editedPost: { type: Object, default: () => ({}) },
         page_id: { type: Number, required: true },
         page_title: { type: String, default: 'Blog' }
@@ -119,24 +128,34 @@ export default {
                 formData.append("cover_image", this.form.cover_image_file);
             }
 
-            try {
-                const url = this.editedPost.id
-                    ? `/blog/${this.editedPost.id}`
-                    : `/blog/posts`;
-                const method = this.editedPost.id ? "put" : "post";
+            if (this.editedIndex === -1) {
+                try {
+                    const url = `/blog/posts`;
+                    const method = this.editedPost.id ? "put" : "post";
 
-                const response = await this.api({
-                    method,
-                    url,
-                    data: formData,
+                    const response = await this.api({
+                        method,
+                        url,
+                        data: formData,
+                        headers: { "Content-Type": "multipart/form-data" },
+                    });
+
+                    const savedPost = response.data.post;
+                    this.$emit("save-post", savedPost); // alerta o componente pai
+                    this.$emit("close");
+                } catch (error) {
+                    console.error("Erro ao salvar post:", error);
+                }
+            }
+            else {
+                const response = await api.put(`/blog/posts/${this.editedPost.id}`, formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
+                const updatedPost = response.data.post;
 
-                const savedPost = response.data.post;
-                this.$emit("save-post", savedPost); // alerta o componente pai
+                this.$emit("update-post", updatedPost); // alerta o componente pai
                 this.$emit("close");
-            } catch (error) {
-                console.error("Erro ao salvar post:", error);
+
             }
         },
     },
