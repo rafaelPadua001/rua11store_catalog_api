@@ -110,6 +110,7 @@ export default {
             if (!this.$refs.form.validate()) return;
 
             const formData = new FormData();
+            formData.append("page_id", this.page_id);
             formData.append("title", this.form.title);
             formData.append("slug", this.form.slug);
             formData.append("excerpt", this.form.excerpt);
@@ -121,17 +122,18 @@ export default {
             try {
                 const url = this.editedPost.id
                     ? `/blog/${this.editedPost.id}`
-                    : `/blog`;
+                    : `/blog/posts`;
                 const method = this.editedPost.id ? "put" : "post";
 
-                await this.api({
+                const response = await this.api({
                     method,
                     url,
                     data: formData,
                     headers: { "Content-Type": "multipart/form-data" },
                 });
 
-                this.$emit("save-post"); // alerta o componente pai
+                const savedPost = response.data.post;
+                this.$emit("save-post", savedPost); // alerta o componente pai
                 this.$emit("close");
             } catch (error) {
                 console.error("Erro ao salvar post:", error);

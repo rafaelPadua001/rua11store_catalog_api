@@ -1,11 +1,11 @@
-from database import datetime
+from datetime import datetime
 from database import db
-
+from models.page import Page
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
 
     id = db.Column(db.Integer, primary_key=True)
-    page_id = db.Column(db.Integer, db.ForeignKey("page.id"), nullable=False)
+    page_id = db.Column(db.Integer, db.ForeignKey("pages.id"), nullable=False)
     slug = db.Column(db.String(255), unique=True, nullable=False)
 
     title = db.Column(db.String(255), nullable=False)
