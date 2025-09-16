@@ -71,14 +71,36 @@ class BlogController:
     @staticmethod
     def update_post(post_id, data):
         post = BlogPost.query.get_or_404(post_id)
+
         post.slug = data.get('slug', post.slug)
         post.title = data.get('title', post.title)
         post.excerpt = data.get('excerpt', post.excerpt)
         post.content = data.get('content', post.content)
-        post.cover_image = data.get('cover_image', post.cover_image)
+
+        # Caso venha arquivo de imagem
+        cover_image = data.get('cover_image')
+        if cover_image:
+            if hasattr(cover_image, 'read'):  # é um arquivo
+                result = cloudinary.uploader.upload(cover_image)
+                post.cover_image = result.get("secure_url")
+            else:  # já é uma URL
+                post.cover_image = cover_image
+
         post.updated_at = datetime.utcnow()
         db.session.commit()
-        return jsonify({"message": "Post atualizado com sucesso"}), 200
+
+        return jsonify({
+            "message": "Post atualizado com sucesso",
+            "post": {
+                "id": post.id,
+                "title": post.title,
+                "slug": post.slug,
+                "excerpt": post.excerpt,
+                "content": post.content,
+                "cover_image": post.cover_image,
+                "updated_at": post.updated_at
+            }
+        }), 200
 
     @staticmethod
     def delete_post(post_id):
