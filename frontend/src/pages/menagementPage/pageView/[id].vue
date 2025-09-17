@@ -1,51 +1,76 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="align-center fill-height mx-auto">
-      <div class="text-center">
+      <!--  <div class="text-center">
         <v-row justify="center" class="mt-0 mb-4" no-gutters>
           <v-col cols="12">
-              <!--<v-card elevation="0">
-                <v-card-title class="text-left">{{ page.name }}</v-card-title>
-              </v-card>-->
-              <v-divider></v-divider>
-              <v-card elevation="4" :color="page.hero_background_color" width="100%"
-                class="rounded-lg overflow-hidden hero-card" v-if="page.hero_background_color || page.heroImage">
-              <v-img  :src="page.hero_image" :alt="page.title" max-height="320" height="100%" class="mx-auto d-block" />
-              <v-card-text class="py-0" v-if="page.hero_title || page.hero_subtitle">
+            <v-divider></v-divider>
+            <v-card
+              elevation="4"
+              :color="page.hero_background_color"
+              width="100%"
+              class="rounded-lg overflow-hidden hero-card"
+              v-if="page.hero_background_color || page.hero_image"
+            >
+              <v-img
+                :src="page.hero_image"
+                :alt="page.title"
+                max-height="320"
+                height="100%"
+                class="mx-auto d-block"
+              />
+              <v-card-text v-if="page.hero_title || page.hero_subtitle">
                 <v-row justify="center" no-gutters>
-                  <v-col cols="auto">
-                    {{ page.hero_title }}
-                  </v-col>
-                </v-row no-gutters>
-                <v-row justify="center" >
-                  <v-col cols="auto">
-                    {{ page.hero_subtitle }}
-                  </v-col>
+                  <v-col cols="auto">{{ page.hero_title }}</v-col>
+                </v-row>
+                <v-row justify="center">
+                  <v-col cols="auto">{{ page.hero_subtitle }}</v-col>
                 </v-row>
               </v-card-text>
-              <v-card-text v-if="page.hero_buttons && page.hero_buttons.length >= 1">
-                <v-row justify='center' no-gutters>
+
+              <v-card-text v-if="page.hero_buttons && page.hero_buttons.length">
+                <v-row justify="center" no-gutters>
                   <v-col v-for="(button, index) in page.hero_buttons" :key="index">
-                   <v-btn class="mx-0 text-caption hover-btn" size="x-large" target="_blank" block
-                      :color="button.heroButtonBackgroundColor" :href="button.url" variant="elevated">
-                      <v-icon :icon="button.icon.value" class="mr-1" size="large"></v-icon>
+                    <v-btn
+                      class="mx-0 text-caption hover-btn"
+                      size="x-large"
+                      target="_blank"
+                      block
+                      :color="button.heroButtonBackgroundColor"
+                      :href="button.url"
+                      variant="elevated"
+                      v-if="button.icon && button.icon.value"
+                    >
+                      <v-icon
+                        
+                        :icon="button.icon.value"
+                        class="mr-1"
+                        size="large"
+                      ></v-icon>
                       {{ button.label }}
                     </v-btn>
-                   
                   </v-col>
                 </v-row>
-
               </v-card-text>
-
             </v-card>
-
           </v-col>
         </v-row>
-        
-        <div class="mt-0 mb-1 d-flex justify-center flex-wrap" v-if="page.carousel_image && page.carousel_image.length >= 1">
+
+        <!-- Carousel 
+        <div
+          class="mt-0 mb-1 d-flex justify-center flex-wrap"
+          v-if="page.carousel_image && page.carousel_image.length"
+        >
           <v-row justify="center" class="my-2">
             <v-col cols="12" sm="10" md="8" lg="6">
-              <v-carousel :show-arrows="false" cycle hide-delimiters height="350" interval="5000" v-model="activeIndex">
+              <v-carousel
+                :show-arrows="false"
+                cycle
+                hide-delimiters
+                height="350"
+                interval="5000"
+                v-model="activeIndex"
+              >
                 <v-carousel-item v-for="(img, index) in page.carousel_image" :key="index">
                   <v-card elevation="0">
                     <v-img :src="img" width="300" height="300" contain class="mx-auto" />
@@ -56,112 +81,223 @@
           </v-row>
         </div>
 
-       
-       <!-- {{ page.name }} -->
-         <v-card v-if="page.content">
+        <!-- Content 
+        <v-card v-if="page.content">
           <v-card-text>
-             <v-card-title class="text-left">{{ page.name }}</v-card-title>
-             <v-divider></v-divider>
+            <v-card-title class="text-left">{{ page.name }}</v-card-title>
+            <v-divider></v-divider>
             <div class="text-body-2 text-left font-weight-light mb-n1" v-html="page.content"></div>
           </v-card-text>
-         </v-card>
+        </v-card>
+      </div>-->
+
+      <div v-if="page.name && isBlogPage">
+        <v-card>
+          <v-toolbar color="transparent">
+            <v-toolbar-title>
+              {{ page.title }}
+            </v-toolbar-title>
+          </v-toolbar>
+
+          <v-divider></v-divider>
+
+          <v-card-text>
+            <v-row>
+              <v-col cols="3">
+                <v-card elevation="1">
+                  <v-card-title>Últimas Notícias</v-card-title>
+
+                  <v-divider></v-divider>
+
+                  <v-card-text>
+                    <div v-for="post in posts.slice(0, 5)" :key="post.id" class="mb-3">
+                      <v-card outlined elevation="0">
+                        <v-row no-gutters align="center">
+                          <!-- Imagem à esquerda -->
+                          <v-col cols="4">
+                            <v-img :src="post.cover_image" aspect-ratio="1" class="rounded" />
+                          </v-col>
+
+                          <!-- Conteúdo à direita -->
+                          <v-col cols="8">
+                            <div class="font-weight-bold">{{ post.title }}</div>
+                            <div class="text--secondary">{{ post.excerpt }}</div>
+                            <div class="text-caption text--secondary">{{ formatDate(post.created_at) }}</div>
+                          </v-col>
+                        </v-row>
+                      </v-card>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+
+              <v-col cols="8">
+                <v-card elevation="0">
+                  <v-card-text>
+                    <v-row>
+                      <v-col v-for="(post, index) in posts" :key="index" cols="12" sm="6" md="4">
+                        <v-card elevation="0" class="rounded overflow-hidden">
+                          <v-img :src="post.cover_image" aspect-ratio="1" class="rounded">
+                            <!-- Overlay apenas na parte inferior -->
+                            <div class="pa-2 text-white"
+                              style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5);">
+                              <div class="text-h6 font-weight-bold">{{ post.title }}</div>
+                              <div class="text-caption">{{ formatDate(post.created_at) }}</div>
+                            </div>
+                          </v-img>
+                        </v-card>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </div>
+      <div v-else-if="page.name">
+        other pages
+      </div>
+      <div v-else>
+        Carregando...
+      </div>
+
     </v-responsive>
   </v-container>
 </template>
 
 <script>
 import axios from "axios";
-import { useSeo } from '../../../useSeo';
+import { useSeo } from "../../../useSeo";
 
 const api = axios.create({
-  baseURL: window.location.hostname === "localhost"
-    ? "http://localhost:5000"
-    : "https://rua11store-catalog-api-lbp7.onrender.com",
+  baseURL:
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://rua11store-catalog-api-lbp7.onrender.com",
   headers: { "Content-Type": "application/json" },
 });
-
-const { setSeo } = useSeo()
 
 export default {
   data() {
     return {
+      isBlogPage: false,
       page: {
         carousel_image: [],
         hero_image: "",
         hero_title: "",
         hero_subtitle: "",
         title: "",
-        content: ""
+        content: "",
+        hero_buttons: [],
+
       },
-      activeIndex: 0
+      activeIndex: 0,
+      loading: false,
+      pages: [],
+      posts: [],
     };
   },
   async created() {
     await this.loadPage();
+    await this.loadPosts();
   },
   watch: {
-    '$route.params.id': {
+    "$route.params.id": {
       immediate: false,
       handler: async function (newId, oldId) {
         if (newId !== oldId) {
           await this.loadPage();
+          await this.loadPosts();
         }
-      }
-    }
+      },
+    },
   },
   methods: {
+    formatDate(date) {
+      return new Date(date).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+    },
     async loadPage() {
-      const pageId = this.$route.params.id;
+      this.loading = true;
       try {
-        const response = await api.get(`/pages/pages/${pageId}`);
-        // mantém reatividade
-        Object.assign(this.page, response.data);
-        await this.loadComponentFromAPI();
+        const response = await api.get("/pages/pages"); // usa o api com baseURL
+        const pagesData = response.data?.pages || [];
+        const currentPageId = this.$route.params.id;
+
+        const foundPage = pagesData.find((p) => p.id == currentPageId);
+
+        if (foundPage) {
+          const normalizedPage = {
+            ...foundPage,
+            name: foundPage.name || "",
+            hero_image: foundPage.heroImage || "",
+            hero_title: foundPage.heroTitle || "",
+            hero_subtitle: foundPage.heroSubtitle || "",
+            carousel_image: Array.isArray(foundPage.carouselImages)
+              ? foundPage.carouselImages
+              : [],
+            hero_buttons: Array.isArray(foundPage.heroButtons)
+              ? foundPage.heroButtons
+              : [],
+          };
+
+          this.page = normalizedPage;
+          this.isBlogPage = normalizedPage.name.toLowerCase() === "blog";
+        }
+        else {
+          console.warn(`Página ${currentPageId} não encontrada`);
+          this.isBlogPage = false;
+        }
       } catch (error) {
-        console.log('Erro ao buscar página', error);
+        console.error("Erro ao carregar páginas:", error);
+        this.isBlogPage = false;
+      } finally {
+        this.loading = false;
       }
     },
-
     stripHtml(html) {
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.innerHTML = html;
       return div.textContent || div.innerText || "";
     },
-
-    async loadComponentFromAPI() {
-      try {
-        const pageTitle = this.page.title;
-        const encodedPageTitle = encodeURIComponent(pageTitle);
-        const response = await api.get(`/pages/pages/${encodedPageTitle}`);
-        await this.loadSeoFromAPI(response.data.id);
-      } catch (error) {
-        console.error('Erro ao buscar componente:', error);
-      }
-    },
-
     async loadSeoFromAPI(pageId) {
       try {
-        const response = await api.get(`/seo/seo/${pageId}`);
-        const seoData = response.data.seo;
-        setSeo(seoData);
-      } catch (error) {
-        console.error('Erro ao buscar SEO:', error);
+        const { setSeo } = useSeo();
+        const response = await axios.get(`/seo/seo/${pageId}`);
+        const seoData = response.data?.seo;
+        setSeo(seoData || { title: this.page.title || 'Título padrão', description: '', image: '' });
+      } catch (err) {
+        console.warn(`Página ${pageId} não possui SEO cadastrado`);
+        const { setSeo } = useSeo();
+        setSeo({ title: this.page.title || 'Título padrão', description: '', image: '' });
+      }
+    },
+    async loadPosts() {
+      try {
+        const response = await api.get(`/blog/posts`);
+        this.posts = response.data;
+      }
+      catch (e) {
+        console.log(e.error);
       }
     }
-  }
+  },
 };
 </script>
 
-<style scopped>
+<style scoped>
 .hero-card {
-   background-image:
-    radial-gradient(circle at center, rgba(255,255,255,0.1) 1px, transparent 1px),
-    repeating-radial-gradient(circle at center, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px),
-    repeating-conic-gradient(rgba(255,255,255,0.05) 0deg 5deg, transparent 5deg 10deg);
+  background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05) 10px, transparent 10px, transparent 20px),
+    repeating-conic-gradient(rgba(255, 255, 255, 0.05) 0deg 5deg, transparent 5deg 10deg);
   background-size: cover;
   color: white;
-  min-height: 375px; /* garante espaço suficiente para botões */
+  min-height: 375px;
 }
 
 .v-btn {
@@ -171,15 +307,11 @@ export default {
 
 .hover-btn {
   transition: transform 0.2s, box-shadow 0.2s;
-  /* animação suave */
 }
 
 .hover-btn:hover {
   transform: translateY(-3px);
-  /* leve "subida" do botão */
   box-shadow: 0px 8px 25px rgba(92, 92, 92, 0.3);
-  /* sombra maior no hover */
-  opacity: 0.90
+  opacity: 0.9;
 }
-
 </style>
