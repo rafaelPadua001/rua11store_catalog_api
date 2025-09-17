@@ -23,6 +23,29 @@ class BlogController:
                 "updated_at": post.updated_at
             })
         return jsonify(result), 200
+    
+    @staticmethod
+    def get_post_by_slug(slug):
+        try:
+            post = BlogPost.query.filter_by(slug=slug).first()
+
+            if not post:
+                return jsonify({"Error": "Post não encontrado"}), 404
+            
+            post_data = {
+                "id": post.id,
+                "title": post.title,
+                "slug": post.slug,
+                "excerpt": post.excerpt,
+                "content": post.content,
+                "cover_image": post.cover_image,
+                "created_at": post.created_at,
+                "updated_at": post.updated_at,
+            }
+
+            return jsonify({"post": post_data}), 200
+        except Exception as e:
+            return jsonify({'Error': str((e))}), 500
 
     @staticmethod
     def create_post():

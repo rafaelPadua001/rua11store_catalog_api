@@ -51,9 +51,9 @@
 
                     <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
-                       <!-- <router-link :to="`/products/productView/${item.seo.slug}`">
+                        <router-link :to="`/blog/blogView/${item.slug}`">
                             <v-icon small color="primary">mdi-eye</v-icon>
-                        </router-link>-->
+                        </router-link>
 
                         <v-icon small color="primary" @click.stop="editPost(item)">
                             mdi-pencil
