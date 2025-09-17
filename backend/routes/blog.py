@@ -22,18 +22,9 @@ CORS(blog_bp,
          }
      })
 
-@blog_bp.route('/blog')
-def blog_index():
-    blog_page = Page.query.filter_by(name="blog").first_or_404()
-    posts = BlogPost.query.filter_by(page_id=blog_page.id)\
-            .order_by(BlogPost.created_at.desc())\
-            .all()
-    return render_template('blog/index.html', page=blog_page, posts=posts)
-
-@blog_bp.route('/blog/<slug>')
+@blog_bp.route('/posts/<slug>', methods=['GET'])
 def blog_details(slug):
-    post = BlogPost.query.filter_by(slug=slug).first_or_404()
-    return render_template("blog/detail.html", post=post, page=post.page)
+    return BlogController.get_post_by_slug(slug)
 
 @blog_bp.route('/posts', methods=['GET'])
 def get_post():

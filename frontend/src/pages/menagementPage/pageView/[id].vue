@@ -137,14 +137,19 @@
                     <v-row>
                       <v-col v-for="(post, index) in posts" :key="index" cols="12" sm="6" md="4">
                         <v-card elevation="0" class="rounded overflow-hidden">
+                           <router-link :to="`/blog/blogView/${post.slug}`">
                           <v-img :src="post.cover_image" aspect-ratio="1" class="rounded">
                             <!-- Overlay apenas na parte inferior -->
-                            <div class="pa-2 text-white"
+                           
+                           
+                        
+                            <div class="pa-2 text-white" 
                               style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5);">
                               <div class="text-h6 font-weight-bold">{{ post.title }}</div>
                               <div class="text-caption">{{ formatDate(post.created_at) }}</div>
                             </div>
                           </v-img>
+                          </router-link>
                         </v-card>
                       </v-col>
                     </v-row>
