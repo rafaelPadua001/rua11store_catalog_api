@@ -68,7 +68,7 @@
 
             <!-- Modal para Adicionar/Editar Produto -->
             <v-dialog v-model="newPostDialog" max-width="600" fullscreen>
-                <BlogForm :page_id="this.form.page_id" :page_title="formTitle" :form-title="formTitle" :editedIndex="editedIndex" :editedPost="editedPost"
+                <BlogForm :page_id="this.form.page_id" :page_title="title" :form-title="formTitle" :editedIndex="editedIndex" :editedPost="editedPost"
                     @save-post="addPost" @update-post="updatePost" @close="close"/>
 
             </v-dialog>

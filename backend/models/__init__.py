@@ -16,6 +16,7 @@ from .orderItem import OrderItem
 from .coupon import Coupon
 from .couponUser import CouponUser
 from .notification import Notification
+from .postSeo import PostSeo
 
 
 __all__ = [
@@ -37,5 +38,6 @@ __all__ = [
     'Coupon',
     'CouponUser',
     'Notification',
+    'PostSeo',
   
 ]

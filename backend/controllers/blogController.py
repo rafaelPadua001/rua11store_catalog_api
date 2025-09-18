@@ -1,5 +1,6 @@
 from models.blogPost import BlogPost
 from models.page import Page
+from controllers.postSeoController import PostSeoController
 from database import db
 from datetime import datetime
 from flask import jsonify, request
@@ -50,42 +51,51 @@ class BlogController:
     @staticmethod
     def create_post():
         try:
-            title = request.form.get("title")
-            slug = request.form.get("slug")
-            content = request.form.get("content")
-            excerpt = request.form.get("excerpt")
-            page_id = request.form.get("page_id")
+            data = request.form
+            cover_image = request.files.get("cover_image")
 
-            if not all([title, slug, content, page_id]):
-                return jsonify({"error": "Campos obrigatórios faltando"}), 400
-
-            cover_image_url = None
-            if "cover_image" in request.files:
-                image_file = request.files["cover_image"]
-                result = cloudinary_upload(image_file, folder="blog_posts")
-                cover_image_url = result.get("secure_url")
+            page_id = data.get("page_id")
+            if not page_id:
+                return jsonify({"error": "page_id é obrigatório"}), 400
 
             post = BlogPost(
-                title=title,
-                slug=slug,
-                excerpt=excerpt,
-                content=content,
-                page_id=int(page_id),
-                cover_image=cover_image_url
+                page_id=page_id,
+                title=data.get("title"),
+                slug=data.get("slug"),
+                excerpt=data.get("excerpt"),
+                content=data.get("content")
             )
 
+            if cover_image:
+                filename = f"uploads/{cover_image.filename}"
+                cover_image.save(filename)
+                post.cover_image = filename
+
+            # Salva o post no banco
             db.session.add(post)
             db.session.commit()
 
-            return jsonify({
-                "message": "Post criado com sucesso!",
-                "post": {
-                    "id": post.id,
-                    "title": post.title,
-                    "slug": post.slug,
-                    "cover_image": post.cover_image
-                }
-            }), 201
+            # Agora cria o SEO
+            seo_data = {
+                "keywords": data.get("keywords"),
+                "description": data.get("description"),
+                "canonical_url": data.get("canonical_url"),
+                "og_title": data.get("og_title"),
+                "og_description": data.get("og_description"),
+                "og_image": data.get("og_image"),
+            }
+
+            PostSeoController.save_seo(post.id, seo_data)
+
+            return jsonify({"post": {
+                "id": post.id,
+                "title": post.title,
+                "slug": post.slug,
+                "excerpt": post.excerpt,
+                "content": post.content,
+                "cover_image": post.cover_image,
+                "created_at": post.created_at
+            }}), 201
 
         except Exception as e:
             db.session.rollback()

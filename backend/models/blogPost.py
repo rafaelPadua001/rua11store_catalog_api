@@ -4,7 +4,7 @@ from models.page import Page
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     page_id = db.Column(db.Integer, db.ForeignKey("pages.id"), nullable=False)
     slug = db.Column(db.String(255), unique=True, nullable=False)
 
@@ -17,3 +17,4 @@ class BlogPost(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
     page = db.relationship('Page', backref=db.backref("articles", lazy=True))
+    seo_metadata = db.relationship("PostSeo", uselist=False, back_populates="post")
