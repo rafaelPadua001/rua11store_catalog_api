@@ -111,8 +111,9 @@
 
                   <v-card-text>
                     <div v-for="post in posts.slice(0, 5)" :key="post.id" class="mb-3">
-                      <v-card outlined elevation="0">
-                        <v-row no-gutters align="center">
+                      <router-link class="text-decoration-none" :to="`/blog/blogView/${post.slug}`">
+                        <v-card outlined elevation="0">
+                        <v-row>
                           <!-- Imagem à esquerda -->
                           <v-col cols="4">
                             <v-img :src="post.cover_image" aspect-ratio="1" class="rounded" />
@@ -126,6 +127,7 @@
                           </v-col>
                         </v-row>
                       </v-card>
+                      </router-link>
                     </div>
                   </v-card-text>
                 </v-card>
