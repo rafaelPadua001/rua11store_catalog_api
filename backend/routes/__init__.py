@@ -21,10 +21,13 @@ from routes.sitemap import sitemap_bp
 from routes.config import config_bp
 from routes.uploadImages import upload_images_bp
 from routes.supabaseUsers import supabaseUsers_bp
+from routes.postSeo import postSeo_bp
+
 
 def register_routes(app):
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(blog_bp, url_prefix='/blog')
+    app.register_blueprint(postSeo_bp, url_prefix='/post-seo')
     app.register_blueprint(pages_bp, url_prefix='/pages')
     app.register_blueprint(category_bp, url_prefix='/categories')
     app.register_blueprint(products_bp, url_prefix='/products')

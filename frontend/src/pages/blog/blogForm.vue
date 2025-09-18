@@ -24,6 +24,23 @@
                 <v-textarea v-model="form.content" label="Conteúdo" rows="6"
                     :rules="[v => !!v || 'Conteúdo é obrigatório']" required></v-textarea>
 
+                <v-divider class="my-4"></v-divider>
+                <h3>Configurações de SEO</h3>
+
+                <v-text-field v-model="form.keywords" label="Keywords (separadas por vírgula)" outlined
+                    dense></v-text-field>
+
+                <v-textarea v-model="form.description" label="Meta Description" outlined rows="2" dense></v-textarea>
+
+                <v-text-field v-model="form.canonical_url" label="Canonical URL" outlined dense></v-text-field>
+
+                <v-text-field v-model="form.og_title" label="Open Graph Title" outlined dense></v-text-field>
+
+                <v-textarea v-model="form.og_description" label="Open Graph Description" outlined rows="2"
+                    dense></v-textarea>
+
+                <v-text-field v-model="form.og_image" label="Open Graph Image URL" outlined dense></v-text-field>
+
                 <!-- Imagem de Capa -->
                 <v-file-input v-model="form.cover_image_file" label="Imagem de Capa" accept="image/*"
                     prepend-icon="mdi-image"></v-file-input>
@@ -31,6 +48,8 @@
                 <!-- Preview da imagem -->
                 <v-img v-if="form.cover_image_preview" :src="form.cover_image_preview" max-height="200"
                     class="mt-2"></v-img>
+
+
             </v-form>
         </v-card-text>
 
@@ -73,6 +92,14 @@ export default {
                 content: "",
                 cover_image_file: null,
                 cover_image_preview: null,
+
+                // SEO
+                keywords: "",
+                description: "",
+                canonical_url: "",
+                og_title: "",
+                og_description: "",
+                og_image: "",
             },
             api: axios.create({
                 baseURL:
@@ -93,6 +120,13 @@ export default {
                     this.form.excerpt = post.excerpt || "";
                     this.form.content = post.content || "";
                     this.form.cover_image_preview = post.cover_image || null;
+                    this.form.keywords = post.seo_metadata?.keywords || "";
+                    this.form.description = post.seo_metadata?.description || "";
+                    this.form.canonical_url = post.seo_metadata?.canonical_url || "";
+                    this.form.og_title = post.seo_metadata?.og_title || "";
+                    this.form.og_description = post.seo_metadata?.og_description || "";
+                    this.form.og_image = post.seo_metadata?.og_image || "";
+
                 }
             },
         },
@@ -124,6 +158,13 @@ export default {
             formData.append("slug", this.form.slug);
             formData.append("excerpt", this.form.excerpt);
             formData.append("content", this.form.content);
+            formData.append("keywords", this.form.keywords);
+            formData.append("description", this.form.description);
+            formData.append("canonical_url", this.form.canonical_url);post
+            formData.append("og_title", this.form.og_title);
+            formData.append("og_description", this.form.og_description);
+            formData.append("og_image", this.form.og_image);
+
             if (this.form.cover_image_file) {
                 formData.append("cover_image", this.form.cover_image_file);
             }
