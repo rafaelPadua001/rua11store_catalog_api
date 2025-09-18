@@ -1,19 +1,30 @@
 <template>
   <v-container>
     <v-app-bar color="purple-darken-3" density="comfortable" flat>
+      <!-- Nav icon à esquerda -->
       <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated" />
-      <v-app-bar-title class="d-flex align-center mx-auto">
+      
+      <!-- Logo + Texto juntos à esquerda -->
+      <div class="d-flex align-center ml-0">
         <template v-if="logoUrl">
-          <v-img :src="logoUrl" alt="Logo" width="50" contain class="mr-2" style="cursor: pointer"
+          <v-img :src="logoUrl" alt="Logo" width="60" height="60" contain class="mr-0" style="cursor: pointer"
             @click="$router.push('/')" />
         </template>
+        <span v-else class="mr-2">Rua11Store</span>
 
-        <span v-else>
-          Rua11Store
-        </span>
-      </v-app-bar-title>
+        <v-divider :thickness="2" class="border-opacity-1 mx-2" inset vertical color="white"></v-divider>
 
+        <!-- Texto Blog -->
+           <router-link :to="`/menagementPage/pageView/${pages.id}`">
+                           <span class="text-white">{{ pages.title }}</span>
+                        </router-link>
+   
+      </div>
+
+      <!-- Empurra qualquer outro conteúdo para a direita -->
       <v-spacer></v-spacer>
+
+
 
       <v-menu offset-y :nudge-y="20" content-class="custom-menu">
         <template #activator="{ props }">
@@ -64,7 +75,7 @@
             title="Dashboard"></v-list-item>
           <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
             title="Pages"></v-list-item>
-            <v-list-item link @click="navigateTo('/blog/blogs')" prepend-icon="mdi-post" title="Blog"></v-list-item>
+          <v-list-item link @click="navigateTo('/blog/blogs')" prepend-icon="mdi-post" title="Blog"></v-list-item>
           <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
           <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
             title="Categories"></v-list-item>
@@ -123,6 +134,7 @@ const router = useRouter();
 const isAuthenticated = ref(false);
 const notifications = inject('notifications', ref([]));
 const hasNewNotifications = inject('hasNewNotifications', ref(true));
+let pages = inject('pages', ref([]));
 
 const snackbar = ref({
   show: false,
@@ -164,6 +176,7 @@ function parseJwt(token) {
 }
 
 onMounted(async () => {
+   getPages();
   try {
     const res = await api.get('/config/config');
     logoUrl.value = res.data.logo_url;
@@ -173,15 +186,18 @@ onMounted(async () => {
   }
   checkAuth();
   window.addEventListener('storage', checkAuth);
+ 
 });
 
 onUnmounted(() => {
   window.removeEventListener('storage', checkAuth);
+  
 });
 
 const showNotifications = () => {
   hasNewNotifications.value = false;
   fetchNotifications();
+  
 };
 
 const navigateTo = (path) => {
@@ -271,6 +287,17 @@ const markAsRead = async (notificationId) => {
   }
 };
 
+const getPages = async () => {
+
+  try {
+    const response = await api.get("/pages/pages/Blog");
+    
+   pages = response.data;
+  
+  } catch (error) {
+    console.error("Error loading pages:", error);
+  }
+};
 
 const logout = async () => {
   const token = localStorage.getItem('access_token');
