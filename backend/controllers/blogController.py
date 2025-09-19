@@ -12,6 +12,7 @@ class BlogController:
         posts = BlogPost.query.all()
         result = []
         for post in posts:
+            seo = post.seo_metadata
             result.append({
                 "id": post.id,
                 "page_id": post.page_id,
@@ -21,9 +22,21 @@ class BlogController:
                 "content": post.content,
                 "cover_image": post.cover_image,
                 "created_at": post.created_at,
-                "updated_at": post.updated_at
+                "updated_at": post.updated_at,
+                "seo": {
+                    "id": seo.id if seo else None,
+                    "keywords": seo.keywords if seo else None,
+                    "description": seo.description if seo else None,
+                    "canonical_url": seo.canonical_url if seo else None,
+                    "og_title": seo.og_title if seo else None,
+                    "og_description": seo.og_description if seo else None,
+                    "og_image": seo.og_image if seo else None,
+                    "created_at": seo.created_at if seo else None,
+                    "updated_at": seo.updated_at if seo else None,
+                } if seo else None
             })
         return jsonify(result), 200
+
     
     @staticmethod
     def get_post_by_slug(slug):
@@ -124,13 +137,26 @@ class BlogController:
         cover_image = data.get('cover_image')
         if cover_image:
             if hasattr(cover_image, 'read'):  # é um arquivo
-                result = cloudinary.uploader.upload(cover_image)
+                result = cloudinary_upload(cover_image)
                 post.cover_image = result.get("secure_url")
             else:  # já é uma URL
                 post.cover_image = cover_image
 
         post.updated_at = datetime.utcnow()
         db.session.commit()
+
+        # Atualizar SEO, se vier dados de SEO junto
+        seo_data = {
+            "keywords": data.get("keywords"),
+            "description": data.get("description"),
+            "canonical_url": data.get("canonical_url"),
+            "og_title": data.get("og_title"),
+            "og_description": data.get("og_description"),
+            "og_image": data.get("og_image"),
+        }
+
+        if any(seo_data.values()):  # só chama se tiver algum dado de SEO
+            PostSeoController.update_seo(post.id, seo_data)
 
         return jsonify({
             "message": "Post atualizado com sucesso",
@@ -144,6 +170,7 @@ class BlogController:
                 "updated_at": post.updated_at
             }
         }), 200
+
 
     @staticmethod
     def delete_post(post_id):

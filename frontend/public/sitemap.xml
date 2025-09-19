@@ -195,4 +195,11 @@
     <loc>https://rua11store-catalog-api.vercel.app/products/productView/case-to-na-be-carta-2-tamanho-p</loc>
     <lastmod>2025-09-19</lastmod>
   </url>
+
+  <url>
+    <loc>teste3</loc>
+    <lastmod>2025-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>
