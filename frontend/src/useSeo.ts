@@ -34,7 +34,7 @@ export function useSeo() {
 
     metaTitle.value = data.metaTitle ||  data.seo?.meta_title || data.post?.title || ''
     metaDescription.value = data.metaDescription || data.seo?.meta_description || data.post?.excerpt || ''
-    metaKeywords.value = data.metaKeywords || data.seo?.meta_keywords ||  data.seo?.keywords  || ''
+    metaKeywords.value = data.metaKeywords || data.seo?.meta_keywords ||  data.seo?.keywords || ''
     ogTitle.value = data.ogTitle || data.seo?.og_title || data.post?.title || ''
     ogDescription.value = data.ogDescription || data.seo?.meta_description || data.post?.excerpt || ''
     ogImage.value =  ogImage.value = data.ogImage ? `${data.ogImage}` : data.thumbnail_path || data.post?.cover_image || '' 
