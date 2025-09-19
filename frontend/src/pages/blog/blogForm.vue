@@ -160,7 +160,7 @@ export default {
             formData.append("content", this.form.content);
             formData.append("keywords", this.form.keywords);
             formData.append("description", this.form.description);
-            formData.append("canonical_url", this.form.canonical_url);post
+            formData.append("canonical_url", this.form.canonical_url);
             formData.append("og_title", this.form.og_title);
             formData.append("og_description", this.form.og_description);
             formData.append("og_image", this.form.og_image);
