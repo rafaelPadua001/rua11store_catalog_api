@@ -17,4 +17,4 @@ class BlogPost(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
     page = db.relationship('Page', backref=db.backref("articles", lazy=True))
-    seo_metadata = db.relationship("PostSeo", uselist=False, back_populates="post")
+    seo_metadata = db.relationship("PostSeo", uselist=False, back_populates="post", cascade="all, delete-orphan")
