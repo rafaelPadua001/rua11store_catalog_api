@@ -9,7 +9,6 @@ const __dirname = path.dirname(__filename);
 const API_URL = 'https://rua11store-catalog-api-lbp7.onrender.com';
 const SITE_URL = 'https://rua11store-catalog-api.vercel.app';
 
-
 async function generateSitemap() {
   try {
     const staticPages = ['', '/', '/sobre'];
@@ -28,7 +27,7 @@ async function generateSitemap() {
       if (produto.slug) {
         urls.push(`
   <url>
-    <loc>${SITE_URL}/products/productView/${encodeURI(produto.slug)}</loc>
+    <loc>${SITE_URL}/products/productView/${encodeURIComponent(produto.slug)}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
   </url>`);
       }
@@ -39,16 +38,25 @@ async function generateSitemap() {
     const posts = postsRes.data;
 
     for (const post of posts) {
-      // Busca SEO do post
-      const seoRes = await axios.get(`${API_URL}/post-seo/post_seo/${post.id}`);
-      const seo = seoRes.data; // pode ser undefined se não existir
+      let seo = {};
+      try {
+        const seoRes = await axios.get(`${API_URL}/post-seo/post_seo/${post.id}`);
+        if (!seoRes.data.error) {
+          seo = seoRes.data; // contém apenas campos SEO
+        }
+      } catch (err) {
+        console.warn(`⚠️ SEO não encontrado para post ID ${post.id}`);
+      }
 
-      const lastmod = seo?.updated_at || post.updated_at || post.created_at || new Date().toISOString();
+      const lastmod = post.updated_at || post.created_at || new Date().toISOString();
+      const canonical = seo.canonical_url || `${SITE_URL}/blog/blogView/${encodeURIComponent(post.slug)}`;
 
       urls.push(`
   <url>
-    <loc>${SITE_URL}/blog/blogView/${encodeURI(post.slug)}</loc>
+    <loc>${canonical}</loc>
     <lastmod>${new Date(lastmod).toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>`);
     }
 
@@ -57,7 +65,10 @@ async function generateSitemap() {
 ${urls.join('\n')}
 </urlset>`;
 
-    fs.writeFileSync(path.resolve(__dirname, 'public', 'sitemap.xml'), sitemap.trim());
+    const publicDir = path.resolve(__dirname, 'public');
+    if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir);
+
+    fs.writeFileSync(path.resolve(publicDir, 'sitemap.xml'), sitemap.trim());
     console.log('✅ sitemap.xml gerado com sucesso!');
   } catch (error) {
     console.error('❌ Erro ao gerar sitemap:', error.message);
