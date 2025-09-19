@@ -59,12 +59,10 @@
                                     </v-row>
                                 </v-card-text>
                             </v-card>
-
-                        </v-col>
+                          </v-col>
                     </v-row>
                 </v-card-text>
             </v-card>
-
         </div>
 
         <div v-else>
@@ -75,6 +73,7 @@
 
 <script>
 import axios from "axios";
+import { useSeo } from '../../../useSeo';
 
 const api = axios.create({
     baseURL:
@@ -89,7 +88,7 @@ export default {
     data() {
         return {
             post: null, // post único
-            psots: [],
+            posts: [],
             isLoading: false,
         };
     },
@@ -110,6 +109,7 @@ export default {
             try {
                 const response = await api.get('/blog/posts');
                 this.posts = response.data;
+               
                 // this.form.page_id = response.data.id;
             }
             catch (e) {
@@ -129,13 +129,30 @@ export default {
 
                 if (data) {
                     this.post = data;
+                    this.loadSeo(this.post);
                 }
             } catch (error) {
+                
                 console.error("Erro ao carregar post:", error);
             } finally {
                 this.isLoading = false;
             }
         },
+        async loadSeo(){
+            try{
+                const { setSeo } = useSeo();
+                const response = await api.get(`/post-seo/post_seo/${this.post.id}`);
+                const seoData = response.data;
+                   
+            setSeo({
+            post: this.post, 
+            seo: seoData     
+        });
+            }catch(error){
+                const { setSeo } = useSeo();
+                console.error("Erro ao carregar post_seo", error);
+            }
+        }
     },
 };
 </script>
