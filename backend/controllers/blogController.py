@@ -67,9 +67,19 @@ class BlogController:
             )
 
             if cover_image:
-                filename = f"uploads/{cover_image.filename}"
-                cover_image.save(filename)
-                post.cover_image = filename
+                # Nome do blog vai ser usado como pasta no Cloudinary
+                blog_folder = f"blogs/{post.slug or post.title.replace(' ', '_')}"
+                
+                upload_result = cloudinary_upload(
+                    cover_image,
+                    folder=blog_folder,
+                    public_id="cover",  # nome fixo (cover.jpg) dentro da pasta
+                    overwrite=True,
+                    resource_type="image"
+                )
+                
+                # Pega a URL segura do Cloudinary
+                post.cover_image = upload_result.get("secure_url")
 
             # Salva o post no banco
             db.session.add(post)
