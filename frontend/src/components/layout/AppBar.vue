@@ -3,7 +3,7 @@
     <v-app-bar color="purple-darken-3" density="comfortable" flat>
       <!-- Nav icon à esquerda -->
       <v-app-bar-nav-icon @click="drawer = !drawer" v-if="isAuthenticated" />
-      
+
       <!-- Logo + Texto juntos à esquerda -->
       <div class="d-flex align-center ml-0">
         <template v-if="logoUrl">
@@ -14,13 +14,13 @@
 
         <v-divider :thickness="2" class="border-opacity-1 mx-2" inset vertical color="white"></v-divider>
 
-        <!-- Texto Blog -->
-           <router-link :to="`/menagementPage/pageView/${pages.id}`">
-                           <span class="text-white">{{ pages.title }}</span>
-                        </router-link>
-   
-      </div>
 
+
+      </div>
+      <!-- Texto Blog -->
+      <router-link :to="`/menagementPage/pageView/${pages.id}`">
+        <span class="text-white">{{ pages.title }}</span>
+      </router-link>
       <!-- Empurra qualquer outro conteúdo para a direita -->
       <v-spacer></v-spacer>
 
@@ -176,7 +176,7 @@ function parseJwt(token) {
 }
 
 onMounted(async () => {
-   getPages();
+  getPages();
   try {
     const res = await api.get('/config/config');
     logoUrl.value = res.data.logo_url;
@@ -186,18 +186,18 @@ onMounted(async () => {
   }
   checkAuth();
   window.addEventListener('storage', checkAuth);
- 
+
 });
 
 onUnmounted(() => {
   window.removeEventListener('storage', checkAuth);
-  
+
 });
 
 const showNotifications = () => {
   hasNewNotifications.value = false;
   fetchNotifications();
-  
+
 };
 
 const navigateTo = (path) => {
@@ -291,9 +291,9 @@ const getPages = async () => {
 
   try {
     const response = await api.get("/pages/pages/Blog");
-    
-   pages = response.data;
-  
+
+    pages = response.data;
+
   } catch (error) {
     console.error("Error loading pages:", error);
   }
