@@ -1,7 +1,87 @@
 <template>
-  <v-container class="fill-height">
+   <v-row justify="center" no-gutters>
+      <v-toolbar color="transparent" v-if="page.name && isBlogPage">
+            <v-toolbar-title>
+              {{ page.title }}
+            </v-toolbar-title>
+          </v-toolbar>
+
+              <v-col cols="12" md="8" v-if="page.name && isBlogPage">
+                <v-card elevation="0">
+                  <v-card-text>
+                    <v-row>
+                      <v-col v-for="(post, index) in posts" :key="index" cols="12" sm="6" md="4">
+                        <v-card elevation="0" class="rounded overflow-hidden">
+                           <router-link :to="`/blog/blogView/${post.slug}`">
+                          <v-img :src="post.cover_image" aspect-ratio="1" class="rounded">
+                            <!-- Overlay apenas na parte inferior -->
+                           
+                           
+                        
+                            <div class="pa-2 text-white" 
+                              style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5);">
+                              <div class="text-h6 font-weight-bold">{{ post.title }}</div>
+                              <div class="text-caption">{{ formatDate(post.created_at) }}</div>
+                            </div>
+                          </v-img>
+                          </router-link>
+                        </v-card>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+
+              </v-col>
+        <v-col cols="12" md="4" sm="12">
+          <div v-if="page.name && isBlogPage">
+        <v-card elevation="0">
+         <v-card-text>
+            <v-row>
+              <v-col>
+                <v-card elevation="1">
+                  <v-card-title>Últimas Notícias</v-card-title>
+
+                  <v-divider></v-divider>
+
+                  <v-card-text>
+                    <div v-for="post in posts.slice(0, 5)" :key="post.id">
+                      <router-link class="text-decoration-none" :to="`/blog/blogView/${post.slug}`">
+                        <v-card outlined elevation="0">
+                        <v-row>
+                          <!-- Imagem à esquerda -->
+                          <v-col cols="4">
+                            <v-img :src="post.cover_image" aspect-ratio="1" class="rounded" />
+                          </v-col>
+
+                          <!-- Conteúdo à direita -->
+                          <v-col cols="8">
+                            <div class="font-weight-bold">{{ post.title }}</div>
+                            <div class="text--secondary">{{ post.excerpt }}</div>
+                            <div class="text-caption text--secondary">{{ formatDate(post.created_at) }}</div>
+                          </v-col>
+                        </v-row>
+                      </v-card>
+                      </router-link>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </div>
+      <div v-else-if="page.name">
+        other pages
+      </div>
+      <div v-else>
+        Carregando...
+      </div>
+        </v-col>
+      </v-row>
+  <!-- <v-container class="fill-height">
     <v-responsive class="align-center fill-height mx-auto">
-      <!--  <div class="text-center">
+       <div class="text-center">
         <v-row justify="center" class="mt-0 mb-4" no-gutters>
           <v-col cols="12">
             <v-divider></v-divider>
@@ -89,89 +169,12 @@
             <div class="text-body-2 text-left font-weight-light mb-n1" v-html="page.content"></div>
           </v-card-text>
         </v-card>
-      </div>-->
-
-      <div v-if="page.name && isBlogPage">
-        <v-card>
-          <v-toolbar color="transparent">
-            <v-toolbar-title>
-              {{ page.title }}
-            </v-toolbar-title>
-          </v-toolbar>
-
-          <v-divider></v-divider>
-
-          <v-card-text>
-            <v-row>
-              <v-col cols="3">
-                <v-card elevation="1">
-                  <v-card-title>Últimas Notícias</v-card-title>
-
-                  <v-divider></v-divider>
-
-                  <v-card-text>
-                    <div v-for="post in posts.slice(0, 5)" :key="post.id" class="mb-3">
-                      <router-link class="text-decoration-none" :to="`/blog/blogView/${post.slug}`">
-                        <v-card outlined elevation="0">
-                        <v-row>
-                          <!-- Imagem à esquerda -->
-                          <v-col cols="4">
-                            <v-img :src="post.cover_image" aspect-ratio="1" class="rounded" />
-                          </v-col>
-
-                          <!-- Conteúdo à direita -->
-                          <v-col cols="8">
-                            <div class="font-weight-bold">{{ post.title }}</div>
-                            <div class="text--secondary">{{ post.excerpt }}</div>
-                            <div class="text-caption text--secondary">{{ formatDate(post.created_at) }}</div>
-                          </v-col>
-                        </v-row>
-                      </v-card>
-                      </router-link>
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-
-              <v-col cols="8">
-                <v-card elevation="0">
-                  <v-card-text>
-                    <v-row>
-                      <v-col v-for="(post, index) in posts" :key="index" cols="12" sm="6" md="4">
-                        <v-card elevation="0" class="rounded overflow-hidden">
-                           <router-link :to="`/blog/blogView/${post.slug}`">
-                          <v-img :src="post.cover_image" aspect-ratio="1" class="rounded">
-                            <!-- Overlay apenas na parte inferior -->
-                           
-                           
-                        
-                            <div class="pa-2 text-white" 
-                              style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5);">
-                              <div class="text-h6 font-weight-bold">{{ post.title }}</div>
-                              <div class="text-caption">{{ formatDate(post.created_at) }}</div>
-                            </div>
-                          </v-img>
-                          </router-link>
-                        </v-card>
-                      </v-col>
-                    </v-row>
-                  </v-card-text>
-                </v-card>
-
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
       </div>
-      <div v-else-if="page.name">
-        other pages
-      </div>
-      <div v-else>
-        Carregando...
-      </div>
+     
+      
 
     </v-responsive>
-  </v-container>
+  </v-container> -->
 </template>
 
 <script>
