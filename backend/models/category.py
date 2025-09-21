@@ -12,7 +12,7 @@ class Category(db.Model):
     # Relacionamento opcional para subcategorias
     subcategories = db.relationship('Category', backref=db.backref('parent', remote_side=[id]), lazy='dynamic')
 
-    products = db.relationship('Product', back_populates="categories", cascade="all, delete-orphan")
+    products = db.relationship('Product', back_populates="category", cascade="all, delete-orphan")
 
     def save(self):
         """Salva ou atualiza a categoria"""
@@ -74,5 +74,6 @@ class Category(db.Model):
             "name": self.name,
             "is_subcategory": self.is_subcategory,
             "parent_id": self.parent_id,
-            "user_id": self.user_id
+            "user_id": self.user_id,
+            "products": [product.to_dict_basic() for product in self.products] if self.products else []
         }
