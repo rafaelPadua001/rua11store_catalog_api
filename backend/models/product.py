@@ -2,6 +2,11 @@ from database import db
 from sqlalchemy import Numeric
 from sqlalchemy.orm import joinedload
 from models.productSeo import ProductSeo
+from models.stock import Stock
+from models.productSeo import ProductSeo
+from models.comment import Comment
+from models.productImage import ProductImage
+from models.productVideo import ProductVideo
 
 
 class Product(db.Model):
@@ -61,12 +66,7 @@ class Product(db.Model):
     @staticmethod
     def get_all():
         try:
-            from models.stock import Stock
-            from models.productSeo import ProductSeo
-            from models.comment import Comment
-            from models.productImage import ProductImage
-            from models.productVideo import ProductVideo
-
+           
             results = db.session.query(
                 Product,
                 ProductImage,
