@@ -68,6 +68,27 @@
                                         <v-divider></v-divider>
                                         <!-- Conteúdo do Post -->
                                         <div v-html="post.content"></div>
+                                        <div>
+                                            <v-row>
+                                                <v-col>
+                                                    <v-card>
+                                                        <v-toolbar color="transparent">
+                                                            <v-toolbar-title class="text-h8">
+                                                                Coments: (0)
+                                                            </v-toolbar-title>
+                                                        </v-toolbar>
+                                                        <v-divider></v-divider>
+                                                        <v-card-text>
+                                                            <commentInputForm /> 
+                                                        </v-card-text>
+                                                        <v-divider></v-divider>
+                                                        <v-card-text>
+                                                            comments here
+                                                        </v-card-text>
+                                                    </v-card>
+                                                </v-col>
+                                            </v-row>
+                                        </div>
                                     </v-card>
                                 </v-col>
                             </v-row>
@@ -121,6 +142,8 @@
 <script>
 import axios from "axios";
 import { useSeo } from '../../../useSeo';
+import commentInputForm from "../../comments/commentsView/commentInputForm.vue";
+
 
 const api = axios.create({
     baseURL:
@@ -131,6 +154,9 @@ const api = axios.create({
 });
 
 export default {
+    components: {
+        commentInputForm
+    },
     name: "BlogPostView",
     data() {
         return {
