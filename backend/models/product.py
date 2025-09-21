@@ -1,12 +1,7 @@
 from database import db
 from sqlalchemy import Numeric
 from sqlalchemy.orm import joinedload
-from models.stock import Stock
 from models.productSeo import ProductSeo
-from models.category import Category
-from models.comment import Comment
-from models.productImage import ProductImage
-from models.productVideo import ProductVideo
 
 
 class Product(db.Model):
@@ -16,7 +11,7 @@ class Product(db.Model):
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     price = db.Column(Numeric(10,2))
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
+    category_id = db.Column(db.Integer)
     subcategory_id = db.Column(db.Integer)
     thumbnail_path = db.Column(db.String)  # Caminho para a imagem de miniatura
     image_paths = db.Column(db.String)
@@ -26,10 +21,10 @@ class Product(db.Model):
     height = db.Column(db.Float)
     weight = db.Column(db.Float)
     length = db.Column(db.Float)
+    quantity = db.Column(db.Integer)
     user_id = db.Column(db.Integer)
 
     stock = db.relationship('Stock', back_populates='product', uselist=False)
-    categories = db.relationship('Category', back_populates="products", uselist=False)
     seo = db.relationship('ProductSeo', uselist=False, back_populates='product', cascade="all, delete-orphan")
     images = db.relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
     
@@ -66,6 +61,12 @@ class Product(db.Model):
     @staticmethod
     def get_all():
         try:
+            from models.stock import Stock
+            from models.productSeo import ProductSeo
+            from models.comment import Comment
+            from models.productImage import ProductImage
+            from models.productVideo import ProductVideo
+
             results = db.session.query(
                 Product,
                 ProductImage,
@@ -77,8 +78,6 @@ class Product(db.Model):
                 Stock, Product.id == Stock.id_product
             ).outerjoin(
                 ProductSeo, Product.id == ProductSeo.product_id
-            ).outerjoin(
-                Category, Product.category_id == Category.id
             ).outerjoin(
                 Comment, Product.id == Comment.product_id
             ).outerjoin(
@@ -118,7 +117,6 @@ class Product(db.Model):
                             "slug": seo.slug if seo else None,
                             "keywords": seo.keywords if seo else None
                         } if seo else None,
-                        "categories": [],
                         "comments": [],
                     }
 
@@ -210,52 +208,6 @@ class Product(db.Model):
             return []
 
     def to_dict(self):
-        # Serializa imagens
-        images = [
-            {
-                "id": img.id,
-                "product_id": img.product_id,
-                "image_path": img.image_path,
-                "is_thumbnail": img.is_thumbnail,
-                "created_at": img.created_at.isoformat() if img.created_at else None
-            }
-            for img in getattr(self, "images", [])
-        ]
-
-        # Serializa vídeo (pega o primeiro se existir)
-        video = None
-        if getattr(self, "product_videos", None) and len(self.product_videos) > 0:
-            video_obj = self.product_videos[0]
-            video = {
-                "id": video_obj.id,
-                "product_id": video_obj.product_id,
-                "video_path": getattr(video_obj, "video_path", None),
-                "created_at": video_obj.created_at.isoformat() if video_obj.created_at else None
-            }
-
-        # Serializa SEO
-        seo = None
-        if self.seo:
-            if hasattr(self.seo, "to_dict"):
-                seo = self.seo.to_dict()
-            else:
-                seo = {
-                    "meta_title": getattr(self.seo, "meta_title", None),
-                    "meta_description": getattr(self.seo, "meta_description", None),
-                    "slug": getattr(self.seo, "slug", None),
-                    "keywords": getattr(self.seo, "keywords", None)
-                }
-
-        # Serializa categorias
-        categories = []
-        if getattr(self, "categories", None):
-            categories = [cat.to_dict() for cat in  getattr(self, "categories", []) if cat]
-
-        # Serializa comentários
-        comments = []
-        if getattr(self, "comments", None):
-            comments = [c.to_dict() for c in self.comments if c]
-
         return {
             "id": self.id,
             "name": self.name,
@@ -263,18 +215,38 @@ class Product(db.Model):
             "price": f"{self.price:.2f}" if isinstance(self.price, float) else self.price,
             "category_id": getattr(self, "category_id", None),
             "subcategory_id": getattr(self, "subcategory_id", None),
-            "thumbnail_path": getattr(self, "thumbnail_path", None),
             "image_paths": getattr(self, "image_paths", None),
+            "thumbnail_path": getattr(self, "thumbnail_path", None),
+            "product_images": [
+            {
+                    "id": img.id,
+                    "product_id": img.product_id,
+                    "image_path": img.image_path,
+                    "is_thumbnail": img.is_thumbnail,
+                    "created_at": img.created_at.isoformat() if img.created_at else None
+                }
+                for img in getattr(self, "product_images", [])
+            ],
+           "product_video": None if not getattr(self, "product_videos", None) else {
+                "id": self.product_videos[0].id,
+                "product_id": self.product_videos[0].product_id,
+                "video_path": self.product_videos[0].image_path,
+                "created_at": self.product_videos[0].created_at.isoformat() if self.product_videos[0].created_at else None
+            },
+
             "quantity": self.quantity,
             "width": getattr(self, "width", None),
             "height": getattr(self, "height", None),
             "weight": getattr(self, "weight", None),
             "length": getattr(self, "length", None),
             "user_id": getattr(self, "user_id", None),
-            "seo": seo,
-            "categories": categories,
-            "product_images": images,
-            "product_video": video,
-            "comments": comments
+            "seo": self.seo.to_dict() if self.seo and hasattr(self.seo, "to_dict") else (
+                {
+                    "meta_title": getattr(self.seo, "meta_title", None),
+                    "meta_description": getattr(self.seo, "meta_description", None),
+                    "slug": getattr(self.seo, "slug", None),
+                    "keywords": getattr(self.seo, "keywords", None),
+                } if self.seo else None
+            ),
+            "comments": [c.to_dict() for c in self.comments] if getattr(self, "comments", None) else []
         }
-
