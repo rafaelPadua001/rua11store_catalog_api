@@ -16,7 +16,7 @@ class Product(db.Model):
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     price = db.Column(Numeric(10,2))
-    category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
     subcategory_id = db.Column(db.Integer)
     thumbnail_path = db.Column(db.String)  # Caminho para a imagem de miniatura
     image_paths = db.Column(db.String)
@@ -250,4 +250,13 @@ class Product(db.Model):
                 } if self.seo else None
             ),
             "comments": [c.to_dict() for c in self.comments] if getattr(self, "comments", None) else []
+        }
+    
+    def to_dict_basic(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "price": f"{self.price:.2f}" if isinstance(self.price, float) else self.price,
+            "thumbnail_path": self.thumbnail_path,
+            "category_id": self.category_id
         }
