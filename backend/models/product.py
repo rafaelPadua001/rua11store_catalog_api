@@ -16,7 +16,7 @@ class Product(db.Model):
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     price = db.Column(Numeric(10,2))
-    category_id = db.Column(db.Integer)
+    category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
     subcategory_id = db.Column(db.Integer)
     thumbnail_path = db.Column(db.String)  # Caminho para a imagem de miniatura
     image_paths = db.Column(db.String)
@@ -29,6 +29,7 @@ class Product(db.Model):
     quantity = db.Column(db.Integer)
     user_id = db.Column(db.Integer)
 
+    category = db.relationship("Category", back_populates="products")
     stock = db.relationship('Stock', back_populates='product', uselist=False)
     seo = db.relationship('ProductSeo', uselist=False, back_populates='product', cascade="all, delete-orphan")
     images = db.relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
@@ -233,7 +234,7 @@ class Product(db.Model):
                 "video_path": self.product_videos[0].image_path,
                 "created_at": self.product_videos[0].created_at.isoformat() if self.product_videos[0].created_at else None
             },
-
+            "category": self.category.to_dict() if self.category else None,
             "quantity": self.quantity,
             "width": getattr(self, "width", None),
             "height": getattr(self, "height", None),
