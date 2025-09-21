@@ -5,13 +5,13 @@
               {{ page.title }}
             </v-toolbar-title>
           </v-toolbar>
-
+          <v-divider></v-divider>
               <v-col cols="12" md="8" v-if="page.name && isBlogPage">
                 <v-card elevation="0">
                   <v-card-text>
                     <v-row>
-                      <v-col v-for="(post, index) in posts" :key="index" cols="12" sm="6" md="4">
-                        <v-card elevation="0" class="rounded overflow-hidden">
+                      <v-col v-for="(post, index) in posts" :key="index" cols="12" sm="6" md="6">
+                        <v-card elevation="0" class="rounded overflow-hidden" >
                            <router-link :to="`/blog/blogView/${post.slug}`">
                           <v-img :src="post.cover_image" aspect-ratio="1" class="rounded">
                             <!-- Overlay apenas na parte inferior -->
@@ -32,13 +32,9 @@
                 </v-card>
 
               </v-col>
-        <v-col cols="12" md="4" sm="12">
+        <v-col cols="12" md="3" sm="12">
           <div v-if="page.name && isBlogPage">
-        <v-card elevation="0">
-         <v-card-text>
-            <v-row>
-              <v-col>
-                <v-card elevation="1">
+               <v-card elevation="1">
                   <v-card-title>Últimas Notícias</v-card-title>
 
                   <v-divider></v-divider>
@@ -49,12 +45,12 @@
                         <v-card outlined elevation="0">
                         <v-row>
                           <!-- Imagem à esquerda -->
-                          <v-col cols="4">
-                            <v-img :src="post.cover_image" aspect-ratio="1" class="rounded" />
+                          <v-col cols="6">
+                            <v-img :src="post.cover_image"  height="75" aspect-ratio="1" class="rounded" />
                           </v-col>
 
                           <!-- Conteúdo à direita -->
-                          <v-col cols="8">
+                          <v-col cols="6">
                             <div class="font-weight-bold">{{ post.title }}</div>
                             <div class="text--secondary">{{ post.excerpt }}</div>
                             <div class="text-caption text--secondary">{{ formatDate(post.created_at) }}</div>
@@ -65,11 +61,6 @@
                     </div>
                   </v-card-text>
                 </v-card>
-              </v-col>
-
-            </v-row>
-          </v-card-text>
-        </v-card>
       </div>
       <div v-else-if="page.name">
         other pages

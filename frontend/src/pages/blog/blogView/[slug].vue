@@ -11,19 +11,19 @@
                                 <v-col cols="12" sm="6" md="12">
                                     <v-card elevation="0" class="rounded overflow-hidden">
                                         <!-- Título -->
-                                        <p class="mb-2 text-h3">{{ post.title }}</p>
+                                        <p class="mb-2 text-h4">{{ post.title }}</p>
                                         <v-divider></v-divider>
 
-                                        <p class="text-caption mb-4" align="end">{{ formatDate(post.created_at) }}</p>
+                                        <p class="text-caption mb-2" align="end">{{ formatDate(post.created_at) }}</p>
 
                                         <!-- Imagem Cover -->
-                                        <v-img :src="post.cover_image" height="300px" class="mb-6 rounded" />
+                                        <v-img :src="post.cover_image" height="300px" class="srounded" />
                                         <v-row>
-                                            <v-col cols="12">
-                                                <v-card elevation="0" class="pa-2">
+                                            <v-col cols="12" md="12" sm="4">
+                                                <v-card elevation="0" class="pa-0">
                                                     <v-card-text>
                                                         <div class="d-flex flex-wrap justify-center align-center">
-                                                            <span class="mr-3 font-weight-medium">Compartilhar:</span>
+                                                            <span class="mr-0 font-weight-medium">Compartilhar:</span>
 
                                                             <!-- WhatsApp -->
                                                             <v-btn icon variant="text" color="green"
@@ -77,7 +77,7 @@
                     </v-card>
                 </v-col>
 
-                <v-col cols="12" md="4" sm="12">
+                <v-col cols="12" md="3" sm="12">
                     <v-card elevation="1">
                         <v-card-title>Últimas Notícias</v-card-title>
 
@@ -89,12 +89,13 @@
                                     <v-card outlined elevation="0">
                                         <v-row>
                                             <!-- Imagem à esquerda -->
-                                            <v-col cols="4">
-                                                <v-img :src="post.cover_image" aspect-ratio="1" class="rounded" />
+                                            <v-col cols="6">
+                                                <v-img :src="post.cover_image" height="75" aspect-ratio="1"
+                                                    class="rounded" />
                                             </v-col>
 
                                             <!-- Conteúdo à direita -->
-                                            <v-col cols="8">
+                                            <v-col cols="6">
                                                 <div class="font-weight-bold">{{ post.title }}</div>
                                                 <div class="text--secondary">{{ post.excerpt }}</div>
                                                 <div class="text-caption text--secondary">{{
