@@ -68,12 +68,12 @@ class Order(db.Model):
             ],
             'categories': [
                 {
-                    'id': item.product.categories.id if item.product and item.product.categories else None,
-                    "name": item.product.categories.name if item.product and item.product.categories else None,
+                    'id': item.product.category.id if item.product and item.product.category else None,
+                    "name": item.product.category.name if item.product and item.product.category else None,
                 }
-                for item in self.items if item.product.categories
+                for item in self.items if item.product and item.product.category
             ],
-           'delivery': 
+            'delivery': 
                {
                 'id': self.delivery.id if self.delivery else None,
                 'melhorenvio_id': self.delivery.melhorenvio_id if self.delivery else None,
