@@ -10,4 +10,8 @@ def create_comment():
 @postComment_bp.route('/post-comment/<int:postId>', methods=['GET'])
 def get_comments_by_postId(postId):
     return PostCommentController.get_comments_by_postId(postId)
+
+@postComment_bp.route('/post-comment/<int:commentId>', methods=['DELETE'])
+def delete_comment(commentId):
+    return PostCommentController.remove_comment(commentId)
   
