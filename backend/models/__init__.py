@@ -39,5 +39,6 @@ __all__ = [
     'CouponUser',
     'Notification',
     'PostSeo',
+    'PostComment'
   
 ]

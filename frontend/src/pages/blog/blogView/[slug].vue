@@ -79,12 +79,74 @@
                                                         </v-toolbar>
                                                         <v-divider></v-divider>
                                                         <v-card-text>
-                                                            <commentInputForm /> 
+                                                            <commentInputForm :postId="post.id" @update:user="setUser"/>
                                                         </v-card-text>
                                                         <v-divider></v-divider>
                                                         <v-card-text>
-                                                            comments here
+                                                            <v-row v-for="comment in comments" :key="comment.id"
+                                                                align="start" class="mb-3" no-gutters>
+                                                                <!-- Avatar pequeno à esquerda -->
+                                                                <v-col cols="auto">
+                                                                    <v-img
+                                                                        :src="comment.user_avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
+                                                                        class="rounded-circle" width="32"
+                                                                        height="32"></v-img>
+                                                                </v-col>
+
+                                                                <!-- Conteúdo do comentário à direita -->
+                                                                <v-col>
+                                                                    <div class="d-flex align-center mb-1">
+                                                                        <span class="font-weight-medium text-body-2">{{
+                                                                            comment.username || 'Anônimo' }}</span>
+                                                                        <span class="text-caption grey--text ml-2"
+                                                                            style="font-size: 0.65rem;">
+                                                                            {{ formatDate(comment.created_at) }}
+                                                                        </span>
+
+                                                                        <!-- Botões de ação -->
+                                                                        <div class="ml-auto d-flex gap-2">
+                                                                            <!-- Denunciar: só se não for dono do comentário -->
+                                                                            <v-btn
+                                                                                v-if="user && user.id !== comment.user_id"
+                                                                                variant="plain" x-small color="red"
+                                                                                @click="reportComment(comment)"
+                                                                                title="Denunciar">
+                                                                                Denunciar
+                                                                            </v-btn>
+
+                                                                            <!-- Editar: só se for dono -->
+                                                                            <!--<v-btn
+                                                                                
+                                                                                icon small color="blue"
+                                                                                @click="editComment(comment)"
+                                                                                title="Editar">
+                                                                                <v-icon>mdi-pencil</v-icon>
+                                                                            </v-btn>-->
+
+                                                                            <!-- Remover: só se for dono -->
+                                                                            <v-btn
+                                                                                v-if="user && user.id === comment.user_id"
+                                                                                variant="text" x-small color="primary"
+                                                                                @click="removeComment(comment)"
+                                                                                title="Remover">
+                                                                               
+                                                                                Remove
+                                                                            </v-btn>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="text-body-2">{{ comment.text }}</div>
+
+                                                                    <v-chip v-if="comment.login_provider" small outlined
+                                                                        color="grey lighten-2" class="mt-1"
+                                                                        style="font-size: 0.6rem;">
+                                                                        {{ comment.login_provider }}
+                                                                    </v-chip>
+                                                                </v-col>
+                                                                <v-divider></v-divider>
+                                                            </v-row>
                                                         </v-card-text>
+
                                                     </v-card>
                                                 </v-col>
                                             </v-row>
@@ -92,8 +154,6 @@
                                     </v-card>
                                 </v-col>
                             </v-row>
-
-
                         </v-card-text>
                     </v-card>
                 </v-col>
@@ -130,7 +190,6 @@
                     </v-card>
                 </v-col>
             </v-row>
-
         </div>
 
         <div v-else>
@@ -162,6 +221,8 @@ export default {
         return {
             post: null, // post único
             posts: [],
+            comments: [],
+            user: null,
             isLoading: false,
             baseUrl: window.location.origin,
         };
@@ -169,8 +230,12 @@ export default {
     created() {
         this.loadPosts();
         this.loadPost();
+
     },
     methods: {
+        setUser(userData){
+            this.user = userData;
+        },
         formatDate(date) {
             return new Date(date).toLocaleDateString("pt-BR", {
                 day: "2-digit",
@@ -183,7 +248,6 @@ export default {
             try {
                 const response = await api.get('/blog/posts');
                 this.posts = response.data;
-
                 // this.form.page_id = response.data.id;
             }
             catch (e) {
@@ -204,6 +268,7 @@ export default {
                 if (data) {
                     this.post = data;
                     this.loadSeo(this.post);
+                    this.loadPostComments();
                 }
             } catch (error) {
 
@@ -225,6 +290,15 @@ export default {
             } catch (error) {
                 const { setSeo } = useSeo();
                 console.error("Erro ao carregar post_seo", error);
+            }
+        },
+        async loadPostComments() {
+            try {
+                console.log(this.post);
+                const response = await api.get(`/post-comment/post-comment/${this.post.id}`);
+                this.comments = response.data;
+            } catch (e) {
+                console.error("Erro ao carregar post_comments", e);
             }
         }
     },
