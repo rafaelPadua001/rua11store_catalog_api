@@ -80,7 +80,7 @@
                                                         <v-divider></v-divider>
                                                         <v-card-text>
                                                             <commentInputForm :postId="post.id"
-                                                                @update:user="setUser" />
+                                                                @create:comment="setComment" @update:user="setUser" />
                                                         </v-card-text>
                                                         <v-divider></v-divider>
                                                         <v-card-text>
@@ -231,11 +231,16 @@ export default {
     created() {
         this.loadPosts();
         this.loadPost();
-
     },
     methods: {
         setUser(userData) {
             this.user = userData;
+        },
+        setComment(commentData) {
+            if (!Array.isArray(this.comments)) {
+                this.comments = [];
+            }
+            this.comments.push(commentData);
         },
         formatDate(date) {
             return new Date(date).toLocaleDateString("pt-BR", {
