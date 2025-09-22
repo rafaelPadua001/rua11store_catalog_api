@@ -300,6 +300,22 @@ export default {
             } catch (e) {
                 console.error("Erro ao carregar post_comments", e);
             }
+        },
+        async removeComment(comment){
+            try{
+                console.log(comment);
+                if (!confirm("Tem certeza que deseja remover este produto permanentemente ?")) return;
+
+                try{
+                    const response = await api.delete(`/post-comment/post-comment/${comment.id}`)
+                    this.comments = this.comments.filter(c => c.id !== comment.id);
+                }catch(e){
+                    return console.log('erro ao remover comentário', e.message);
+                }
+            }
+            catch(e){
+                console.log('Erro ao deletar comentário');
+            }
         }
     },
 };

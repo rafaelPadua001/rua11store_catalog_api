@@ -38,7 +38,14 @@ class PostCommentController:
     @staticmethod
     def get_comments_by_postId(postId):
         comments = PostComment.query.filter_by(post_id=postId).order_by(PostComment.created_at.desc()).all()
-        return jsonify([comment.to_dict() for comment in comments])
+        return jsonify([comment.to_dict() for comment in comments]), 200
     
+
+    @staticmethod
+    def remove_comment(commentId):
+        comment = PostComment.query.get_or_404(commentId)
+        db.session.delete(comment)
+        db.session.commit()
+        return jsonify({'message': 'Comentário removido com sucesso'}), 200
     
        
