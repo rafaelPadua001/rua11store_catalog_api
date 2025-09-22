@@ -79,7 +79,8 @@
                                                         </v-toolbar>
                                                         <v-divider></v-divider>
                                                         <v-card-text>
-                                                            <commentInputForm :postId="post.id" @update:user="setUser"/>
+                                                            <commentInputForm :postId="post.id"
+                                                                @update:user="setUser" />
                                                         </v-card-text>
                                                         <v-divider></v-divider>
                                                         <v-card-text>
@@ -129,7 +130,7 @@
                                                                                 variant="text" x-small color="primary"
                                                                                 @click="removeComment(comment)"
                                                                                 title="Remover">
-                                                                               
+
                                                                                 Remove
                                                                             </v-btn>
                                                                         </div>
@@ -233,7 +234,7 @@ export default {
 
     },
     methods: {
-        setUser(userData){
+        setUser(userData) {
             this.user = userData;
         },
         formatDate(date) {
@@ -301,19 +302,19 @@ export default {
                 console.error("Erro ao carregar post_comments", e);
             }
         },
-        async removeComment(comment){
-            try{
+        async removeComment(comment) {
+            try {
                 console.log(comment);
                 if (!confirm("Tem certeza que deseja remover este produto permanentemente ?")) return;
 
-                try{
+                try {
                     const response = await api.delete(`/post-comment/post-comment/${comment.id}`)
                     this.comments = this.comments.filter(c => c.id !== comment.id);
-                }catch(e){
+                } catch (e) {
                     return console.log('erro ao remover comentário', e.message);
                 }
             }
-            catch(e){
+            catch (e) {
                 console.log('Erro ao deletar comentário');
             }
         }

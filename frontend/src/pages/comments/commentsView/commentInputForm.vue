@@ -117,7 +117,8 @@ const clearComment = () => {
 //Social login
 const login = async (provider) => {
     try {
-        const currentUrl = window.location.origin + this.$route.fullPath; // pega a URL atual (com o slug)
+        const currentUrl = window.location.href; // pega a URL atual (com o slug)
+        print(currentUrl);
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider,
             options: {
