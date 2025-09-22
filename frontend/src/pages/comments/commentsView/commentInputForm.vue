@@ -23,8 +23,6 @@
                             <v-btn color="light-blue" variant="outlined" @click="login('twitter')">
                                 <v-icon>mdi-twitter</v-icon>
                             </v-btn>
-
-
                         </div>
                     </div>
                 </v-card-text>
@@ -56,13 +54,11 @@ const api = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
-
-
 const comment = ref('');
 let comments = ref('');
 const anonymous = ref(false);
 const user = ref(null);
-const emit = defineEmits(['update:user']);
+const emit = defineEmits(['create:comment', 'update:user']);
 
 const props = defineProps({
     postId: {
@@ -71,7 +67,6 @@ const props = defineProps({
     }
 });
 
-
 const submitComment = async () => {
     if (!comment.value.trim()) return;
 
@@ -79,7 +74,6 @@ const submitComment = async () => {
         let payload;
 
         if (anonymous.value) {
-
             payload = {
                 post_id: props.postId,
                 text: comment.value,
@@ -106,10 +100,12 @@ const submitComment = async () => {
         }
 
         const response = await api.post('/post-comment/post-comment', payload);
+        const data = response.data.comment;
+        emit('create:comment', data);
         clearComment();
     }
     catch (e) {
-        console.error('Erro ao enviar comentário:', err);
+        console.log('Erro ao enviar comentário:', e.message);
     }
 };
 
@@ -121,7 +117,7 @@ const clearComment = () => {
 const login = async (provider) => {
     try {
         const currentUrl = window.location.href; // pega a URL atual (com o slug)
-        console.log(currentUrl);
+        //console.log(currentUrl);
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider,
             options: {
@@ -131,7 +127,7 @@ const login = async (provider) => {
 
         if (error) throw error;
 
-       
+
     } catch (err) {
         console.error("Erro no login social:", err.message);
     }
