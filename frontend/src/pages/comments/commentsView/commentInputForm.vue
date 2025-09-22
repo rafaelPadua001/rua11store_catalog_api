@@ -45,6 +45,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { supabase } from "@/supabase";
+
 import axios from 'axios'
 
 const api = axios.create({
@@ -54,6 +55,8 @@ const api = axios.create({
             : "https://rua11store-catalog-api-lbp7.onrender.com",
     headers: { "Content-Type": "application/json" },
 });
+
+
 
 const comment = ref('');
 let comments = ref('');
@@ -117,7 +120,8 @@ const clearComment = () => {
 //Social login
 const login = async (provider) => {
     try {
-        const currentUrl = window.location.origin + this.$route.fullPath; // pega a URL atual (com o slug)
+        const currentUrl = window.location.origin + window.location.pathname; // pega a URL atual (com o slug)
+        console.log(currentUrl);
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider,
             options: {
