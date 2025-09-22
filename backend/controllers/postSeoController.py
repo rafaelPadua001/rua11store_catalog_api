@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import jsonify
 from database import db
 from models.blogPost import BlogPost
 from models.postSeo import PostSeo

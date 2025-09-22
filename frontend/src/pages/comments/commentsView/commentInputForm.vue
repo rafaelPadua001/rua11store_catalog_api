@@ -3,106 +3,145 @@
         <v-col>
             <v-card class="pa-4" elevation="2">
                 <v-card-text>
-                    <v-textarea
-                        v-model="comment"
-                        label="Escreva seu comentário..."
-                        auto-grow
-                        outlined
-                        rows="2"
-                        class="mb-4"
-                    >
+                    <v-textarea v-model="comment" label="Escreva seu comentário..." auto-grow outlined rows="2"
+                        class="mb-4" v-if="user">
 
                     </v-textarea>
-
+                    <p v-else>Faça login para comentar</p>
                     <div class="d-flex flex-column gap-3">
-                        <v-checkbox
-                            v-model="anonymous"
-                            label="Comentar como Anônimo"
-                        />
+                        <v-checkbox v-model="anonymous" label="Comentar como Anônimo" />
 
                         <div class="d-flex flex-wrap align-center">
-                            <v-btn
-                                color="red"
-                                variant="outlined"
-                                @click="login('google')"
-                            >
+                            <v-btn color="red" variant="outlined" @click="login('google')">
                                 <v-icon start>mdi-google</v-icon>
                                 Google
                             </v-btn>
-                             <v-btn
-                                color="blue"
-                                variant="outlined"
-                                @click="login('facebook')"
-                             >
+                            <v-btn color="blue" variant="outlined" @click="login('facebook')">
                                 <v-icon start>mdi-facebook</v-icon>
                                 Facebook
                             </v-btn>
-                             <v-btn
-                                color="light-blue"
-                                variant="outlined"
-                                @click="login('twitter')"
-                             >
+                            <v-btn color="light-blue" variant="outlined" @click="login('twitter')">
                                 <v-icon>mdi-twitter</v-icon>
                             </v-btn>
 
-                           
+
                         </div>
                     </div>
                 </v-card-text>
 
                 <v-card-actions>
-                     <div class="text-right mt-4">
-                                 <v-btn
-                                    color="primary"
-                                    :disabled="!comment"
-                                    @click="submitComment"   
-                                 >
-                              Enviar comentário
-                            </v-btn>
-                            </div>
+                    <div class="text-right mt-4">
+                        <v-btn color="primary" :disabled="!comment" @click="submitComment">
+                            Enviar comentário
+                        </v-btn>
+                    </div>
                 </v-card-actions>
             </v-card>
         </v-col>
     </v-row>
-   
+
 </template>
 
 <script setup>
-    import {ref} from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { supabase } from "@/supabase";
+import axios from 'axios'
 
-    const comment = ref('');
-    const anonymous = ref(false);
-    const user = ref(null);
+const api = axios.create({
+    baseURL:
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://rua11store-catalog-api-lbp7.onrender.com",
+    headers: { "Content-Type": "application/json" },
+});
 
-    const submitComment = () => {
-        if(!comment.value) return;
+const comment = ref('');
+let comments = ref('');
+const anonymous = ref(false);
+const user = ref(null);
+const emit = defineEmits(['update:user']);
 
-        if(anonymous.value){
-            console.log('Comentário anônimo:', comment.value);
-        }
-        else if(user.value){
-            console.log('Comentário de:', comment.value)
-            // chamada API -> { text: comment.value, user: user.value }
-        }
-        else{
-            console.warn('Precisa logar ou marcar anônimo!');
-        }
-
-        console.log("commentário:", comment.value);
-        console.log('Anonimo:', anonymous.value);
-
-        //Call to api
-
-    };
-
-    const login = (provider) => {
-        console.log('Login com:', provider);
-        //Integrations here ... 
-
-        user.value = {
-            provider,
-            name: "usuario teste",
-            id: '12345'
-        }
+const props = defineProps({
+    postId: {
+        type: Number,
+        required: true,
     }
+});
+
+
+const submitComment = async () => {
+    if (!comment.value.trim()) return;
+
+    try {
+        let payload;
+
+        if (anonymous.value) {
+
+            payload = {
+                post_id: props.postId,
+                text: comment.value,
+                user_id: null,
+                username: null,
+                user_avatar: null,
+                login_provider: null
+            };
+        }
+        else if (user.value) {
+            console.log(user.value)
+            payload = {
+                post_id: props.postId,
+                text: comment.value,
+                user_id: user.value.id,
+                username: user.value.user_metadata.full_name || user.value.email,
+                user_avatar: user.value.user_metadata.avatar_url || null,
+                login_provider: user.value.app_metadata?.provider || null
+            };
+        }
+        else {
+            console.warn('Precisa logar ou marcar anônimo!');
+            return
+        }
+
+        const response = await api.post('/post-comment/post-comment', payload);
+        clearComment();
+    }
+    catch (e) {
+        console.error('Erro ao enviar comentário:', err);
+    }
+};
+
+const clearComment = () => {
+    comment.value = "";
+    anonymous.value = false;
+};
+//Social login
+const login = async (provider) => {
+    try {
+        const currentUrl = window.location.href; // pega a URL atual (com o slug)
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider,
+            options: {
+                redirectTo: currentUrl, // volta exatamente para a página do post
+            },
+        });
+
+        if (error) throw error;
+
+       
+    } catch (err) {
+        console.error("Erro no login social:", err.message);
+    }
+};
+
+onMounted(async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+        user.value = data.session.user;
+    }
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+        user.value = session?.user || null;
+        emit('update:user', user.value);
+    });
+});
 </script>
