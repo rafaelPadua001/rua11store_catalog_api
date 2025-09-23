@@ -53,7 +53,7 @@ async function generateSitemap() {
 
       urls.push(`
   <url>
-    <loc>${canonical}</loc>
+    <loc>${SITE_URL}/blog/blogView/${encodeURIComponent(post.slug)}</loc>
     <lastmod>${new Date(lastmod).toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
