@@ -5,6 +5,10 @@ import uuid
 
 class PostCommentController:
     @staticmethod
+    def get_comments():
+        comments = PostComment.query.all()
+        return jsonify([comment.to_dict() for comment in comments]), 200
+    @staticmethod
     def save_comment():
         data = request.json
 

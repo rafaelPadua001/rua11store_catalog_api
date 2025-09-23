@@ -75,7 +75,31 @@
             title="Dashboard"></v-list-item>
           <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
             title="Pages"></v-list-item>
-          <v-list-item link @click="navigateTo('/blog/blogs')" prepend-icon="mdi-post" title="Blog"></v-list-item>
+          <v-list-item-group>
+
+            <v-list-item>
+              <template #prepend>
+                <v-icon>mdi-post</v-icon>
+              </template>
+              <v-list-item-title @click="blogMenuOpen = !blogMenuOpen">Blogs</v-list-item-title>
+            </v-list-item>
+
+            <!-- Submenus -->
+            <v-slide-y-transition>
+              <div v-if="blogMenuOpen">
+                <v-list-item link @click="navigateTo('/blog/blogs')" title="Articles" class="ps-12"></v-list-item>
+                <v-list-item link @click="navigateTo('/blog/blogView/comments')" class="ps-12">
+                  <v-list-item-title>Comentários</v-list-item-title>
+                </v-list-item>
+                <v-list-item link @click="navigateTo('/blog/comentarios-reportados')" class="ps-12">
+                  <v-list-item-title>Comentários Reportados</v-list-item-title>
+                </v-list-item>
+              </div>
+            </v-slide-y-transition>
+          </v-list-item-group>
+
+
+
           <v-list-item link @click="navigateTo('/seo/seo')" prepend-icon="mdi-web" title="SEO"></v-list-item>
           <v-list-item link @click="navigateTo('/categories/categories')" prepend-icon="mdi-inbox"
             title="Categories"></v-list-item>
@@ -134,6 +158,7 @@ const router = useRouter();
 const isAuthenticated = ref(false);
 const notifications = inject('notifications', ref([]));
 const hasNewNotifications = inject('hasNewNotifications', ref(true));
+const blogMenuOpen = ref(false);
 let pages = inject('pages', ref([]));
 
 const snackbar = ref({

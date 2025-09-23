@@ -3,6 +3,10 @@ from controllers.postCommentController import PostCommentController
 
 postComment_bp = Blueprint('post-comment', __name__)
 
+@postComment_bp.route('/post-comment', methods=['GET'])
+def get_comments():
+    return PostCommentController.get_comments()
+
 @postComment_bp.route('/post-comment', methods=['POST'])
 def create_comment():
     return PostCommentController.save_comment()

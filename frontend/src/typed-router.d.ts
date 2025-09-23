@@ -28,6 +28,7 @@ declare module 'vue-router/auto-routes' {
     '/blog/blogForm': RouteRecordInfo<'/blog/blogForm', '/blog/blogForm', Record<never, never>, Record<never, never>>,
     '/blog/blogs': RouteRecordInfo<'/blog/blogs', '/blog/blogs', Record<never, never>, Record<never, never>>,
     '/blog/blogView/[slug]': RouteRecordInfo<'/blog/blogView/[slug]', '/blog/blogView/:slug', { slug: ParamValue<true> }, { slug: ParamValue<false> }>,
+    '/blog/blogView/comments': RouteRecordInfo<'/blog/blogView/comments', '/blog/blogView/comments', Record<never, never>, Record<never, never>>,
     '/categories/categories': RouteRecordInfo<'/categories/categories', '/categories/categories', Record<never, never>, Record<never, never>>,
     '/comments/comment': RouteRecordInfo<'/comments/comment', '/comments/comment', Record<never, never>, Record<never, never>>,
     '/comments/commentsView/commentInputForm': RouteRecordInfo<'/comments/commentsView/commentInputForm', '/comments/commentsView/commentInputForm', Record<never, never>, Record<never, never>>,
