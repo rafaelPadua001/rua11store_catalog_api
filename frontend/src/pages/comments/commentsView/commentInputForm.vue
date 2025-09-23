@@ -1,6 +1,6 @@
 <template>
-    <v-row justify="center">
-        <v-col>
+    <v-row justify="center" no-gutters>
+        <v-col cols="12" sm="12">
             <v-card class="pa-4" elevation="2">
                 <v-card-text>
                     <v-textarea v-model="comment" label="Escreva seu comentário..." auto-grow outlined rows="2"
@@ -11,7 +11,7 @@
                     <div class="d-flex flex-column gap-3">
                         <v-checkbox v-model="anonymous" label="Comentar como Anônimo" />
 
-                        <div class="d-flex flex-wrap align-center">
+                        <div class="d-flex flex-wrap justify-center gap-2">
                             <v-btn color="red" variant="outlined" @click="login('google')">
                                 <v-icon start>mdi-google</v-icon>
                                 Google
@@ -22,6 +22,7 @@
                             </v-btn>
                             <v-btn color="light-blue" variant="outlined" @click="login('twitter')">
                                 <v-icon>mdi-twitter</v-icon>
+                                Twitter
                             </v-btn>
                         </div>
                     </div>

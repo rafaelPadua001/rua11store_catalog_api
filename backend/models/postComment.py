@@ -12,7 +12,7 @@ class PostComment(db.Model):
     post_id = Column(Integer, ForeignKey('blog_posts.id'), nullable=False)
     user_id = Column(UUID(as_uuid=True), nullable=True, default=None)
     username = Column(String(100), nullable=True)
-    user_avatar = Column(String(100), nullable=True)
+    user_avatar = Column(String(500), nullable=True)
     login_provider = Column(String(50), nullable=True)
     text = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
