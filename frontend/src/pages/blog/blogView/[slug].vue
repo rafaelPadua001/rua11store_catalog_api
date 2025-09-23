@@ -92,37 +92,27 @@
                                                                 <v-col cols="2" sm="1" class="d-flex justify-center">
                                                                     <v-img
                                                                         :src="comment.user_avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
-                                                                        class="rounded-circle" contain
-                                                                        ></v-img>
+                                                                        class="rounded-circle" contain />
                                                                 </v-col>
 
                                                                 <!-- Conteúdo do comentário à direita -->
                                                                 <v-col cols="10" sm="11">
                                                                     <div class="d-flex flex-wrap align-center mb-1">
-                                                                        <span class="font-weight-medium text-body-2">{{
-                                                                            comment.username || 'Anônimo' }}</span>
-
+                                                                        <span class="font-weight-medium text-body-2">
+                                                                            {{ comment.username || 'Anônimo' }}
+                                                                        </span>
 
                                                                         <!-- Botões de ação -->
                                                                         <div class="ml-auto d-flex flex-wrap">
                                                                             <!-- Denunciar: só se não for dono do comentário -->
                                                                             <v-btn
-                                                                                v-if="user && user.id !== comment.user_id"
+                                                                                v-if="user && user.id !== comment.user_id && comment.status !== 'reported'"
                                                                                 variant="plain" size="x-small"
                                                                                 color="red"
                                                                                 @click="reportComment(comment)"
                                                                                 title="Denunciar">
                                                                                 Denunciar
                                                                             </v-btn>
-
-                                                                            <!-- Editar: só se for dono -->
-                                                                            <!--<v-btn
-                                                                                
-                                                                                icon small color="blue"
-                                                                                @click="editComment(comment)"
-                                                                                title="Editar">
-                                                                                <v-icon>mdi-pencil</v-icon>
-                                                                            </v-btn>-->
 
                                                                             <!-- Remover: só se for dono -->
                                                                             <v-btn
@@ -131,13 +121,27 @@
                                                                                 color="primary"
                                                                                 @click="removeComment(comment)"
                                                                                 title="Remover">
-
-                                                                                Remove
+                                                                                Remover
                                                                             </v-btn>
                                                                         </div>
                                                                     </div>
 
-                                                                    <div class="text-body-2">{{ comment.text }}</div>
+                                                                    <!-- Texto do comentário -->
+                                                                    <div v-if="comment.status === 'reported'"
+                                                                        class="text-body-2 text-grey">
+                                                                        <span class="d-inline-block text-truncate"
+                                                                            style="max-width: 100%; overflow: hidden;">
+                                                                            {{ comment.text }}
+                                                                        </span>
+                                                                        <v-chip size="x-small" color="red"
+                                                                            variant="outlined" class="ml-2">
+                                                                            Reported
+                                                                        </v-chip>
+                                                                    </div>
+                                                                    <div v-else class="text-body-2">
+                                                                        {{ comment.text }}
+                                                                    </div>
+
                                                                     <!-- Cabeçalho do comentário -->
                                                                     <div class="d-flex justify-end mb-1">
                                                                         <span class="text-caption grey--text"
@@ -145,18 +149,14 @@
                                                                             {{ formatDate(comment.created_at) }}
                                                                         </span>
                                                                     </div>
-
-
-                                                                    <!--<v-chip v-if="comment.login_provider" size="small" outlined
-                                                                        color="grey lighten-2" class="mt-1"
-                                                                        style="font-size: 0.6rem;">
-                                                                        {{ comment.login_provider }}
-                                                                    </v-chip> -->
                                                                 </v-col>
 
-                                                                <v-col cols="12"><v-divider /></v-col>
+                                                                <v-col cols="12">
+                                                                    <v-divider />
+                                                                </v-col>
                                                             </v-row>
                                                         </v-card-text>
+
 
                                                     </v-card>
                                                 </v-col>
@@ -199,6 +199,15 @@
                             </div>
                         </v-card-text>
                     </v-card>
+                    <v-snackbar v-model="showToast" timeout="3000" top right :color="toastColor">
+                        {{ toastMessage }}
+                    </v-snackbar>
+                    <v-dialog v-model="reportDialog" max-width="470">
+                        <reportComment :comment="comment" @closeReportDialog="handleReportDialogClose" />
+
+                    </v-dialog>
+
+
                 </v-col>
             </v-row>
         </div>
@@ -213,7 +222,7 @@
 import axios from "axios";
 import { useSeo } from '../../../useSeo';
 import commentInputForm from "../../comments/commentsView/commentInputForm.vue";
-
+import reportComment from "../../comments/commentsView/reportComment.vue";
 
 const api = axios.create({
     baseURL:
@@ -225,7 +234,8 @@ const api = axios.create({
 
 export default {
     components: {
-        commentInputForm
+        commentInputForm,
+        reportComment,
     },
     name: "BlogPostView",
     data() {
@@ -236,6 +246,10 @@ export default {
             user: null,
             isLoading: false,
             baseUrl: window.location.origin,
+            reportDialog: false,
+            showToast: false,
+            toastMessage: '',
+            toastColor: 'green'
         };
     },
     created() {
@@ -259,6 +273,29 @@ export default {
                 year: "numeric",
             });
         },
+        async reportComment(comment) {
+            this.comment = comment;
+            this.reportDialog = true;
+        },
+        handleReportDialogClose(commentId, isError = false) {
+            this.reportDialog = false;
+
+            if (commentId) {
+                const index = this.comments.findIndex(c => c.id === commentId);
+                if (index !== -1) {
+                    this.comments[index].status = 'reported';
+                }
+
+                this.toastMessage = 'Comentário reportado para a nossa moderação!';
+                this.toastColor = 'green';
+                this.showToast = true;
+            } else if (isError) {
+                this.toastMessage = 'Erro ao enviar reporte.';
+                this.toastColor = 'red';
+                this.showToast = true;
+            }
+        },
+
         async loadPosts() {
             this.loading = true;
             try {
@@ -332,6 +369,13 @@ export default {
             catch (e) {
                 console.log('Erro ao deletar comentário');
             }
+        },
+        async reportComment(comment) {
+            this.comment = comment;
+            this.reportDialog = true;
+        },
+        async close() {
+            this.reportDialog = false;
         }
     },
 };

@@ -11,6 +11,10 @@ def create_comment():
 def get_comments_by_postId(postId):
     return PostCommentController.get_comments_by_postId(postId)
 
+@postComment_bp.route('/post-comment/post-comment-report/<int:commentId>', methods=['POST'])
+def report_comment(commentId):
+    return PostCommentController.report_comment(commentId)
+
 @postComment_bp.route('/post-comment/<int:commentId>', methods=['DELETE'])
 def delete_comment(commentId):
     return PostCommentController.remove_comment(commentId)

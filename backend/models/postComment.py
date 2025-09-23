@@ -15,6 +15,7 @@ class PostComment(db.Model):
     user_avatar = Column(String(500), nullable=True)
     login_provider = Column(String(50), nullable=True)
     text = Column(Text, nullable=False)
+    status = Column(String(20), nullable=False, default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
@@ -29,6 +30,7 @@ class PostComment(db.Model):
             "user_avatar": self.user_avatar,
             "login_provider": self.login_provider,
             "text": self.text,
+            "status": self.status,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat()
         }

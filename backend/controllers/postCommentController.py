@@ -42,6 +42,23 @@ class PostCommentController:
     
 
     @staticmethod
+    def report_comment(commentId):
+        comment = PostComment.query.get(commentId)
+        if not comment:
+            return {'error': 'Comentário não encontrado'}, 400
+        
+        comment.status = 'reported'
+        db.session.commit()
+        
+        return {
+            "message": "Comentário reportado para a moderação",
+            "id": comment.text,
+            "status": comment.status
+        }, 200
+    
+       
+
+    @staticmethod
     def remove_comment(commentId):
         comment = PostComment.query.get_or_404(commentId)
         db.session.delete(comment)

@@ -44,7 +44,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { supabase } from "@/supabase";
-
 import axios from 'axios'
 
 const api = axios.create({
