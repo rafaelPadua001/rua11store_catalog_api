@@ -70,14 +70,16 @@
                                         <div v-html="post.content"></div>
                                         <div>
                                             <v-row>
-                                                <v-col>
+                                                <v-col cols="12">
                                                     <v-card>
-                                                        <v-toolbar color="transparent">
-                                                            <v-toolbar-title class="text-h8">
-                                                                Coments: (0)
+                                                        <v-toolbar color="transparent" density="compact">
+                                                            <v-toolbar-title class="text-body-1">
+                                                                Coments: ({{ this.comments.length }})
                                                             </v-toolbar-title>
                                                         </v-toolbar>
+
                                                         <v-divider></v-divider>
+
                                                         <v-card-text>
                                                             <commentInputForm :postId="post.id"
                                                                 @create:comment="setComment" @update:user="setUser" />
@@ -85,31 +87,29 @@
                                                         <v-divider></v-divider>
                                                         <v-card-text>
                                                             <v-row v-for="comment in comments" :key="comment.id"
-                                                                align="start" class="mb-3" no-gutters>
+                                                                align="start" class="mb-4" no-gutters>
                                                                 <!-- Avatar pequeno à esquerda -->
-                                                                <v-col cols="auto">
+                                                                <v-col cols="2" sm="1" class="d-flex justify-center">
                                                                     <v-img
                                                                         :src="comment.user_avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
-                                                                        class="rounded-circle" width="32"
-                                                                        height="32"></v-img>
+                                                                        class="rounded-circle" contain
+                                                                        ></v-img>
                                                                 </v-col>
 
                                                                 <!-- Conteúdo do comentário à direita -->
-                                                                <v-col>
-                                                                    <div class="d-flex align-center mb-1">
+                                                                <v-col cols="10" sm="11">
+                                                                    <div class="d-flex flex-wrap align-center mb-1">
                                                                         <span class="font-weight-medium text-body-2">{{
                                                                             comment.username || 'Anônimo' }}</span>
-                                                                        <span class="text-caption grey--text ml-2"
-                                                                            style="font-size: 0.65rem;">
-                                                                            {{ formatDate(comment.created_at) }}
-                                                                        </span>
+
 
                                                                         <!-- Botões de ação -->
-                                                                        <div class="ml-auto d-flex gap-2">
+                                                                        <div class="ml-auto d-flex flex-wrap">
                                                                             <!-- Denunciar: só se não for dono do comentário -->
                                                                             <v-btn
                                                                                 v-if="user && user.id !== comment.user_id"
-                                                                                variant="plain" x-small color="red"
+                                                                                variant="plain" size="x-small"
+                                                                                color="red"
                                                                                 @click="reportComment(comment)"
                                                                                 title="Denunciar">
                                                                                 Denunciar
@@ -127,7 +127,8 @@
                                                                             <!-- Remover: só se for dono -->
                                                                             <v-btn
                                                                                 v-if="user && user.id === comment.user_id"
-                                                                                variant="text" x-small color="primary"
+                                                                                variant="text" size="x-small"
+                                                                                color="primary"
                                                                                 @click="removeComment(comment)"
                                                                                 title="Remover">
 
@@ -137,14 +138,23 @@
                                                                     </div>
 
                                                                     <div class="text-body-2">{{ comment.text }}</div>
+                                                                    <!-- Cabeçalho do comentário -->
+                                                                    <div class="d-flex justify-end mb-1">
+                                                                        <span class="text-caption grey--text"
+                                                                            style="font-size: 0.65rem;">
+                                                                            {{ formatDate(comment.created_at) }}
+                                                                        </span>
+                                                                    </div>
 
-                                                                    <v-chip v-if="comment.login_provider" small outlined
+
+                                                                    <!--<v-chip v-if="comment.login_provider" size="small" outlined
                                                                         color="grey lighten-2" class="mt-1"
                                                                         style="font-size: 0.6rem;">
                                                                         {{ comment.login_provider }}
-                                                                    </v-chip>
+                                                                    </v-chip> -->
                                                                 </v-col>
-                                                                <v-divider></v-divider>
+
+                                                                <v-col cols="12"><v-divider /></v-col>
                                                             </v-row>
                                                         </v-card-text>
 
