@@ -60,7 +60,20 @@ class PostCommentController:
             "status": comment.status
         }, 200
     
-       
+    @staticmethod
+    def alter_status_comment(commentId):
+        data = request.json
+        status = data.get('status')
+
+        comment = PostComment.query.get(commentId)
+        if not comment:
+            return{"error": "Comentário não encontrado"}, 404
+        
+        comment.status = status
+        db.session.commit()
+
+        return {"success": True, "id": comment.id, 'new_status': comment.status}, 200
+        
 
     @staticmethod
     def remove_comment(commentId):
