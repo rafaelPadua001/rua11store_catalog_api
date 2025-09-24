@@ -22,7 +22,7 @@
 
                         <v-chip v-if="item.login_provider == 'email'" color="grey">{{ item.login_provider }}</v-chip>
                         <v-chip v-if="item.login_provider == 'facebook'" color="primary">{{ item.login_provider
-                        }}</v-chip>
+                            }}</v-chip>
                     </template>
                     <template v-slot:item.username="{ item }">
 
@@ -162,14 +162,18 @@ const getPostComments = async () => {
 
 const editDialog = async (comment) => {
     editCommentDialog.value = true;
-    editedComment.value = comment;
+    editedComment.value = { ...comment };
 }
 
 const confirmEdit = async (comment) => {
     try {
         const response = await api.post(`/post-comment/post-comment/comment-alter-status/${comment.id}`, { 'status': comment.status })
         const data = response.data;
-        console.log(data);
+
+        const index = comments.value.findIndex(c => c.id === comment.id);
+        if (index !== -1) {
+            comments.value[index].status = comment.status;
+        }
         close();
     }
     catch (e) {
