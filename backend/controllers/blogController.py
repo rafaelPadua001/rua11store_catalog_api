@@ -175,7 +175,7 @@ class BlogController:
     @staticmethod
     def share_post(slug):
         post = BlogPost.query.filter_by(slug=slug).first_or_404()
-
+        print(post)
         #mount data SEO/OG
         title = post.title
         description = post.excerpt or "Confira este artigo no blog Rua11Store!"
@@ -192,6 +192,8 @@ class BlogController:
         <meta property="og:title" content="{title}" />
         <meta property="og:description" content="{description}" />
         <meta property="og:image" content="{image}" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:url" content="{url}" />
         <meta property="og:type" content="article" />
         <meta http-equiv="refresh" content="0; url={url}" />
