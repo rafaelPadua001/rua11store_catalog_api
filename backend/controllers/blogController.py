@@ -196,7 +196,7 @@ class BlogController:
         <meta property="og:image:height" content="630" />
         <meta property="og:url" content="{url}" />
         <meta property="og:type" content="article" />
-        <meta http-equiv="refresh" content="0; url={url}" />
+        <meta http-equiv="refresh" content="0; url=/blog/blogView/{post.slug}" />
         </head>
         <body>
         </body>
