@@ -173,7 +173,7 @@ class BlogController:
         }), 200
         
     @staticmethod
-    def share(slug):
+    def share_post(slug):
         post = BlogPost.query.filter_by(slug=slug).first_or_404()
 
         title = post.title
