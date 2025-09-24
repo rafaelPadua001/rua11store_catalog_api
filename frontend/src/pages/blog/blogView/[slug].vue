@@ -86,10 +86,10 @@
                                                         </v-card-text>
                                                         <v-divider></v-divider>
                                                         <v-card-text>
-                                                            <v-row v-for="comment in comments" :key="comment.id"
+                                                            <v-row v-for="comment in comments.filter(c => c.status !== 'removed')" :key="comment.id"
                                                                 align="start" class="mb-4" no-gutters>
                                                                 <!-- Avatar pequeno à esquerda -->
-                                                                <v-col cols="2" sm="1" class="d-flex justify-center">
+                                                                <v-col cols="2" sm="1" class="d-flex justify-center" >
                                                                     <v-img
                                                                         :src="comment.user_avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
                                                                         class="rounded-circle" contain />
