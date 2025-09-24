@@ -1,3 +1,4 @@
+from flask import Flask, render_template_string, redirect
 from models.blogPost import BlogPost
 from models.page import Page
 from controllers.postSeoController import PostSeoController
@@ -170,7 +171,36 @@ class BlogController:
                 "updated_at": post.updated_at
             }
         }), 200
+        
+    @staticmethod
+    def share_post(slug):
+        post = BlogPost.query.filter_by(slug=slug).first_or_404()
 
+        #mount data SEO/OG
+        title = post.title
+        description = post.excerpt or "Confira este artigo no blog Rua11Store!"
+        image = post.cover_image or "https://seusite.com/default.jpg"
+        url =  f"https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}"
+
+        #return HTML with OG tags
+        html = f"""
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+        <meta charset="utf-8">
+        <title>{title}</title>
+        <meta property="og:title" content="{title}" />
+        <meta property="og:description" content="{description}" />
+        <meta property="og:image" content="{image}" />
+        <meta property="og:url" content="{url}" />
+        <meta property="og:type" content="article" />
+        <meta http-equiv="refresh" content="0; url={url}" />
+        </head>
+        <body>
+        </body>
+        </html>
+        """
+        return render_template_string(html)
 
     @staticmethod
     def delete_post(post_id):

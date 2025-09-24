@@ -42,6 +42,10 @@ def update_post(postId):
         data = {**request.form.to_dict(), **request.files.to_dict()}
     return BlogController.update_post(postId, data)
 
+@blog_bp.route("/share/<slug>")
+def share(slug):
+    return BlogController.share_post(slug)
+
 @blog_bp.route('/posts/<int:postId>', methods=['DELETE'])
 def delete_post(postId):
     return BlogController.delete_post(postId)
