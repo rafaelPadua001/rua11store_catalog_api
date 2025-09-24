@@ -206,7 +206,10 @@ class BlogController:
             <meta http-equiv="refresh" content="0; url={redirect_url}" />
         </head>
         <body>
-            Compartilhando...
+            <p>Redirecionando para o post...</p>
+            <script>
+                window.location.href = "{redirect_url}";
+            </script>
         </body>
         </html>
         """
