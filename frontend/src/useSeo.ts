@@ -8,6 +8,7 @@ export function useSeo() {
   const ogTitle = ref('')
   const ogDescription = ref('')
   const ogImage = ref('')
+  const ogType = ref('')
   const canonicalUrl = ref('')
 
   useHead({
@@ -19,6 +20,7 @@ export function useSeo() {
       { property: 'og:title', content: ogTitle },
       { property: 'og:description', content: ogDescription },
       { property: 'og:image', content: ogImage },
+      {property: 'og:type', content: ogType}
     ],
     link: [
       {
@@ -37,7 +39,8 @@ export function useSeo() {
     metaKeywords.value = data.metaKeywords || data.seo?.meta_keywords ||  data.seo?.keywords || ''
     ogTitle.value = data.ogTitle || data.seo?.og_title || data.post?.title || ''
     ogDescription.value = data.ogDescription || data.seo?.meta_description || data.post?.excerpt || ''
-    ogImage.value =  ogImage.value = data.ogImage ? `${data.ogImage}` : data.thumbnail_path || data.post?.cover_image || '' 
+    ogImage.value =  ogImage.value = data.ogImage ? `${data.ogImage}` : data.thumbnail_path || data.post?.cover_image || ''
+    ogType.value =  ogType.value = data.ogType ? `${data.ogType}` : data.thumbnail_path || data.post?.cover_Type || 'article' 
     canonicalUrl.value = data.canonicalUrl || data.seo?.canonical_url || `${window.location.origin}/blog/${data.post?.id}`
   }
 
