@@ -180,7 +180,7 @@ class BlogController:
         title = post.title
         description = post.excerpt or "Confira este artigo no blog Rua11Store!"
         image = post.cover_image or "https://seusite.com/default.jpg"
-        url =  f"https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}"
+        url =  f"https://rua11store-catalog-api-lbp7.onrender.com/blog/blogView/{post.slug}"
 
         #return HTML with OG tags
         html = f"""
