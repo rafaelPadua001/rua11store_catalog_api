@@ -180,7 +180,7 @@ class BlogController:
         title = post.title
         description = post.excerpt or "Confira este artigo no blog Rua11Store!"
         image = post.cover_image or "https://seusite.com/default.jpg"
-        url =  f"https://rua11store-catalog-api-lbp7.onrender.com/blog/posts/{post.slug}"
+        url =  f"https://rua11store-catalog-api-lbp7.onrender.com/blog/blogView/{post.slug}"
 
         #return HTML with OG tags
         html = f"""
@@ -196,7 +196,7 @@ class BlogController:
         <meta property="og:image:height" content="630" />
         <meta property="og:url" content="{url}" />
         <meta property="og:type" content="article" />
-        <meta http-equiv="refresh" content="0; url=/blog/blogView/{post.slug}" />
+        <meta http-equiv="refresh" content="0; url={url}" />
         </head>
         <body>
         </body>
