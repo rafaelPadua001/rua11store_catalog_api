@@ -89,7 +89,7 @@
               <div v-if="blogMenuOpen">
                 <v-list-item link @click="navigateTo('/blog/blogs')" title="Articles" class="ps-12"></v-list-item>
                 <v-list-item link @click="navigateTo('/blog/blogView/comments')" class="ps-12">
-                  <v-list-item-title>Comentários</v-list-item-title>
+                  <v-list-item-title>Comments</v-list-item-title>
                 </v-list-item>
               <!--  <v-list-item link @click="navigateTo('/blog/comentarios-reportados')" class="ps-12">
                   <v-list-item-title>Comentários Reportados</v-list-item-title>
