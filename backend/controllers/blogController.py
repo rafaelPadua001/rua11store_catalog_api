@@ -180,7 +180,7 @@ class BlogController:
         description = post.excerpt or "Confira este artigo no blog Rua11Store!"
         image = post.cover_image or "https://seusite.com/default.jpg"
         share_url = f"https://rua11store-catalog-api-lbp7.onrender.com/blog/share/{post.slug}"
-        redirect_url = f"/blog/blogView/{post.slug}"
+        redirect_url = f"https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}"
 
         html = f"""
         <!DOCTYPE html>
