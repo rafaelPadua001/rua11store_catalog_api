@@ -90,9 +90,11 @@
                                                                 align="start" class="mb-4" no-gutters>
                                                                 <!-- Avatar pequeno à esquerda -->
                                                                 <v-col cols="2" sm="1" class="d-flex justify-center" >
-                                                                    <v-img
+                                                                    <v-avatar>
+                                                                        <v-img
                                                                         :src="comment.user_avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'"
                                                                         class="rounded-circle" contain />
+                                                                    </v-avatar>
                                                                 </v-col>
 
                                                                 <!-- Conteúdo do comentário à direita -->
