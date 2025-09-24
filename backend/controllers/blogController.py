@@ -173,13 +173,13 @@ class BlogController:
         }), 200
         
     @staticmethod
-    def share(slug):
+    def share_post(slug):
         post = BlogPost.query.filter_by(slug=slug).first_or_404()
 
         title = post.title
         description = post.excerpt or "Confira este artigo no blog Rua11Store!"
         image = post.cover_image or "https://seusite.com/default.jpg"
-        share_url = f"https://rua11store-catalog-api-lbp7.onrender.com/share/{post.slug}"
+        share_url = f"https://rua11store-catalog-api-lbp7.onrender.com/blog/share/{post.slug}"
         redirect_url = f"/blog/blogView/{post.slug}"
 
         html = f"""
