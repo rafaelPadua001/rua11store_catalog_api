@@ -34,10 +34,11 @@
 
                                                             <!-- Facebook -->
                                                             <v-btn icon variant="text" color="blue"
-                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + '/share/' + post.slug)}`"
+                                                                :href="`https://rua11store-catalog-api-lbp7.onrender.com/blog/share/${post.slug}`"
                                                                 target="_blank">
                                                                 <v-icon>mdi-facebook</v-icon>
                                                             </v-btn>
+
                                                             <!-- X (Twitter) -->
                                                             <v-btn icon variant="text" color="black"
                                                                 :href="`https://twitter.com/intent/tweet?url=${encodeURIComponent(baseUrl + '/blog/blogView/' + post.slug)}&text=${encodeURIComponent(post.title)}`"
