@@ -22,7 +22,7 @@
 
                         <v-chip v-if="item.login_provider == 'email'" color="grey">{{ item.login_provider }}</v-chip>
                         <v-chip v-if="item.login_provider == 'facebook'" color="primary">{{ item.login_provider
-                            }}</v-chip>
+                        }}</v-chip>
                     </template>
                     <template v-slot:item.username="{ item }">
 
@@ -154,8 +154,6 @@ const getPostComments = async () => {
         const response = await api.get('/post-comment/post-comment');
         const data = response.data;
         comments.value.push(...response.data);
-        console.log(data);
-
     }
     catch (e) {
         console.log('Erro ao buscar comentários:', e.message);
@@ -177,7 +175,6 @@ const confirmEdit = async (comment) => {
     catch (e) {
         console.log('Erro ao alterar status', e.message);
     }
-
 }
 
 const close = async () => {
@@ -190,12 +187,9 @@ const deleteComment = async (comment) => {
 
     try {
 
-        await api.delete(`/post-comment/post-comment/comment-remove/${comment.id}`);
-
-        //Remove product from local list
-        this.comments = this.posts.filter(c => c.id !== comment.id);
-
-        console.log('Produto removido com sucesso');
+        await api.delete(`/post-comment/post-comment/${comment.id}`);
+        //Remove comment from local list
+        comments.value = comments.value.filter(c => c.id !== comment.id);
     }
     catch (error) {
         console.log("Error deleting product:", error);

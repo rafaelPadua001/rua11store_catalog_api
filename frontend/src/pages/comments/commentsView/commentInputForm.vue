@@ -126,8 +126,6 @@ const login = async (provider) => {
         });
 
         if (error) throw error;
-
-
     } catch (err) {
         console.error("Erro no login social:", err.message);
     }

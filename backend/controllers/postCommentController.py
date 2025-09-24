@@ -77,6 +77,7 @@ class PostCommentController:
 
     @staticmethod
     def remove_comment(commentId):
+        print(commentId)
         comment = PostComment.query.get_or_404(commentId)
         db.session.delete(comment)
         db.session.commit()
