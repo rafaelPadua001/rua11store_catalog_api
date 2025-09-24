@@ -25,29 +25,27 @@
                                                         <div class="d-flex flex-wrap justify-center align-center">
                                                             <span class="mr-0 font-weight-medium">Compartilhar:</span>
 
-                                                            <!-- WhatsApp -->
-                                                            <v-btn icon variant="text" color="green"
-                                                                :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title)} - ${baseUrl}/blog/blogView/${post.slug}`"
-                                                                target="_blank">
-                                                                <v-icon>mdi-whatsapp</v-icon>
-                                                            </v-btn>
-
                                                             <!-- Facebook -->
                                                             <v-btn icon variant="text" color="blue"
-                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + '/blog/share/' + post.slug)}`"
+                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + '/share/' + post.slug)}`"
                                                                 target="_blank">
                                                                 <v-icon>mdi-facebook</v-icon>
                                                             </v-btn>
 
+                                                            <!-- WhatsApp -->
+                                                            <v-btn icon variant="text" color="green"
+                                                                :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' - ' + baseUrl + '/share/' + post.slug)}`"
+                                                                target="_blank">
+                                                                <v-icon>mdi-whatsapp</v-icon>
+                                                            </v-btn>
 
-
-
-                                                            <!-- X (Twitter) -->
-                                                            <v-btn icon variant="text" color="black"
-                                                                :href="`https://twitter.com/intent/tweet?url=${encodeURIComponent(baseUrl + '/blog/blogView/' + post.slug)}&text=${encodeURIComponent(post.title)}`"
+                                                            <!-- Twitter -->
+                                                            <v-btn icon variant="text" color="blue-darken-2"
+                                                                :href="`https://twitter.com/intent/tweet?url=${encodeURIComponent(baseUrl + '/share/' + post.slug)}&text=${encodeURIComponent(post.title)}`"
                                                                 target="_blank">
                                                                 <v-icon>mdi-twitter</v-icon>
                                                             </v-btn>
+
 
                                                             <!-- LinkedIn -->
                                                             <v-btn icon variant="text" color="indigo"

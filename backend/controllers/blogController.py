@@ -173,12 +173,14 @@ class BlogController:
         }), 200
         
     @staticmethod
-    def share_post(slug):
+    def share(slug):
         post = BlogPost.query.filter_by(slug=slug).first_or_404()
+
         title = post.title
         description = post.excerpt or "Confira este artigo no blog Rua11Store!"
         image = post.cover_image or "https://seusite.com/default.jpg"
-        url = f"https://rua11store-catalog-api-lbp7.onrender.com/blog/blogView/{post.slug}"
+        share_url = f"https://rua11store-catalog-api-lbp7.onrender.com/share/{post.slug}"
+        redirect_url = f"/blog/blogView/{post.slug}"
 
         html = f"""
         <!DOCTYPE html>
@@ -186,19 +188,29 @@ class BlogController:
         <head>
             <meta charset="utf-8">
             <title>{title}</title>
+
+            <!-- Open Graph -->
             <meta property="og:title" content="{title}" />
             <meta property="og:description" content="{description}" />
             <meta property="og:image" content="{image}" />
-            <meta property="og:image:width" content="1200" />
-            <meta property="og:image:height" content="630" />
-            <meta property="og:url" content="{url}" />
+            <meta property="og:url" content="{share_url}" />
             <meta property="og:type" content="article" />
-            <meta http-equiv="refresh" content="0; url=/blog/blogView/{post.slug}" />
+
+            <!-- Twitter Cards -->
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content="{title}" />
+            <meta name="twitter:description" content="{description}" />
+            <meta name="twitter:image" content="{image}" />
+
+            <!-- Redireciona usuário humano -->
+            <meta http-equiv="refresh" content="0; url={redirect_url}" />
         </head>
-        <body></body>
+        <body>
+            Compartilhando...
+        </body>
         </html>
         """
-        return render_template_string(html)
+        return html, 200, {"Content-Type": "text/html"}
 
     @staticmethod
     def delete_post(post_id):
