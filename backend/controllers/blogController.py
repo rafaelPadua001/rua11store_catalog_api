@@ -174,7 +174,7 @@ class BlogController:
         
     @staticmethod
     def share_post(slug):
-        post = BlogPost.query.filter_by(slug=slug).first()
+        post = BlogPost.query.filter_by(slug=slug).first_or_404()
         print(post)
         #mount data SEO/OG
         title = post.title
