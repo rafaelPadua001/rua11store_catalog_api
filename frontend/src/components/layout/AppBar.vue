@@ -91,9 +91,9 @@
                 <v-list-item link @click="navigateTo('/blog/blogView/comments')" class="ps-12">
                   <v-list-item-title>Comentários</v-list-item-title>
                 </v-list-item>
-                <v-list-item link @click="navigateTo('/blog/comentarios-reportados')" class="ps-12">
+              <!--  <v-list-item link @click="navigateTo('/blog/comentarios-reportados')" class="ps-12">
                   <v-list-item-title>Comentários Reportados</v-list-item-title>
-                </v-list-item>
+                </v-list-item>-->
               </div>
             </v-slide-y-transition>
           </v-list-item-group>
