@@ -37,7 +37,7 @@
 
                                                             <!-- WhatsApp -->
                                                             <v-btn icon variant="text" color="green"
-                                                                :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' - ' + baseUrl + '/blog/blogView/' + post.slug)}`"
+                                                                :href="`https://api.whatsapp.com/send?text=${encodeURIComponent('https://rua11store-catalog-api-lbp7.onrender.com/blog/share/' + post.slug)}`"
                                                                 target="_blank">
                                                                 <v-icon>mdi-whatsapp</v-icon>
                                                             </v-btn>
