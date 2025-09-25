@@ -175,7 +175,9 @@ class BlogController:
     @staticmethod
     def share_post(slug):
         try:
-            post = BlogPost.query.filter_by(slug=slug).first_or_404()
+            clean_slug = slug.split('?')[0]
+     
+            post = BlogPost.query.filter_by(slug=clean_slug).first_or_404()
             
             # Sanitize os dados
             title = post.title.strip() if post.title else "Artigo do Blog Rua11Store"
