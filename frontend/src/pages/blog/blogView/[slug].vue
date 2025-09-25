@@ -32,15 +32,12 @@
                                                                 target="_blank">
                                                                 <v-icon>mdi-facebook</v-icon>
                                                             </v-btn>
-<v-btn icon variant="text" color="purple"
-       :href="`https://www.instagram.com/stories/create?text=${encodeURIComponent(post.title)}%0A%0A${encodeURIComponent(post.excerpt)}`"
-       target="_blank">
-    <v-icon>mdi-instagram</v-icon>
-</v-btn>
-                                                          
 
-
-
+                                                       <v-btn icon variant="text" color="purple"
+                                                                @click="shareOnInstagram(post)"
+                                                                target="_blank">
+                                                                <v-icon>mdi-instagram</v-icon>
+                                                            </v-btn> 
                                                             <!-- WhatsApp -->
                                                             <v-btn icon variant="text" color="green"
                                                                 :href="`https://api.whatsapp.com/send?text=${encodeURIComponent('https://rua11store-catalog-api-lbp7.onrender.com/blog/share/' + post.slug + '?v=' + new Date().getTime())}`"
@@ -376,6 +373,21 @@ export default {
 
             metaTag.setAttribute('content', content);
         },
+        shareOnInstagram(post) {
+  const postUrl = `${this.baseUrl}/blog/blogView/${post.slug}`;
+
+  // Regex sem aspas ✅
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    const imageUrl = post.cover_image || "https://exemplo.com/imagem-padrao.png";
+    window.location.href = `instagram://story-camera?source_url=${encodeURIComponent(imageUrl)}`;
+  } else {
+    navigator.clipboard.writeText(postUrl).then(() => {
+      alert("✅ Link copiado! Abra o Instagram e cole na sua bio ou post.");
+    });
+  }
+},
         async loadPost() {
             this.isLoading = true;
             try {
