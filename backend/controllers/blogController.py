@@ -195,9 +195,10 @@ class BlogController:
             <meta property="og:image:height" content="630" />
             <meta property="og:url" content="https://rua11store-catalog-api-lbp7.onrender.com/blog/share/{post.slug}" />
             <meta property="og:type" content="article" />
+            <meta property="fb:app_id" content="801771992806957" />
         </head>
         <body>
-            <p>Confira o post: <a href="https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}">{title}</a></p>
+            <p>Confira o post: <a href="https://rua11store-catalog-api-lbp7.onrender.com/blog/blogView/{post.slug}">{title}</a></p>
         </body>
         </html>
         """
