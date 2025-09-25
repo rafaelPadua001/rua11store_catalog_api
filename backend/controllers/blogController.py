@@ -174,12 +174,17 @@ class BlogController:
         
     @staticmethod
     def share_post(slug):
+        # Busca o post
         post = BlogPost.query.filter_by(slug=slug).first_or_404()
 
         title = post.title
         description = post.excerpt or "Confira este artigo no blog Rua11Store!"
-        image = post.cover_image or "https://seusite.com/default.jpg"
-        share_url = f"https://rua11store-catalog-api-lbp7.onrender.com/blog/share/{post.slug}"
+        image = post.cover_image or "https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png"
+
+        # URL do share (essa URL será lida pelo Facebook)
+        share_url = f"https://rua11store-catalog-api.vercel.app/blog/share/{post.slug}"
+
+        # URL real do post para redirecionar o usuário
         redirect_url = f"https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}"
 
         html = f"""
@@ -193,6 +198,8 @@ class BlogController:
             <meta property="og:title" content="{title}" />
             <meta property="og:description" content="{description}" />
             <meta property="og:image" content="{image}" />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
             <meta property="og:url" content="{share_url}" />
             <meta property="og:type" content="article" />
 
@@ -213,6 +220,8 @@ class BlogController:
         </body>
         </html>
         """
+
+        # Retorna HTML estático com status 200 e content-type correto
         return html, 200, {"Content-Type": "text/html"}
 
     @staticmethod
