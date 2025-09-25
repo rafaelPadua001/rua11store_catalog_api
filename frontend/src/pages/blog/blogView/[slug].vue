@@ -27,7 +27,7 @@
 
                                                             <!-- Facebook -->
                                                             <v-btn icon variant="text" color="blue"
-                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + 'https://rua11store-catalog-api.vercel.app/blog/share/' + post.slug)}`"
+                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + 'https://rua11store-catalog-api.vercel.app/blog/blogView/' + post.slug)}`"
                                                                 target="_blank">
                                                                 <v-icon>mdi-facebook</v-icon>
                                                             </v-btn>
@@ -316,6 +316,50 @@ export default {
                 this.loading = false;
             }
         },
+         // ✅ NOVO MÉTODO PARA CONFIGURAR OPEN GRAPH
+        setOpenGraphMetaTags() {
+            if (!this.post) return;
+
+            const title = this.post.title || 'Rua11Store Blog';
+            const description = this.post.excerpt || 'Confira este artigo no blog Rua11Store!';
+            const image = this.post.cover_image || 'https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png';
+            const url = window.location.href;
+
+            // Atualiza meta tags existentes ou cria novas
+            this.updateMetaTag('og:title', title);
+            this.updateMetaTag('og:description', description);
+            this.updateMetaTag('og:image', image);
+            this.updateMetaTag('og:url', url);
+            this.updateMetaTag('og:type', 'article');
+            this.updateMetaTag('og:site_name', 'Rua11Store Blog');
+            
+            // Twitter Card (opcional mas recomendado)
+            this.updateMetaTag('twitter:card', 'summary_large_image');
+            this.updateMetaTag('twitter:title', title);
+            this.updateMetaTag('twitter:description', description);
+            this.updateMetaTag('twitter:image', image);
+
+            // Title da página
+            document.title = title;
+        },
+
+        // ✅ MÉTODO AUXILIAR PARA ATUALIZAR/CRIAR META TAGS
+        updateMetaTag(property, content) {
+            let metaTag = document.querySelector(`meta[property="${property}"]`) || 
+                         document.querySelector(`meta[name="${property}"]`);
+            
+            if (!metaTag) {
+                metaTag = document.createElement('meta');
+                if (property.startsWith('og:')) {
+                    metaTag.setAttribute('property', property);
+                } else {
+                    metaTag.setAttribute('name', property);
+                }
+                document.head.appendChild(metaTag);
+            }
+            
+            metaTag.setAttribute('content', content);
+        },
         async loadPost() {
             this.isLoading = true;
             try {
@@ -384,5 +428,14 @@ export default {
             this.reportDialog = false;
         }
     },
+     // ✅ ATUALIZA META TAGS QUANDO A ROTA MUDA
+    watch: {
+        '$route.params.slug': {
+            handler() {
+                this.loadPost();
+            },
+            immediate: false
+        }
+    }
 };
 </script>
