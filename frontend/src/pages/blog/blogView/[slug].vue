@@ -32,6 +32,12 @@
                                                                 target="_blank">
                                                                 <v-icon>mdi-facebook</v-icon>
                                                             </v-btn>
+<v-btn icon variant="text" color="purple"
+       :href="`https://www.instagram.com/stories/create?text=${encodeURIComponent(post.title)}%0A%0A${encodeURIComponent(post.excerpt)}`"
+       target="_blank">
+    <v-icon>mdi-instagram</v-icon>
+</v-btn>
+                                                          
 
 
 
