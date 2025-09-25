@@ -26,8 +26,9 @@
                                                             <span class="mr-0 font-weight-medium">Compartilhar:</span>
 
                                                             <!-- Facebook -->
+                                                            <!-- No seu componente Vue, atualize o botão do Facebook -->
                                                             <v-btn icon variant="text" color="blue"
-                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + 'https://rua11store-catalog-api.vercel.app/blog/share/' + post.slug)}`"
+                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://rua11store-catalog-api-lbp7.onrender.com/blog/share/' + post.slug + '?v=' + new Date().getTime())}`"
                                                                 target="_blank">
                                                                 <v-icon>mdi-facebook</v-icon>
                                                             </v-btn>
@@ -317,46 +318,46 @@ export default {
             }
         },
         setOpenGraphMetaTags() {
-    if (!this.post) {
-        console.log('Post não carregado ainda');
-        return;
-    }
+            if (!this.post) {
+                console.log('Post não carregado ainda');
+                return;
+            }
 
-    const title = this.post.title || 'Rua11Store Blog';
-    const description = this.post.excerpt || 'Confira este artigo no blog Rua11Store!';
-    const image = this.post.cover_image || 'https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png';
-    const url = window.location.href;
+            const title = this.post.title || 'Rua11Store Blog';
+            const description = this.post.excerpt || 'Confira este artigo no blog Rua11Store!';
+            const image = this.post.cover_image || 'https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png';
+            const url = window.location.href;
 
-    console.log('Configurando meta tags:', { title, description, image }); // ✅ DEBUG
+            console.log('Configurando meta tags:', { title, description, image }); // ✅ DEBUG
 
-    // Meta tags básicas essenciais
-    this.updateMetaTag('title', title);
-    this.updateMetaTag('description', description);
+            // Meta tags básicas essenciais
+            this.updateMetaTag('title', title);
+            this.updateMetaTag('description', description);
 
-    // Open Graph obrigatórias
-    this.updateMetaTag('og:title', title);
-    this.updateMetaTag('og:description', description);
-    this.updateMetaTag('og:image', image);
-    this.updateMetaTag('og:url', url);
-    this.updateMetaTag('og:type', 'article');
-    this.updateMetaTag('og:site_name', 'Rua11Store Blog');
-    this.updateMetaTag('og:image:width', '1200');
-    this.updateMetaTag('og:image:height', '630');
+            // Open Graph obrigatórias
+            this.updateMetaTag('og:title', title);
+            this.updateMetaTag('og:description', description);
+            this.updateMetaTag('og:image', image);
+            this.updateMetaTag('og:url', url);
+            this.updateMetaTag('og:type', 'article');
+            this.updateMetaTag('og:site_name', 'Rua11Store Blog');
+            this.updateMetaTag('og:image:width', '1200');
+            this.updateMetaTag('og:image:height', '630');
 
-    // Twitter Card
-    this.updateMetaTag('twitter:card', 'summary_large_image');
-    this.updateMetaTag('twitter:title', title);
-    this.updateMetaTag('twitter:description', description);
-    this.updateMetaTag('twitter:image', image);
+            // Twitter Card
+            this.updateMetaTag('twitter:card', 'summary_large_image');
+            this.updateMetaTag('twitter:title', title);
+            this.updateMetaTag('twitter:description', description);
+            this.updateMetaTag('twitter:image', image);
 
-    document.title = title;
-},
+            document.title = title;
+        },
 
         // ✅ MÉTODO AUXILIAR PARA ATUALIZAR/CRIAR META TAGS
         updateMetaTag(property, content) {
-            let metaTag = document.querySelector(`meta[property="${property}"]`) || 
-                         document.querySelector(`meta[name="${property}"]`);
-            
+            let metaTag = document.querySelector(`meta[property="${property}"]`) ||
+                document.querySelector(`meta[name="${property}"]`);
+
             if (!metaTag) {
                 metaTag = document.createElement('meta');
                 if (property.startsWith('og:')) {
@@ -366,7 +367,7 @@ export default {
                 }
                 document.head.appendChild(metaTag);
             }
-            
+
             metaTag.setAttribute('content', content);
         },
         async loadPost() {
@@ -438,7 +439,7 @@ export default {
             this.reportDialog = false;
         }
     },
-     // ✅ ATUALIZA META TAGS QUANDO A ROTA MUDA
+    // ✅ ATUALIZA META TAGS QUANDO A ROTA MUDA
     watch: {
         '$route.params.slug': {
             handler() {
