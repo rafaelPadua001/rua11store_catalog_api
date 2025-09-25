@@ -174,35 +174,72 @@ class BlogController:
         
     @staticmethod
     def share_post(slug):
-        post = BlogPost.query.filter_by(slug=slug).first_or_404()
-        title = post.title
-        description = post.excerpt or "Confira este artigo no blog Rua11Store!"
-        image = post.cover_image or "https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png"
-        url = f"https://rua11store-catalog-api-lbp7.onrender.com/blog/share/{post.slug}"
+        try:
+            post = BlogPost.query.filter_by(slug=slug).first_or_404()
+            
+            # Sanitize os dados
+            title = post.title.strip() if post.title else "Artigo do Blog Rua11Store"
+            description = (post.excerpt.strip() if post.excerpt 
+                        else "Confira este artigo no blog Rua11Store!")
+            image = (post.cover_image.strip() if post.cover_image 
+                    else "https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png")
+            
+            # URL canônica sem parâmetros de cache para o OG
+            canonical_url = f"https://rua11store-catalog-api-lbp7.onrender.com/blog/share/{post.slug}"
+            
+            html = f"""
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head>
+                <meta charset="utf-8">
+                <title>{title}</title>
+                <link rel="canonical" href="{canonical_url}" />
 
-        html = f"""
-        <!DOCTYPE html>
-        <html lang="pt-BR">
-        <head>
-            <meta charset="utf-8">
-            <title>{title}</title>
-
-            <!-- Open Graph -->
-            <meta property="og:title" content="{title}" />
-            <meta property="og:description" content="{description}" />
-            <meta property="og:image" content="{image}" />
-            <meta property="og:image:width" content="1200" />
-            <meta property="og:image:height" content="630" />
-            <meta property="og:url" content="{url}" />
-            <meta property="og:type" content="article" />
-            <meta property="fb:app_id" content="801771992806957" />
-        </head>
-        <body>
-            <p>Leia o post: <a href="https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}">{title}</a></p>
-        </body>
-        </html>
-        """
-        return html, 200, {"Content-Type": "text/html"}
+                <!-- Open Graph -->
+                <meta property="og:title" content="{title}" />
+                <meta property="og:description" content="{description}" />
+                <meta property="og:image" content="{image}" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
+                <meta property="og:url" content="{canonical_url}" />
+                <meta property="og:type" content="article" />
+                <meta property="og:site_name" content="Rua11Store Blog" />
+                <meta property="fb:app_id" content="801771992806957" />
+                
+                <!-- Twitter Card (opcional, mas recomendado) -->
+                <meta name="twitter:card" content="summary_large_image">
+                <meta name="twitter:title" content="{title}">
+                <meta name="twitter:description" content="{description}">
+                <meta name="twitter:image" content="{image}">
+            </head>
+            <body>
+                <h1>{title}</h1>
+                <p>{description}</p>
+                <img src="{image}" alt="{title}" style="max-width: 100%;">
+                <p><a href="https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}">Leia o artigo completo</a></p>
+            </body>
+            </html>
+            """
+            return html, 200, {"Content-Type": "text/html"}
+        
+        except Exception as e:
+            # Fallback em caso de erro
+            html = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Artigo do Blog Rua11Store</title>
+                <meta property="og:title" content="Rua11Store Blog" />
+                <meta property="og:description" content="Confira nossos artigos!" />
+                <meta property="og:image" content="https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png" />
+                <meta property="og:url" content="https://rua11store-catalog-api.vercel.app/blog" />
+            </head>
+            <body>
+                <p>Visite nosso blog: <a href="https://rua11store-catalog-api.vercel.app/blog">Rua11Store Blog</a></p>
+            </body>
+            </html>
+            """
+            return html, 200, {"Content-Type": "text/html"}
 
 
 
