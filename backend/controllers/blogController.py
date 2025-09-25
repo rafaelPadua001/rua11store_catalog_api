@@ -174,18 +174,11 @@ class BlogController:
         
     @staticmethod
     def share_post(slug):
-        # Busca o post
         post = BlogPost.query.filter_by(slug=slug).first_or_404()
 
         title = post.title
         description = post.excerpt or "Confira este artigo no blog Rua11Store!"
         image = post.cover_image or "https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png"
-
-        # URL do share (essa URL será lida pelo Facebook)
-        share_url = f"https://rua11store-catalog-api-lbp7.onrender.com/blog/share/{post.slug}"
-
-        # URL real do post para redirecionar o usuário
-        redirect_url = f"https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}"
 
         html = f"""
         <!DOCTYPE html>
@@ -200,30 +193,16 @@ class BlogController:
             <meta property="og:image" content="{image}" />
             <meta property="og:image:width" content="1200" />
             <meta property="og:image:height" content="630" />
-            <meta property="og:url" content="{share_url}" />
+            <meta property="og:url" content="https://rua11store-catalog-api-lbp7.onrender.com/blog/share/{post.slug}" />
             <meta property="og:type" content="article" />
-
-            <!-- Twitter Cards -->
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content="{title}" />
-            <meta name="twitter:description" content="{description}" />
-            <meta name="twitter:image" content="{image}" />
-
-         
         </head>
         <body>
-            <p>Redirecionando em 5 segundos...</p>
-           <script>
-                setTimeout(function() {{
-                    window.location.href = "{redirect_url}";
-                }}, 1500);
-            </script>
+            <p>Confira o post: <a href="https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}">{title}</a></p>
         </body>
         </html>
         """
-
-        # Retorna HTML estático com status 200 e content-type correto
         return html, 200, {"Content-Type": "text/html"}
+
 
     @staticmethod
     def delete_post(post_id):
