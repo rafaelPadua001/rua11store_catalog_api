@@ -323,8 +323,8 @@ export default {
             const title = this.post.title || 'Rua11Store Blog';
             const description = this.post.excerpt || 'Confira este artigo no blog Rua11Store!';
             const image = this.post.cover_image || 'https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png';
-            const url = window.location.href;
-
+            const url = `https://rua11store-catalog-api.vercel.app/blog/blogView/${this.post.slug}`;
+            
             // Atualiza meta tags existentes ou cria novas
             this.updateMetaTag('og:title', title);
             this.updateMetaTag('og:description', description);
