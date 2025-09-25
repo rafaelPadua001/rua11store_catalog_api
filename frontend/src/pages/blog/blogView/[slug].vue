@@ -32,6 +32,12 @@
                                                                 target="_blank">
                                                                 <v-icon>mdi-facebook</v-icon>
                                                             </v-btn>
+                                                          <v-btn icon variant="text" color="purple"
+       :href="`instagram://story-camera?source_url=${encodeURIComponent(post.cover_image)}`"
+       target="_blank">
+  <v-icon>mdi-instagram</v-icon>
+</v-btn>
+                                                          
 
 
 
