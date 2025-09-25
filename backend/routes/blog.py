@@ -4,6 +4,7 @@ from models.page import Page
 from controllers.blogController import BlogController
 #from controllers.categoryController import CategoryController
 from flask_cors import CORS
+from flask import redirect
 
 # Criação do Blueprint
 blog_bp = Blueprint('blog', __name__)
@@ -41,6 +42,12 @@ def update_post(postId):
     else:
         data = {**request.form.to_dict(), **request.files.to_dict()}
     return BlogController.update_post(postId, data)
+
+@blog_bp.route('/blog/blogView/<slug>')
+def redirect_to_frontend(slug):
+    """Redireciona para a página real do post no frontend"""
+    frontend_url = f"https://rua11store-catalog-api.vercel.app/blog/blogView/{slug}"
+    return redirect(frontend_url, code=301)
 
 @blog_bp.route("/share/<slug>")
 def share(slug):
