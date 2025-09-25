@@ -381,7 +381,8 @@ export default {
 
   if (isMobile) {
     const imageUrl = post.cover_image || "https://exemplo.com/imagem-padrao.png";
-    window.location.href = `instagram://story-camera?source_url=${encodeURIComponent(imageUrl)}`;
+    window.location.href = "instagram://app";
+
   } else {
     navigator.clipboard.writeText(postUrl).then(() => {
       alert("✅ Link copiado! Abra o Instagram e cole na sua bio ou post.");
