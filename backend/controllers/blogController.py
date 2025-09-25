@@ -210,10 +210,10 @@ class BlogController:
             <meta name="twitter:image" content="{image}" />
 
             <!-- Redireciona usuário humano -->
-            <meta http-equiv="refresh" content="0; url={redirect_url}" />
+            <meta http-equiv="refresh" content="5; url={redirect_url}" />
         </head>
         <body>
-            <p>Redirecionando para o post...</p>
+            <p>Redirecionando em 5 segundos...</p>
             <script>
                 window.location.href = "{redirect_url}";
             </script>

@@ -27,14 +27,14 @@
 
                                                             <!-- Facebook -->
                                                             <v-btn icon variant="text" color="blue"
-                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + '/blog/blogView/' + post.slug)}`"
+                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + '/blog/share/' + post.slug)}`"
                                                                 target="_blank">
                                                                 <v-icon>mdi-facebook</v-icon>
                                                             </v-btn>
 
                                                             <!-- WhatsApp -->
                                                             <v-btn icon variant="text" color="green"
-                                                                :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' - ' + baseUrl + '/blog/blogView/' + post.slug)}`"
+                                                                :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' - ' + baseUrl + '/blog/share/' + post.slug)}`"
                                                                 target="_blank">
                                                                 <v-icon>mdi-whatsapp</v-icon>
                                                             </v-btn>
