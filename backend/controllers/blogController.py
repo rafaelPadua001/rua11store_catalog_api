@@ -214,8 +214,10 @@ class BlogController:
         </head>
         <body>
             <p>Redirecionando em 5 segundos...</p>
-            <script>
-                window.location.href = "{redirect_url}";
+           <script>
+                setTimeout(function() {{
+                    window.location.href = "{redirect_url}";
+                }}, 1500);
             </script>
         </body>
         </html>
