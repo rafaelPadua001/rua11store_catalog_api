@@ -316,32 +316,41 @@ export default {
                 this.loading = false;
             }
         },
-         // ✅ NOVO MÉTODO PARA CONFIGURAR OPEN GRAPH
         setOpenGraphMetaTags() {
-            if (!this.post) return;
+    if (!this.post) {
+        console.log('Post não carregado ainda');
+        return;
+    }
 
-            const title = this.post.title || 'Rua11Store Blog';
-            const description = this.post.excerpt || 'Confira este artigo no blog Rua11Store!';
-            const image = this.post.cover_image || 'https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png';
-            const url = `https://rua11store-catalog-api.vercel.app/blog/blogView/${this.post.slug}`;
-            
-            // Atualiza meta tags existentes ou cria novas
-            this.updateMetaTag('og:title', title);
-            this.updateMetaTag('og:description', description);
-            this.updateMetaTag('og:image', image);
-            this.updateMetaTag('og:url', url);
-            this.updateMetaTag('og:type', 'article');
-            this.updateMetaTag('og:site_name', 'Rua11Store Blog');
-            
-            // Twitter Card (opcional mas recomendado)
-            this.updateMetaTag('twitter:card', 'summary_large_image');
-            this.updateMetaTag('twitter:title', title);
-            this.updateMetaTag('twitter:description', description);
-            this.updateMetaTag('twitter:image', image);
+    const title = this.post.title || 'Rua11Store Blog';
+    const description = this.post.excerpt || 'Confira este artigo no blog Rua11Store!';
+    const image = this.post.cover_image || 'https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png';
+    const url = window.location.href;
 
-            // Title da página
-            document.title = title;
-        },
+    console.log('Configurando meta tags:', { title, description, image }); // ✅ DEBUG
+
+    // Meta tags básicas essenciais
+    this.updateMetaTag('title', title);
+    this.updateMetaTag('description', description);
+
+    // Open Graph obrigatórias
+    this.updateMetaTag('og:title', title);
+    this.updateMetaTag('og:description', description);
+    this.updateMetaTag('og:image', image);
+    this.updateMetaTag('og:url', url);
+    this.updateMetaTag('og:type', 'article');
+    this.updateMetaTag('og:site_name', 'Rua11Store Blog');
+    this.updateMetaTag('og:image:width', '1200');
+    this.updateMetaTag('og:image:height', '630');
+
+    // Twitter Card
+    this.updateMetaTag('twitter:card', 'summary_large_image');
+    this.updateMetaTag('twitter:title', title);
+    this.updateMetaTag('twitter:description', description);
+    this.updateMetaTag('twitter:image', image);
+
+    document.title = title;
+},
 
         // ✅ MÉTODO AUXILIAR PARA ATUALIZAR/CRIAR META TAGS
         updateMetaTag(property, content) {
@@ -370,6 +379,7 @@ export default {
 
                 if (data) {
                     this.post = data;
+                    this.setOpenGraphMetaTags();
                     this.loadSeo(this.post);
                     this.loadPostComments();
                 }
