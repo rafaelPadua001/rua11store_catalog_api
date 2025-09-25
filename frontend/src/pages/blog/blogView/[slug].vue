@@ -27,7 +27,7 @@
 
                                                             <!-- Facebook -->
                                                             <v-btn icon variant="text" color="blue"
-                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + '/blog/share/' + post.slug)}`"
+                                                                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(baseUrl + 'https://rua11store-catalog-api.vercel.app/blog/blogView/' + post.slug)}`"
                                                                 target="_blank">
                                                                 <v-icon>mdi-facebook</v-icon>
                                                             </v-btn>
