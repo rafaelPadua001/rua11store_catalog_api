@@ -33,6 +33,7 @@
                                                             </v-btn>
 
 
+
                                                             <!-- WhatsApp -->
                                                             <v-btn icon variant="text" color="green"
                                                                 :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' - ' + baseUrl + '/blog/share/' + post.slug)}`"
