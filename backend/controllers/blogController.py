@@ -209,8 +209,7 @@ class BlogController:
             <meta name="twitter:description" content="{description}" />
             <meta name="twitter:image" content="{image}" />
 
-            <!-- Redireciona usuário humano -->
-            <meta http-equiv="refresh" content="5; url={redirect_url}" />
+         
         </head>
         <body>
             <p>Redirecionando em 5 segundos...</p>
