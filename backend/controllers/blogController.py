@@ -182,7 +182,7 @@ class BlogController:
         image = post.cover_image or "https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png"
 
         # URL do share (essa URL será lida pelo Facebook)
-        share_url = f"https://rua11store-catalog-api.vercel.app/blog/share/{post.slug}"
+        share_url = f"https://rua11store-catalog-api-lbp7.onrender.com/blog/share/{post.slug}"
 
         # URL real do post para redirecionar o usuário
         redirect_url = f"https://rua11store-catalog-api.vercel.app/blog/blogView/{post.slug}"
