@@ -10,30 +10,25 @@
         <v-text-field v-model="form.page_title" label="Página" disabled></v-text-field>
 
         <!-- Título -->
-        <v-text-field
-          v-model="form.title"
-          label="Título"
-          :rules="[v => !!v || 'Título é obrigatório']"
-          required
-          @input="generateSlug"
-        ></v-text-field>
+        <v-text-field v-model="form.title" label="Título" :rules="[v => !!v || 'Título é obrigatório']" required
+          @input="generateSlug"></v-text-field>
 
         <!-- Slug -->
         <v-text-field v-model="form.slug" label="Slug" readonly></v-text-field>
 
         <!-- Resumo -->
         <v-textarea v-model="form.excerpt" label="Resumo (opcional)" rows="2"></v-textarea>
-<div>
-    <!-- Toolbar do editor -->
-    <div v-if="editor" class="editor-toolbar mb-2">
-      <button type="button" @click="addAdBanner">Inserir Ad Banner</button>
-      <button type="button" @click="toggleBold" :class="{ 'font-bold': isBoldActive }">B</button>
-      <button type="button" @click="toggleItalic" :class="{ 'italic': isItalicActive }">I</button>
-    </div>
+        <div>
+          <!-- Toolbar do editor -->
+          <div v-if="editor" class="editor-toolbar mb-2">
+            <button type="button" @click="addAdBanner">Inserir Ad Banner</button>
+            <button type="button" @click="toggleBold" :class="{ 'font-bold': isBoldActive }">B</button>
+            <button type="button" @click="toggleItalic" :class="{ 'italic': isItalicActive }">I</button>
+          </div>
 
-    <!-- Editor -->
-    <EditorContent v-if="editor" :editor="editor" class="editor-content" />
-  </div>
+          <!-- Editor -->
+          <EditorContent v-if="editor" :editor="editor" class="editor-content" />
+        </div>
 
         <v-divider class="my-4"></v-divider>
         <h3>Configurações de SEO</h3>
@@ -46,20 +41,13 @@
         <v-text-field v-model="form.og_image" label="Open Graph Image URL" outlined dense></v-text-field>
 
         <!-- Imagem de Capa -->
-        <v-file-input
-          v-model="form.cover_image_file"
-          label="Imagem de Capa"
-          accept="image/*"
-          prepend-icon="mdi-image"
-        ></v-file-input>
+        <v-file-input v-model="form.cover_image_file" label="Imagem de Capa" accept="image/*"
+          prepend-icon="mdi-image"></v-file-input>
 
         <!-- Preview -->
-        <v-img
-          v-if="form.cover_image_preview || form.cover_image_backend"
-          :src="form.cover_image_preview || resolveImageUrl(form.cover_image_backend)"
-          max-height="200"
-          class="mt-2"
-        ></v-img>
+        <v-img v-if="form.cover_image_preview || form.cover_image_backend"
+          :src="form.cover_image_preview || resolveImageUrl(form.cover_image_backend)" max-height="200"
+          class="mt-2"></v-img>
       </v-form>
     </v-card-text>
 
@@ -132,7 +120,7 @@ export default {
       }
     },
   },
-   computed: {
+  computed: {
     isBoldActive() {
       return this.editor && this.editor.isActive('bold')
     },
@@ -141,7 +129,7 @@ export default {
     },
   },
   mounted() {
-     this.editor = new Editor({
+    this.editor = new Editor({
       extensions: [StarterKit],
       content: '<p>Primeiro parágrafo...</p>',
     })
@@ -149,7 +137,7 @@ export default {
   beforeDestroy() {
     if (this.editor) this.editor.destroy()
   },
-  
+
   methods: {
     loadPostData(post) {
       this.form.title = post.title || ''
@@ -180,7 +168,7 @@ export default {
       if (!path) return null
       return path.startsWith('http') ? path : `${API_BASE}/${path}`
     },
-     toggleBold() {
+    toggleBold() {
       this.editor.chain().focus().toggleBold().run()
     },
     toggleItalic() {
@@ -194,20 +182,36 @@ export default {
     },
     async savePost() {
       if (!this.$refs.form.validate()) return
+
+      // Atualiza o form.content com o conteúdo atual do editor
+      if (this.editor) {
+        this.form.content = this.editor.getHTML()
+      }
+
       const formData = new FormData()
       Object.keys(this.form).forEach(key => {
         if (!['cover_image_file', 'cover_image_preview', 'cover_image_backend'].includes(key)) {
           formData.append(key, this.form[key])
         }
       })
+
       if (this.form.cover_image_file) formData.append('cover_image', this.form.cover_image_file)
+
       const url = this.editedPost?.id ? `/blog/posts/${this.editedPost.id}` : `/blog/posts`
       const method = this.editedPost?.id ? 'put' : 'post'
-      const response = await this.api({ method, url, data: formData, headers: { 'Content-Type': 'multipart/form-data' } })
+
+      const response = await this.api({
+        method,
+        url,
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+
       const event = this.editedPost?.id ? 'update-post' : 'save-post'
       this.$emit(event, response.data.post)
       this.$emit('close')
     },
+
   },
 }
 </script>
@@ -219,6 +223,12 @@ export default {
   padding: 10px;
   border-radius: 4px;
 }
-.font-bold { font-weight: bold; }
-.italic { font-style: italic; }
+
+.font-bold {
+  font-weight: bold;
+}
+
+.italic {
+  font-style: italic;
+}
 </style>
