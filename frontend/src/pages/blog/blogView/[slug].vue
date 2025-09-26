@@ -74,7 +74,13 @@
 
                                         <v-divider></v-divider>
                                         <!-- Conteúdo do Post -->
-                                        <div v-html="post.content"></div>
+                                        <div>
+                                            <component v-for="(node, index) in parsedContent" :key="index"
+                                                :is="node.type === 'ad-banner' ? 'ad-banner' : 'div'"
+                                                v-bind="node.type === 'ad-banner' ? { slot: node.attrs.slot, format: node.attrs.format } : {}"
+                                                v-html="node.type === 'text' ? node.content : null" />
+                                        </div>
+
                                         <div>
                                             <v-row>
                                                 <v-col cols="12">
@@ -150,6 +156,7 @@
                                                                     </div>
                                                                     <div v-else class="text-body-2">
                                                                         {{ comment.text }}
+
                                                                     </div>
 
                                                                     <!-- Cabeçalho do comentário -->
@@ -166,8 +173,6 @@
                                                                 </v-col>
                                                             </v-row>
                                                         </v-card-text>
-
-
                                                     </v-card>
                                                 </v-col>
                                             </v-row>
@@ -216,8 +221,6 @@
                         <reportComment :comment="comment" @closeReportDialog="handleReportDialogClose" />
 
                     </v-dialog>
-
-
                 </v-col>
             </v-row>
         </div>
@@ -231,8 +234,11 @@
 <script>
 import axios from "axios";
 import { useSeo } from '../../../useSeo';
+import { onMounted, ref, watch } from "vue";
+import { h, render } from "vue";
 import commentInputForm from "../../comments/commentsView/commentInputForm.vue";
 import reportComment from "../../comments/commentsView/reportComment.vue";
+import adBanner from "../../adBanner/adBanner.vue";
 
 const api = axios.create({
     baseURL:
@@ -246,7 +252,9 @@ export default {
     components: {
         commentInputForm,
         reportComment,
+        adBanner
     },
+    props: ['content'],
     name: "BlogPostView",
     data() {
         return {
@@ -265,6 +273,40 @@ export default {
     created() {
         this.loadPosts();
         this.loadPost();
+    },
+    computed: {
+        parsedContent() {
+            if (!this.post || !this.post.content) return [];
+
+            // Decodifica HTML entities
+            const htmlString = this.post.content
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&');
+
+            const container = document.createElement('div');
+            container.innerHTML = htmlString;
+
+            const nodes = [];
+            Array.from(container.childNodes).forEach((node) => {
+                if (node.tagName === 'AD-BANNER') {
+                    nodes.push({
+                        type: 'ad-banner',
+                        attrs: {
+                            slot: node.getAttribute('slot'),
+                            format: node.getAttribute('format'),
+                        },
+                    });
+                } else {
+                    nodes.push({
+                        type: 'text',
+                        content: node.outerHTML || node.textContent,
+                    });
+                }
+            });
+
+            return nodes;
+        },
     },
     methods: {
         setUser(userData) {
@@ -305,7 +347,6 @@ export default {
                 this.showToast = true;
             }
         },
-
         async loadPosts() {
             this.loading = true;
             try {
@@ -355,7 +396,6 @@ export default {
 
             document.title = title;
         },
-
         // ✅ MÉTODO AUXILIAR PARA ATUALIZAR/CRIAR META TAGS
         updateMetaTag(property, content) {
             let metaTag = document.querySelector(`meta[property="${property}"]`) ||
@@ -375,10 +415,10 @@ export default {
         },
         //shareOnInstagram(post) {
         //    const postUrl = `${this.baseUrl}/blog/blogView/${post.slug}`;
-//
+        //
         //    // Regex sem aspas ✅
         //    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-//
+        //
         //    if (isMobile) {
         //        const imageUrl = post.cover_image || "https://exemplo.com/imagem-padrao.png";
         //        window.location.href = `instagram://story-camera?source_url=${encodeURIComponent(imageUrl)}`;
@@ -401,6 +441,7 @@ export default {
                     this.setOpenGraphMetaTags();
                     this.loadSeo(this.post);
                     this.loadPostComments();
+                    this.renderAdBanners();
                 }
             } catch (error) {
 
@@ -452,6 +493,31 @@ export default {
         async reportComment(comment) {
             this.comment = comment;
             this.reportDialog = true;
+        },
+        renderAdBanners() {
+            this.$nextTick(() => {
+                const container = this.$el.querySelector("[v-html]");
+                if (!container) return;
+
+                const placeholders = container.querySelectorAll("ad-banner");
+
+                placeholders.forEach((el) => {
+                    // Pega os atributos definidos no post.content
+                    const slot = el.getAttribute("slot");
+                    const format = el.getAttribute("format") || "auto";
+                    const responsive = el.getAttribute("responsive") || "true";
+
+                    // Renderiza o componente Vue no lugar
+                    render(
+                        h(AdBanner, {
+                            slot,
+                            format,
+                            responsive
+                        }),
+                        el
+                    );
+                });
+            });
         },
         async close() {
             this.reportDialog = false;
