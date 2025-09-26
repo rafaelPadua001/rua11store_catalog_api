@@ -372,7 +372,7 @@ export default {
             const image = this.post.cover_image || 'https://res.cloudinary.com/dnfnevy9e/image/upload/v1758308180/cratlzxc3sf2qxelqru8.png';
             const url = window.location.href;
 
-            console.log('Configurando meta tags:', { title, description, image }); // ✅ DEBUG
+            //console.log('Configurando meta tags:', { title, description, image }); // ✅ DEBUG
 
             // Meta tags básicas essenciais
             this.updateMetaTag('title', title);
@@ -467,7 +467,7 @@ export default {
         },
         async loadPostComments() {
             try {
-                console.log(this.post);
+             //   console.log(this.post);
                 const response = await api.get(`/post-comment/post-comment/${this.post.id}`);
                 this.comments = response.data;
             } catch (e) {
@@ -476,7 +476,7 @@ export default {
         },
         async removeComment(comment) {
             try {
-                console.log(comment);
+               // console.log(comment);
                 if (!confirm("Tem certeza que deseja remover este produto permanentemente ?")) return;
 
                 try {
