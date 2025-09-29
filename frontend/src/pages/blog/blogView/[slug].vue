@@ -87,7 +87,7 @@
                                                     <v-card>
                                                         <v-toolbar color="transparent" density="compact">
                                                             <v-toolbar-title class="text-body-1">
-                                                                Coments: ({{ this.comments.length }})
+                                                                Comments: ({{ this.comments.length }})
                                                             </v-toolbar-title>
                                                         </v-toolbar>
 

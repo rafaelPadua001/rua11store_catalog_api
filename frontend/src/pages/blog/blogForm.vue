@@ -21,9 +21,33 @@
         <div>
           <!-- Toolbar do editor -->
           <div v-if="editor" class="editor-toolbar mb-2">
-            <button type="button" @click="addAdBanner">Inserir Ad Banner</button>
-            <button type="button" @click="toggleBold" :class="{ 'font-bold': isBoldActive }">B</button>
-            <button type="button" @click="toggleItalic" :class="{ 'italic': isItalicActive }">I</button>
+            <v-btn-toggle v-model="toggle" border divided>
+              <v-btn @click="addAdBanner" prepend-icon="mdi-plus">
+                Inserir Ad Banner
+              </v-btn>
+              <v-btn @click="toggleBold" :class="{ 'font-bold': isBoldActive }">
+                <v-icon icon="mdi-format-bold"></v-icon>
+              </v-btn>
+              <v-btn @click="toggleItalic" :class="{ 'italic': isItalicActive }">
+                <v-icon icon="mdi-format-italic"></v-icon>
+              </v-btn>
+            </v-btn-toggle>
+            
+            <v-btn-toggle v-model="alignment" variant="outlined" divided>
+              <v-btn>
+                <v-icon icon="mdi-format-align-center"></v-icon>
+              </v-btn>
+
+              <v-btn>
+                <v-icon icon="mdi-format-align-left"></v-icon>
+              </v-btn>
+
+              <v-btn>
+                <v-icon icon="mdi-format-align-right"></v-icon>
+              </v-btn>
+
+            </v-btn-toggle>
+
           </div>
 
           <!-- Editor -->
@@ -81,6 +105,7 @@ export default {
     return {
       valid: false,
       editor: null,
+      toggle: null,
       form: {
         page_id: this.page_id,
         page_title: this.page_title,
@@ -131,7 +156,7 @@ export default {
   mounted() {
     this.editor = new Editor({
       extensions: [StarterKit],
-      content: '<p>Primeiro parágrafo...</p>',
+      content: '<p></p>',
     })
   },
   beforeDestroy() {
@@ -175,7 +200,7 @@ export default {
       this.editor.chain().focus().toggleItalic().run()
     },
     addAdBanner() {
-      const slotId = prompt('Informe o slot do AdSense', '1234567890')
+      const slotId = '1234567890';
       if (!slotId) return
       const adHtml = `<ad-banner slot="${slotId}" format="auto"></ad-banner>`
       this.editor.chain().focus().insertContent(adHtml).run()
@@ -221,7 +246,10 @@ export default {
   min-height: 200px;
   border: 1px solid #ccc;
   padding: 10px;
-  border-radius: 4px;
+ 
+}
+.editor-content * {
+  outline: none !important;
 }
 
 .font-bold {

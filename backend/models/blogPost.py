@@ -18,3 +18,9 @@ class BlogPost(db.Model):
 
     page = db.relationship('Page', backref=db.backref("articles", lazy=True))
     seo_metadata = db.relationship("PostSeo", uselist=False, back_populates="post", cascade="all, delete-orphan")
+    comments = db.relationship(
+        "PostComment",
+        back_populates="post",
+        cascade="all, delete-orphan",
+        lazy=True
+    )

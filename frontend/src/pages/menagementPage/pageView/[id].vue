@@ -1,8 +1,8 @@
 <template>
    <v-row justify="center" no-gutters>
       <v-toolbar color="transparent" v-if="page.name && isBlogPage">
-            <v-toolbar-title>
-              {{ page.title }}
+            <v-toolbar-title class="text-h5">
+              <strong>{{ page.title }}</strong>
             </v-toolbar-title>
           </v-toolbar>
           <v-divider></v-divider>
@@ -15,13 +15,19 @@
                            <router-link :to="`/blog/blogView/${post.slug}`">
                           <v-img :src="post.cover_image" aspect-ratio="1" class="rounded">
                             <!-- Overlay apenas na parte inferior -->
-                           
-                           
-                        
                             <div class="pa-2 text-white" 
                               style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5);">
-                              <div class="text-h6 font-weight-bold">{{ post.title }}</div>
-                              <div class="text-caption">{{ formatDate(post.created_at) }}</div>
+                              <div class="text-h6 font-weight-bold">
+                                <span>{{ post.title }}</span>  
+                              </div>
+                             
+                              <div class="text-caption">
+                                <span>{{ formatDate(post.created_at) }}</span>
+                              </div>
+                               <div>
+                                  <v-icon icon="mdi-comment"></v-icon>
+                                  {{ post.comments.length }}
+                              </div>
                             </div>
                           </v-img>
                           </router-link>

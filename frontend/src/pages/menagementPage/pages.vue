@@ -639,4 +639,7 @@ export default {
     min-height: 200px;
     border-radius: 4px;
 }
+.editor-content * {
+  outline: none !important;
+}
 </style>
