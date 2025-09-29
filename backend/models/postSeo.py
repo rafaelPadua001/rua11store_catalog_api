@@ -19,3 +19,17 @@ class PostSeo(db.Model):
 
     # relacionamento inverso
     post = db.relationship("BlogPost", back_populates="seo_metadata")
+
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "keywords": self.keywords,
+            "description": self.description,
+            "canonical_url": self.canonical_url,
+            "og_title": self.og_title,
+            "og_description": self.og_description,
+            "og_image": self.og_image,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

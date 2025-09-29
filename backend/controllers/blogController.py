@@ -1,4 +1,5 @@
 from flask import Flask, render_template_string, redirect
+from sqlalchemy.orm import joinedload
 from models.blogPost import BlogPost
 from models.page import Page
 from controllers.postSeoController import PostSeoController
@@ -11,11 +12,13 @@ class BlogController:
     @staticmethod
     def get_posts():
         posts = BlogPost.query.all()
+
         result = []
         for post in posts:
             seo = post.seo_metadata
+            comments = [c.to_dict() for c in post.post_comments]
             result.append({
-                "id": post.id,
+                 "id": post.id,
                 "page_id": post.page_id,
                 "slug": post.slug,
                 "title": post.title,
@@ -24,20 +27,11 @@ class BlogController:
                 "cover_image": post.cover_image,
                 "created_at": post.created_at,
                 "updated_at": post.updated_at,
-                "seo": {
-                    "id": seo.id if seo else None,
-                    "keywords": seo.keywords if seo else None,
-                    "description": seo.description if seo else None,
-                    "canonical_url": seo.canonical_url if seo else None,
-                    "og_title": seo.og_title if seo else None,
-                    "og_description": seo.og_description if seo else None,
-                    "og_image": seo.og_image if seo else None,
-                    "created_at": seo.created_at if seo else None,
-                    "updated_at": seo.updated_at if seo else None,
-                } if seo else None
+                "seo": seo.to_dict() if seo else None,
+                "comments": comments
             })
-        return jsonify(result), 200
 
+        return jsonify(result), 200
     
     @staticmethod
     def get_post_by_slug(slug):
