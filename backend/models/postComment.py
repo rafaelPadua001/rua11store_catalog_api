@@ -19,7 +19,7 @@ class PostComment(db.Model):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
-    post = relationship("BlogPost", backref="post_comments")
+    post = db.relationship("BlogPost", back_populates="comments")
 
     def to_dict(self):
         return {
