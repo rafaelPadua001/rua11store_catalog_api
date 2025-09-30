@@ -16,7 +16,8 @@ class BlogController:
         result = []
         for post in posts:
             seo = post.seo_metadata
-            comments = [c.to_dict() for c in post.post_comments]
+            comments = [c.to_dict() for c in post.comments]
+            views = [v.to_dict() for v in post.views]
             result.append({
                  "id": post.id,
                 "page_id": post.page_id,
@@ -28,7 +29,8 @@ class BlogController:
                 "created_at": post.created_at,
                 "updated_at": post.updated_at,
                 "seo": seo.to_dict() if seo else None,
-                "comments": comments
+                "comments": comments,
+                "views": views
             })
 
         return jsonify(result), 200

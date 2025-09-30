@@ -17,7 +17,7 @@ from .coupon import Coupon
 from .couponUser import CouponUser
 from .notification import Notification
 from .postSeo import PostSeo
-
+from .blogPostView import BlogPostView
 
 __all__ = [
     'UserProfile',
@@ -40,5 +40,6 @@ __all__ = [
     'Notification',
     'PostSeo',
     'PostComment'
+    'BlogPostView',
   
 ]

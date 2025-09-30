@@ -11,7 +11,7 @@
                   <v-card-text>
                     <v-row>
                       <v-col v-for="(post, index) in posts" :key="index" cols="12" sm="6" md="6">
-                        <v-card elevation="0" class="rounded overflow-hidden" >
+                        <v-card elevation="0" class="rounded overflow-hidden">
                            <router-link :to="`/blog/blogView/${post.slug}`">
                           <v-img :src="post.cover_image" aspect-ratio="1" class="rounded">
                             <!-- Overlay apenas na parte inferior -->
@@ -27,6 +27,9 @@
                                <div>
                                   <v-icon icon="mdi-comment"></v-icon>
                                   {{ post.comments.length }}
+
+                                  <v-icon icon="mdi-eye"></v-icon>
+                                  {{post.views.length}}
                               </div>
                             </div>
                           </v-img>
@@ -36,8 +39,7 @@
                     </v-row>
                   </v-card-text>
                 </v-card>
-
-              </v-col>
+        </v-col>
         <v-col cols="12" md="3" sm="12">
           <div v-if="page.name && isBlogPage">
                <v-card elevation="1">

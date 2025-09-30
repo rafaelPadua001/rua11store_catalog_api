@@ -352,6 +352,7 @@ export default {
             try {
                 const response = await api.get('/blog/posts');
                 this.posts = response.data;
+
                 // this.form.page_id = response.data.id;
             }
             catch (e) {
@@ -442,6 +443,8 @@ export default {
                     this.loadSeo(this.post);
                     this.loadPostComments();
                     this.renderAdBanners();
+                    this.addPostView(this.post);
+                    
                 }
             } catch (error) {
 
@@ -518,6 +521,16 @@ export default {
                     );
                 });
             });
+        },
+        async addPostView(post){
+            try{
+                response = await api.post(`/post-views/${post.id}`)
+                const data = response.data;
+                console.log(data);
+            }
+            catch(e){
+                console.log('error:', e.message);
+            }
         },
         async close() {
             this.reportDialog = false;

@@ -24,3 +24,9 @@ class BlogPost(db.Model):
         cascade="all, delete-orphan",
         lazy=True
     )
+    views = db.relation(
+        'BlogPostView',
+        back_populates="post",
+        cascade="all, delete-orphan",
+        lazy=True
+    )
