@@ -1,5 +1,5 @@
 from flask import Blueprint
-from controllers.blogPostViewController import add_view, get_views
+from controllers.blogPostViewController import add_view
 
 post_views_bp = Blueprint('post_views', __name__)
 
