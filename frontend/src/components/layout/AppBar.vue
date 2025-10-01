@@ -206,7 +206,7 @@ const checkAuth = () => {
   let payload = null;
   try {
     payload = parseJwt(token);
-    console.log("Payload JWT:", payload);
+   // console.log("Payload JWT:", payload);
   } catch (err) {
     console.error("Erro ao decodificar JWT:", err);
     payload = null;
@@ -229,7 +229,7 @@ const checkAuth = () => {
     userType.value = null;
   }
 
-  console.log("userType ref atualizado:", userType.value);
+//  console.log("userType ref atualizado:", userType.value);
 };
 
 
@@ -247,7 +247,7 @@ onMounted(async () => {
   }
   checkAuth();
   userType.value = localStorage.getItem('user_type'); // pega do localStorage depois
-  console.log("User type inicial:", userType.value);
+  //console.log("User type inicial:", userType.value);
   window.addEventListener('storage', checkAuth);
 
 });
