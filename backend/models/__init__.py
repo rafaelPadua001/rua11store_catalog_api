@@ -1,3 +1,4 @@
+from .clientUser import ClientUser
 from .userProfile import UserProfile
 from .page import Page
 from .product import Product
@@ -20,6 +21,7 @@ from .postSeo import PostSeo
 from .blogPostView import BlogPostView
 
 __all__ = [
+    'clientUser',
     'UserProfile',
     'Page',
     'Product',
