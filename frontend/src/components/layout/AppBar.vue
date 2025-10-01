@@ -23,10 +23,17 @@
       </router-link>
       <!-- Empurra qualquer outro conteúdo para a direita -->
       <v-spacer></v-spacer>
+      <div v-if="!isAuthenticated && !isClient">
+          <router-link to="/authenticator/client/clientLogin">
+        <span class="text-white">
+          <v-icon icon="mdi-login"></v-icon>
+        </span>
+      </router-link>
 
-
-
-      <v-menu offset-y :nudge-y="20" content-class="custom-menu">
+      </div>
+      
+    
+      <v-menu offset-y :nudge-y="20" content-class="custom-menu" v-if="isAuthenticated">
         <template #activator="{ props }">
           <v-btn icon v-bind="props" @click="showNotifications">
             <v-icon size="18">mdi-bell</v-icon>
@@ -70,7 +77,8 @@
 
         <v-divider></v-divider>
 
-        <div v-if="isAuthenticated">
+        <div v-if="isAuthenticated && !isClient">
+
           <v-list-item link @click="navigateTo('/authenticator/dashboard')" prepend-icon="mdi-home"
             title="Dashboard"></v-list-item>
           <v-list-item link @click="navigateTo('/menagementPage/pages')" prepend-icon="mdi-file-document"
@@ -91,7 +99,7 @@
                 <v-list-item link @click="navigateTo('/blog/blogView/comments')" class="ps-12">
                   <v-list-item-title>Comments</v-list-item-title>
                 </v-list-item>
-              <!--  <v-list-item link @click="navigateTo('/blog/comentarios-reportados')" class="ps-12">
+                <!--  <v-list-item link @click="navigateTo('/blog/comentarios-reportados')" class="ps-12">
                   <v-list-item-title>Comentários Reportados</v-list-item-title>
                 </v-list-item>-->
               </div>
@@ -120,7 +128,9 @@
             title="Profile"></v-list-item>
           <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
         </div>
-
+        <div v-else-if="isAuthenticated && isClient">
+          <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
+        </div>
         <div v-else>
           <v-list-item link @click="navigateTo('/')" prepend-icon="mdi-home" title="Home"></v-list-item>
           <v-list-item link @click="navigateTo('/authenticator/login')" prepend-icon="mdi-login"
@@ -138,7 +148,7 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, onUnmounted } from 'vue';
+import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -156,6 +166,7 @@ const logoUrl = ref('');
 const drawer = ref(false);
 const router = useRouter();
 const isAuthenticated = ref(false);
+const userType = ref(null);
 const notifications = inject('notifications', ref([]));
 const hasNewNotifications = inject('hasNewNotifications', ref(true));
 const blogMenuOpen = ref(false);
@@ -166,39 +177,64 @@ const snackbar = ref({
   text: '',
 });
 
+function parseJwt(token) {
+  if (!token) throw new Error("Token JWT vazio");
+  const base64Url = token.split('.')[1];
+  if (!base64Url) throw new Error("Formato JWT inválido");
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+      .join('')
+  );
+  return JSON.parse(jsonPayload);
+}
+
 
 const checkAuth = () => {
-  isAuthenticated.value = !!localStorage.getItem('access_token');
+  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+  isAuthenticated.value = !!token;
+
   if (!isAuthenticated.value) {
     localStorage.removeItem('user_id');
-  } else {
-    const userId = localStorage.getItem('user_id');
-    if (!userId) {
-      const token = localStorage.getItem('access_token');
-      const payload = parseJwt(token);
-      if (payload && payload.user_id) {
-        localStorage.setItem('user_id', payload.user_id);
-      }
-    }
+    localStorage.removeItem('user_type');
+    userType.value = null;
+    return;
   }
+
+  let payload = null;
+  try {
+    payload = parseJwt(token);
+    console.log("Payload JWT:", payload);
+  } catch (err) {
+    console.error("Erro ao decodificar JWT:", err);
+    payload = null;
+  }
+
+  if (payload) {
+    if (payload.user_id) {
+      localStorage.setItem('user_id', payload.user_id);
+    }
+    if (payload.user_type) {
+      localStorage.setItem('user_type', payload.user_type);
+      userType.value = payload.user_type; // ✅ Atualiza ref reativa corretamente
+    }
+  } else {
+    // Token inválido ou mal formatado
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_type');
+    isAuthenticated.value = false;
+    userType.value = null;
+  }
+
+  console.log("userType ref atualizado:", userType.value);
 };
 
-// Função para extrair user_id do JWT, caso não esteja salvo no localStorage
-function parseJwt(token) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
-  }
-}
+
+const isClient = computed(() => userType.value === 'client');
+
 
 onMounted(async () => {
   getPages();
@@ -210,14 +246,19 @@ onMounted(async () => {
     console.error("Erro ao carregar logo:", error);
   }
   checkAuth();
+  userType.value = localStorage.getItem('user_type'); // pega do localStorage depois
+  console.log("User type inicial:", userType.value);
   window.addEventListener('storage', checkAuth);
 
 });
+
 
 onUnmounted(() => {
   window.removeEventListener('storage', checkAuth);
 
 });
+
+
 
 const showNotifications = () => {
   hasNewNotifications.value = false;
@@ -325,17 +366,19 @@ const getPages = async () => {
 };
 
 const logout = async () => {
-  const token = localStorage.getItem('access_token');
+  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const user_type = payload.user_type;
 
-  if (!token) {
+  if (!token && user_type === 'client') {
     alert("Você já está deslogado.");
-    navigateTo('/authenticator/login');
+    navigateTo('/authenticator/client/clientLogin');
     return;
   }
 
   try {
-    const response = await axios.post(
-      'https://rua11store-catalog-api-lbp7.onrender.com/auth/logout',
+    const response = await api.post(
+      '/client/logoutClient',
       {},
       {
         headers: {
@@ -346,11 +389,19 @@ const logout = async () => {
     );
 
     if (response.status === 200) {
-      localStorage.removeItem('access_token');
+      localStorage.removeItem('access_token') || localStorage.removeItem('token');
       localStorage.removeItem('user_id');
       window.dispatchEvent(new Event('storage'));
       alert('Logout realizado com sucesso!');
-      navigateTo('/authenticator/login');
+
+      if (user_type !== 'client') {
+        return navigateTo('/authenticator/Login');
+      }
+      else {
+        return navigateTo('/authenticator/client/clientLogin');
+      }
+
+      // navigateTo('/authenticator/client/clientLogin');
     }
   } catch (error) {
     console.error('Erro no logout:', error.response?.data || error.message);
@@ -361,7 +412,7 @@ const logout = async () => {
       window.dispatchEvent(new Event('storage'));
     }
 
-    navigateTo('/authenticator/login');
+    navigateTo('/authenticator/client/clientLogin');
   }
 };
 </script>
