@@ -64,9 +64,9 @@
       <v-snackbar v-model="snackbar.show" :timeout="5000" color="success">
         {{ snackbar.text }}
       </v-snackbar>
-      <v-btn icon @click="navigateTo('/')">
+      <!--<v-btn icon @click="navigateTo('/')">
         <v-icon size="18">mdi-domain</v-icon>
-      </v-btn>
+      </v-btn>-->
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" class="bg-purple-darken-3" theme="dark" temporary>
@@ -128,11 +128,24 @@
             title="Profile"></v-list-item>
           <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
         </div>
+
+        <!-- Client itens -->
         <div v-else-if="isAuthenticated && isClient">
+          <v-list-item link @click="navigateTo('/authenticator/client/clientDashboard')" prepend-icon="mdi-home"
+            title="Dashboard"></v-list-item>
+          <v-list-item link @click="navigateTo('/cart/client/cartClient')" prepend-icon="mdi-cart"
+            title="Cart"></v-list-item>
+          <v-list-item link @click="navigateTo('/orders/client/clientOrders')" prepend-icon="mdi-package"
+            title="Orders"></v-list-item>
+            <v-list-item link @click="navigateTo('/coupons/client/clientCoupons')" prepend-icon="mdi-package"
+            title="Coupons"></v-list-item>
+            <v-list-item link @click="navigateTo('/authenticator/client/profileClient')" prepend-icon="mdi-account"
+            title="Profile"></v-list-item>
           <v-list-item link @click="logout" prepend-icon="mdi-logout" title="Logout"></v-list-item>
         </div>
         <div v-else>
           <v-list-item link @click="navigateTo('/')" prepend-icon="mdi-home" title="Home"></v-list-item>
+          
           <v-list-item link @click="navigateTo('/authenticator/login')" prepend-icon="mdi-login"
             title="Login"></v-list-item>
         </div>
