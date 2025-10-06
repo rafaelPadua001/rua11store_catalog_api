@@ -7,12 +7,12 @@ from models.product import Product
 
 cart_bp = Blueprint("cart", __name__, url_prefix="/cart")
 
-@cart_bp.route('/get-cart/<int:userId>', methods=["GET"])
+@cart_bp.route('/get-cart/<userId>', methods=["GET"])
 @jwt_required()
 def get_cart(userId):
-   # user_id = get_jwt_identity()
-   # print(user_id)
-    return CartController.get_cart_items(userId)
+    user_id = get_jwt_identity()
+   
+    return CartController.get_cart_items(user_id)
 
 @cart_bp.route("/add-cart", methods=["POST"])
 @jwt_required()
