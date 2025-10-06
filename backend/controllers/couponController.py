@@ -249,3 +249,14 @@ class CouponController:
         self.db_session.commit()
 
         return new_coupon_user.to_dict(), 201
+    
+    def get_coupon_by_title(self, title):
+        """
+        Retorna o cupom com o título exato informado.
+        """
+        if not title:
+            return None
+
+        coupon = self.db_session.query(Coupon).filter_by(title=title).first()
+        return coupon  # Retorna o objeto Coupon ou None
+

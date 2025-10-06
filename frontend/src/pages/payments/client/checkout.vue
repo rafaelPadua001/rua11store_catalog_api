@@ -44,7 +44,7 @@
                               </v-col>
                               <v-col cols="auto">
                                 <strong>R$ {{ (Number(item.quantity) * Number(item.product_price)).toFixed(2)
-                                  }}</strong>
+                                }}</strong>
                               </v-col>
                             </v-row>
 
@@ -63,54 +63,59 @@
                         <v-card-text>
                           <v-row>
                             <v-col cols="auto">
-                              <strong>Total em produtos:</strong>
+                              <strong>Subtotal em produtos:</strong>
                             </v-col>
                             <v-col cols="auto">
                               R$ {{ totalCarrinho.toFixed(2) }}
                             </v-col>
                           </v-row>
-                             
-                           <v-row justify="stretch">
-    <v-col cols="12" md="8" sm="4">
-      
-      <!-- Alterna entre select e input -->
-      <div class="d-flex align-center">
-        <div class="flex-grow-1">
-          <v-select
-            v-if="!useTextInput"
-            v-model="selectedCoupon"
-            :items="formattedCoupons"
-            item-title="displayText"
-            item-value="id"
-            label="Selecione um cupom"
-            outlined
-            dense
-            :menu-props="{ maxHeight: '300px' }"
-            return-object
-          ></v-select>
+                          <v-row>
+                            <v-col>
+                              <strong>Total com desconto (%):</strong>
+                            </v-col>
+                            <v-col v-if="appliedCoupon && appliedCoupon.discount">
 
-          <v-text-field
-            v-else
-            v-model="couponText"
-            label="Digite o cupom"
-            outlined
-            dense
-          ></v-text-field>
-        </div>
+                              R$ {{ (totalCarrinho - (totalCarrinho * appliedCoupon.discount / 100)).toFixed(2) }}
+                            </v-col>
 
-        <!-- Botão para alternar -->
-        <v-btn
-          text
-          class="ms-2"
-          @click="useTextInput = !useTextInput"
-        >
-          {{ useTextInput ? 'Selecionar' : 'Digitar' }}
-        </v-btn>
-      </div>
+                          </v-row>
+                          <v-row>
+                            <v-col>
+                              <strong>Total:</strong>
+                            </v-col>
+                            <v-col>
+                              R$ {{
+                                appliedCoupon && appliedCoupon.discount
+                                  ? (totalCarrinho - (totalCarrinho * appliedCoupon.discount / 100)).toFixed(2)
+                              : totalCarrinho.toFixed(2)
+                              }}
+                            </v-col>
+                          </v-row>
 
-    </v-col>
-  </v-row>
-                          
+
+                          <v-row justify="stretch">
+                            <v-col cols="12" md="8" sm="4">
+
+                              <!-- Alterna entre select e input -->
+                              <div class="d-flex align-center">
+                                <div class="flex-grow-1">
+                                  <v-select v-if="!useTextInput" v-model="selectedCoupon" :items="formattedCoupons"
+                                    item-title="displayText" item-value="id" label="Selecione um cupom" outlined dense
+                                    :menu-props="{ maxHeight: '300px' }" return-object></v-select>
+
+                                  <v-text-field v-else v-model="couponText" label="Digite o cupom" outlined
+                                    dense></v-text-field>
+                                </div>
+
+                                <!-- Botão para alternar -->
+                                <v-btn text class="ms-2" @click="useTextInput = !useTextInput">
+                                  {{ useTextInput ? 'Selecionar' : 'Digitar' }}
+                                </v-btn>
+                              </div>
+
+                            </v-col>
+                          </v-row>
+
                           <!-- Exibir cupom aplicado 
                           <v-row v-if="selectedCoupon" class="mt-2">
                             <v-col cols="12">
@@ -124,11 +129,7 @@
 
                           <v-row justify="end" class="mt-2">
                             <v-col cols="auto">
-                              <v-btn 
-                                color="success" 
-                                @click="applyCoupon"
-                                :disabled="!selectedCoupon && !couponText"
-                              >
+                              <v-btn color="success" @click="applyCoupon" :disabled="!selectedCoupon && !couponText">
                                 Aplicar cupom
                               </v-btn>
                             </v-col>
@@ -218,7 +219,7 @@ const coupons = ref([]);
 const selectedCoupon = ref(null);
 const appliedCoupon = ref(null);
 const useTextInput = ref(false)
-const couponText = ref('')  
+const couponText = ref('')
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
 const cart = reactive(cartData)
@@ -246,7 +247,7 @@ const totalComDesconto = computed(() => {
   if (!appliedCoupon.value || !appliedCoupon.value.discount) {
     return totalCarrinho.value;
   }
-  
+
   const desconto = (totalCarrinho.value * appliedCoupon.value.discount) / 100;
   return totalCarrinho.value - desconto;
 })
@@ -266,8 +267,8 @@ const formatDate = (dateString) => {
 const getCoupon = async () => {
   try {
     const response = await api.get(`/coupon/get-coupons/${cart.user_id}`)
-   
-    if(!response.data || response.data.length === 0){
+
+    if (!response.data || response.data.length === 0) {
       console.log('Você não possui cupom');
       coupons.value = [];
       return;
@@ -280,19 +281,46 @@ const getCoupon = async () => {
       start_date: c.start_date,
       end_date: c.end_date,
     }));
-    
+
     //console.log('Cupons carregados:', coupons.value);
-  } catch(e) {
+  } catch (e) {
     console.log("Erro ao carregar cupons, tente novamente mais tarde", e);
   }
 }
 
-const applyCoupon = () => {
+const applyCoupon = async () => {
   if (useTextInput.value) {
     if (!couponText.value) return
-    console.log('Cupom digitado:', couponText.value)
-    alert(`Cupom "${couponText.value}" aplicado!`)
-    couponText.value = ''
+
+    try {
+      // Chamada para verificar se o cupom existe
+      const response = await api.get(`/coupon/validate-coupon/${couponText.value}`)
+
+      if (!response.data || response.data.length === 0) {
+        alert(`O cupom "${couponText.value}" não existe!`)
+        return
+      }
+
+      const coupon = response.data[0] // assumindo que retorna array de cupons
+
+      // Verifica se está expirado
+      const now = new Date()
+      const endDate = new Date(coupon.end_date)
+      if (endDate < now) {
+        alert(`O cupom "${coupon.title}" já expirou em ${formatDate(coupon.end_date)}!`)
+        return
+      }
+
+      // Cupom válido
+      appliedCoupon.value = coupon
+      alert(`Cupom "${coupon.title}" aplicado com sucesso! Desconto: ${coupon.discount}%`)
+      couponText.value = ''
+
+    } catch (err) {
+      console.error('Erro ao validar cupom:', err)
+      alert('Erro ao validar o cupom. Tente novamente mais tarde.')
+    }
+
   } else {
     if (!selectedCoupon.value) return
 
@@ -306,12 +334,10 @@ const applyCoupon = () => {
 
     // Cupom válido
     appliedCoupon.value = selectedCoupon.value
-    console.log('Cupom selecionado:', appliedCoupon.value)
     alert(`Cupom "${selectedCoupon.value.displayText}" aplicado com sucesso!`)
     selectedCoupon.value = null
   }
 }
-
 onMounted(async () => {
   await getCoupon();
 });
