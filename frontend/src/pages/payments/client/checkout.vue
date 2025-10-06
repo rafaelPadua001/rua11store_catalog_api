@@ -161,11 +161,11 @@
 
               <div v-if="currentStep === 2">
                 <h3>Endereço de Entrega</h3>
-                <v-text-field v-model="cep" label="CEP" variant="outlined" @blur="buscarCep" :loading="loading"
-                  maxlength="9" placeholder="00000-000"></v-text-field>
-                <v-text-field label="Rua" variant="outlined"></v-text-field>
-                <v-text-field label="Número" variant="outlined"></v-text-field>
-
+                
+                <addressForm
+                  ref="addressFormRef"
+                  v-model="address"
+                ></addressForm>
                 <v-card-actions class="justify-space-between mt-2">
                   <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
                   <v-btn color="primary" @click="nextStep">Avançar</v-btn>
@@ -204,6 +204,8 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
+import addressForm from '@/address/addressForm.vue';
+
 
 const api = axios.create({
   baseURL:
@@ -220,6 +222,7 @@ const selectedCoupon = ref(null);
 const appliedCoupon = ref(null);
 const useTextInput = ref(false)
 const couponText = ref('')
+const addressFormRef = ref(null);
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
 const cart = reactive(cartData)
