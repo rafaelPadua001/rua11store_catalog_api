@@ -19,8 +19,10 @@ from .couponUser import CouponUser
 from .notification import Notification
 from .postSeo import PostSeo
 from .blogPostView import BlogPostView
+from .address import Address
 
 __all__ = [
+    'Address',
     'clientUser',
     'UserProfile',
     'Page',

@@ -10,7 +10,7 @@
               <v-row no-gutters align="center">
                 <v-col v-if="pageHeroTitle || pageHeroSubTitle" cols="12" md="6" class="px-4">
                   <v-card-text class="py-0 text-center">
-                    <div class="text-h6 text-sm-h4 font-weight-bold">
+                    <div class="text-h6 text-sm-h2 font-weight-bold">
                       {{ pageHeroTitle }}
                     </div>
                     <div class="text-body-2 text-sm-body-1">
@@ -49,6 +49,64 @@
         <br></br>
         <!-- Produtos -->
         <div>
+          <v-row justify="center">
+                    <v-col cols="6" md="4" sm="4" v-for="product in productsData" :key="product.name" elevation="2">
+                      <v-row>
+                        <v-col>
+                           <v-card class="d-flex flex-column" >
+                        <v-card-text>
+                         
+                          <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
+                              <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
+                                  target="_blank" rel="noopener noreferrer">
+                                  <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer"
+                                    contain >
+                                    
+                                    <v-chip class="ma-0" color="deep-purple" text-color="white"
+                                      style="position: absolute; top: 0; right: 0;">
+                                      <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                                    </v-chip>
+                                    
+                                  </v-img>
+                                  <v-chip class="ma-0" v-if="product.product_quantity == 0" color="error">Esgotado</v-chip>
+                                </a>
+
+                              <!--<v-card-text class="text-center">
+                            <v-btn color="primary">Comprar</v-btn>
+                          </v-card-text> -->
+
+                          
+                            <span class="d-block text-truncate " style="max-width: 100%; overflow: hidden;">
+                              <strong>{{ product.name }}</strong>
+                            </span>
+
+                          </template>
+                         
+                        </v-card-text>
+
+                        <v-card-actions class="d-flex justify-center align-center">
+                        
+                          <v-btn icon color="primary" @click="addItemCart(product)">
+                            <v-icon>mdi-cart-plus</v-icon>
+                          </v-btn>
+                          
+                       
+                        </v-card-actions>
+                          
+                        </v-card>
+                         <br></br>
+                        </v-col>
+                      </v-row>
+                     
+                     <v-spacer></v-spacer>
+                  
+                    </v-col>
+                    
+                  </v-row>
+                 
+        </div>
+
+        <!--<div>
           <v-card class="rounded-xl overflow-hidden hero-card" elevation="4" width="100%" color="#b48a17">
             <v-card-title>Conheça nossos produtos !</v-card-title>
             <v-divider class="border-opacity-50" thickness="2" color="deep-purple"></v-divider>
@@ -79,11 +137,6 @@
 
                               </v-card-text>
 
-
-                              <!--<v-card-text class="text-center">
-                            <v-btn color="primary">Comprar</v-btn>
-                          </v-card-text> -->
-
                             </v-card>
                             <span class="d-block text-truncate " style="max-width: 100%; overflow: hidden;">
                               <strong>{{ product.name }}</strong>
@@ -101,15 +154,17 @@
             <v-divider class="border-opacity-50" thickness="2" color="deep-purple"></v-divider>
             <v-card-actions>
               <v-btn block href="https://rua11store-web.vercel.app/" target="_blank" icon>
-                <!--<v-icon>mdi-eye</v-icon>-->
+                <!--<v-icon>mdi-eye</v-icon>
                 <span>Ver tudo</span>
               </v-btn>
             </v-card-actions>
           </v-card>
 
-        </div>
+        </div>-->
         <br></br>
         <br></br>
+
+
 
         <div>
           <v-row no-gutters>
@@ -238,34 +293,20 @@
     <v-sheet elevation="12" rounded="lg" max-width="400" width="100%"
       style="position: fixed; bottom: 150px; right: 20px; z-index: 9999; overflow: hidden; height: 350px;">
       <!-- Imagem de fundo -->
-      <v-img :src="`${coupon.image_path}`" cover class="absolute inset-2"
-        style="z-index: 0;">
-      
-        <template #placeholder>
-    <v-row
-      class="fill-height ma-0"
-      align="center"
-      justify="center"
-      style="background-color: rgba(0,0,0,0.05);"
-    >
-      <v-progress-circular
-        indeterminate
-        color="deep-purple accent-4"
-      ></v-progress-circular>
-    </v-row>
-  </template>
+      <v-img :src="`${coupon.image_path}`" cover class="absolute inset-2" style="z-index: 0;">
 
-  <!-- Caso haja erro ao carregar a imagem -->
-  <template #error>
-    <v-row
-      class="fill-height ma-0"
-      align="center"
-      justify="center"
-      style="background-color: rgba(255,0,0,0.1);"
-    >
-      <span class="text-center">Imagem não disponível</span>
-    </v-row>
-  </template>
+        <template #placeholder>
+          <v-row class="fill-height ma-0" align="center" justify="center" style="background-color: rgba(0,0,0,0.05);">
+            <v-progress-circular indeterminate color="deep-purple accent-4"></v-progress-circular>
+          </v-row>
+        </template>
+
+        <!-- Caso haja erro ao carregar a imagem -->
+        <template #error>
+          <v-row class="fill-height ma-0" align="center" justify="center" style="background-color: rgba(255,0,0,0.1);">
+            <span class="text-center">Imagem não disponível</span>
+          </v-row>
+        </template>
       </v-img>
 
       <!-- Overlay semitransparente -->
@@ -340,9 +381,11 @@ const fabButtons = [
 ]
 
 interface Product {
+  id: number,
   name: string
   thumbnail_path: string
   price: number
+  product_quantity: number,
   seo?: {
     slug: string
     meta_title?: string
@@ -407,14 +450,17 @@ async function loadComponentFromAPI() {
       pageHeroSubTitle.value = pageResponse.data.hero_subtitle
       pageBackgroundColor.value = pageResponse.data.hero_background_color
       pageImage.value = pageResponse.data.hero_image
-      pageHeroButtons.value = pageResponse.data.hero_buttons
+      pageHeroButtons.value = Array.isArray(pageResponse.data.hero_buttons)
+        ? pageResponse.data.hero_buttons
+        : JSON.parse(pageResponse.data.hero_buttons || "[]")
+
       pageId = pageResponse.data.id
     }
 
     loadFailed.value = false
 
     if (pageId) {
-      await loadSeoFromAPI(pageId)
+      await loadSeoFromAPI(pageId);
     }
   } catch (error) {
     console.error('Erro ao buscar componente:', error)
@@ -429,6 +475,7 @@ async function loadSeoFromAPI(pageId: number) {
     setSeo(seoData)
   } catch (error) {
     console.error('Erro ao buscar SEO:', error)
+    return false;
   }
 }
 
@@ -495,6 +542,28 @@ function handleScroll() {
   if (bottom) {
     showNotify.value = true
     window.removeEventListener("scroll", handleScroll)
+  }
+}
+
+const addItemCart = async (product: Product) => {
+  try{
+    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+    if(product.product_quantity == 0){
+      alert("Protudo sem estoque");
+    }
+    
+    const response = await api.post(`/cart/add-cart`, {
+      product_id: product.id,
+      quantity: 1
+    },
+    {
+       headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    console.log('Item adicionado');
+  }catch(e){
+    console.log("erro ao inserir item no carrinho", e);
   }
 }
 

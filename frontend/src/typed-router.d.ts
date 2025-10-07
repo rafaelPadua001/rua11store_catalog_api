@@ -48,6 +48,7 @@ declare module 'vue-router/auto-routes' {
     '/notifications/notify': RouteRecordInfo<'/notifications/notify', '/notifications/notify', Record<never, never>, Record<never, never>>,
     '/orders/client/clientOrders': RouteRecordInfo<'/orders/client/clientOrders', '/orders/client/clientOrders', Record<never, never>, Record<never, never>>,
     '/orders/orders': RouteRecordInfo<'/orders/orders', '/orders/orders', Record<never, never>, Record<never, never>>,
+    '/payments/client/checkout': RouteRecordInfo<'/payments/client/checkout', '/payments/client/checkout', Record<never, never>, Record<never, never>>,
     '/payments/payments': RouteRecordInfo<'/payments/payments', '/payments/payments', Record<never, never>, Record<never, never>>,
     '/products/ProductForm': RouteRecordInfo<'/products/ProductForm', '/products/ProductForm', Record<never, never>, Record<never, never>>,
     '/products/products': RouteRecordInfo<'/products/products', '/products/products', Record<never, never>, Record<never, never>>,

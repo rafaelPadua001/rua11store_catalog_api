@@ -27,6 +27,7 @@ class CouponController:
 
     def get_coupons_by_user(self, user_id):
         user_coupons = self.db_session.query(CouponUser).filter_by(client_id=user_id).all()
+        print(user_coupons)
         return [coupon.to_dict() for coupon in user_coupons]
     
     def get_promotional_coupons(self, limit=5):
@@ -248,3 +249,14 @@ class CouponController:
         self.db_session.commit()
 
         return new_coupon_user.to_dict(), 201
+    
+    def get_coupon_by_title(self, title):
+        """
+        Retorna o cupom com o título exato informado.
+        """
+        if not title:
+            return None
+
+        coupon = self.db_session.query(Coupon).filter_by(title=title).first()
+        return coupon  # Retorna o objeto Coupon ou None
+

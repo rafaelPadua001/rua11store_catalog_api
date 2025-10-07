@@ -1,6 +1,8 @@
 from flask import Blueprint
+from routes.address import address_bp
 from routes.authentication import auth_bp
 from routes.client import client_bp
+from routes.cart import cart_bp
 from routes.blog import blog_bp
 from routes.pages import pages_bp
 from routes.categories import category_bp
@@ -28,8 +30,10 @@ from routes.post_views import post_views_bp
 
 
 def register_routes(app):
+    app.register_blueprint(address_bp, url_prefix='/address')
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(client_bp, url_prefix='/client')
+    app.register_blueprint(cart_bp, url_prefix='/cart')
     app.register_blueprint(blog_bp, url_prefix='/blog')
     app.register_blueprint(postSeo_bp, url_prefix='/post-seo')
     app.register_blueprint(postComment_bp, url_prefix='/post-comment')

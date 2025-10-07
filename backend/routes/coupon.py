@@ -223,3 +223,16 @@ def delete_coupon(coupon_id):
             return jsonify({'error': 'Cupom não encontrado.'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+    
+@coupon_bp.route('/validate-coupon/<string:title>', methods=['GET'])
+def validate_coupon(title):
+    coupon_controller = CouponController()
+    try:
+        coupon = coupon_controller.get_coupon_by_title(title)
+
+        if not coupon:
+            return jsonify([]), 200  # Retorna array vazio se não existir
+
+        return jsonify([coupon.to_dict()]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
