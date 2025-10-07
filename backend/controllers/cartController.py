@@ -27,14 +27,20 @@ class CartController:
                     "items": []
                 }
             if item:
-                carts_dict[cart.id]["items"].append({
+               carts_dict[cart.id]["items"].append({
                     "id": item.id,
                     "product_id": item.product_id,
                     "product_name": item.product_name,
                     "product_price": item.product_price,
                     "product_image": item.product_image,
-                    "quantity": item.quantity
+                    "quantity": item.quantity,
+                    "product_height": item.product_height,
+                    "product_width": item.product_width,
+                    "product_weight": item.product_weight,
+                    "product_length": item.product_length
                 })
+
+
 
         return jsonify(list(carts_dict.values())), 200
 
@@ -54,6 +60,7 @@ class CartController:
             user_id = user_id,
             product = product,
             quantity = quantity
+
         )
 
         item_data = {

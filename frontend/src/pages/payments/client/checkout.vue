@@ -231,39 +231,64 @@
               <template #opposite>
                 <div v-if="currentStep === 3">
                   <v-card>
-                    <v-toolbar>
+                    <v-toolbar flat>
                       <v-toolbar-title>Pagamento</v-toolbar-title>
                     </v-toolbar>
+                    <v-card-text class="justify-center">
+                      <div>
+                        <v-row justify="center">
+                          <v-col cols="auto">
+                            <span class="text-h4 ">R$ {{ (Number(selectedDelivery.price) +
+                              Number(totalCarrinho)).toFixed(2) }}</span>
+                          </v-col>
+                        </v-row>
+
+                      </div>
+
+                    </v-card-text>
 
                     <v-card-text>
-                      <v-tabs v-model="tab">
+                      <v-tabs v-model="tab" background-color="primary" dark>
                         <v-tab value="credit">Crédito</v-tab>
                         <v-tab value="debit">Débito</v-tab>
                         <v-tab value="pix">Pix</v-tab>
                       </v-tabs>
 
-                      <div v-if="tab === 'credit'">
-                        <v-text-field label="Número do Cartão (Crédito)" />
-                        Restante dos campos
+                      <!-- Campos compartilhados -->
+                      <div v-if="tab === 'credit' || tab === 'debit'">
+                        <v-text-field
+                          :label="tab === 'credit' ? 'Número do Cartão (Crédito)' : 'Número do Cartão (Débito)'"
+                          v-model="payment.card_number" />
+                        <v-text-field label="Nome do Titular" v-model="payment.name" />
+                        <v-text-field label="CPF" v-model="payment.cpf" />
+                        <v-text-field label="Email" v-model="payment.email" />
+                        <v-text-field label="Código de Segurança" v-model="payment.security_code" />
+                        <v-text-field label="Validade" v-model="payment.expiration_date" />
+
+                        <!-- Select de parcelas só para crédito -->
+                        <v-select v-if="tab === 'credit'" label="Parcelas" :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+                          v-model="payment.installments" outlined />
                       </div>
 
-                      <div v-else-if="tab === 'debit'">
-                        <v-text-field label="Número do Cartão (Débito)" />
-                        Restante dos campos
-                      </div>
 
                       <div v-else-if="tab === 'pix'">
-                     <!--   <v-text-field label="Chave Pix" /> -->
-                        QrCode + Chave copia e cola
+                        <v-img :src="qrCodeImg" max-width="200" />
+                        <v-text-field label="Chave Pix (copia e cola)" v-model="payment.pix_key" />
+                        <v-text-field label="Nome" v-model="payment.name" />
+                        <v-text-field label="CPF" v-model="payment.cpf" />
+                        <v-text-field label="Email" v-model="payment.email" />
+                        <!-- <v-text-field label="Cupom" v-model="payment.coupon_code" />
+                        <v-text-field label="Valor do Cupom" v-model="payment.coupon_amount" />
+                        <v-text-field label="Total" v-model="payment.total_value" />-->
                       </div>
-
                     </v-card-text>
-                  </v-card>
 
-                  <v-card-actions class="justify-space-between mt-2">
-                    <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
-                    <v-btn color="success">Finalizar Pedido</v-btn>
-                  </v-card-actions>
+                    <v-card-actions class="justify-space-between mt-2">
+                      <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
+                      <v-btn color="primary" @click="submitPayment">Pagar</v-btn>
+                      <v-btn color="success">Finalizar Pedido</v-btn>
+                    </v-card-actions>
+                  </v-card>
                 </div>
               </template>
 
@@ -306,6 +331,19 @@ const tab = ref('credit');
 const credit = ref(null);
 const debit = ref(null);
 const pix = ref(null);
+const payment = ref({
+  card_number: '',
+  name: '',
+  cpf: '',
+  email: '',
+  security_code: '',
+  expiration_date: '',
+  pix_key: '',
+  coupon_code: '',
+  coupon_amount: 0,
+  total_value: 0,
+  installments: 1,
+});
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
 const cart = reactive(cartData)
@@ -355,9 +393,6 @@ const nextStep = async () => {
 
   if (currentStep.value < 3) currentStep.value++
 }
-
-
-
 
 const prevStep = () => {
   if (currentStep.value > 1) currentStep.value--
@@ -490,8 +525,16 @@ const calculateDelivery = async () => {
   const zipcodeOrigin = '97010002' // CEP da loja
 
   try {
-    const products = JSON.parse(localStorage.getItem('cartProducts')) || []
+    const products = (cart.items || []).map(item => ({
+      product_id: item.product_id,
+      quantity: item.quantity,
+      product_weight: Number(item.product_weight || 0),
+      product_height: Number(item.product_height || 0),
+      product_width: Number(item.product_width || 0),
+      product_length: Number(item.product_length || 0)
+    }))
 
+    console.log(cart.items);
     const { data } = await api.post('/melhorEnvio/calculate-delivery', {
       zipcode_origin: zipcodeOrigin,
       zipcode_destiny: cep,
@@ -573,6 +616,12 @@ const saveAddress = async () => {
     alert('Não foi possível salvar o endereço. Tente novamente.')
   }
 };
+
+function submitPayment() {
+  console.log('Pagamento enviado', payment.value)
+}
+
+
 
 onMounted(async () => {
   await getCoupon();
