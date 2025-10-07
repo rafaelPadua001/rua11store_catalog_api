@@ -162,25 +162,25 @@
               <div v-if="currentStep === 2">
                 <h3>Endereço de Entrega</h3>
 
-                <addressForm ref="addressFormRef" v-if="!address"/>
+                <addressForm ref="addressFormRef" v-if="!address" />
                 <v-card v-else>
-      <v-card-text>
-        <div><strong>CEP:</strong> {{ address.cep }}</div>
-        <div><strong>Logradouro:</strong> {{ address.logradouro }}</div>
-        <div><strong>Número:</strong> {{ address.numero }}</div>
-        <div v-if="address.complemento"><strong>Complemento:</strong> {{ address.complemento }}</div>
-        <div><strong>Bairro:</strong> {{ address.bairro }}</div>
-        <div><strong>Cidade:</strong> {{ address.cidade }}</div>
-        <div><strong>Estado:</strong> {{ address.estado }}</div>
-        <div><strong>País:</strong> {{ address.pais }}</div>
-        <div v-if="address.referencia"><strong>Referência:</strong> {{ address.referencia }}</div>
-      </v-card-text>
+                  <v-card-text>
+                    <div><strong>CEP:</strong> {{ address.cep }}</div>
+                    <div><strong>Logradouro:</strong> {{ address.logradouro }}</div>
+                    <div><strong>Número:</strong> {{ address.numero }}</div>
+                    <div v-if="address.complemento"><strong>Complemento:</strong> {{ address.complemento }}</div>
+                    <div><strong>Bairro:</strong> {{ address.bairro }}</div>
+                    <div><strong>Cidade:</strong> {{ address.cidade }}</div>
+                    <div><strong>Estado:</strong> {{ address.estado }}</div>
+                    <div><strong>País:</strong> {{ address.pais }}</div>
+                    <div v-if="address.referencia"><strong>Referência:</strong> {{ address.referencia }}</div>
+                  </v-card-text>
 
-      <v-card-actions>
-        <v-btn>Editar</v-btn>
-        <v-btn>Remover</v-btn>
-      </v-card-actions>
-    </v-card>
+                  <v-card-actions>
+                    <v-btn>Editar</v-btn>
+                    <v-btn>Remover</v-btn>
+                  </v-card-actions>
+                </v-card>
                 <v-card-actions class="justify-space-between mt-2">
                   <v-btn color="primary" @click="calculateDelivery">Calcular Frete</v-btn>
                 </v-card-actions>
@@ -230,8 +230,35 @@
 
               <template #opposite>
                 <div v-if="currentStep === 3">
-                  <h3>Pagamento</h3>
-                  <v-text-field label="Número do Cartão" variant="outlined"></v-text-field>
+                  <v-card>
+                    <v-toolbar>
+                      <v-toolbar-title>Pagamento</v-toolbar-title>
+                    </v-toolbar>
+
+                    <v-card-text>
+                      <v-tabs v-model="tab">
+                        <v-tab value="credit">Crédito</v-tab>
+                        <v-tab value="debit">Débito</v-tab>
+                        <v-tab value="pix">Pix</v-tab>
+                      </v-tabs>
+
+                      <div v-if="tab === 'credit'">
+                        <v-text-field label="Número do Cartão (Crédito)" />
+                        Restante dos campos
+                      </div>
+
+                      <div v-else-if="tab === 'debit'">
+                        <v-text-field label="Número do Cartão (Débito)" />
+                        Restante dos campos
+                      </div>
+
+                      <div v-else-if="tab === 'pix'">
+                     <!--   <v-text-field label="Chave Pix" /> -->
+                        QrCode + Chave copia e cola
+                      </div>
+
+                    </v-card-text>
+                  </v-card>
 
                   <v-card-actions class="justify-space-between mt-2">
                     <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
@@ -273,8 +300,12 @@ const appliedCoupon = ref(null);
 const useTextInput = ref(false)
 const couponText = ref('')
 const addressFormRef = ref(null);
-const availableDeliveries = ref([])
-const selectedDelivery = ref(null)
+const availableDeliveries = ref([]);
+const selectedDelivery = ref(null);
+const tab = ref('credit');
+const credit = ref(null);
+const debit = ref(null);
+const pix = ref(null);
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
 const cart = reactive(cartData)
@@ -469,7 +500,7 @@ const calculateDelivery = async () => {
 
     availableDeliveries.value = data
     console.log('Fretes calculados:', data)
-   
+
   } catch (error) {
     console.error('Erro ao calcular frete:', error)
     alert('Erro ao calcular o frete.')
@@ -477,15 +508,15 @@ const calculateDelivery = async () => {
 };
 
 const loadAddress = async () => {
-  try{
+  try {
     const response = await api.get('/address/get-address', {
-        headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token") || localStorage.getItem('token')}`
-    }
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token") || localStorage.getItem('token')}`
+      }
     });
     address.value = response.data[0];
   }
-  catch(e){
+  catch (e) {
     console.log('nenhum endereço encontrado...');
   }
 };
@@ -526,17 +557,17 @@ const saveAddress = async () => {
 
     console.log('Dados que serão enviados:', data)
 
-   const response = await api.post('/address/create-address', data, {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('access_token') || localStorage.getItem('token')}`
-  }
-})
+    const response = await api.post('/address/create-address', data, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('access_token') || localStorage.getItem('token')}`
+      }
+    })
 
-// Atualiza endereço local
-address.value = { ...data, id: response.data.address_id }
+    // Atualiza endereço local
+    address.value = { ...data, id: response.data.address_id }
 
-console.log('Endereço salvo com sucesso:', response.data)
-nextStep()
+    console.log('Endereço salvo com sucesso:', response.data)
+    nextStep()
   } catch (e) {
     console.error('Erro ao salvar o endereço:', e)
     alert('Não foi possível salvar o endereço. Tente novamente.')
