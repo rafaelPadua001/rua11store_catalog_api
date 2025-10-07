@@ -87,7 +87,7 @@
                               R$ {{
                                 appliedCoupon && appliedCoupon.discount
                                   ? (totalCarrinho - (totalCarrinho * appliedCoupon.discount / 100)).toFixed(2)
-                              : totalCarrinho.toFixed(2)
+                                  : totalCarrinho.toFixed(2)
                               }}
                             </v-col>
                           </v-row>
@@ -159,65 +159,67 @@
                 </div>
               </template>
 
-            <div v-if="currentStep === 2">
-    <h3>Endereço de Entrega</h3>
+              <div v-if="currentStep === 2">
+                <h3>Endereço de Entrega</h3>
 
-    <addressForm ref="addressFormRef" />
+                <addressForm ref="addressFormRef" v-if="!address"/>
+                <v-card v-else>
+      <v-card-text>
+        <div><strong>CEP:</strong> {{ address.cep }}</div>
+        <div><strong>Logradouro:</strong> {{ address.logradouro }}</div>
+        <div><strong>Número:</strong> {{ address.numero }}</div>
+        <div v-if="address.complemento"><strong>Complemento:</strong> {{ address.complemento }}</div>
+        <div><strong>Bairro:</strong> {{ address.bairro }}</div>
+        <div><strong>Cidade:</strong> {{ address.cidade }}</div>
+        <div><strong>Estado:</strong> {{ address.estado }}</div>
+        <div><strong>País:</strong> {{ address.pais }}</div>
+        <div v-if="address.referencia"><strong>Referência:</strong> {{ address.referencia }}</div>
+      </v-card-text>
 
-    <v-card-actions class="justify-space-between mt-2">
-      <v-btn color="primary" @click="calculateDelivery">Calcular Frete</v-btn>
-    </v-card-actions>
+      <v-card-actions>
+        <v-btn>Editar</v-btn>
+        <v-btn>Remover</v-btn>
+      </v-card-actions>
+    </v-card>
+                <v-card-actions class="justify-space-between mt-2">
+                  <v-btn color="primary" @click="calculateDelivery">Calcular Frete</v-btn>
+                </v-card-actions>
 
-    <div v-if="availableDeliveries.length" class="mt-4">
-  <h4 class="mb-2">Opções de entrega</h4>
+                <div v-if="availableDeliveries.length" class="mt-4">
+                  <h4 class="mb-2">Opções de entrega</h4>
 
-  <v-radio-group v-model="selectedDelivery" class="pa-2">
-  <v-radio
-    v-for="(option, index) in availableDeliveries"
-    :key="index"
-    :value="option"
-    class="my-2"
-  >
-    <template #label>
-      <div class="d-flex align-center gap-3">
-        <!-- Logo -->
-        <v-img
-          v-if="option.company.picture"
-          :src="option.company.picture"
-          alt="Logo {{ option.company.name }}"
-          max-width="50"
-          max-height="30"
-          contain
-          class="rounded-sm"
-        ></v-img>
+                  <v-radio-group v-model="selectedDelivery" class="pa-2">
+                    <v-radio v-for="(option, index) in availableDeliveries" :key="index" :value="option" class="my-2">
+                      <template #label>
+                        <div class="d-flex align-center gap-3">
+                          <!-- Logo -->
+                          <v-img v-if="option.company.picture" :src="option.company.picture"
+                            alt="Logo {{ option.company.name }}" max-width="50" max-height="30" contain
+                            class="rounded-sm"></v-img>
 
-        <!-- Dados da entrega -->
-        <div class="d-flex flex-column">
-          <span class="font-weight-medium">
-            {{ option.company.name }} — R$ {{ option.price }}
-          </span>
-          <small class="text-grey">
-            Prazo: {{ option.delivery_time }} dias úteis
-          </small>
-        </div>
-      </div>
-    </template>
-  </v-radio>
-</v-radio-group>
+                          <!-- Dados da entrega -->
+                          <div class="d-flex flex-column">
+                            <span class="font-weight-medium">
+                              {{ option.company.name }} — R$ {{ option.price }}
+                            </span>
+                            <small class="text-grey">
+                              Prazo: {{ option.delivery_time }} dias úteis
+                            </small>
+                          </div>
+                        </div>
+                      </template>
+                    </v-radio>
+                  </v-radio-group>
 
 
-  <v-card-actions class="justify-end mt-2">
-    <v-btn
-      color="primary"
-      :disabled="!selectedDelivery"
-      @click="nextStep"
-    >
-      Continuar
-    </v-btn>
-  </v-card-actions>
-</div>
+                  <v-card-actions class="justify-end mt-2">
+                    <v-btn color="primary" :disabled="!selectedDelivery" @click="saveAddress">
+                      Continuar
+                    </v-btn>
+                  </v-card-actions>
+                </div>
 
-  </div>
+              </div>
             </v-timeline-item>
 
             <!-- ETAPA 3: Pagamento -->
@@ -262,6 +264,7 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+const address = ref(null);
 const route = useRoute()
 const cartData = route.query.item ? JSON.parse(route.query.item) : { items: [] }
 const coupons = ref([]);
@@ -280,34 +283,38 @@ const currentStep = ref(1)
 
 const nextStep = async () => {
   if (currentStep.value === 2) {
-    const form = addressFormRef.value
-    if (!form) {
-      console.error('Formulário de endereço não encontrado.')
+    let cep = null
+
+    if (addressFormRef.value) {
+      // formulário existe → pegar CEP do form
+      const form = addressFormRef.value
+      const isValid = await form.validate()
+      if (!isValid) {
+        alert('Preencha todos os campos obrigatórios corretamente.')
+        return
+      }
+      cep = form.address.cep.replace(/\D/g, '')
+    } else if (address.value) {
+      // usar endereço já salvo
+      cep = address.value.cep.replace(/\D/g, '')
+    } else {
+      alert('Nenhum endereço disponível.')
       return
     }
 
-    // valida o form interno
-    const isValid = await form.validate()
-    if (!isValid) {
-      alert('Preencha todos os campos obrigatórios corretamente.')
-      return
-    }
-
-    // agora sim, pegamos o CEP de dentro do componente filho
-    const zipcodeDestiny = form.address.cep.replace(/\D/g, '')
-    const zipcodeOrigin = '97010002' // CEP de origem da loja
+    const zipcodeOrigin = '97010002' // CEP da loja
 
     try {
       const products = JSON.parse(localStorage.getItem('cartProducts')) || []
 
-      const response = await api.post('/melhorEnvio/calculate-delivery', {
+      const { data } = await api.post('/melhorEnvio/calculate-delivery', {
         zipcode_origin: zipcodeOrigin,
-        zipcode_destiny: zipcodeDestiny,
-        products: products
+        zipcode_destiny: cep,
+        products
       })
 
-      console.log('Fretes calculados:', response.data)
-      availableDeliveries.value = response.data
+      availableDeliveries.value = data
+      console.log('Fretes calculados:', data)
     } catch (error) {
       console.error('Erro ao calcular frete:', error)
       alert('Erro ao calcular o frete. Tente novamente.')
@@ -317,6 +324,7 @@ const nextStep = async () => {
 
   if (currentStep.value < 3) currentStep.value++
 }
+
 
 
 
@@ -428,18 +436,26 @@ const applyCoupon = async () => {
     selectedCoupon.value = null
   }
 };
-
 const calculateDelivery = async () => {
-  const form = addressFormRef.value
-  if (!form) return console.error('Formulário de endereço não encontrado')
+  let cep = null
 
-  const isValid = await form.validate()
-  if (!isValid) {
-    alert('Preencha todos os campos obrigatórios corretamente.')
+  if (addressFormRef.value) {
+    // formulário existe → pegar CEP do form
+    const form = addressFormRef.value
+    const isValid = await form.validate()
+    if (!isValid) {
+      alert('Preencha todos os campos obrigatórios corretamente.')
+      return
+    }
+    cep = form.address.cep.replace(/\D/g, '')
+  } else if (address.value) {
+    // usar endereço já salvo
+    cep = address.value.cep.replace(/\D/g, '')
+  } else {
+    alert('Nenhum endereço disponível.')
     return
   }
 
-  const cep = form.address.cep.replace(/\D/g, '')
   const zipcodeOrigin = '97010002' // CEP da loja
 
   try {
@@ -453,14 +469,82 @@ const calculateDelivery = async () => {
 
     availableDeliveries.value = data
     console.log('Fretes calculados:', data)
-    alert('Frete calculado com sucesso!')
+   
   } catch (error) {
     console.error('Erro ao calcular frete:', error)
     alert('Erro ao calcular o frete.')
   }
 };
 
+const loadAddress = async () => {
+  try{
+    const response = await api.get('/address/get-address', {
+        headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token") || localStorage.getItem('token')}`
+    }
+    });
+    address.value = response.data[0];
+  }
+  catch(e){
+    console.log('nenhum endereço encontrado...');
+  }
+};
+
+const saveAddress = async () => {
+  try {
+    let addressData = null
+
+    if (addressFormRef.value) {
+      // Formulário existe → valida e pega os dados
+      const isValid = await addressFormRef.value.validate()
+      if (!isValid) {
+        alert('Por favor, preencha corretamente o endereço antes de continuar.')
+        return
+      }
+      addressData = addressFormRef.value.address
+    } else if (address.value) {
+      // Formulário não existe → pegar endereço já salvo
+      addressData = address.value
+    } else {
+      alert('Nenhum endereço disponível.')
+      return
+    }
+
+    const data = {
+      cep: addressData.cep,
+      logradouro: addressData.logradouro,
+      numero: addressData.numero,
+      complemento: addressData.complemento,
+      bairro: addressData.bairro,
+      cidade: addressData.cidade,
+      estado: addressData.estado,
+      pais: addressData.pais,
+      referencia: addressData.referencia,
+      delivery_option: selectedDelivery?.company?.name || null,
+      delivery_price: selectedDelivery?.price || null
+    }
+
+    console.log('Dados que serão enviados:', data)
+
+   const response = await api.post('/address/create-address', data, {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem('access_token') || localStorage.getItem('token')}`
+  }
+})
+
+// Atualiza endereço local
+address.value = { ...data, id: response.data.address_id }
+
+console.log('Endereço salvo com sucesso:', response.data)
+nextStep()
+  } catch (e) {
+    console.error('Erro ao salvar o endereço:', e)
+    alert('Não foi possível salvar o endereço. Tente novamente.')
+  }
+};
+
 onMounted(async () => {
   await getCoupon();
+  await loadAddress();
 });
 </script>

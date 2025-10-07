@@ -16,6 +16,8 @@ class ClientUser(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
+    addresses = db.relationship("Address", back_populates="client_user")
+    
     # setter para salvar senha já criptografada
     @property
     def password(self):
