@@ -159,18 +159,65 @@
                 </div>
               </template>
 
-              <div v-if="currentStep === 2">
-                <h3>Endereço de Entrega</h3>
-                
-                <addressForm
-                  ref="addressFormRef"
-                  v-model="address"
-                ></addressForm>
-                <v-card-actions class="justify-space-between mt-2">
-                  <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
-                  <v-btn color="primary" @click="nextStep">Avançar</v-btn>
-                </v-card-actions>
-              </div>
+            <div v-if="currentStep === 2">
+    <h3>Endereço de Entrega</h3>
+
+    <addressForm ref="addressFormRef" />
+
+    <v-card-actions class="justify-space-between mt-2">
+      <v-btn color="primary" @click="calculateDelivery">Calcular Frete</v-btn>
+    </v-card-actions>
+
+    <div v-if="availableDeliveries.length" class="mt-4">
+  <h4 class="mb-2">Opções de entrega</h4>
+
+  <v-radio-group v-model="selectedDelivery" class="pa-2">
+  <v-radio
+    v-for="(option, index) in availableDeliveries"
+    :key="index"
+    :value="option"
+    class="my-2"
+  >
+    <template #label>
+      <div class="d-flex align-center gap-3">
+        <!-- Logo -->
+        <v-img
+          v-if="option.company.picture"
+          :src="option.company.picture"
+          alt="Logo {{ option.company.name }}"
+          max-width="50"
+          max-height="30"
+          contain
+          class="rounded-sm"
+        ></v-img>
+
+        <!-- Dados da entrega -->
+        <div class="d-flex flex-column">
+          <span class="font-weight-medium">
+            {{ option.company.name }} — R$ {{ option.price }}
+          </span>
+          <small class="text-grey">
+            Prazo: {{ option.delivery_time }} dias úteis
+          </small>
+        </div>
+      </div>
+    </template>
+  </v-radio>
+</v-radio-group>
+
+
+  <v-card-actions class="justify-end mt-2">
+    <v-btn
+      color="primary"
+      :disabled="!selectedDelivery"
+      @click="nextStep"
+    >
+      Continuar
+    </v-btn>
+  </v-card-actions>
+</div>
+
+  </div>
             </v-timeline-item>
 
             <!-- ETAPA 3: Pagamento -->
@@ -223,15 +270,55 @@ const appliedCoupon = ref(null);
 const useTextInput = ref(false)
 const couponText = ref('')
 const addressFormRef = ref(null);
+const availableDeliveries = ref([])
+const selectedDelivery = ref(null)
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
 const cart = reactive(cartData)
 
 const currentStep = ref(1)
 
-const nextStep = () => {
+const nextStep = async () => {
+  if (currentStep.value === 2) {
+    const form = addressFormRef.value
+    if (!form) {
+      console.error('Formulário de endereço não encontrado.')
+      return
+    }
+
+    // valida o form interno
+    const isValid = await form.validate()
+    if (!isValid) {
+      alert('Preencha todos os campos obrigatórios corretamente.')
+      return
+    }
+
+    // agora sim, pegamos o CEP de dentro do componente filho
+    const zipcodeDestiny = form.address.cep.replace(/\D/g, '')
+    const zipcodeOrigin = '97010002' // CEP de origem da loja
+
+    try {
+      const products = JSON.parse(localStorage.getItem('cartProducts')) || []
+
+      const response = await api.post('/melhorEnvio/calculate-delivery', {
+        zipcode_origin: zipcodeOrigin,
+        zipcode_destiny: zipcodeDestiny,
+        products: products
+      })
+
+      console.log('Fretes calculados:', response.data)
+      availableDeliveries.value = response.data
+    } catch (error) {
+      console.error('Erro ao calcular frete:', error)
+      alert('Erro ao calcular o frete. Tente novamente.')
+      return
+    }
+  }
+
   if (currentStep.value < 3) currentStep.value++
 }
+
+
 
 const prevStep = () => {
   if (currentStep.value > 1) currentStep.value--
@@ -340,7 +427,39 @@ const applyCoupon = async () => {
     alert(`Cupom "${selectedCoupon.value.displayText}" aplicado com sucesso!`)
     selectedCoupon.value = null
   }
-}
+};
+
+const calculateDelivery = async () => {
+  const form = addressFormRef.value
+  if (!form) return console.error('Formulário de endereço não encontrado')
+
+  const isValid = await form.validate()
+  if (!isValid) {
+    alert('Preencha todos os campos obrigatórios corretamente.')
+    return
+  }
+
+  const cep = form.address.cep.replace(/\D/g, '')
+  const zipcodeOrigin = '97010002' // CEP da loja
+
+  try {
+    const products = JSON.parse(localStorage.getItem('cartProducts')) || []
+
+    const { data } = await api.post('/melhorEnvio/calculate-delivery', {
+      zipcode_origin: zipcodeOrigin,
+      zipcode_destiny: cep,
+      products
+    })
+
+    availableDeliveries.value = data
+    console.log('Fretes calculados:', data)
+    alert('Frete calculado com sucesso!')
+  } catch (error) {
+    console.error('Erro ao calcular frete:', error)
+    alert('Erro ao calcular o frete.')
+  }
+};
+
 onMounted(async () => {
   await getCoupon();
 });
