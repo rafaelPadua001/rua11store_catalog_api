@@ -3,7 +3,7 @@
     <v-col cols="12" sm="12" md="10" lg="10" xl="6">
       <v-card class="pa-4" elevation="0">
         <v-card-text>
-          <v-timeline direction="horizontal" line-inset="12">
+          <v-timeline :direction="timelineDirection" line-inset="12">
             <!-- ETAPA 1: Itens -->
             <v-timeline-item fill-dot :color="currentStep === 1 ? 'primary' : 'grey'">
               <template #icon>
@@ -21,20 +21,18 @@
 
                             </v-col>
                           </v-row>
-                          <v-card class="pa-2 mb-2" elevation="0">
+                          <v-card class="pa-2 mb-2 d-flex flex-column" elevation="0">
                             <v-avatar size="50">
                               <v-img :src="item.product_image" :alt="item.product_name" cover></v-img>
                             </v-avatar>
                             <v-row>
-                              <v-col cols="auto">
+                              <v-col cols="12" md="6">
                                 <strong>{{ item.product_name }}</strong>
                               </v-col>
-                              <v-col cols="auto">
+                              <v-spacer></v-spacer>
+                              <v-col cols="12" md="3">
                                 <strong>R$ {{ item.product_price }}</strong>
                               </v-col>
-                            </v-row>
-
-                            <v-row dense class="align-center mt-2" no-gutters>
                               <v-col cols="auto">
                                 <strong>Qtd:</strong>
                               </v-col>
@@ -47,7 +45,6 @@
                                 }}</strong>
                               </v-col>
                             </v-row>
-
                             <v-card-actions>
                               <v-btn color="error" size="small">Remover</v-btn>
                             </v-card-actions>
@@ -62,15 +59,15 @@
                         </v-card-title>
                         <v-card-text>
                           <v-row>
-                            <v-col cols="auto">
+                            <v-col cols="12" md="6">
                               <strong>Subtotal em produtos:</strong>
                             </v-col>
-                            <v-col cols="auto">
+                            <v-col cols="12" md="6">
                               R$ {{ totalCarrinho.toFixed(2) }}
                             </v-col>
                           </v-row>
                           <v-row>
-                            <v-col>
+                            <v-col cols="12" md="6" s>
                               <strong>Total com desconto (%):</strong>
                             </v-col>
                             <v-col v-if="appliedCoupon && appliedCoupon.discount">
@@ -80,10 +77,10 @@
 
                           </v-row>
                           <v-row>
-                            <v-col>
+                            <v-col cols="12" md="6">
                               <strong>Total:</strong>
                             </v-col>
-                            <v-col>
+                            <v-col cols="12" md="6">
                               R$ {{
                                 appliedCoupon && appliedCoupon.discount
                                   ? (totalCarrinho - (totalCarrinho * appliedCoupon.discount / 100)).toFixed(2)
@@ -93,12 +90,12 @@
                           </v-row>
 
 
-                          <v-row justify="stretch">
-                            <v-col cols="12" md="8" sm="4">
+                          <v-row>
+                            <v-col cols="12" md="10">
 
                               <!-- Alterna entre select e input -->
-                              <div class="d-flex align-center">
-                                <div class="flex-grow-1">
+                              <div class="d-flex flex-wrap align-center gap-2">
+                                <div class="flex-grow-1 min-w-0">
                                   <v-select v-if="!useTextInput" v-model="selectedCoupon" :items="formattedCoupons"
                                     item-title="displayText" item-value="id" label="Selecione um cupom" outlined dense
                                     :menu-props="{ maxHeight: '300px' }" return-object></v-select>
@@ -108,7 +105,7 @@
                                 </div>
 
                                 <!-- Botão para alternar -->
-                                <v-btn text class="ms-2" @click="useTextInput = !useTextInput">
+                                <v-btn text class="ms-1" variant="tonal" @click="useTextInput = !useTextInput">
                                   {{ useTextInput ? 'Selecionar' : 'Digitar' }}
                                 </v-btn>
                               </div>
@@ -127,8 +124,8 @@
                             </v-col>
                           </v-row>-->
 
-                          <v-row justify="end" class="mt-2">
-                            <v-col cols="auto">
+                          <v-row justify="center" class="mt-2">
+                            <v-col cols="12" md="6">
                               <v-btn color="success" @click="applyCoupon" :disabled="!selectedCoupon && !couponText">
                                 Aplicar cupom
                               </v-btn>
@@ -136,12 +133,20 @@
                           </v-row>
 
                         </v-card-text>
+                        <v-card-actions>
+                          <v-row justify="end" class="mt-4">
+                            <v-col cols="auto">
+                              <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
+                              <v-btn color="primary" @click="nextStep">Avançar</v-btn>
+                            </v-col>
+                          </v-row>
+                        </v-card-actions>
                       </v-card>
                     </v-col>
                   </v-row>
                 </div>
 
-                <v-btn color="primary" @click="nextStep">Avançar</v-btn>
+
               </template>
 
               <h3>Checkout Items</h3>
@@ -213,6 +218,7 @@
 
 
                   <v-card-actions class="justify-end mt-2">
+                    <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
                     <v-btn color="primary" :disabled="!selectedDelivery" @click="saveAddress">
                       Continuar
                     </v-btn>
@@ -238,7 +244,7 @@
                       <div>
                         <v-row>
                           <v-col>
-                              <span>shippment: R$ {{ selectedDelivery.price }}</span>
+                            <span>shippment: R$ {{ selectedDelivery.price }}</span>
                           </v-col>
                         </v-row>
                         <v-row>
@@ -276,8 +282,8 @@
                         <v-text-field label="Validade" v-model="payment.expiration_date" />
 
                         <!-- Select de parcelas só para crédito -->
-                        <v-select v-if="tab === 'credit'" label="Parcelas" :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
-                          v-model="payment.installments" outlined />
+                        <v-select v-if="tab === 'credit'" label="Parcelas"
+                          :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]" v-model="payment.installments" outlined />
                       </div>
 
 
@@ -295,7 +301,7 @@
 
                     <v-card-actions class="justify-space-between mt-2">
                       <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
-                      <v-btn color="success"  @click="submitPayment">Finalizar Pedido</v-btn>
+                      <v-btn color="success" @click="submitPayment">Finalizar Pedido</v-btn>
                     </v-card-actions>
                   </v-card>
                 </div>
@@ -315,9 +321,11 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import addressForm from '@/address/addressForm.vue';
+import { useDisplay } from 'vuetify'
 
+const { mdAndUp } = useDisplay()
 
-
+const timelineDirection = computed(() => (mdAndUp.value ? 'horizontal' : 'vertical'))
 const api = axios.create({
   baseURL:
     window.location.hostname === "localhost"
@@ -382,7 +390,7 @@ const nextStep = async () => {
       return
     }
 
-    const zipcodeOrigin = '97010002' // CEP da loja
+    const zipcodeOrigin = '73082180' // CEP da loja
 
     try {
       const products = JSON.parse(localStorage.getItem('cartProducts')) || []
@@ -666,16 +674,16 @@ async function submitPayment() {
 
     // ⚡ APENAS campos que você realmente tem disponível
     // Remova os que não existem no seu componente
-    
+
     // Se você tem produtos no carrinho, adicione:
     // payload.products = itemsDoCarrinho.value || []
-    
+
     // Se você tem endereço, adicione:
     // payload.address = enderecoSelecionado.value || {}
 
     if (tab.value === 'credit' || tab.value === 'debit') {
       const [month, year] = payment.value.expiration_date.split('/');
-      
+
       // ⚡ ENVIA OS DADOS DO CARTÃO PARA O BACKEND CRIAR O TOKEN
       payload.card_data = {
         card_number: payment.value.card_number.replace(/\s/g, ''),
@@ -689,11 +697,11 @@ async function submitPayment() {
     }
 
     console.log('📤 Enviando para backend:', payload);
-    
+
     // ⚡ ENVIA PARA SEU BACKEND PYTHON
     const response = await api.post('/payment/payment', payload);
     console.log('✅ Resposta do backend:', response.data);
-    
+
     if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
       alert('Pagamento processado com sucesso!');
     } else {
@@ -711,7 +719,7 @@ async function submitPayment() {
 onMounted(async () => {
   await getCoupon();
   await loadAddress();
-    try {
+  try {
     mp.value = new MercadoPago('APP_USR-f969c2eb-5d4f-4e5c-974d-ace6053a80a8', {
       locale: 'pt-BR'
     });

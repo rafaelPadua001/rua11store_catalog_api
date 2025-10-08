@@ -142,12 +142,7 @@ class CreditCardPayment(PaymentStrategy):
         try:
             # ⚡ Extrai dados do cartão do payload
             card_data = data.get("card_data", {})
-            card_token = self.create_card_token(data)
-            if not card_token:
-                return {
-                    "status": 400,
-                    "message": "Falha ao criar token do cartão"
-                }
+          
             
             token_url = "https://api.mercadopago.com/v1/card_tokens"
             headers = {
