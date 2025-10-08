@@ -30,17 +30,17 @@
                                 <strong>{{ item.product_name }}</strong>
                               </v-col>
                               <v-spacer></v-spacer>
-                              <v-col cols="12" md="3">
+                              <v-col cols="12" md="6">
                                 <strong>R$ {{ item.product_price }}</strong>
                               </v-col>
-                              <v-col cols="auto">
+                              <v-col cols="12" md="2">
                                 <strong>Qtd:</strong>
                               </v-col>
-                              <v-col cols="auto">
+                              <v-col cols="12" md="4">
                                 <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact"
                                   hide-details style="width: 80px;" @click.stop @mousedown.stop />
                               </v-col>
-                              <v-col cols="auto">
+                              <v-col cols="12" md="6">
                                 <strong>R$ {{ (Number(item.quantity) * Number(item.product_price)).toFixed(2)
                                 }}</strong>
                               </v-col>
@@ -323,10 +323,11 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import addressForm from '@/address/addressForm.vue';
 import { useDisplay } from 'vuetify'
+import PaymentResult from './payment_result.vue';
 
 const { mdAndUp } = useDisplay()
 
@@ -369,6 +370,7 @@ const payment = ref({
 });
 const paymentStatus = ref(null);
 const paymentMessage = ref('');
+
 
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
@@ -733,22 +735,32 @@ async function submitPayment() {
     console.log('✅ Resposta do backend:', response.data);
 
     if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
-      paymentStatus.value = 'approved';
-      paymentMessage.value = 'Pagamento aprovado com sucesso!';
-    } else if (response.data.status === 'pending') {
-      paymentStatus.value = 'pending';
-      paymentMessage.value = 'Pagamento pendente. Aguarde confirmação.';
-    } else if (response.data.status === 'rejected') {
-      paymentStatus.value = 'rejected';
-      paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
-    } else {
-      paymentStatus.value = 'rejected';
-      paymentMessage.value = 'Erro desconhecido. Tente novamente.';
-    }
+  paymentStatus.value = 'approved';
+  paymentMessage.value = 'Pagamento aprovado com sucesso!';
+  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+  
+} else if (response.data.status === 'pending') {
+  paymentStatus.value = 'pending';
+  paymentMessage.value = 'Pagamento pendente. Aguarde confirmação.';
+  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+
+} else if (response.data.status === 'rejected') {
+  paymentStatus.value = 'rejected';
+  paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
+  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+
+} else {
+  paymentStatus.value = 'rejected';
+  paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
+  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+}
+
 
   } catch (error) {
-    console.error('❌ Erro detalhado:', error);
-    alert('Erro ao processar pagamento: ' + error.message);
+    paymentStatus.value = 'rejected';
+    paymentMessage.value = 'Erro desconhecido. Tente novamente.';
+    window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+
   }
 }
 
