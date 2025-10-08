@@ -236,9 +236,19 @@
                     </v-toolbar>
                     <v-card-text class="justify-center">
                       <div>
+                        <v-row>
+                          <v-col>
+                              <span>shippment: R$ {{ selectedDelivery.price }}</span>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col>
+                            <span>Subtotal: R${{ Number(totalCarrinho).toFixed(2) }}</span>
+                          </v-col>
+                        </v-row>
                         <v-row justify="center">
                           <v-col cols="auto">
-                            <span class="text-h4 ">R$ {{ (Number(selectedDelivery.price) +
+                            <span class="text-h4 ">Total: R$ {{ (Number(selectedDelivery.price) +
                               Number(totalCarrinho)).toFixed(2) }}</span>
                           </v-col>
                         </v-row>
@@ -285,8 +295,7 @@
 
                     <v-card-actions class="justify-space-between mt-2">
                       <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
-                      <v-btn color="primary" @click="submitPayment">Pagar</v-btn>
-                      <v-btn color="success">Finalizar Pedido</v-btn>
+                      <v-btn color="success"  @click="submitPayment">Finalizar Pedido</v-btn>
                     </v-card-actions>
                   </v-card>
                 </div>
@@ -306,6 +315,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import addressForm from '@/address/addressForm.vue';
+
 
 
 const api = axios.create({
@@ -344,6 +354,7 @@ const payment = ref({
   total_value: 0,
   installments: 1,
 });
+
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
 const cart = reactive(cartData)
@@ -617,8 +628,82 @@ const saveAddress = async () => {
   }
 };
 
-function submitPayment() {
-  console.log('Pagamento enviado', payment.value)
+const createCardToken = async (cardData) => {
+  if (!mp.value) {
+    throw new Error('MercadoPago não foi inicializado');
+  }
+
+  const token = await mp.value.card.createToken({
+    cardNumber: cardData.cardNumber,
+    cardholderName: cardData.cardholderName,
+    cardExpirationMonth: cardData.cardExpirationMonth,
+    cardExpirationYear: cardData.cardExpirationYear,
+    securityCode: cardData.securityCode,
+    identificationType: cardData.identificationType,
+    identificationNumber: cardData.identificationNumber
+  });
+
+  return token;
+};
+
+async function submitPayment() {
+  try {
+    console.log('🚀 Iniciando processo de pagamento...');
+
+    const deliveryPrice = parseFloat(selectedDelivery?.price || 0);
+    const cartTotal = parseFloat(totalCarrinho?.value || 0);
+    const totalAmount = deliveryPrice + cartTotal;
+
+    const payload = {
+      paymentType: tab.value,
+      total: totalAmount,
+      coupon_code: payment.value.coupon_code || null,
+      coupon_amount: payment.value.coupon_amount || 0,
+      name: payment.value.name,
+      cpf: payment.value.cpf,
+      email: payment.value.email,
+    };
+
+    // ⚡ APENAS campos que você realmente tem disponível
+    // Remova os que não existem no seu componente
+    
+    // Se você tem produtos no carrinho, adicione:
+    // payload.products = itemsDoCarrinho.value || []
+    
+    // Se você tem endereço, adicione:
+    // payload.address = enderecoSelecionado.value || {}
+
+    if (tab.value === 'credit' || tab.value === 'debit') {
+      const [month, year] = payment.value.expiration_date.split('/');
+      
+      // ⚡ ENVIA OS DADOS DO CARTÃO PARA O BACKEND CRIAR O TOKEN
+      payload.card_data = {
+        card_number: payment.value.card_number.replace(/\s/g, ''),
+        expiration_month: month?.trim(),
+        expiration_year: year?.trim(),
+        security_code: payment.value.security_code
+      };
+
+      payload.installments = payment.value.installments;
+      payload.payment_method_id = "visa" // ou detecte a bandeira
+    }
+
+    console.log('📤 Enviando para backend:', payload);
+    
+    // ⚡ ENVIA PARA SEU BACKEND PYTHON
+    const response = await api.post('/payment/payment', payload);
+    console.log('✅ Resposta do backend:', response.data);
+    
+    if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
+      alert('Pagamento processado com sucesso!');
+    } else {
+      alert('Erro no pagamento: ' + (response.data.message || 'Tente novamente'));
+    }
+
+  } catch (error) {
+    console.error('❌ Erro detalhado:', error);
+    alert('Erro ao processar pagamento: ' + error.message);
+  }
 }
 
 
@@ -626,5 +711,13 @@ function submitPayment() {
 onMounted(async () => {
   await getCoupon();
   await loadAddress();
+    try {
+    mp.value = new MercadoPago('APP_USR-f969c2eb-5d4f-4e5c-974d-ace6053a80a8', {
+      locale: 'pt-BR'
+    });
+    console.log('✅ MercadoPago inicializado:', mp.value);
+  } catch (error) {
+    console.log('❌ Erro ao inicializar MercadoPago:', error);
+  }
 });
 </script>
