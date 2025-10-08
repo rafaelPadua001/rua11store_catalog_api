@@ -246,12 +246,23 @@ def logout():
         
         print(f"Revogando token {jti} para usuário {user_id}")
         
-        # Verifica se o token já está na blocklist para evitar duplicidade
+        # ⚡ DETECTAR automaticamente o tipo de ID
+        if isinstance(user_id, int):
+            # É um admin (integer)
+            user_id_str = str(user_id)
+            print(f"👤 Admin detectado (ID: {user_id_str})")
+        else:
+            # É um client (UUID ou string)
+            user_id_str = str(user_id)
+            print(f"👤 Client detectado (ID: {user_id_str})")
+        
+        # Verifica se o token já está na blocklist
         existing = TokenBlocklist.query.filter_by(jti=jti).first()
         if existing:
             return jsonify({"msg": "Token já revogado"}), 400
         
-        revoked_token = TokenBlocklist(jti=jti, user_id=user_id)
+        # ⚡ Salva como string (funciona para ambos)
+        revoked_token = TokenBlocklist(jti=jti, user_id=user_id_str)
         db.session.add(revoked_token)
         db.session.commit()
         
@@ -259,6 +270,7 @@ def logout():
 
     except Exception as e:
         print(f"Erro ao revogar token: {str(e)}")
+        db.session.rollback()
         return jsonify({"error": "Erro interno"}), 500
 
 
