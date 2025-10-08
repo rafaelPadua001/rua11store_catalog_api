@@ -5,9 +5,9 @@
         <v-card-text>
           <v-timeline :direction="timelineDirection" line-inset="12">
             <!-- ETAPA 1: Itens -->
-            <v-timeline-item fill-dot :color="currentStep === 1 ? 'primary' : 'grey'">
+            <v-timeline-item fill-dot :color="currentStep === 1 ? 'primary' : 'grey'" dot-color="deep-purple">
               <template #icon>
-                <v-icon :color="currentStep === 1 ? 'primary' : 'grey'">mdi-cart-outline</v-icon>
+                <v-icon :color="currentStep === 1 ? 'yellow' : 'grey'">mdi-cart-outline</v-icon>
               </template>
 
               <template #opposite>
@@ -153,9 +153,9 @@
             </v-timeline-item>
 
             <!-- ETAPA 2: Endereço -->
-            <v-timeline-item :color="currentStep === 2 ? 'success' : 'grey'">
+            <v-timeline-item :color="currentStep === 2 ? 'success' : 'grey'" dot-color="deep-purple">
               <template #icon>
-                <v-icon :color="currentStep === 2 ? 'success' : 'grey'">mdi-truck-outline</v-icon>
+                <v-icon :color="currentStep === 2 ? 'yellow' : 'grey'">mdi-truck-outline</v-icon>
               </template>
 
               <template #opposite>
@@ -194,14 +194,17 @@
                   <h4 class="mb-2">Opções de entrega</h4>
 
                   <v-radio-group v-model="selectedDelivery" class="pa-2">
-                    <v-radio v-for="(option, index) in availableDeliveries" :key="index" :value="option" class="my-2">
+                    <template v-for="(option, index) in availableDeliveries" :key="index">
+                      <v-radio :value="option" class="my-2" v-if="option && !option.error" >
+                      
                       <template #label>
+                        
                         <div class="d-flex align-center gap-3">
                           <!-- Logo -->
-                          <v-img v-if="option.company.picture" :src="option.company.picture"
-                            alt="Logo {{ option.company.name }}" max-width="50" max-height="30" contain
+                          <v-img v-if="option.company && option.company.picture" :src="option.company.picture"
+                            alt="Logo {{ option.company.name }}" max-width="50" max-height="30" cover
                             class="rounded-sm"></v-img>
-
+                          <v-icon v-else color="grey" size="30">mdi-truck-delivery-outline</v-icon>
                           <!-- Dados da entrega -->
                           <div class="d-flex flex-column">
                             <span class="font-weight-medium">
@@ -214,6 +217,8 @@
                         </div>
                       </template>
                     </v-radio>
+                    </template>
+                    
                   </v-radio-group>
 
 
@@ -229,9 +234,9 @@
             </v-timeline-item>
 
             <!-- ETAPA 3: Pagamento -->
-            <v-timeline-item :color="currentStep === 3 ? 'purple' : 'grey'">
+            <v-timeline-item :color="currentStep === 3 ? 'purple' : 'grey'" dot-color="deep-purple">
               <template #icon>
-                <v-icon :color="currentStep === 3 ? 'purple' : 'grey'">mdi-credit-card-outline</v-icon>
+                <v-icon :color="currentStep === 3 ? 'yellow' : 'grey'">mdi-credit-card-outline</v-icon>
               </template>
 
               <template #opposite>
@@ -551,18 +556,41 @@ const calculateDelivery = async () => {
       product_height: Number(item.product_height || 0),
       product_width: Number(item.product_width || 0),
       product_length: Number(item.product_length || 0)
-    }))
+    }));
 
     console.log(cart.items);
+
     const { data } = await api.post('/melhorEnvio/calculate-delivery', {
       zipcode_origin: zipcodeOrigin,
       zipcode_destiny: cep,
       products
-    })
+    });
 
-    availableDeliveries.value = data
-    console.log('Fretes calculados:', data)
+    const companyLogos = {
+      1: 'https://static.melhorenvio.com.br/logo/correios.png',
+      6: 'https://static.melhorenvio.com.br/logo/latam-cargo.png',
+      9: 'https://static.melhorenvio.com.br/logo/azul-cargo.png',
+      12: 'https://static.melhorenvio.com.br/logo/buslog.png'
+    };
+    
+  
+const validDeliveries = Array.isArray(data)
+  ? data
+      .filter(d => !d?.error && Number(d?.price) > 0)
+      .map(d => ({
+        ...d,
+        company: {
+          ...d.company,
+          picture: companyLogos[d.company?.id] || null
+        }
+      }))
+  : []
 
+availableDeliveries.value = validDeliveries
+
+    if(validDeliveries.length === 0){
+      alert('Nenhuma transportadora disponível para esse endereço.');
+    }
   } catch (error) {
     console.error('Erro ao calcular frete:', error)
     alert('Erro ao calcular o frete.')
