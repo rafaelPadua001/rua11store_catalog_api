@@ -46,7 +46,7 @@
                               </v-col>
                             </v-row>
                             <v-card-actions>
-                              <v-btn color="error" size="small">Remover</v-btn>
+                              <v-btn color="error" size="small" @click="removeItemCart(item)">Remover</v-btn>
                             </v-card-actions>
                           </v-card>
                         </v-list-item>
@@ -136,7 +136,7 @@
                         <v-card-actions>
                           <v-row justify="end" class="mt-4">
                             <v-col cols="auto">
-                              <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
+                             <!-- <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>-->
                               <v-btn color="primary" @click="nextStep">Avançar</v-btn>
                             </v-col>
                           </v-row>
@@ -187,6 +187,7 @@
                   </v-card-actions>
                 </v-card>
                 <v-card-actions class="justify-space-between mt-2">
+                  <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
                   <v-btn color="primary" @click="calculateDelivery">Calcular Frete</v-btn>
                 </v-card-actions>
 
@@ -667,6 +668,27 @@ const saveAddress = async () => {
     alert('Não foi possível salvar o endereço. Tente novamente.')
   }
 };
+
+const removeItemCart = async(item) => {
+  console.log(item);
+  try{
+    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+    const response = await api.delete(`/cart/cart-item-remove/${item.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if(response.status === 200 && response.data.message == "Item removido com sucesso."){
+      cart.items = cart.items.filter(i => i.id !== item.id)
+      console.log('Item removido');
+    } 
+  }
+  catch(e){
+    console.log('Erro ao remover item. Tente novamente...', e);
+  }
+}
 
 const createCardToken = async (cardData) => {
   if (!mp.value) {
