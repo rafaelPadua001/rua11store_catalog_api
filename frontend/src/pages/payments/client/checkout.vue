@@ -5,9 +5,9 @@
         <v-card-text>
           <v-timeline :direction="timelineDirection" line-inset="12">
             <!-- ETAPA 1: Itens -->
-            <v-timeline-item fill-dot :color="currentStep === 1 ? 'primary' : 'grey'">
+            <v-timeline-item fill-dot :color="currentStep === 1 ? 'primary' : 'grey'" dot-color="deep-purple">
               <template #icon>
-                <v-icon :color="currentStep === 1 ? 'primary' : 'grey'">mdi-cart-outline</v-icon>
+                <v-icon :color="currentStep === 1 ? 'yellow' : 'grey'">mdi-cart-outline</v-icon>
               </template>
 
               <template #opposite>
@@ -30,17 +30,17 @@
                                 <strong>{{ item.product_name }}</strong>
                               </v-col>
                               <v-spacer></v-spacer>
-                              <v-col cols="12" md="3">
+                              <v-col cols="12" md="6">
                                 <strong>R$ {{ item.product_price }}</strong>
                               </v-col>
-                              <v-col cols="auto">
+                              <v-col cols="12" md="2">
                                 <strong>Qtd:</strong>
                               </v-col>
-                              <v-col cols="auto">
+                              <v-col cols="12" md="4">
                                 <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact"
                                   hide-details style="width: 80px;" @click.stop @mousedown.stop />
                               </v-col>
-                              <v-col cols="auto">
+                              <v-col cols="12" md="6">
                                 <strong>R$ {{ (Number(item.quantity) * Number(item.product_price)).toFixed(2)
                                 }}</strong>
                               </v-col>
@@ -153,9 +153,9 @@
             </v-timeline-item>
 
             <!-- ETAPA 2: Endereço -->
-            <v-timeline-item :color="currentStep === 2 ? 'success' : 'grey'">
+            <v-timeline-item :color="currentStep === 2 ? 'success' : 'grey'" dot-color="deep-purple">
               <template #icon>
-                <v-icon :color="currentStep === 2 ? 'success' : 'grey'">mdi-truck-outline</v-icon>
+                <v-icon :color="currentStep === 2 ? 'yellow' : 'grey'">mdi-truck-outline</v-icon>
               </template>
 
               <template #opposite>
@@ -194,14 +194,17 @@
                   <h4 class="mb-2">Opções de entrega</h4>
 
                   <v-radio-group v-model="selectedDelivery" class="pa-2">
-                    <v-radio v-for="(option, index) in availableDeliveries" :key="index" :value="option" class="my-2">
+                    <template v-for="(option, index) in availableDeliveries" :key="index">
+                      <v-radio :value="option" class="my-2" v-if="option && !option.error" >
+                      
                       <template #label>
+                        
                         <div class="d-flex align-center gap-3">
                           <!-- Logo -->
-                          <v-img v-if="option.company.picture" :src="option.company.picture"
-                            alt="Logo {{ option.company.name }}" max-width="50" max-height="30" contain
+                          <v-img v-if="option.company && option.company.picture" :src="option.company.picture"
+                            alt="Logo {{ option.company.name }}" max-width="50" max-height="30" cover
                             class="rounded-sm"></v-img>
-
+                          <v-icon v-else color="grey" size="30">mdi-truck-delivery-outline</v-icon>
                           <!-- Dados da entrega -->
                           <div class="d-flex flex-column">
                             <span class="font-weight-medium">
@@ -214,6 +217,8 @@
                         </div>
                       </template>
                     </v-radio>
+                    </template>
+                    
                   </v-radio-group>
 
 
@@ -229,9 +234,9 @@
             </v-timeline-item>
 
             <!-- ETAPA 3: Pagamento -->
-            <v-timeline-item :color="currentStep === 3 ? 'purple' : 'grey'">
+            <v-timeline-item :color="currentStep === 3 ? 'purple' : 'grey'" dot-color="deep-purple">
               <template #icon>
-                <v-icon :color="currentStep === 3 ? 'purple' : 'grey'">mdi-credit-card-outline</v-icon>
+                <v-icon :color="currentStep === 3 ? 'yellow' : 'grey'">mdi-credit-card-outline</v-icon>
               </template>
 
               <template #opposite>
@@ -318,10 +323,11 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import addressForm from '@/address/addressForm.vue';
 import { useDisplay } from 'vuetify'
+import PaymentResult from './payment_result.vue';
 
 const { mdAndUp } = useDisplay()
 
@@ -362,6 +368,9 @@ const payment = ref({
   total_value: 0,
   installments: 1,
 });
+const paymentStatus = ref(null);
+const paymentMessage = ref('');
+
 
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
@@ -551,18 +560,41 @@ const calculateDelivery = async () => {
       product_height: Number(item.product_height || 0),
       product_width: Number(item.product_width || 0),
       product_length: Number(item.product_length || 0)
-    }))
+    }));
 
     console.log(cart.items);
+
     const { data } = await api.post('/melhorEnvio/calculate-delivery', {
       zipcode_origin: zipcodeOrigin,
       zipcode_destiny: cep,
       products
-    })
+    });
 
-    availableDeliveries.value = data
-    console.log('Fretes calculados:', data)
+    const companyLogos = {
+      1: 'https://static.melhorenvio.com.br/logo/correios.png',
+      6: 'https://static.melhorenvio.com.br/logo/latam-cargo.png',
+      9: 'https://static.melhorenvio.com.br/logo/azul-cargo.png',
+      12: 'https://static.melhorenvio.com.br/logo/buslog.png'
+    };
+    
+  
+const validDeliveries = Array.isArray(data)
+  ? data
+      .filter(d => !d?.error && Number(d?.price) > 0)
+      .map(d => ({
+        ...d,
+        company: {
+          ...d.company,
+          picture: companyLogos[d.company?.id] || null
+        }
+      }))
+  : []
 
+availableDeliveries.value = validDeliveries
+
+    if(validDeliveries.length === 0){
+      alert('Nenhuma transportadora disponível para esse endereço.');
+    }
   } catch (error) {
     console.error('Erro ao calcular frete:', error)
     alert('Erro ao calcular o frete.')
@@ -703,14 +735,32 @@ async function submitPayment() {
     console.log('✅ Resposta do backend:', response.data);
 
     if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
-      alert('Pagamento processado com sucesso!');
-    } else {
-      alert('Erro no pagamento: ' + (response.data.message || 'Tente novamente'));
-    }
+  paymentStatus.value = 'approved';
+  paymentMessage.value = 'Pagamento aprovado com sucesso!';
+  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+  
+} else if (response.data.status === 'pending') {
+  paymentStatus.value = 'pending';
+  paymentMessage.value = 'Pagamento pendente. Aguarde confirmação.';
+  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+
+} else if (response.data.status === 'rejected') {
+  paymentStatus.value = 'rejected';
+  paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
+  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+
+} else {
+  paymentStatus.value = 'rejected';
+  paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
+  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+}
+
 
   } catch (error) {
-    console.error('❌ Erro detalhado:', error);
-    alert('Erro ao processar pagamento: ' + error.message);
+    paymentStatus.value = 'rejected';
+    paymentMessage.value = 'Erro desconhecido. Tente novamente.';
+    window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+
   }
 }
 
