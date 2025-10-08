@@ -367,6 +367,8 @@ const payment = ref({
   total_value: 0,
   installments: 1,
 });
+const paymentStatus = ref(null);
+const paymentMessage = ref('');
 
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
@@ -731,9 +733,17 @@ async function submitPayment() {
     console.log('✅ Resposta do backend:', response.data);
 
     if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
-      alert('Pagamento processado com sucesso!');
+      paymentStatus.value = 'approved';
+      paymentMessage.value = 'Pagamento aprovado com sucesso!';
+    } else if (response.data.status === 'pending') {
+      paymentStatus.value = 'pending';
+      paymentMessage.value = 'Pagamento pendente. Aguarde confirmação.';
+    } else if (response.data.status === 'rejected') {
+      paymentStatus.value = 'rejected';
+      paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
     } else {
-      alert('Erro no pagamento: ' + (response.data.message || 'Tente novamente'));
+      paymentStatus.value = 'rejected';
+      paymentMessage.value = 'Erro desconhecido. Tente novamente.';
     }
 
   } catch (error) {
