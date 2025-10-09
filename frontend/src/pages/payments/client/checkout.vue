@@ -148,11 +148,6 @@
                   </v-col>
                 </v-row>
               </div>
-
-
-
-
-
             </v-timeline-item>
 
             <!-- ETAPA 2: Endereço -->
@@ -166,11 +161,12 @@
 
                   <addressForm ref="addressFormRef" v-if="!address" />
                   <v-card class="py-2" width="500" v-else>
-                    <v-toolbar color="transparent">
+                    <v-toolbar color="deep-purple-accent-4">
                       <v-toolbar-title>
                         <v-icon class="me-2">mdi-map-marker</v-icon>
                         Endereço de Entrega</v-toolbar-title>
                     </v-toolbar>
+                    <v-divider :thickness="1"></v-divider>
                     <v-card-text>
                       <div><strong>CEP:</strong> {{ address.cep }}</div>
                       <div><strong>Logradouro:</strong> {{ address.logradouro }}</div>
@@ -245,7 +241,7 @@
               </template>
 
               <template #opposite>
-                <span class="text-body-1"></span>
+                <span class="text-body-1">Pagamento</span>
               </template>
               <div v-if="currentStep === 3">
                 <v-card>
@@ -266,8 +262,8 @@
                       </v-row>
                       <v-row justify="center">
                         <v-col cols="auto">
-                          <span class="text-h4 ">Total: R$ {{ (Number(selectedDelivery.price) +
-                            Number(totalCarrinho)).toFixed(2) }}</span>
+                          <span class="text-h4 ">Total: R$ {{ ((Number(selectedDelivery.price) +
+                            Number(totalCarrinho)) / payment.installments).toFixed(2) }}</span>
                         </v-col>
                       </v-row>
 
@@ -286,16 +282,8 @@
 
                     <!-- Campos compartilhados -->
                     <div v-if="tab === 'credit' || tab === 'debit'">
-                        <v-select
-    v-model="payment.payment_method_id"
-    :items="cardBrands"
-    label="Selecione a bandeira do cartão"
-    item-value="id"
-    item-title="name"
-   
-    outlined
-    dense
-  />
+                      <v-select v-model="payment.payment_method_id" :items="cardBrands"
+                        label="Selecione a bandeira do cartão" item-value="id" item-title="name" outlined dense />
                       <VMaskInput :label="tab === 'credit' ? 'Número do Cartão (Crédito)' : 'Número do Cartão (Débito)'"
                         v-model="payment.card_number" mask="credit-card" variant="underlined" />
                       <v-text-field label="Nome do Titular" v-model="payment.name" variant="underlined" />
@@ -740,7 +728,10 @@ const removeAddress = async (addr) => {
     });
 
     // Limpa o endereço
-    address.value = {};
+    address.value = null;
+    if (addressFormRef.value) {
+      addressFormRef.value.resetForm?.();
+    }
     console.log('Endereço removido');
   } catch (e) {
     console.log('Não foi possível remover endereço', e);
