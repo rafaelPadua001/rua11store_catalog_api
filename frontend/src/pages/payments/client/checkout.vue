@@ -286,6 +286,16 @@
 
                     <!-- Campos compartilhados -->
                     <div v-if="tab === 'credit' || tab === 'debit'">
+                        <v-select
+    v-model="payment.payment_method_id"
+    :items="cardBrands"
+    label="Selecione a bandeira do cartão"
+    item-value="id"
+    item-title="name"
+   
+    outlined
+    dense
+  />
                       <VMaskInput :label="tab === 'credit' ? 'Número do Cartão (Crédito)' : 'Número do Cartão (Débito)'"
                         v-model="payment.card_number" mask="credit-card" variant="underlined" />
                       <v-text-field label="Nome do Titular" v-model="payment.name" variant="underlined" />
@@ -390,11 +400,19 @@ const payment = ref({
   coupon_amount: 0,
   total_value: 0,
   installments: 1,
+  payment_method_id: null,
 });
 const paymentStatus = ref(null);
 const paymentMessage = ref('');
 
-
+const cardBrands = [
+  { id: 'visa', name: 'Visa' },
+  { id: 'mastercard', name: 'Mastercard' },
+  { id: 'elo', name: 'Elo' },
+  { id: 'amex', name: 'American Express' },
+  { id: 'hipercard', name: 'Hipercard' },
+  { id: 'cabal', name: 'Cabal' },
+];
 
 // 👇 Faz o Vue reagir a mudanças no carrinho
 const cart = reactive(cartData)
@@ -752,23 +770,6 @@ const removeItemCart = async (item) => {
   }
 }
 
-const createCardToken = async (cardData) => {
-  if (!mp.value) {
-    throw new Error('MercadoPago não foi inicializado');
-  }
-
-  const token = await mp.value.card.createToken({
-    cardNumber: cardData.cardNumber,
-    cardholderName: cardData.cardholderName,
-    cardExpirationMonth: cardData.cardExpirationMonth,
-    cardExpirationYear: cardData.cardExpirationYear,
-    securityCode: cardData.securityCode,
-    identificationType: cardData.identificationType,
-    identificationNumber: cardData.identificationNumber
-  });
-
-  return token;
-};
 
 function formatExpiration() {
   let val = payment.value.expiration_date.replace(/\D/g, ''); // só números
@@ -821,7 +822,8 @@ async function submitPayment() {
       };
 
       payload.installments = payment.value.installments;
-      payload.payment_method_id = 'visa';
+      payload.payment_method_id = payment.value.payment_method_id?.id || 'visa';
+
     }
     console.log('📤 Enviando para backend:', payload);
 
@@ -854,7 +856,7 @@ async function submitPayment() {
     paymentStatus.value = 'rejected';
     paymentMessage.value = 'Erro desconhecido. Tente novamente.';
     console.log('Erro desconhecido. Tente novamente.', error);
-    // window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+    window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
   }
 }
