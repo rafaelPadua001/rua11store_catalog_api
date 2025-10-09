@@ -23,3 +23,6 @@ class Address(db.Model):
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     client_user = db.relationship("ClientUser", back_populates="addresses")
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

@@ -81,3 +81,31 @@ class AddressController:
             return jsonify({"error": f"Campo obrigatório faltando: {str(e)}"}), 400
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+        
+    @staticmethod
+    def update_address(user_id, address_id, data):
+        address = Address.query.filter_by(id=address_id, client_user_id=user_id).first()
+
+        if not address:
+            return {"error": "Endereço não encontrado"}, 404
+        
+        for key, value in data.items():
+            if hasattr(address, key) and value is not None:
+                setattr(address, key, value)
+
+        db.session.commit()
+        return {"message": "Endereço atualizado com sucesso!", "address": address.to_dict() if hasattr(address, 'to_dict') else data}
+    
+    @staticmethod
+    def delete_address(address_id, user_id):
+       
+        address = Address.query.filter_by(id=address_id, client_user_id=user_id).first()
+        if not address:
+            return jsonify({"error": "Endereço não encontrado"})
+        
+        try:
+            db.session.delete(address)
+            db.session.commit()
+            return jsonify({"message": "Endereço deletado com sucesso."}), 200
+        except Exception as e:
+            return jsonify({"error": "Erro ao deletar endereço", "details": str(e)}), 500

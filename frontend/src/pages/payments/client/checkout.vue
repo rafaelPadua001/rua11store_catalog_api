@@ -165,10 +165,14 @@
               </template>
 
               <div v-if="currentStep === 2">
-                <h3>Endereço de Entrega</h3>
-
+                
                 <addressForm ref="addressFormRef" v-if="!address" />
-                <v-card v-else>
+                <v-card class="py-2" width="500" v-else>
+                  <v-toolbar color="transparent">
+                    <v-toolbar-title> 
+                       <v-icon class="me-2">mdi-map-marker</v-icon>
+                      Endereço de Entrega</v-toolbar-title>
+                  </v-toolbar>
                   <v-card-text>
                     <div><strong>CEP:</strong> {{ address.cep }}</div>
                     <div><strong>Logradouro:</strong> {{ address.logradouro }}</div>
@@ -182,8 +186,8 @@
                   </v-card-text>
 
                   <v-card-actions>
-                    <v-btn>Editar</v-btn>
-                    <v-btn>Remover</v-btn>
+                    <v-btn @click="openAddressDialog(address)">Editar</v-btn>
+                    <v-btn @click="removeAddress(address)">Remover</v-btn>
                   </v-card-actions>
                 </v-card>
                 <v-card-actions class="justify-space-between mt-2">
@@ -225,7 +229,7 @@
 
                   <v-card-actions class="justify-end mt-2">
                     <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
-                    <v-btn color="primary" :disabled="!selectedDelivery" @click="saveAddress">
+                    <v-btn color="primary" :disabled="!selectedDelivery" @click="saveAddress()">
                       Continuar
                     </v-btn>
                   </v-card-actions>
@@ -318,6 +322,16 @@
           </v-timeline>
         </v-card-text>
       </v-card>
+
+      <v-dialog v-model="addressDialog" max-width="600">
+        <v-card>
+          <v-card-title>Editar Endereço</v-card-title>
+          <v-card-text>
+            <addressForm v-if="addressDialog" :address="address":editing="true" @updated="onUpdated" @cancel="addressDialog = false" ref="addressFormRef"/>
+          </v-card-text>
+
+        </v-card>
+      </v-dialog>
     </v-col>
   </v-row>
 </template>
@@ -342,6 +356,7 @@ const api = axios.create({
 });
 
 const address = ref(null);
+const addressDialog = ref(false); 
 const route = useRoute()
 const cartData = route.query.item ? JSON.parse(route.query.item) : { items: [] }
 const coupons = ref([]);
@@ -650,8 +665,6 @@ const saveAddress = async () => {
       delivery_price: selectedDelivery?.price || null
     }
 
-    console.log('Dados que serão enviados:', data)
-
     const response = await api.post('/address/create-address', data, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('access_token') || localStorage.getItem('token')}`
@@ -660,14 +673,56 @@ const saveAddress = async () => {
 
     // Atualiza endereço local
     address.value = { ...data, id: response.data.address_id }
-
-    console.log('Endereço salvo com sucesso:', response.data)
+ 
     nextStep()
   } catch (e) {
     console.error('Erro ao salvar o endereço:', e)
     alert('Não foi possível salvar o endereço. Tente novamente.')
   }
 };
+
+const openAddressDialog = (address) => {
+  addressDialog.value = true;
+}
+
+const onUpdated = async (updatedAddress) => {
+  try{
+    address.value = {...updatedAddress, id: address.value.id}
+   
+    addressDialog.value = false
+    
+    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+
+    const response = await api.put(`/address/update-address/${address.value.id}`, address.value, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+  catch(e){
+    console.log('Erro ao atualizar endereço.', e);
+  }
+ 
+};
+
+const removeAddress = async (addr) => {
+  if (!confirm('Deseja realmente remover este endereço?')) return;
+
+  try {
+    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+    await api.delete(`/address/delete-address/${addr.id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    // Limpa o endereço
+    address.value = {};
+    console.log('Endereço removido');
+  } catch (e) {
+    console.log('Não foi possível remover endereço', e);
+  }
+};
+
+
 
 const removeItemCart = async(item) => {
   console.log(item);
@@ -777,16 +832,13 @@ async function submitPayment() {
   window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 }
 
-
-  } catch (error) {
+} catch (error) {
     paymentStatus.value = 'rejected';
     paymentMessage.value = 'Erro desconhecido. Tente novamente.';
     window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
   }
 }
-
-
 
 onMounted(async () => {
   await getCoupon();

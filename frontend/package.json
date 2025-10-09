@@ -13,7 +13,7 @@
     "build": "npm run generate-sitemap && npm run type-check && npm run build-only"
   },
   "dependencies": {
-    "@mdi/font": "7.4.47",
+    "@mdi/font": "^7.4.47",
     "@mercadopago/sdk-js": "^0.0.3",
     "@supabase/supabase-js": "^2.50.3",
     "@tiptap/starter-kit": "^2.12.0",
