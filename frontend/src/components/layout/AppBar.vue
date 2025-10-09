@@ -116,7 +116,7 @@
       </div>
 
       <v-card-actions class="justify-center mt-2">
-        <v-btn color="primary" size="small" variant="tonal" @click="checkout(cart)">Finalizar Compra</v-btn>
+        <v-btn color="primary" size="small" variant="tonal" @click="checkout(cart)" :disabled="cart.items.length === 0">Finalizar Compra</v-btn>
       </v-card-actions>
     </v-list-item>
   </template>

@@ -106,7 +106,11 @@
           </v-col>
           
         </v-row>
-        
+        <v-card-actions v-if="editing">
+  <v-btn color="primary" @click="$emit('updated', { ...address })">Salvar</v-btn>
+  <v-btn text @click="$emit('cancel')">Cancelar</v-btn>
+</v-card-actions>
+
       </v-form>
     </v-col>
   </v-row>
@@ -116,6 +120,24 @@
 
 <script setup>
 import { ref, reactive, watch, defineExpose } from 'vue'
+
+const props = defineProps({
+  address: {
+    type: Object,
+    default: () => ({})
+  },
+  editing: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const emit = defineEmits(['updated']);
+const form = ref({...props.address});
+
+watch(() => props.address, (newVal) => {
+  form.value = {...newVal}
+}, {immediate: true});
 
 const estados = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
@@ -127,15 +149,15 @@ const addressForm = ref(null)
 const loadingCep = ref(false)
 
 const address = reactive({
-  cep: '',
-  logradouro: '',
-  numero: '',
-  complemento: '',
-  bairro: '',
-  cidade: '',
-  estado: '',
-  pais: 'Brasil',
-  referencia: ''
+  cep: props.address?.cep || '',
+  logradouro: props.address?.logradouro || '',
+  numero: props.address?.numero || '',
+  complemento: props.address?.complemento || '',
+  bairro: props.address?.bairro || '',
+  cidade: props.address?.cidade || '',
+  estado: props.address?.estado || '',
+  pais: props.address?.pais || 'Brasil',
+  referencia: props.address?.referencia || ''
 })
 
 const rules = {
