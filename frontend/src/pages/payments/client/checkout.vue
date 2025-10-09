@@ -829,26 +829,26 @@ async function submitPayment() {
     const response = await api.post('/payment/payment', payload);
     console.log('✅ Resposta do backend:', response.data);
 
-    //  if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
-    //  paymentStatus.value = 'approved';
-    //  paymentMessage.value = 'Pagamento aprovado com sucesso!';
-    //  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
-    //  
-    //} else if (response.data.status === 'pending') {
-    //  paymentStatus.value = 'pending';
-    //  paymentMessage.value = 'Pagamento pendente. Aguarde confirmação.';
-    //  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
-    //
-    //} else if (response.data.status === 'rejected') {
-    //  paymentStatus.value = 'rejected';
-    //  paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
-    //  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
-    //
-    //} else {
-    //  paymentStatus.value = 'rejected';
-    //  paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
-    //  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
-    //}
+    if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
+      paymentStatus.value = 'approved';
+      paymentMessage.value = 'Pagamento aprovado com sucesso!';
+      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+
+    } else if (response.data.status === 'pending') {
+      paymentStatus.value = 'pending';
+      paymentMessage.value = 'Pagamento pendente. Aguarde confirmação.';
+      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+
+    } else if (response.data.status === 'rejected') {
+      paymentStatus.value = 'rejected';
+      paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
+      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+
+    } else {
+      paymentStatus.value = 'rejected';
+      paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
+      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+    }
 
   } catch (error) {
     paymentStatus.value = 'rejected';
@@ -872,10 +872,3 @@ onMounted(async () => {
   }
 });
 </script>
-
-<style>
-.v-timeline-horizontal {
-  align-items: flex-start;
-  /* força itens no topo */
-}
-</style>
