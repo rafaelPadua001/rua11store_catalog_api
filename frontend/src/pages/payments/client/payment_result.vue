@@ -14,7 +14,7 @@
         </v-icon>
 
         <v-card-title class="text-h5 font-weight-bold mb-2">
-          {{ title }}
+          {{ status }}
         </v-card-title>
 
         <v-card-text class="text-body-1">
@@ -38,5 +38,6 @@ const message = ref('')
 onMounted(() => {
   status.value = sessionStorage.getItem('paymentStatus')
   message.value = sessionStorage.getItem('paymentMessage')
+  console.log(status.value);
 })
 </script>
