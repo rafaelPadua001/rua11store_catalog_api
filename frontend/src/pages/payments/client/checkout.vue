@@ -1,9 +1,9 @@
 <template>
   <v-row justify="center">
-    <v-col cols="12" sm="12" md="10" lg="10" xl="6">
-      <v-card class="pa-4" elevation="0">
+    <v-col cols="12">
+      <v-card class="w-full w-full max-w-md" elevation="0">
         <v-card-text>
-          <v-timeline :direction="timelineDirection" line-inset="12" align="start">
+          <v-timeline :direction="timelineDirection" line-inset="12">
             <!-- ETAPA 1: Itens -->
             <v-timeline-item fill-dot :color="currentStep === 1 ? 'primary' : 'grey'" dot-color="deep-purple">
               <template #icon>
@@ -15,17 +15,12 @@
               </template>
 
               <div v-if="currentStep === 1">
-                <v-row>
+                <v-row no-gutters>
                   <v-col cols="12" md="6">
                     <v-list>
                       <v-list-item v-for="(item, index) in cart.items" :key="index">
-                        <v-row>
-                          <v-col>
-
-                          </v-col>
-                        </v-row>
-                        <v-card class="pa-2 mb-2 d-flex flex-column" elevation="0">
-                          <v-avatar size="50">
+                        <v-card class="d-flex flex-column w-full max-w-md" elevation="0">
+                          <v-avatar size="150">
                             <v-img :src="item.product_image" :alt="item.product_name" cover></v-img>
                           </v-avatar>
                           <v-row>
@@ -56,7 +51,7 @@
                     </v-list>
                   </v-col>
                   <v-col cols="12" md="6">
-                    <v-card>
+                    <v-card class="w-full max-w-wd">
                       <v-card-title>
                         Resumo
                       </v-card-title>
@@ -136,8 +131,9 @@
                         </v-row>
 
                       </v-card-text>
+                      <v-divider></v-divider>
                       <v-card-actions>
-                        <v-row justify="end" class="mt-4">
+                        <v-row justify="end">
                           <v-col cols="auto">
                             <!-- <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>-->
                             <v-btn color="primary" @click="nextStep">Avançar</v-btn>
@@ -151,7 +147,7 @@
             </v-timeline-item>
 
             <!-- ETAPA 2: Endereço -->
-            <v-timeline-item :color="currentStep === 2 ? 'success' : 'grey'" dot-color="deep-purple" align="start">
+            <v-timeline-item :color="currentStep === 2 ? 'success' : 'grey'" dot-color="deep-purple">
               <template #icon>
                 <v-icon :color="currentStep === 2 ? 'yellow' : 'grey'">mdi-truck-outline</v-icon>
               </template>
@@ -160,23 +156,28 @@
                 <div v-if="currentStep === 2">
 
                   <addressForm ref="addressFormRef" v-if="!address" />
-                  <v-card class="py-2" width="500" v-else>
+                  <v-card class="d-flex flex-column "  v-else>
                     <v-toolbar color="deep-purple-accent-4">
                       <v-toolbar-title>
-                        <v-icon class="me-2">mdi-map-marker</v-icon>
+                        <v-icon>mdi-map-marker</v-icon>
                         Endereço de Entrega</v-toolbar-title>
                     </v-toolbar>
-                    <v-divider :thickness="1"></v-divider>
+                    <v-divider></v-divider>
                     <v-card-text>
-                      <div><strong>CEP:</strong> {{ address.cep }}</div>
-                      <div><strong>Logradouro:</strong> {{ address.logradouro }}</div>
-                      <div><strong>Número:</strong> {{ address.numero }}</div>
-                      <div v-if="address.complemento"><strong>Complemento:</strong> {{ address.complemento }}</div>
-                      <div><strong>Bairro:</strong> {{ address.bairro }}</div>
-                      <div><strong>Cidade:</strong> {{ address.cidade }}</div>
-                      <div><strong>Estado:</strong> {{ address.estado }}</div>
-                      <div><strong>País:</strong> {{ address.pais }}</div>
-                      <div v-if="address.referencia"><strong>Referência:</strong> {{ address.referencia }}</div>
+                      <v-row>
+                        <v-col>
+                          <div><strong>CEP:</strong> {{ address.cep }}</div>
+                          <div><strong>Logradouro:</strong> {{ address.logradouro }}</div>
+                          <div><strong>Número:</strong> {{ address.numero }}</div>
+                          <div v-if="address.complemento"><strong>Complemento:</strong> {{ address.complemento }}</div>
+                          <div><strong>Bairro:</strong> {{ address.bairro }}</div>
+                          <div><strong>Cidade:</strong> {{ address.cidade }}</div>
+                          <div><strong>Estado:</strong> {{ address.estado }}</div>
+                          <div><strong>País:</strong> {{ address.pais }}</div>
+                          <div v-if="address.referencia"><strong>Referência:</strong> {{ address.referencia }}</div>
+                        </v-col>
+                      </v-row>
+                     
                     </v-card-text>
 
                     <v-card-actions>
@@ -184,7 +185,7 @@
                       <v-btn @click="removeAddress(address)">Remover</v-btn>
                     </v-card-actions>
                   </v-card>
-                  <v-card-actions class="justify-space-between mt-2">
+                  <v-card-actions class="justify-space-between mt-2" v-if="!availableDeliveries.length">
                     <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
                     <v-btn color="primary" @click="calculateDelivery">Calcular Frete</v-btn>
                   </v-card-actions>
@@ -235,15 +236,15 @@
             </v-timeline-item>
 
             <!-- ETAPA 3: Pagamento -->
-            <v-timeline-item :color="currentStep === 3 ? 'purple' : 'grey'" dot-color="deep-purple">
+            <v-timeline-item :color="currentStep === 3 ? 'purple' : 'grey'"  fill-dot dot-color="deep-purple">
               <template #icon>
                 <v-icon :color="currentStep === 3 ? 'yellow' : 'grey'">mdi-credit-card-outline</v-icon>
               </template>
 
               <template #opposite>
-                <span class="text-body-1">Pagamento</span>
+                <span class="text-body-2">Pagamento</span>
               </template>
-              <div v-if="currentStep === 3">
+              <div v-if="currentStep === 3"  class="timeline-content d-flex flex-column">
                 <v-card>
                   <v-toolbar flat>
                     <v-toolbar-title>Pagamento</v-toolbar-title>
@@ -251,18 +252,17 @@
                   <v-card-text class="justify-center">
                     <div>
                       <v-row>
-                        <v-col>
-                          <span>shippment: R$ {{ selectedDelivery.price }}</span>
+                        <v-col cols="12" md="6">
+                          <span>shippment: R${{ selectedDelivery.price }}</span>
                         </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col>
+                         <v-col cols="12" md="5">
                           <span>Subtotal: R${{ Number(totalCarrinho).toFixed(2) }}</span>
                         </v-col>
                       </v-row>
+                     
                       <v-row justify="center">
-                        <v-col cols="auto">
-                          <span class="text-h4 ">Total: R$ {{ ((Number(selectedDelivery.price) +
+                        <v-col cols="12" class="text-center">
+                          <span class="text-h5 text-weight-bold">Total: R$ {{ ((Number(selectedDelivery.price) +
                             Number(totalCarrinho)) / payment.installments).toFixed(2) }}</span>
                         </v-col>
                       </v-row>
@@ -283,7 +283,7 @@
                     <!-- Campos compartilhados -->
                     <div v-if="tab === 'credit' || tab === 'debit'">
                       <v-select v-model="payment.payment_method_id" :items="cardBrands"
-                        label="Selecione a bandeira do cartão" item-value="id" item-title="name" outlined dense />
+                        label="Selecione a bandeira do cartão" item-value="id" item-title="name" variant="underlined" dense />
                       <VMaskInput :label="tab === 'credit' ? 'Número do Cartão (Crédito)' : 'Número do Cartão (Débito)'"
                         v-model="payment.card_number" mask="credit-card" variant="underlined" />
                       <v-text-field label="Nome do Titular" v-model="payment.name" variant="underlined" />
@@ -295,7 +295,7 @@
                       <v-text-field label="Código de Segurança" v-model="payment.security_code" maxlength="3"
                         variant="outlined" @input="payment.security_code = payment.security_code.replace(/\D/g, '')" />
                       <v-text-field v-model="payment.expiration_date" label="Validade do cartão (MM/YYYY)" maxlength="7"
-                        placeholder="MM/YYYY" @input="formatExpiration" />
+                        placeholder="MM/YYYY" @input="formatExpiration" variant="underlined"/>
                       <!-- Select de parcelas só para crédito -->
                       <v-select v-if="tab === 'credit'" label="Parcelas"
                         :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]" v-model="payment.installments"
@@ -315,9 +315,9 @@
                     </div>
                   </v-card-text>
 
-                  <v-card-actions class="justify-space-between mt-2">
-                    <v-btn color="grey" variant="tonal" @click="prevStep">Voltar</v-btn>
-                    <v-btn color="success" @click="submitPayment">Finalizar Pedido</v-btn>
+                  <v-card-actions class="justify-space-around mt-0">
+                    <v-btn color="primary" @click="prevStep" size="small">Voltar</v-btn>
+                    <v-btn color="success" @click="submitPayment" size="small">Finalizar Pedido</v-btn>
                   </v-card-actions>
                 </v-card>
               </div>
@@ -328,7 +328,7 @@
       </v-card>
 
       <v-dialog v-model="addressDialog" max-width="600">
-        <v-card>
+        <v-card class="w-full max-w-md">
           <v-card-title>Editar Endereço</v-card-title>
           <v-card-text>
             <addressForm v-if="addressDialog" :address="address" :editing="true" @updated="onUpdated"
@@ -490,7 +490,7 @@ const getCoupon = async () => {
     const response = await api.get(`/coupon/get-coupons/${cart.user_id}`)
 
     if (!response.data || response.data.length === 0) {
-      console.log('Você não possui cupom');
+     // console.log('Você não possui cupom');
       coupons.value = [];
       return;
     }
@@ -591,7 +591,7 @@ const calculateDelivery = async () => {
       product_length: Number(item.product_length || 0)
     }));
 
-    console.log(cart.items);
+   // console.log(cart.items);
 
     const { data } = await api.post('/melhorEnvio/calculate-delivery', {
       zipcode_origin: zipcodeOrigin,
@@ -732,7 +732,7 @@ const removeAddress = async (addr) => {
     if (addressFormRef.value) {
       addressFormRef.value.resetForm?.();
     }
-    console.log('Endereço removido');
+ //   console.log('Endereço removido');
   } catch (e) {
     console.log('Não foi possível remover endereço', e);
   }
@@ -753,7 +753,7 @@ const removeItemCart = async (item) => {
 
     if (response.status === 200 && response.data.message == "Item removido com sucesso.") {
       cart.items = cart.items.filter(i => i.id !== item.id)
-      console.log('Item removido');
+      //console.log('Item removido');
     }
   }
   catch (e) {
@@ -816,11 +816,11 @@ async function submitPayment() {
       payload.payment_method_id = payment.value.payment_method_id?.id || 'visa';
 
     }
-    console.log('📤 Enviando para backend:', payload);
+  //  console.log('📤 Enviando para backend:', payload);
 
     // ⚡ ENVIA PARA SEU BACKEND PYTHON
     const response = await api.post('/payment/payment', payload);
-    console.log('✅ Resposta do backend:', response.data);
+   // console.log('✅ Resposta do backend:', response.data);
 
     if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
       paymentStatus.value = 'approved';
@@ -859,9 +859,31 @@ onMounted(async () => {
     mp.value = new MercadoPago('APP_USR-f969c2eb-5d4f-4e5c-974d-ace6053a80a8', {
       locale: 'pt-BR'
     });
-    console.log('✅ MercadoPago inicializado:', mp.value);
+  //  console.log('✅ MercadoPago inicializado:', mp.value);
   } catch (error) {
-    console.log('❌ Erro ao inicializar MercadoPago:', error);
+   // console.log('❌ Erro ao inicializar MercadoPago:', error);
   }
 });
 </script>
+
+<style scoped>
+.timeline-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 960px) {
+  .timeline-content {
+    margin-left: -24px;
+    padding-right: 16px;
+  }
+
+  .v-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+</style>

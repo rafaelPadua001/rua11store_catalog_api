@@ -4,112 +4,70 @@
       <v-form ref="addressForm">
         <v-row>
           <!-- CEP -->
-          <v-col cols="12" md="8">
-            <v-text-field 
-              v-model="address.cep" 
-              label="CEP" 
-              variant="outlined" 
-              @blur="fetchZipcode" 
-              :loading="loadingCep"
-              maxlength="9" 
-              placeholder="00000-000" 
-              :rules="[rules.required, rules.cep]"
-            ></v-text-field>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="address.cep" label="CEP" variant="outlined" @blur="fetchZipcode"
+              :loading="loadingCep" maxlength="9" placeholder="00000-000"
+              :rules="[rules.required, rules.cep]"></v-text-field>
           </v-col>
         </v-row>
 
         <v-row>
           <!-- Logradouro -->
-          <v-col cols="12" md="8">
-            <v-text-field 
-              v-model="address.logradouro" 
-              label="Logradouro" 
-              variant="outlined"
-              :rules="[rules.required]"
-            ></v-text-field>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="address.logradouro" label="Logradouro" variant="outlined"
+              :rules="[rules.required]"></v-text-field>
           </v-col>
         </v-row>
 
         <v-row>
           <!-- Número -->
           <v-col cols="12" md="6">
-            <v-text-field 
-              v-model="address.numero" 
-              label="Número" 
-              variant="outlined"
-              :rules="[rules.required]"
-            ></v-text-field>
+            <v-text-field v-model="address.numero" label="Número" variant="outlined"
+              :rules="[rules.required]"></v-text-field>
           </v-col>
           <v-col cols="12" md="6">
-            <v-text-field 
-              v-model="address.complemento" 
-              label="Complemento" 
-              variant="outlined"
-              placeholder="Apto, Bloco, Casa, etc."
-            ></v-text-field>
+            <v-text-field v-model="address.complemento" label="Complemento" variant="outlined"
+              placeholder="Apto, Bloco, Casa, etc."></v-text-field>
           </v-col>
         </v-row>
 
         <v-row>
           <!-- Bairro -->
           <v-col cols="12" md="6">
-            <v-text-field 
-              v-model="address.bairro" 
-              label="Bairro" 
-              variant="outlined"
-              :rules="[rules.required]"
-            ></v-text-field>
+            <v-text-field v-model="address.bairro" label="Bairro" variant="outlined"
+              :rules="[rules.required]"></v-text-field>
           </v-col>
           <!-- Cidade -->
           <v-col cols="12" md="6">
-            <v-text-field 
-              v-model="address.cidade" 
-              label="Cidade" 
-              variant="outlined"
-              :rules="[rules.required]"
-            ></v-text-field>
+            <v-text-field v-model="address.cidade" label="Cidade" variant="outlined"
+              :rules="[rules.required]"></v-text-field>
           </v-col>
         </v-row>
 
         <v-row>
           <!-- Estado -->
           <v-col cols="12" md="6">
-            <v-select 
-              v-model="address.estado" 
-              :items="estados" 
-              label="Estado" 
-              variant="outlined"
-              :rules="[rules.required]"
-            ></v-select>
+            <v-select v-model="address.estado" :items="estados" label="Estado" variant="outlined"
+              :rules="[rules.required]"></v-select>
           </v-col>
           <!-- País -->
           <v-col cols="12" md="6">
-            <v-text-field 
-              v-model="address.pais" 
-              label="País" 
-              variant="outlined" 
-              value="Brasil" 
-              readonly
-            ></v-text-field>
+            <v-text-field v-model="address.pais" label="País" variant="outlined" value="Brasil" readonly></v-text-field>
           </v-col>
         </v-row>
 
         <v-row>
           <!-- Referência -->
-          <v-col cols="12">
-            <v-text-field 
-              v-model="address.referencia" 
-              label="Ponto de referência" 
-              variant="outlined"
-              placeholder="Próximo a..."
-            ></v-text-field>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="address.referencia" label="Ponto de referência" variant="outlined"
+              placeholder="Próximo a..."></v-text-field>
           </v-col>
-          
+
         </v-row>
         <v-card-actions v-if="editing">
-  <v-btn color="primary" @click="$emit('updated', { ...address })">Salvar</v-btn>
-  <v-btn text @click="$emit('cancel')">Cancelar</v-btn>
-</v-card-actions>
+          <v-btn color="primary" @click="$emit('updated', { ...address })">Salvar</v-btn>
+          <v-btn text @click="$emit('cancel')">Cancelar</v-btn>
+        </v-card-actions>
 
       </v-form>
     </v-col>
@@ -133,11 +91,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['updated']);
-const form = ref({...props.address});
+const form = ref({ ...props.address });
 
 watch(() => props.address, (newVal) => {
-  form.value = {...newVal}
-}, {immediate: true});
+  form.value = { ...newVal }
+}, { immediate: true });
 
 const estados = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
