@@ -26,24 +26,46 @@ class MelhorEnvioService:
             "Accept": "application/json"
         }
 
-    def delivery_calculate(self, zipcode_origin, zipcode_destiny, weight, height, width, length, secure_value=0, quantity=1):
+    def delivery_calculate(self, zipcode_origin, zipcode_destiny, products: list):
+        """
+        products: lista de dicts, cada dict tem:
+        product_id, product_weight, product_height, product_width, product_length, quantity
+        """
         url = f"{self.baseUrl}/me/shipment/calculate"
 
-        products = [
-            {
-                "width": width,
-                "height": height,
-                "length": length,
-                "weight": weight,
-                "insurance_value": secure_value,
-                "quantity": quantity
-            }
-        ]
+        # Calcular peso e dimensões do pacote
+        total_weight = sum([float(p.get("product_weight", 0)) * int(p.get("quantity", 1)) for p in products])
+        total_height = sum([float(p.get("product_height", 0)) * int(p.get("quantity", 1)) for p in products])
+        max_width = max([float(p.get("product_width", 0)) for p in products], default=10)
+        max_length = max([float(p.get("product_length", 0)) for p in products], default=15)
+
+        melhorenvio_products = []
+        for p in products:
+            melhorenvio_products.append({
+                "id": str(p.get("product_id")),
+                "quantity": int(p.get("quantity", 1)),
+                "weight": float(p.get("product_weight", 0)),
+                "width": float(p.get("product_width", 0)),
+                "height": float(p.get("product_height", 0)),
+                "length": float(p.get("product_length", 0)),
+                "insurance_value": 1.00
+            })
 
         payload = {
-            "from": {"postal_code": os.getenv("SENDER_POSTAL_CODE")},
+            "from": {"postal_code": zipcode_origin},
             "to": {"postal_code": zipcode_destiny},
-            "products": products,
+            "products": melhorenvio_products,
+            "packages": [
+                {
+                    "weight": f"{total_weight:.2f}",
+                    "width": max_width,
+                    "height": total_height,
+                    "length": max_length,
+                    "insurance_value": "1.00",
+                    "format": "box",
+                    "products": [{"id": str(p["product_id"]), "quantity": int(p["quantity"])} for p in products]
+                }
+            ],
             "services": "",
             "options": {
                 "receipt": False,
@@ -57,9 +79,16 @@ class MelhorEnvioService:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            print('Erro ao calcular frete:', e)
-            if e.response is not None:
-                print("Resposta da API:", e.response.text)
+            print("❌ Erro ao calcular frete:", e)
+            if hasattr(e, "response") and e.response is not None:
+                print("→ Status code:", e.response.status_code)
+                try:
+                    print("→ Resposta JSON:", e.response.json())
+                except Exception:
+                    print("→ Resposta texto:", e.response.text)
+            raise
+
+
 
     def create_shipment(self, data, delivery_id=None):
         print(f"Dados recebidos para criar etiqueta: {data}")
