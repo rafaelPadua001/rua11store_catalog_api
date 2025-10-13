@@ -6,7 +6,7 @@
                     <v-toolbar-title>
                         <v-card-title>
                             <v-icon>mdi-cart</v-icon>
-                            Cart
+                            Cart itens ({{cartItens?.items?.length  }})
                         </v-card-title>
 
                     </v-toolbar-title>
@@ -23,18 +23,26 @@
                                     <v-col cols="3">
                                         <v-img :src="item.product_image" height="150" contain></v-img>
                                     </v-col>
-                                    <v-col cols="9">
+                                    <v-col cols="6">
                                         <div class="text-subtitle-2 font-weight-bold">{{ item.product_name }}</div>
                                         <div class="text-body-2"><strong>Price:</strong> R$ {{ item.product_price }}
                                         </div>
-                                        <div class="text-caption"><strong>Qtd:</strong> {{ item.quantity }}
-                                            <v-col cols="12" sm="12" md="4">
+                                        <div class="text-caption">
+                                            <strong>Qtd:</strong>
+                                            {{ item.quantity }}
+                                            <v-col cols="8" sm="8" md="4">
                                                 <v-text-field v-model.number="item.quantity" type="number" min="1"
                                                     density="compact" hide-details style="width: 80px;" @click.stop
                                                     @mousedown.stop variant="underlined"/>
                                             </v-col>
                                         </div>
                                     </v-col>
+                                    <v-col cols="3">
+                                        <v-btn color="error" variant="text" @click="removeItem(item)">
+                                            <v-icon>mdi-delete</v-icon>
+                                        </v-btn>
+                                    </v-col>
+                                   
                                 </v-row>
 
                                 <v-divider></v-divider>
@@ -96,7 +104,30 @@ const getItemsCart = async () => {
 
 const checkout = (item) => {
     router.push({path: '/payments/client/checkout', query: {item: JSON.stringify(item)}})
-}
+};
+
+const removeItem = async (item) => {
+    if(!confirm(`Tem certeza que deseja remover ${item.product_name}`)) return;
+    try{
+            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+            const response = await api.delete(`cart/cart-item-remove/${item.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            if(cartItens.value && Array.isArray(cartItens.value.items)){
+                return cartItens.value.items = cartItens.value.items.filter(i => i.id !== item.id);
+            }
+            else if(Array.isArray(cartItens.value)){
+                cartItens.value = cartItens.value.filter(i => i.id !== item.id)
+            }
+          
+    }
+    catch(e){
+         alert('Não foi possível remover item. Tente novamente', e);
+    }
+};
 
 onMounted(() => {
     getItemsCart();
