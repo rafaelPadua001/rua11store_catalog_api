@@ -37,7 +37,7 @@
                               </v-col>
                               <v-col cols="12" sm="12" md="6">
                                 <strong>R$ {{ (Number(item.quantity) * Number(item.product_price)).toFixed(2)
-                                  }}</strong>
+                                }}</strong>
                               </v-col>
                             </v-row>
                             <v-card-actions>
@@ -154,7 +154,7 @@
                   <v-row justify="center">
                     <v-col cols="12" md="12">
                       <addressForm ref="addressFormRef" v-if="!address" />
-                      <v-card  v-else>
+                      <v-card v-else>
                         <v-toolbar color="deep-purple-accent-4">
                           <v-toolbar-title>
                             <v-icon>mdi-map-marker</v-icon>
@@ -169,7 +169,7 @@
                               <v-col cols="12" sm="12"><strong>Número:</strong> {{ address.numero }}</v-col>
                               <v-col cols="12" sm="12" v-if="address.complemento"><strong>Complemento:</strong> {{
                                 address.complemento
-                                }}</v-col>
+                              }}</v-col>
                               <v-col cols="12" sm="12"><strong>Bairro:</strong> {{ address.bairro }}</v-col>
                               <v-col cols="12" sm="12"><strong>Cidade:</strong> {{ address.cidade }}</v-col>
                               <v-col cols="12" sm="12"><strong>Estado:</strong> {{ address.estado }}</v-col>
@@ -274,7 +274,7 @@
                               (
                                 (Number(selectedDelivery.price) + Number(totalCarrinho)) /
                                 payment.installments
-                            ).toFixed(2)
+                              ).toFixed(2)
                             }}
                           </span>
                         </v-col>
@@ -310,8 +310,9 @@
                           <v-text-field v-model="payment.expiration_date" label="Validade (MM/YYYY)" maxlength="7"
                             placeholder="MM/YYYY" @input="formatExpiration" variant="underlined" />
 
-                          <v-select v-if="tab === 'credit'" label="Parcelas" :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
-                            v-model="payment.installments" variant="underlined" />
+                          <v-select v-if="tab === 'credit'" label="Parcelas"
+                            :items="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]" v-model="payment.installments"
+                            variant="underlined" />
                         </div>
 
                         <div v-else-if="tab === 'pix'" class="text-center">
@@ -592,8 +593,7 @@ const calculateDelivery = async () => {
     return
   }
 
-  const zipcodeOrigin = '97010002' // CEP da loja
-
+  const zipcodeOrigin = '97010002' 
   try {
     const products = (cart.items || []).map(item => ({
       product_id: item.product_id,
@@ -878,4 +878,3 @@ onMounted(async () => {
   }
 });
 </script>
-

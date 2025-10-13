@@ -31,7 +31,7 @@
                                             <v-col cols="12" sm="12" md="4">
                                                 <v-text-field v-model.number="item.quantity" type="number" min="1"
                                                     density="compact" hide-details style="width: 80px;" @click.stop
-                                                    @mousedown.stop />
+                                                    @mousedown.stop variant="underlined"/>
                                             </v-col>
                                         </div>
                                     </v-col>
