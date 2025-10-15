@@ -130,8 +130,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import axios from 'axios';
 
+const router = useRouter();
 const userId = localStorage.getItem('user_id');
 const orders = ref([]);
 
@@ -154,7 +156,7 @@ const getOrders = async () => {
     }
 };
 const checkout = async (item) => {
-    console.log(item);
+    router.push({path: '/payments/client/checkout', query: {item: JSON.stringify(item)}})
 };
 onMounted(() => {
     getOrders();
