@@ -19,11 +19,9 @@
                   </v-card-text>
                 </v-col>
 
-
                 <v-col cols="12" md="6">
                   <v-img :src="pageImage" :alt="pageTitle" max-height="450" class="mx-auto d-block" />
                 </v-col>
-
               </v-row>
 
               <!-- Botões Hero -->
@@ -37,8 +35,6 @@
                       <v-icon :icon="button.icon.value" class="mr-1" size="large"></v-icon>
                       {{ button.label }}
                     </v-btn>
-
-
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -47,63 +43,80 @@
         </v-row>
         <br></br>
         <br></br>
+        <div>
+
+          <v-text-field v-model="searchQuery" :loading="loading" append-inner-icon="mdi-magnify" density="compact"
+            label="Search Templates" variant="solo" hide-details single-line
+            @click:append-inner="searchProduct"></v-text-field>
+
+
+        </div>
+        <br></br>
         <!-- Produtos -->
         <div>
           <v-row justify="center">
-                    <v-col cols="6" md="4" sm="4" v-for="product in productsData" :key="product.name" elevation="2">
-                      <v-row>
-                        <v-col>
-                           <v-card class="d-flex flex-column" >
-                        <v-card-text>
-                         
-                          <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
-                              <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
-                                  target="_blank" rel="noopener noreferrer">
-                                  <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer"
-                                    contain >
-                                    
-                                    <v-chip class="ma-0" color="deep-purple" text-color="white"
-                                      style="position: absolute; top: 0; right: 0;">
-                                      <strong>R$ {{ product.price ?? '0,00' }}</strong>
-                                    </v-chip>
-                                    
-                                  </v-img>
-                                  <v-chip class="ma-0" v-if="product.product_quantity == 0" color="error">Esgotado</v-chip>
-                                </a>
 
-                              <!--<v-card-text class="text-center">
+            <!--if not result to search product -->
+            <v-col cols="12" v-if="!filteredProducts.length && !loading">
+              <v-alert type="info" variant="tonal" class="text-center" color="deep-purple">
+                Nenhum Produto encontrado com os termos de busca
+              </v-alert>
+            </v-col>
+
+
+            <v-col cols="6" md="4" sm="4" v-for="(product, index) in filteredProducts" :key="index" elevation="2">
+              <v-row>
+                <v-col>
+                  <v-card class="d-flex flex-column">
+                    <v-card-text>
+
+                      <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
+                        <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
+                          target="_blank" rel="noopener noreferrer">
+                          <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer" contain>
+
+                            <v-chip class="ma-0" color="deep-purple" text-color="white"
+                              style="position: absolute; top: 0; right: 0;">
+                              <strong>R$ {{ product.price ?? '0,00' }}</strong>
+                            </v-chip>
+
+                          </v-img>
+                          <v-chip class="ma-0" v-if="product.product_quantity == 0" color="error">Esgotado</v-chip>
+                        </a>
+
+                        <!--<v-card-text class="text-center">
                             <v-btn color="primary">Comprar</v-btn>
                           </v-card-text> -->
 
-                          
-                            <span class="d-block text-truncate " style="max-width: 100%; overflow: hidden;">
-                              <strong>{{ product.name }}</strong>
-                            </span>
 
-                          </template>
-                         
-                        </v-card-text>
+                        <span class="d-block text-truncate " style="max-width: 100%; overflow: hidden;">
+                          <strong>{{ product.name }}</strong>
+                        </span>
 
-                        <v-card-actions class="d-flex justify-center align-center">
-                        
-                          <v-btn icon color="primary" @click="addItemCart(product)">
-                            <v-icon>mdi-cart-plus</v-icon>
-                          </v-btn>
-                          
-                       
-                        </v-card-actions>
-                          
-                        </v-card>
-                         <br></br>
-                        </v-col>
-                      </v-row>
-                     
-                     <v-spacer></v-spacer>
-                  
-                    </v-col>
-                    
-                  </v-row>
-                 
+                      </template>
+
+                    </v-card-text>
+
+                    <v-card-actions class="d-flex justify-center align-center">
+
+                      <v-btn icon color="primary" @click="addItemCart(product)">
+                        <v-icon>mdi-cart-plus</v-icon>
+                      </v-btn>
+
+
+                    </v-card-actions>
+
+                  </v-card>
+                  <br></br>
+                </v-col>
+              </v-row>
+
+              <v-spacer></v-spacer>
+
+            </v-col>
+
+          </v-row>
+
         </div>
 
         <!--<div>
@@ -348,6 +361,9 @@ const route = useRoute()
 const slug = (route.params as any).slug
 
 const loadFailed = ref(false)
+const loading = ref(false)
+const searchQuery = ref('')
+const productData = ref([])
 const coupon = ref<any | null>(null)
 const showNotify = ref(false)
 const pageTitle = ref('')
@@ -544,25 +560,42 @@ function handleScroll() {
     window.removeEventListener("scroll", handleScroll)
   }
 }
+//reactive filter
+const filteredProducts = computed(() => {
+  if (!searchQuery.value.trim()) return productsData.value
+  const q = searchQuery.value.toLowerCase()
+  return productsData.value.filter(
+    (p) =>
+      p.name.toLowerCase().includes(q) ||
+      p.seo?.slug?.toLowerCase().includes(q)
+  )
+})
+
+const searchProduct = () => {
+  loading.value = true
+  setTimeout(() => {
+    loading.value = false
+  }, 400)
+}
 
 const addItemCart = async (product: Product) => {
-  try{
+  try {
     const token = localStorage.getItem('token') || localStorage.getItem('access_token');
-    if(product.product_quantity == 0){
+    if (product.product_quantity == 0) {
       alert("Protudo sem estoque");
     }
-    
+
     const response = await api.post(`/cart/add-cart`, {
       product_id: product.id,
       quantity: 1
     },
-    {
-       headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
     console.log('Item adicionado');
-  }catch(e){
+  } catch (e) {
     console.log("erro ao inserir item no carrinho", e);
   }
 }
