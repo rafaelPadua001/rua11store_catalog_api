@@ -51,7 +51,7 @@
                                 <v-autocomplete v-model="editedCoupon.client_id" v-model:search="searchUser"
                                     :items="users" item-title="display_name" item-value="id" label="Buscar Cliente"
                                     prepend-inner-icon="mdi-magnify" clearable :loading="loadingUsers"
-                                    no-data-text="Nenhum cliente encontrado" />
+                                    no-data-text="Nenhum cliente encontrado" @update:model-value="onClientSelect" />
 
 
 
@@ -122,6 +122,7 @@ export default {
             searchUser: "",
             users: [],
             loadingUsers: false,
+            selectedUser: [],
         };
     },
     created() {
@@ -137,25 +138,43 @@ export default {
             this.loadingUsers = true;
             try {
                 const token = localStorage.getItem('access-token');
-                const config = {
-                    headers: { Authorization: `Bearer ${token}` },
-                };
+                const config = { headers: { Authorization: `Bearer ${token}` } };
 
-                const response = await api.get("/supabaseUsers/search_users", {
+                // 1️⃣ Usuários do Supabase
+                const supabaseResp = await api.get("/supabaseUsers/search_users", {
                     params: { q: val },
                     ...config
                 });
 
-                this.users = response.data;
-            }
-            catch (error) {
+
+                const supabaseUsers = supabaseResp.data.map(u => ({
+                    id: u.id,   // normalizando para "id"
+                    display_name: `${u.display_name} (${u.email})`,
+                    email: u.email
+                }));
+
+                // 2️⃣ Usuários da base local
+                const localResp = await api.get("/client/get-client", {
+                    params: { q: val },
+                    ...config
+                });
+                const localUsers = localResp.data.map(u => ({
+                    id: u.id,   // já é id
+                    display_name: `${u.name} (${u.email})`,
+                    email: u.email
+                }));
+
+                // 3️⃣ Concatenar os arrays
+                this.users = [...supabaseUsers, ...localUsers];
+
+            } catch (error) {
                 console.error(error);
-            }
-            finally {
+            } finally {
                 this.loadingUsers = false;
             }
         }
     },
+
     methods: {
         async loadCoupons() {
             this.loading = true;
@@ -175,6 +194,21 @@ export default {
                 console.error("Error loading coupons:", error);
             } finally {
                 this.loading = false;
+            }
+        },
+        onClientSelect(id) {
+            const selectedUser = this.users.find(u => u.id == id)
+
+            console.log(selectedUser);
+            if (selectedUser) {
+                this.editedCoupon.client_id = selectedUser.id
+                this.editedCoupon.client_username = selectedUser.display_name
+                this.editedCoupon.client_email = selectedUser.email
+            }
+            else {
+                this.editedCoupon.client_id = null;
+                this.editedCoupon.client_username = '';
+                this.editedCoupon.client_email = '';
             }
         },
         newCoupon() {
@@ -199,17 +233,16 @@ export default {
             formData.append('title', this.editedCoupon.title);
             formData.append('code', this.editedCoupon.code);
             formData.append('discount', this.editedCoupon.discount);
-
-            const selectedUser = this.users.find(u => u.id === this.editedCoupon.client_id);
-            formData.append('client_id', selectedUser?.id || '');
-            formData.append('client_username', selectedUser?.display_name || '');
-            formData.append('client_email', selectedUser?.email || '');
-
+            formData.append('client_id', this.editedCoupon.client_id || '');
+            formData.append('client_username', this.editedCoupon.client_username || '');
+            formData.append('client_email', this.editedCoupon.client_email || '');
             formData.append('start_date', this.editedCoupon.start_date);
             formData.append('end_date', this.editedCoupon.end_date);
             if (this.editedCoupon.image) {
                 formData.append('image', this.editedCoupon.image);
             }
+
+            
 
             const token = localStorage.getItem("access_token");
             if (!token) return this.$router.push("/login");
@@ -223,25 +256,17 @@ export default {
 
             try {
                 let response;
-
                 if (this.editedIndex === -1) {
-                    // Criar novo cupom
                     response = await api.post('/coupon/create_coupon', formData, config);
                 } else {
-                    // Atualizar cupom existente (supondo que API tenha endpoint PUT /coupon/:id)
                     response = await api.put(`/coupon/${this.editedCoupon.id}`, formData, config);
                     Object.assign(this.coupons[this.editedIndex], response.data.coupon);
                 }
 
-                if (response.status === 201 || response.status === 200) {
+                if ([200, 201].includes(response.status)) {
                     this.couponDialog = false;
-                    if (this.editedIndex === -1) {
-                        this.coupons.push(response.data.coupon);
-                        alert('Cupom criado com sucesso!');
-                    } else {
-                        // this.coupons.splice(this.editedIndex, 1, response.data.coupon);
-                        alert('Cupom atualizado com sucesso!');
-                    }
+                    if (this.editedIndex === -1) this.coupons.push(response.data.coupon);
+                    alert(this.editedIndex === -1 ? 'Cupom criado com sucesso!' : 'Cupom atualizado com sucesso!');
                 } else {
                     alert(`Erro: ${response.data.error || 'Ocorreu um erro'}`);
                 }
