@@ -189,7 +189,7 @@ export default {
             try {
                 const response = await api.get("/coupon/coupons", config);
                 this.coupons = response.data;
-                // console.log(this.coupons);
+                 console.log(this.coupons);
             } catch (error) {
                 console.error("Error loading coupons:", error);
             } finally {
@@ -238,12 +238,11 @@ export default {
             formData.append('client_email', this.editedCoupon.client_email || '');
             formData.append('start_date', this.editedCoupon.start_date);
             formData.append('end_date', this.editedCoupon.end_date);
-            if (this.editedCoupon.image) {
+            if (this.editedCoupon.image) {  
                 formData.append('image', this.editedCoupon.image);
             }
 
-            
-
+           
             const token = localStorage.getItem("access_token");
             if (!token) return this.$router.push("/login");
 
