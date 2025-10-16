@@ -1,78 +1,99 @@
 <template>
   <v-container>
-    <v-row justify="center" no-gutters>
-      <v-col cols="12" sm="10" md="8" lg="6" xl="4">
-        <v-card class="pa-4" elevation="0">
-          <!-- Nome e preço -->
-          <v-card-title class="text-h6 text-sm-h6 text-md-h8">
+    <v-row justify="center">
+      <v-col cols="6">
+        <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
+          <v-sheet class="mx-auto overflow-hidden" rounded="xl">
+            <v-carousel v-model="currentIndex" class="mx-auto" progress="purple" show-arrows="hover" hide-delimiter
+              height="auto">
+              <!-- Primeira imagem: thumbnail -->
+              <v-carousel-item class="carousel-img" v-if="product.thumbnail_path" :src="product.thumbnail_path"
+                :alt="product?.seo?.slug">
+                <v-chip class="ma-2" v-if="product.product_quantity == 0" color="error">Esgotado</v-chip>
+              </v-carousel-item>
 
-            {{ product.name }}
+              <!-- Outras imagens -->
+              <v-carousel-item class="carousel-img" v-for="(img, index) in product.images" :key="index" :src="img.url">
+                
+              </v-carousel-item>
+            </v-carousel>
 
+            <!-- Overlay com legenda -->
+            <v-overlay :scrim="false"
+              content-class="d-flex flex-column align-center justify-space-between pointer-pass-through py-3" contained
+              model-value no-click-animation persistent>
+
+            </v-overlay>
+          </v-sheet>
+          <div class="text-center">
+            <v-chip :text="`${currentIndex + 1} / ${product.images.length + 1}`" color="deep-purple" size="small"
+              variant="flat"></v-chip>
+          </div>
+        </v-defaults-provider>
+      </v-col>
+      <v-col cols="6">
+        <v-row>
+          <v-col cols="12" sm="12">
+            <span class="text-h4">{{ product.name }}</span>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <span class="text-h5">R$ {{ product.price }}</span>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12">
+            <div style="display: flex; gap: 8px;">
+              <v-btn color="black" @click="addItemCart(product)">Adicionar ao carrinho</v-btn>
+              <v-btn color="success">Whatsapp Button</v-btn>
+            </div>
+          </v-col>
+        </v-row>
+
+
+      </v-col>
+
+    </v-row>
+    <!-- Sugestoes de produtos -->
+    <v-row>
+      <v-col cols="12">
+        <v-card>
+          <v-toolbar color="transparent">
+            <v-toolbar-title>
+              <span class="text-h8">Combine com...</span>
+            </v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <v-card>
+              produtos
+            </v-card>
+            <v-card>
+              produtos
+            </v-card>
+            <v-card>
+              produtos
+            </v-card>
+            <v-card>
+              produtos
+            </v-card>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>
+            Descrição
           </v-card-title>
-
-
-          <v-card-subtitle class="text-subtitle-1 text-sm-h8 text-md-h8">
-            R$ {{ product.price }}
-          </v-card-subtitle>
-
-          <!-- Carrossel de imagens -->
           <v-card-text>
-            <v-row justify="center" no-gutters>
-              <v-col cols="12" md="12" sm="10" xl="10">
-                <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
-                  <v-sheet class="mx-auto overflow-hidden" rounded="xl">
-                    <v-carousel v-model="currentIndex"  class="mx-auto" progress="purple" show-arrows="hover" hide-delimiter
-                      height="auto">
-                      <!-- Primeira imagem: thumbnail -->
-                      <v-carousel-item class="carousel-img" v-if="product.thumbnail_path" :src="product.thumbnail_path"
-                        :alt="product?.seo?.slug">
-                      </v-carousel-item>
-
-                      <!-- Outras imagens -->
-                      <v-carousel-item class="carousel-img" v-for="(img, index) in product.images" :key="index"
-                        :src="img.url">
-                      </v-carousel-item>
-                    </v-carousel>
-
-                    <!-- Overlay com legenda -->
-                    <v-overlay :scrim="false"
-                      content-class="d-flex flex-column align-center justify-space-between pointer-pass-through py-3"
-                      contained model-value no-click-animation persistent>
-
-                    </v-overlay>
-                  </v-sheet>
-                  <div class="text-center">
-                    <v-chip :text="`${currentIndex + 1} / ${product.images.length + 1}`" color="deep-purple"
-                      size="small" variant="flat"></v-chip>
-                  </div>
-                </v-defaults-provider>
-              </v-col>
-            </v-row>
+            <v-card-text>
+              <p class="text-body-2 text-sm-body-2 text-justify">{{ product.description }}</p>
+            </v-card-text>
           </v-card-text>
-
-          <v-card-text>
-            <p class="text-body-2 text-sm-body-1 text-center">{{ product.description }}</p>
-          </v-card-text>
-
-
-          <v-divider class="border-opacity-90" color="deep-purple" :thickness="2"></v-divider>
-
-          <!-- Botões -->
-          <v-card-actions class="d-flex flex-wrap justify-center" style="gap: 1px;">
-            <v-btn color="success" @click="goToWhatsApp" variant="elevated" size="small" :block="$vuetify.display.xs">
-              <v-icon left size="large">mdi-whatsapp</v-icon>
-            </v-btn>
-
-            <v-btn color="primary" href="https://rua11store-web.vercel.app/" size="small" variant="elevated"
-              :block="$vuetify.display.xs">
-              <v-icon left size="large">mdi-storefront</v-icon>
-            </v-btn>
-
-            <v-btn color="info" @click="downloadApp" variant="elevated" size="small" :block="$vuetify.display.xs">
-              <v-icon left size="large">mdi-download</v-icon>
-            </v-btn>
-          </v-card-actions>
-
         </v-card>
       </v-col>
     </v-row>
@@ -134,6 +155,27 @@ export default {
         }
       } catch (error) {
         console.error("Erro ao buscar produto:", error);
+      }
+    },
+    async addItemCart(product) {
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+        if (product.product_quantity == 0) {
+          alert("Protudo sem estoque");
+        }
+
+        const response = await api.post(`/cart/add-cart`, {
+          product_id: product.id,
+          quantity: 1
+        },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+        console.log('Item adicionado');
+      } catch (e) {
+        console.log("erro ao inserir item no carrinho", e);
       }
     },
 
