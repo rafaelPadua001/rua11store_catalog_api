@@ -1,16 +1,43 @@
 import os
 import jwt
-from flask import jsonify
+from flask import jsonify, request
 from models.clientUser import ClientUser
 from models.tokenBlockList import TokenBlocklist
 from database import db
 from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import get_jwt, jwt_required, create_access_token, get_jwt_identity, JWTManager
+import uuid
 
 jwt = JWTManager()
 
 class ClientUserController:
+ 
+    def get_client():
+        query = request.args.get('q', '').strip()
+        if not query or len(query) < 2:
+            return jsonify([]), 200
+        
+        try:
+            # Busca por UUID válido
+            
+                # Busca por nome ou e-mail se não for UUID
+            users_query = ClientUser.query.filter(
+                    (ClientUser.name.ilike(f"%{query}%")) |
+                    (ClientUser.email.ilike(f"%{query}%"))
+                )
+
+            users = users_query.all()
+
+            return jsonify([
+                {"id": u.id, "name": u.name, "email": u.email}
+                for u in users
+            ]), 200
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+
     def register_client_controller(data):
         name = data.get("name")
         birth_date = data.get("birthDate")
