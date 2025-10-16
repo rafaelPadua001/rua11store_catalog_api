@@ -46,7 +46,7 @@
         <div>
 
           <v-text-field v-model="searchQuery" :loading="loading" append-inner-icon="mdi-magnify" density="compact"
-            label="Search Templates" variant="solo" hide-details single-line
+            label="Posso te ajudar ? Digite aqui o que procura." variant="solo" hide-details single-line
             @click:append-inner="searchProduct"></v-text-field>
 
 
@@ -230,7 +230,6 @@
                   <v-divider></v-divider>
                   <br></br>
 
-
                   <div class="d-flex justify-center flex-wrap">
                     <v-row no-gutters>
                       <v-col cols="12">
@@ -343,9 +342,6 @@
       </div>
     </v-sheet>
   </transition>
-
-
-
 
 </template>
 
