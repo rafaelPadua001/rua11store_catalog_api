@@ -37,43 +37,35 @@
               <v-icon>mdi-cart</v-icon>
             </v-btn>
           </template>
-         <v-list>
-  <v-list-item>
-    <v-list-item-title class="text-h6">Carrinho</v-list-item-title>
-  </v-list-item>
+          <v-list
+            :lines="false"
+            max-width="390"
+          >
+            <v-list-item>
+              <v-list-item-title class="text-h6">Carrinho</v-list-item-title>
+            </v-list-item>
 
-  <v-divider></v-divider>
+            <v-divider></v-divider>
 
-  <template v-if="cartItems.length">
-    <!-- Itera pelos carrinhos -->
-    <v-list-item v-for="(cart, index) in cartItems" :key="cart.id" class="py-2">
-      <v-list-item-subtitle class="text-caption text-grey mb-2">
-        Criado em: {{ new Date(cart.created_at).toLocaleString() }}
-      </v-list-item-subtitle>
+            <template v-if="cartItems.length">
+              <!-- Itera pelos carrinhos -->
+              <v-list-item v-for="(cart, index) in cartItems" :key="cart.id" class="py-2">
+                <v-list-item-subtitle class="text-caption text-grey mb-2">
+                  Criado em: {{ new Date(cart.created_at).toLocaleString() }}
+                </v-list-item-subtitle>
 
-      <!-- Itera pelos itens dentro de cada carrinho -->
-      <v-card
-        v-for="(item, i) in cart.items"
-        :key="item.id"
-        elevation="1"
-        class="mb-2 pa-2 d-flex align-center"
-        width="350"
-      >
-        <v-avatar>
-             <v-img
-          :src="item.product_image"
-          width="50"
-          height="50"
-          contain
-          class="rounded mr-2"
-        ></v-img>
-        </v-avatar>
-     
+                <!-- Itera pelos itens dentro de cada carrinho -->
+                <v-card v-for="(item, i) in cart.items" :key="item.id" elevation="1"
+                  class="mb-2 pa-2 d-flex align-center" width="350">
+                  <v-avatar>
+                    <v-img :src="item.product_image" width="60" height="60" contain class="rounded mr-2"></v-img>
+                  </v-avatar>
 
-        <div class="flex-grow-1">
-          <div class="font-weight-medium">{{ item.product_name }}</div>
-          <div class="text-caption text-grey d-flex align-center">
-           <!-- <v-text-field
+
+                  <div class="flex-grow-1">
+                    <div class="font-weight-medium">{{ item.product_name }}</div>
+                    <div class="text-caption text-grey d-flex align-center">
+                      <!-- <v-text-field
               v-model.number="item.quantity"
               type="number"
               min="1"
@@ -82,49 +74,45 @@
               dense
               hide-details
             ></v-text-field>-->
-             <v-text-field
-              v-model.number="item.quantity"
-              type="number"
-              min="1"
-              style="width: 60px; margin-left: 8px"
-              dense
-              hide-details
-              @click.stop
-              @mousedown.stop
-            ></v-text-field>
-          </div>
-          <div class="text-caption text-grey">
-            {{ item.quantity }}x — R$ {{ item.product_price }}
-          </div>
-        </div>
+                      <v-text-field v-model.number="item.quantity" type="number" min="1" class="shrink ml-2"
+                        density="compact" hide-details @click.stop @mousedown.stop></v-text-field>
+                    </div>
+                    <div class="text-caption text-grey">
+                      {{ item.quantity }}x — R$ {{ item.product_price }}
+                    </div>
+                  </div>
 
-        <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click.stop="removeItem(item)"></v-btn>
-      </v-card>
+                  <div>
+                    <v-btn icon="mdi-delete" size="small" variant="text" color="error"
+                      @click.stop="removeItem(item)"></v-btn>
+                  </div>
+                </v-card>
 
-      <v-divider class="my-2"></v-divider>
+                <v-divider class="my-2"></v-divider>
 
-      <div class="d-flex justify-space-between align-center mt-2">
-        <strong>Total:</strong>
-        <span>
-          R$
-          {{
-            cart.items
-              .reduce((acc, i) => acc + i.product_price * i.quantity, 0).toFixed(2)
-              
-          }}
-        </span>
-      </div>
+                <div class="d-flex justify-space-between align-center mt-2">
+                  <strong>Total:</strong>
+                  <span>
+                    R$
+                    {{
+                      cart.items
+                        .reduce((acc, i) => acc + i.product_price * i.quantity, 0).toFixed(2)
 
-      <v-card-actions class="justify-center mt-2">
-        <v-btn color="primary" size="small" variant="tonal" @click="checkout(cart)" :disabled="cart.items.length === 0">Finalizar Compra</v-btn>
-      </v-card-actions>
-    </v-list-item>
-  </template>
+                    }}
+                  </span>
+                </div>
 
-  <v-list-item v-else>
-    <v-list-item-title class="text-grey text-center">Nenhum item no carrinho</v-list-item-title>
-  </v-list-item>
-</v-list>
+                <v-card-actions class="justify-center mt-2">
+                  <v-btn color="primary" size="small" variant="tonal" @click="checkout(cart)"
+                    :disabled="cart.items.length === 0">Finalizar Compra</v-btn>
+                </v-card-actions>
+              </v-list-item>
+            </template>
+
+            <v-list-item v-else>
+              <v-list-item-title class="text-grey text-center">Nenhum item no carrinho</v-list-item-title>
+            </v-list-item>
+          </v-list>
 
         </v-menu>
 
@@ -332,13 +320,13 @@ const checkAuth = () => {
   if (payload) {
     if (payload.user_id) {
       localStorage.setItem('user_id', payload.user_id);
-     
-      
+
+
     }
     if (payload.user_type) {
       localStorage.setItem('user_type', payload.user_type);
       userType.value = payload.user_type; // ✅ Atualiza ref reativa corretamente
-     ;
+      ;
     }
   } else {
     // Token inválido ou mal formatado
@@ -356,51 +344,51 @@ const isClient = computed(() => userType.value === 'client');
 
 const getCartItems = async (payload) => {
   const token = localStorage.getItem("access_token") || localStorage.getItem("token");
-  if(!token){
+  if (!token) {
     console.warn("Usuário não autenticado, não é possível buscar o carrinho.");
     return;
   }
 
   let userId = localStorage.getItem('user_id');
-  if(!userId){
+  if (!userId) {
     const payload = parseJwt(token);
     userId = payload?.user_id || payload?.sub || null;
-    if(userId){
+    if (userId) {
       localStorage.setItem('user_id', userId);
     }
   }
-  if(!userId){
+  if (!userId) {
     console.warn("User ID não encontrado");
   }
-  try{
-     
-      const response = await api.get(`/cart/get-cart/${userId}`,{
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+  try {
 
-      cartItems.value = response.data;
+    const response = await api.get(`/cart/get-cart/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-      
-    }
-    catch(e){
-      console.log('nenhum item encontrado...', e);
-    }
+    cartItems.value = response.data;
+
+
   }
+  catch (e) {
+    console.log('nenhum item encontrado...', e);
+  }
+}
 
-  //const updateQuantity = async (item) => {
-  //  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-  //  if(!token){
-  //    return;
-  //  }
+//const updateQuantity = async (item) => {
+//  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+//  if(!token){
+//    return;
+//  }
 //
-  //  try{
-  //    const response = await 
-  //  }
-  //  catch(e){}
-  //}
+//  try{
+//    const response = await 
+//  }
+//  catch(e){}
+//}
 
 onMounted(async () => {
   getPages();
@@ -416,7 +404,7 @@ onMounted(async () => {
   userType.value = localStorage.getItem('user_type'); // pega do localStorage depois
   //console.log("User type inicial:", userType.value);
   window.addEventListener('storage', checkAuth);
- 
+
 
 });
 
@@ -537,33 +525,33 @@ const getPages = async () => {
   }
 };
 
-const removeItem = async (item) =>{
-   if (!confirm("Tem certeza que deseja remover este produto do carrinho ?")) return;
-  try{
+const removeItem = async (item) => {
+  if (!confirm("Tem certeza que deseja remover este produto do carrinho ?")) return;
+  try {
     const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 
     const itemId = item.id;
-    const response = await api.delete(`/cart/cart-item-remove/${itemId}`,{
+    const response = await api.delete(`/cart/cart-item-remove/${itemId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
-    if(response.status === 200){
-      cartItems.value = cartItems.value.map(cart => ({...cart, items: cart.items.filter(i => i.id !== itemId)}));
+    if (response.status === 200) {
+      cartItems.value = cartItems.value.map(cart => ({ ...cart, items: cart.items.filter(i => i.id !== itemId) }));
       console.log('Item removido');
 
-    } 
+    }
   }
-  catch(e){
+  catch (e) {
     console.log("Erro ao remover item", e.error);
   }
- 
+
 };
 
 const checkout = (item) => {
-  router.push({path: '/payments/client/checkout', query: {item: JSON.stringify(item)}});
- 
+  router.push({ path: '/payments/client/checkout', query: { item: JSON.stringify(item) } });
+
 };
 
 const logout = async () => {
