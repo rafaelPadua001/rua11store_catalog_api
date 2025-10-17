@@ -33,27 +33,28 @@
       </v-col>
       <v-col cols="12" md="6" class="px-4">
         <div class="text-center text-md-start">
-            <span class="text-h5 text-md-h4 font-weight-bold">
-              {{ product.name }}
-            </span>
+          <span class="text-h3 text-sm-h4 font-weight-bold">
+            {{ product.name }}
+          </span>
         </div>
         <div class="text-center text-md-start mt-2">
-           <span class="text-h6 text-md-h5">
-              R$ {{ product.price }}
-            </span>
+          <span class="text-h6 text-md-h5">
+            R$ {{ product.price }}
+          </span>
         </div>
-        
-        <div class="d-flex flex-column flex-sm-row align-center justify-center justify-md-start mt-4" style="gap: 10px;">
+
+        <div class="d-flex flex-column flex-sm-row align-center justify-center justify-md-start mt-4"
+          style="gap: 10px;">
           <v-btn color="black" @click="addItemCart(product)">
-                <v-icon size="x-large">mdi-cart-plus</v-icon>
-                Adicionar ao carrinho
-              </v-btn>
-              <v-btn color="success" @click="goToWhatsApp">
-                <v-icon size="x-large">mdi-whatsapp</v-icon>
-                Pedir pelo Whatsapp
-              </v-btn>
+            <v-icon size="x-large">mdi-cart-plus</v-icon>
+            Adicionar ao carrinho
+          </v-btn>
+          <v-btn color="success" @click="goToWhatsApp">
+            <v-icon size="x-large">mdi-whatsapp</v-icon>
+            Pedir pelo Whatsapp
+          </v-btn>
         </div>
-        
+
 
 
 
@@ -102,10 +103,61 @@
       </v-col>
     </v-row>
 
+    <v-row class="mt-6">
+      <v-col cols="12">
+        <v-card elevation="0">
+          <v-card-title>
+            Comments
+          </v-card-title>
+          <v-divider></v-divider>
+
+          <v-card-text>
+            <v-row no-gutters>
+              <v-col cols="3" md="1">
+                <v-avatar color="grey" rounded="10" size="75">
+                  <v-img height="100%" src="https://cdn.vuetifyjs.com/images/cards/server-room.jpg" contain></v-img>
+                </v-avatar>
+              </v-col>
+              <v-col cols="6" md="3">
+                <v-list-item class="" subtitle="Network engineer" title="Marcos Obrien">
+
+                </v-list-item>
+              </v-col>
+
+              <v-col cols="12">
+                <div class="d-flex align-end">
+                  <v-textarea placeholder="Comment here..." rows="2" auto-grow class="flex-grow- mr-1">
+                  </v-textarea>
+
+
+                </div>
+
+              </v-col>
+
+
+            </v-row>
+            <v-row no-gutters>
+              <v-col cols="12">
+                <div class="d-flex justify-end">
+                  <v-btn color="primary" @click="submitComment()">Comment</v-btn>
+                </div>
+
+              </v-col>
+            </v-row>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-text>
+            Load comments here....
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+
     <transition name="fade">
       <v-alert v-if="alert" class="notification" type="success" variant="elevated" elevation="8" border="start"
-        :text="alertMessage"
-        title="Produto adicionado ao carrinho" />
+        :text="alertMessage" title="Produto adicionado ao carrinho" />
       <v-alert v-else-if="alertError" class="notification" type="error" elevation="8" border="start"
         :text="alertMessage" title="Erro ao adicionar o produto ao carrinho">
 
@@ -234,6 +286,9 @@ export default {
         "_blank"
       );
     },
+    submitComment(){
+      window.alert('Desculpe o transtorno. Isso ainda esta em desenvolvimento');
+    }
   },
 };
 </script>
@@ -242,13 +297,15 @@ export default {
   object-fit: cover;
   width: 100%;
   height: auto;
- 
+
 }
-@media (max-width: 650px){
+
+@media (max-width: 650px) {
   .carousel-img {
     max-height: 500px;
   }
 }
+
 .v-btn {
   font-size: 0.9rem;
   padding: 8px 12px;
