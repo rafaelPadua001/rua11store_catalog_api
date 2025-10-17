@@ -39,7 +39,7 @@
           </template>
           <v-list
             :lines="false"
-            max-width="390"
+            max-width="400"
           >
             <v-list-item>
               <v-list-item-title class="text-h6">Carrinho</v-list-item-title>
