@@ -1,81 +1,116 @@
 <template>
   <v-container>
-    <v-row justify="center" no-gutters>
-      <v-col cols="12" sm="10" md="8" lg="6" xl="4">
-        <v-card class="pa-4" elevation="0">
-          <!-- Nome e preço -->
-          <v-card-title class="text-h6 text-sm-h6 text-md-h8">
+    <v-row justify="center" class="mt-4">
+      <v-col cols="12" md="6">
+        <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
+          <v-sheet class="mx-auto overflow-hidden" rounded="xl">
+            <v-carousel v-model="currentIndex" class="mx-auto" progress="purple" show-arrows="hover" hide-delimiter
+              height="auto">
+              <!-- Primeira imagem: thumbnail -->
+              <v-carousel-item class="carousel-img" v-if="product.thumbnail_path" :src="product.thumbnail_path"
+                :alt="product?.seo?.slug">
+                <v-chip class="ma-2" v-if="product.product_quantity == 0" color="error">Esgotado</v-chip>
+              </v-carousel-item>
 
-            {{ product.name }}
+              <!-- Outras imagens -->
+              <v-carousel-item class="carousel-img" v-for="(img, index) in product.images" :key="index" :src="img.url">
 
+              </v-carousel-item>
+            </v-carousel>
+
+            <!-- Overlay com legenda -->
+            <v-overlay :scrim="false"
+              content-class="d-flex flex-column align-center justify-space-between pointer-pass-through py-3" contained
+              model-value no-click-animation persistent>
+
+            </v-overlay>
+          </v-sheet>
+          <div class="text-center">
+            <v-chip :text="`${currentIndex + 1} / ${product.images.length + 1}`" color="deep-purple" size="small"
+              variant="flat"></v-chip>
+          </div>
+        </v-defaults-provider>
+      </v-col>
+      <v-col cols="12" md="6" class="px-4">
+        <div class="text-center text-md-start">
+            <span class="text-h5 text-md-h4 font-weight-bold">
+              {{ product.name }}
+            </span>
+        </div>
+        <div class="text-center text-md-start mt-2">
+           <span class="text-h6 text-md-h5">
+              R$ {{ product.price }}
+            </span>
+        </div>
+        
+        <div class="d-flex flex-column flex-sm-row align-center justify-center justify-md-start mt-4" style="gap: 10px;">
+          <v-btn color="black" @click="addItemCart(product)">
+                <v-icon size="x-large">mdi-cart-plus</v-icon>
+                Adicionar ao carrinho
+              </v-btn>
+              <v-btn color="success" @click="goToWhatsApp">
+                <v-icon size="x-large">mdi-whatsapp</v-icon>
+                Pedir pelo Whatsapp
+              </v-btn>
+        </div>
+        
+
+
+
+      </v-col>
+
+    </v-row>
+    <!-- Sugestoes de produtos -->
+    <v-row>
+      <v-col cols="12">
+        <!--  <v-card>
+          <v-toolbar color="transparent">
+            <v-toolbar-title>
+              <span class="text-h8">Combine com...</span>
+            </v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <v-card>
+              produtos
+            </v-card>
+            <v-card>
+              produtos
+            </v-card>
+            <v-card>
+              produtos
+            </v-card>
+            <v-card>
+              produtos
+            </v-card>
+          </v-card-text>
+        </v-card>-->
+      </v-col>
+    </v-row>
+
+    <v-row class="mt-6">
+      <v-col cols="12">
+        <v-card elevation="2" rounded="lg">
+          <v-card-title>
+            Descrição
           </v-card-title>
-
-
-          <v-card-subtitle class="text-subtitle-1 text-sm-h8 text-md-h8">
-            R$ {{ product.price }}
-          </v-card-subtitle>
-
-          <!-- Carrossel de imagens -->
           <v-card-text>
-            <v-row justify="center" no-gutters>
-              <v-col cols="12" md="12" sm="10" xl="10">
-                <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
-                  <v-sheet class="mx-auto overflow-hidden" rounded="xl">
-                    <v-carousel v-model="currentIndex"  class="mx-auto" progress="purple" show-arrows="hover" hide-delimiter
-                      height="auto">
-                      <!-- Primeira imagem: thumbnail -->
-                      <v-carousel-item class="carousel-img" v-if="product.thumbnail_path" :src="product.thumbnail_path"
-                        :alt="product?.seo?.slug">
-                      </v-carousel-item>
-
-                      <!-- Outras imagens -->
-                      <v-carousel-item class="carousel-img" v-for="(img, index) in product.images" :key="index"
-                        :src="img.url">
-                      </v-carousel-item>
-                    </v-carousel>
-
-                    <!-- Overlay com legenda -->
-                    <v-overlay :scrim="false"
-                      content-class="d-flex flex-column align-center justify-space-between pointer-pass-through py-3"
-                      contained model-value no-click-animation persistent>
-
-                    </v-overlay>
-                  </v-sheet>
-                  <div class="text-center">
-                    <v-chip :text="`${currentIndex + 1} / ${product.images.length + 1}`" color="deep-purple"
-                      size="small" variant="flat"></v-chip>
-                  </div>
-                </v-defaults-provider>
-              </v-col>
-            </v-row>
+            <v-card-text>
+              <p class="text-body-2 text-md-body-1 text-justify">{{ product.description }}</p>
+            </v-card-text>
           </v-card-text>
-
-          <v-card-text>
-            <p class="text-body-2 text-sm-body-1 text-center">{{ product.description }}</p>
-          </v-card-text>
-
-
-          <v-divider class="border-opacity-90" color="deep-purple" :thickness="2"></v-divider>
-
-          <!-- Botões -->
-          <v-card-actions class="d-flex flex-wrap justify-center" style="gap: 1px;">
-            <v-btn color="success" @click="goToWhatsApp" variant="elevated" size="small" :block="$vuetify.display.xs">
-              <v-icon left size="large">mdi-whatsapp</v-icon>
-            </v-btn>
-
-            <v-btn color="primary" href="https://rua11store-web.vercel.app/" size="small" variant="elevated"
-              :block="$vuetify.display.xs">
-              <v-icon left size="large">mdi-storefront</v-icon>
-            </v-btn>
-
-            <v-btn color="info" @click="downloadApp" variant="elevated" size="small" :block="$vuetify.display.xs">
-              <v-icon left size="large">mdi-download</v-icon>
-            </v-btn>
-          </v-card-actions>
-
         </v-card>
       </v-col>
     </v-row>
+
+    <transition name="fade">
+      <v-alert v-if="alert" class="notification" type="success" variant="elevated" elevation="8" border="start"
+        :text="alertMessage"
+        title="Produto adicionado ao carrinho" />
+      <v-alert v-else-if="alertError" class="notification" type="error" elevation="8" border="start"
+        :text="alertMessage" title="Erro ao adicionar o produto ao carrinho">
+
+      </v-alert>
+    </transition>
   </v-container>
 </template>
 
@@ -97,6 +132,9 @@ export default {
     return {
       product: { images: [] },
       currentIndex: 0,
+      alert: null,
+      alertError: null,
+      alertMessage: '',
     };
   },
   async created() {
@@ -136,7 +174,51 @@ export default {
         console.error("Erro ao buscar produto:", error);
       }
     },
+    async addItemCart(product) {
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+        if (!token) {
+          return alert('Você precisa estar logado...');
+        }
 
+        if (product.product_quantity == 0) {
+          // console.log(this.alert);
+          this.showNotification();
+          return;
+        }
+
+        const response = await api.post(`/cart/add-cart`, {
+          product_id: product.id,
+          quantity: 1
+        },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+        this.showNotification()
+        console.log('Item adicionado');
+      } catch (e) {
+        console.log("erro ao inserir item no carrinho", e);
+        this.notification();
+      }
+    },
+    showNotification() {
+      if (this.product.product_quantity === 0) {
+        this.alertMessage = "Produto sem estoque";
+        this.alertError = true;
+        setTimeout(() => {
+          this.alertError = false
+        }, 3000);
+        return;
+      }
+      this.alertMessage = `Produto ${this.product.name} - R$ ${this.product.price} adicionado ao carrinho`;
+      this.alert = true;
+      setTimeout(() => {
+        this.alert = false;
+      }, 3000); //desaparece em 3 segundos;
+
+    },
     goToWhatsApp() {
       const message = `Olá, tenho interesse no produto: ${this.product.name}`;
       const phone = "556191865680"; // seu número aqui
@@ -155,8 +237,40 @@ export default {
   },
 };
 </script>
-<style>
+<style scoped>
 .carousel-img {
-  object-fit: contain;
+  object-fit: cover;
+  width: 100%;
+  height: auto;
+ 
+}
+@media (max-width: 650px){
+  .carousel-img {
+    max-height: 500px;
+  }
+}
+.v-btn {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+}
+
+.notification {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 350px;
+  z-index: 9999;
+}
+
+/*anima notificação */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(20);
 }
 </style>
