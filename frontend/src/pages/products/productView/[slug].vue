@@ -1,7 +1,7 @@
 <template>
   <v-container>
-    <v-row justify="center">
-      <v-col cols="6">
+    <v-row justify="center" class="mt-4">
+      <v-col cols="12" md="6">
         <v-defaults-provider :defaults="{ VBtn: { variant: 'outlined', color: '#eee' } }">
           <v-sheet class="mx-auto overflow-hidden" rounded="xl">
             <v-carousel v-model="currentIndex" class="mx-auto" progress="purple" show-arrows="hover" hide-delimiter
@@ -14,7 +14,7 @@
 
               <!-- Outras imagens -->
               <v-carousel-item class="carousel-img" v-for="(img, index) in product.images" :key="index" :src="img.url">
-                
+
               </v-carousel-item>
             </v-carousel>
 
@@ -31,26 +31,30 @@
           </div>
         </v-defaults-provider>
       </v-col>
-      <v-col cols="6">
-        <v-row>
-          <v-col cols="12" sm="12">
-            <span class="text-h4">{{ product.name }}</span>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12">
-            <span class="text-h5">R$ {{ product.price }}</span>
-          </v-col>
-        </v-row>
+      <v-col cols="12" md="6" class="px-4">
+        <div class="text-center text-md-start">
+            <span class="text-h5 text-md-h4 font-weight-bold">
+              {{ product.name }}
+            </span>
+        </div>
+        <div class="text-center text-md-start mt-2">
+           <span class="text-h6 text-md-h5">
+              R$ {{ product.price }}
+            </span>
+        </div>
+        
+        <div class="d-flex flex-column flex-sm-row align-center justify-center justify-md-start mt-4" style="gap: 10px;">
+          <v-btn color="black" @click="addItemCart(product)">
+                <v-icon size="x-large">mdi-cart-plus</v-icon>
+                Adicionar ao carrinho
+              </v-btn>
+              <v-btn color="success" @click="goToWhatsApp">
+                <v-icon size="x-large">mdi-whatsapp</v-icon>
+                Pedir pelo Whatsapp
+              </v-btn>
+        </div>
+        
 
-        <v-row>
-          <v-col cols="12">
-            <div style="display: flex; gap: 8px;">
-              <v-btn color="black" @click="addItemCart(product)">Adicionar ao carrinho</v-btn>
-              <v-btn color="success">Whatsapp Button</v-btn>
-            </div>
-          </v-col>
-        </v-row>
 
 
       </v-col>
@@ -59,7 +63,7 @@
     <!-- Sugestoes de produtos -->
     <v-row>
       <v-col cols="12">
-        <v-card>
+        <!--  <v-card>
           <v-toolbar color="transparent">
             <v-toolbar-title>
               <span class="text-h8">Combine com...</span>
@@ -79,24 +83,34 @@
               produtos
             </v-card>
           </v-card-text>
-        </v-card>
+        </v-card>-->
       </v-col>
     </v-row>
 
-    <v-row>
+    <v-row class="mt-6">
       <v-col cols="12">
-        <v-card>
+        <v-card elevation="2" rounded="lg">
           <v-card-title>
             Descrição
           </v-card-title>
           <v-card-text>
             <v-card-text>
-              <p class="text-body-2 text-sm-body-2 text-justify">{{ product.description }}</p>
+              <p class="text-body-2 text-md-body-1 text-justify">{{ product.description }}</p>
             </v-card-text>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
+
+    <transition name="fade">
+      <v-alert v-if="alert" class="notification" type="success" variant="elevated" elevation="8" border="start"
+        :text="alertMessage"
+        title="Produto adicionado ao carrinho" />
+      <v-alert v-else-if="alertError" class="notification" type="error" elevation="8" border="start"
+        :text="alertMessage" title="Erro ao adicionar o produto ao carrinho">
+
+      </v-alert>
+    </transition>
   </v-container>
 </template>
 
@@ -118,6 +132,9 @@ export default {
     return {
       product: { images: [] },
       currentIndex: 0,
+      alert: null,
+      alertError: null,
+      alertMessage: '',
     };
   },
   async created() {
@@ -160,8 +177,14 @@ export default {
     async addItemCart(product) {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+        if (!token) {
+          return alert('Você precisa estar logado...');
+        }
+
         if (product.product_quantity == 0) {
-          alert("Protudo sem estoque");
+          // console.log(this.alert);
+          this.showNotification();
+          return;
         }
 
         const response = await api.post(`/cart/add-cart`, {
@@ -173,12 +196,29 @@ export default {
               Authorization: `Bearer ${token}`
             }
           });
+        this.showNotification()
         console.log('Item adicionado');
       } catch (e) {
         console.log("erro ao inserir item no carrinho", e);
+        this.notification();
       }
     },
+    showNotification() {
+      if (this.product.product_quantity === 0) {
+        this.alertMessage = "Produto sem estoque";
+        this.alertError = true;
+        setTimeout(() => {
+          this.alertError = false
+        }, 3000);
+        return;
+      }
+      this.alertMessage = `Produto ${this.product.name} - R$ ${this.product.price} adicionado ao carrinho`;
+      this.alert = true;
+      setTimeout(() => {
+        this.alert = false;
+      }, 3000); //desaparece em 3 segundos;
 
+    },
     goToWhatsApp() {
       const message = `Olá, tenho interesse no produto: ${this.product.name}`;
       const phone = "556191865680"; // seu número aqui
@@ -197,8 +237,40 @@ export default {
   },
 };
 </script>
-<style>
+<style scoped>
 .carousel-img {
-  object-fit: contain;
+  object-fit: cover;
+  width: 100%;
+  height: auto;
+ 
+}
+@media (max-width: 650px){
+  .carousel-img {
+    max-height: 500px;
+  }
+}
+.v-btn {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+}
+
+.notification {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 350px;
+  z-index: 9999;
+}
+
+/*anima notificação */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(20);
 }
 </style>
