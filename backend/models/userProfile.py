@@ -1,15 +1,16 @@
 from typing import Optional
 from datetime import date
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, Session
 from database import db  # sua instância do SQLAlchemy
 from models.user import User  # ajuste o caminho conforme necessário
-
+import uuid
 
 class UserProfile(db.Model):
     __tablename__ = 'profiles'
 
-    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    user_id = Column(String(36), ForeignKey('users.id'), primary_key=True)
     username = Column(String(150), nullable=False, unique=True)
     full_name = Column(String(200), nullable=False)
     birth_date = Column(Date, nullable=False)
