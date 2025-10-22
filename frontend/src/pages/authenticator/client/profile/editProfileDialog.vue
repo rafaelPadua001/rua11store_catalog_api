@@ -17,9 +17,10 @@
                             <v-col cols="3" class="d-flex flex-column justify-center">
                                 <div class="avatar-wrapper position-relative d-inline-block">
                                     <!-- Avatar -->
-                                    <v-avatar size="150" class="mt-4 overflow-hidden">
-                                        <v-img :src="avatarPreview || defaultAvatar"></v-img>
-                                    </v-avatar>
+                                   <v-avatar size="150" class="mt-4 overflow-hidden">
+  <v-img :src="avatarPreview || profile.avatar_url || defaultAvatar"></v-img>
+</v-avatar>
+
 
                                     <!-- Fundo escurecido com blur -->
                                     <div class="avatar-overlay"></div>
@@ -33,22 +34,15 @@
                                         accept="image/*" class="d-none" @change="onAvatarChange" />
                                 </div>
                             </v-col>
-                            <!--<v-col cols="12">
-                                <!-- Avatar URL 
-                                <v-file-input v-model="formData.avatar_file" label="Avatar" accept="image/*"
-                                    prepend-icon="mdi-camera" placeholder="Select an image" @change="onAvatarChange" />
-                            </v-col> -->
                         </v-row>
                         <v-row>
                             <v-col cols="6">
-
                                 <!-- Name -->
                                 <v-text-field v-model="formData.full_name" label="Name"
                                     :rules="[v => !!v || 'Name is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
-
-                                <!-- Name -->
+                                <!-- Username -->
                                 <v-text-field v-model="formData.user_name" label="Username"
                                     :rules="[v => !!v || 'Name is required']" required></v-text-field>
                             </v-col>
@@ -62,7 +56,6 @@
                                 <v-text-field v-model="formData.birth_date" label="Birth Date" type="date"
                                     :rules="[v => !!v || 'Birth date is required']" required></v-text-field>
                             </v-col>
-
                         </v-row>
                         <v-row>
                             <v-col cols="12">
@@ -70,46 +63,48 @@
                             </v-col>
                             <v-divider></v-divider>
                             <v-col cols="6">
-                                <v-text-field v-model="formData.zip" label="ZIP / Postal Code"
+                                <v-text-field v-model="formData.address.zip" label="ZIP / Postal Code"
                                     @blur="getAddressByZipCode()" :rules="[rules.required, rules.cep]"></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field v-model="formData.street" label="Street / Address"
+                                <v-text-field v-model="formData.address.street" label="Street / Address"
                                     :rules="[v => !!v || 'Street is required']" required></v-text-field>
                             </v-col>
+                            <!-- ADICIONE ESTE CAMPO AQUI -->
                             <v-col cols="6">
-                                <v-text-field v-model="formData.complement" label="complement"
-                                    :rules="[v => !!v || 'Complement is required']" required></v-text-field>
+                                <v-text-field v-model="formData.address.number" label="Number"
+                                    :rules="[v => !!v || 'Number is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field v-model="formData.neighborhood" label="neighborhood"
-                                    :rules="[v => !!v || 'Street is required']" required></v-text-field>
+                                <v-text-field v-model="formData.address.complement" label="Complement"></v-text-field>
                             </v-col>
-
+                            <v-col cols="6">
+                                <v-text-field v-model="formData.address.neighborhood" label="Neighborhood"
+                                    :rules="[v => !!v || 'Neighborhood is required']" required></v-text-field>
+                            </v-col>
                             <v-col cols="4">
-                                <v-text-field v-model="formData.city" label="City"
+                                <v-text-field v-model="formData.address.city" label="City"
                                     :rules="[v => !!v || 'City is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="4">
-                                <v-text-field v-model="formData.state" label="State"></v-text-field>
+                                <v-text-field v-model="formData.address.state" label="State"
+                                    :rules="[v => !!v || 'State is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="4">
-                                <v-text-field v-model="formData.country" label="Country"></v-text-field>
+                                <v-text-field v-model="formData.address.country" label="Country"
+                                    :rules="[v => !!v || 'Country is required']" required></v-text-field>
                             </v-col>
                         </v-row>
-
                         <v-row>
                             <v-col cols="12">
                                 <h3>Contact</h3>
                             </v-col>
                             <v-divider class="mb-4"></v-divider>
-
                             <v-col cols="6">
                                 <v-text-field v-model="formData.phone" label="Phone"
                                     :rules="[v => !!v || 'Phone is required']" required prepend-inner-icon="mdi-phone"
                                     @input="formatPhoneInput('phone')"></v-text-field>
                             </v-col>
-
                             <v-col cols="6">
                                 <v-text-field v-model="formData.mobile" label="Mobile"
                                     :rules="[v => !!v || 'Mobile is required']" required
@@ -127,11 +122,10 @@
             </v-card>
         </v-col>
     </v-row>
-
 </template>
 
 <script setup>
-import { ref, watch, reactive } from 'vue'
+import { ref, watch, reactive, onMounted } from 'vue' // Adicione onMounted aqui
 import axios from 'axios'
 
 const api = axios.create({
@@ -155,8 +149,6 @@ const form = ref(null)
 const avatarPreview = ref('')
 const loadingCep = ref(false)
 const user = ref([])
-
-//const userId = localStorage.getItem('user_id');
 const token = localStorage.getItem('access_token') || localStorage.getItem('token')
 
 // Copia os dados do profile para formData
@@ -168,6 +160,7 @@ const formData = reactive({
     avatar_file: null,
     address: {
         street: '',
+        number: '', // ADICIONE ESTE CAMPO
         city: '',
         state: '',
         zip: '',
@@ -186,8 +179,13 @@ watch(
         formData.user_name = newVal.username || ''
         formData.birth_date = newVal.birth_date || ''
         formData.email = newVal.email || ''
-        formData.avatar_file = newVal.avatar_file || ''
+        formData.avatar_file = null
+        if(newVal.avatar_file){
+            avatarPreview.value = newVal.avatar_file
+        }
+        formData.avatar_file = newVal.avatar_file
         formData.address.street = newVal.address?.street || ''
+        formData.address.number = newVal.address?.number || newVal.address?.numero || '' // ADICIONE ESTA LINHA
         formData.address.city = newVal.address?.city || ''
         formData.address.state = newVal.address?.state || ''
         formData.address.zip = newVal.address?.zip || ''
@@ -196,6 +194,11 @@ watch(
         formData.address.neighborhood = newVal.address?.neighborhood || ''
         formData.phone = newVal.phone || ''
         formData.mobile = newVal.mobile || ''
+        
+        // Se tiver avatar_url, use para o preview
+        if (newVal.avatar_url) {
+            avatarPreview.value = newVal.avatar_url
+        }
     },
     { immediate: true }
 )
@@ -220,13 +223,14 @@ const getAuthenticatedUser = async () => {
 }
 
 const onAvatarChange = () => {
-    if (formData.avatar_file) {
-        const file = formData.avatar_file
-        avatarPreview.value = URL.createObjectURL(file)
-    } else {
-        avatarPreview.value = ''
-    }
-};
+  const file = formData.avatar_file
+  if (file) {
+    avatarPreview.value = URL.createObjectURL(file)
+  } else {
+    avatarPreview.value = ''
+  }
+}
+
 
 const rules = {
     required: value => !!value || 'Campo obrigatório',
@@ -234,7 +238,7 @@ const rules = {
 };
 
 const getAddressByZipCode = async () => {
-    const cleanCep = formData.zip.replace(/\D/g, '')
+    const cleanCep = formData.address.zip.replace(/\D/g, '')
     if (cleanCep.length !== 8) return
 
     loadingCep.value = true
@@ -243,13 +247,14 @@ const getAddressByZipCode = async () => {
         const data = await res.json()
 
         if (!data.erro) {
-            formData.street = data.logradouro || ''
-            formData.neighborhood = data.bairro || ''
-            formData.city = data.localidade || ''
-            formData.state = data.uf || ''
-            formData.complement = data.complemento || ''
-            formData.country = data.country || ''
-
+            formData.address.street = data.logradouro || ''
+            formData.address.neighborhood = data.bairro || ''
+            formData.address.city = data.localidade || ''
+            formData.address.state = data.uf || ''
+            formData.address.complement = data.complemento || ''
+            formData.address.number = data.number || ''
+            // O campo "number" não é preenchido automaticamente pelo ViaCEP
+            // pois o número é específico de cada endereço
         } else {
             alert('CEP não encontrado')
         }
@@ -263,11 +268,11 @@ const getAddressByZipCode = async () => {
 
 // Formatar CEP enquanto digita
 const formatZipcode = () => {
-    let cep = formData.zip.replace(/\D/g, '')
+    let cep = formData.address.zip.replace(/\D/g, '')
     if (cep.length > 5) {
         cep = cep.substring(0, 5) + '-' + cep.substring(5, 8)
     }
-    formData.zip = cep
+    formData.address.zip = cep
 };
 
 const formatPhoneInput = (field) => {
@@ -284,14 +289,19 @@ const formatPhoneInput = (field) => {
     formData[field] = val
 }
 
-
-
-watch(() => formData.zip, (newVal) => {
+watch(() => formData.address.zip, (newVal) => {
     if (newVal && newVal.length <= 9) formatZipcode()
 });
 
 const saveProfile = () => {
+    // Validação adicional para o campo number
+    if (!formData.address.number || formData.address.number.trim() === '') {
+        alert('Por favor, informe o número do endereço.')
+        return
+    }
+
     if (form.value.validate()) {
+        console.log('Dados a serem enviados:', formData)
         // Emite evento para o componente pai atualizar o perfil
         emit('update-profile', { ...formData })
         emit('update:modelValue', false)
@@ -303,7 +313,6 @@ onMounted(() => {
 });
 </script>
 
-
 <style scoped>
 .avatar-wrapper {
     position: relative;
@@ -311,7 +320,18 @@ onMounted(() => {
     cursor: pointer;
 }
 
-
+.avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 
 .avatar-upload-btn {
     position: absolute;

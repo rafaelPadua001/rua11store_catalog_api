@@ -13,7 +13,10 @@
           <!-- Cabeçalho do perfil -->
           <v-row align="center" class="mb-6">
             <v-col cols="12" md="4" class="d-flex justify-center">
-              <v-avatar size="120">
+              <v-avatar size="120" v-if="profile.avatar_url">
+                <v-img :src="`${profile.avatar_url}`" alt="User Avatar"></v-img>
+              </v-avatar>
+              <v-avatar size="120" v-else>
                 <v-img src="https://cdn.vuetifyjs.com/images/john.jpg" alt="User Avatar"></v-img>
               </v-avatar>
             </v-col>
@@ -51,8 +54,8 @@
             <v-col cols="12" sm="6">
               <v-card class="pa-3" variant="outlined" rounded="lg">
                 <v-icon class="mr-2" color="green">mdi-calendar</v-icon>
-                <span v-if="profile.created_at">Joined: {{profile.created_at}}</span>
-                 <span v-else>Joined: March 2022</span>
+                <span v-if="profile.created_at">Joined: {{ profile.created_at }}</span>
+                <span v-else>Joined: March 2022</span>
               </v-card>
             </v-col>
           </v-row>
@@ -94,10 +97,12 @@ const api = axios.create({
 });
 
 const userId = localStorage.getItem('user_id');
+const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 const profile = ref({});
 const loading = ref(true);
 const editDialog = ref(false);
-let updatedProfile;
+let updatedProfile = ref([]);
+let file = '';
 
 const getProfileUser = async () => {
   try {
@@ -122,12 +127,40 @@ const openEditProfileDialog = async () => {
   }
 };
 
-const handleUpdateProfile = async (updatedProfile) => {
+const handleUpdateProfile = async (updatedProfile, avatarFile) => {
   profile.value = { ...updatedProfile }
   console.log('Perfil Atualizado:', updatedProfile);
+  
   try {
-    const response = await api.put(`/profile/update-profile/${userId}`, updatedProfile);
+    const payload = new FormData();
+    
+    // Adiciona campos do perfil
+    for (const key in updatedProfile) {
+      if (key === "address") {
+        // Converte endereço para JSON string
+        payload.append(key, JSON.stringify(updatedProfile[key]));
+      } else if (key === "avatar_file") {
+        // Não adiciona avatar_file aqui se vier separado
+        continue;
+      } else {
+        payload.append(key, updatedProfile[key]);
+      }
+    }
+
+    // Adiciona arquivo de avatar separadamente
+    if (updatedProfile.avatar_file) {
+      payload.append("avatar_file", updatedProfile.avatar_file); // Corrigido: usar payload em vez de formData
+    }
+
+    const response = await api.put(`/profile/update-profile/${userId}`, payload, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    
     profile.value = response.data;
+    console.log('Perfil atualizado com sucesso:', response.data);
   }
   catch (e) {
     console.log("Erro ao atualizar dados de usuario", e);

@@ -25,6 +25,7 @@ def get_profile(userId):
         "phone": profile.phone,
         "mobile": profile.mobile,
         "birth_date": profile.birth_date,
+        "avatar_url": profile.avatar_url,
         "created_at": profile.created_at,
         
     }

@@ -25,6 +25,7 @@ class ClientUserController:
             'id': str(client.id),
             'name': client.name,
             'email': client.email,
+            
         }), 200
  
     def get_client():
