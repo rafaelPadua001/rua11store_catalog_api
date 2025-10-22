@@ -12,6 +12,20 @@ import uuid
 jwt = JWTManager()
 
 class ClientUserController:
+    def get_logged_client():
+        userId = get_jwt_identity()
+
+        # se o ClientUser.id for UUID
+        client = ClientUser.query.get(str(userId))
+
+        if not client:
+            return jsonify({'error': 'Cliente não encontrado'}), 404
+
+        return jsonify({
+            'id': str(client.id),
+            'name': client.name,
+            'email': client.email,
+        }), 200
  
     def get_client():
         query = request.args.get('q', '').strip()

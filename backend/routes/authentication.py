@@ -103,7 +103,26 @@ def register():
         "username": name
     }), 201
 
-        
+@auth_bp.route('/user/<uuid:userId>', methods=['GET'])
+@jwt_required()
+def get_auth_user(userId):
+    current_user_id = get_jwt_identity()
+
+    if str(userId) != str(current_user_id):
+        return jsonify({'error': 'Acesso não autorizado'}), 403
+
+    user = User.query.get(current_user_id)
+
+    if not user:
+        return jsonify({'error': 'Usuário não encontrado'}), 404
+
+    return jsonify({
+        'id': str(user.id),
+        'name': user.name,
+        'email': user.email,
+        'avatar': user.avatar,
+    }), 200
+
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
