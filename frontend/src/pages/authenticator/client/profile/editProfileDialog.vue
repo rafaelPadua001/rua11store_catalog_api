@@ -164,7 +164,7 @@ const formData = reactive({
     full_name: '',
     user_name: '',
     birth_date: '',
-    //email: '',
+    email: '',
     avatar_file: null,
     address: {
         street: '',
@@ -183,7 +183,7 @@ watch(
     () => props.profile,
     (newVal) => {
         formData.full_name = newVal.full_name || ''
-        formData.user_name = newVal.user_name || ''
+        formData.user_name = newVal.username || ''
         formData.birth_date = newVal.birth_date || ''
         formData.email = newVal.email || ''
         formData.avatar_file = newVal.avatar_file || ''
