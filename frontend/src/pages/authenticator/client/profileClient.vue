@@ -51,7 +51,8 @@
             <v-col cols="12" sm="6">
               <v-card class="pa-3" variant="outlined" rounded="lg">
                 <v-icon class="mr-2" color="green">mdi-calendar</v-icon>
-                <span>Joined: March 2022</span>
+                <span v-if="profile.created_at">Joined: {{profile.created_at}}</span>
+                 <span v-else>Joined: March 2022</span>
               </v-card>
             </v-col>
           </v-row>

@@ -21,7 +21,10 @@ def get_profile(userId):
         "id": profile.user_id,
         "username": profile.username,
         "full_name": profile.full_name,
-        "email": email
+        "email": email,
+        "birth_date": profile.birth_date,
+        "created_at": profile.created_at,
+        
     }
 
 

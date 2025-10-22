@@ -36,6 +36,8 @@ class ProfileController:
             if profile:
                 #update user data
                 profile.full_name = data.get('full_name', profile.full_name)
+                profile.username = data.get('user_name', profile.username)
+                profile.birth_date = data.get('birth_date', profile.birth_date)
           #      profile.email = data.get('email', profile.email)
                 profile.phone = data.get('phone', profile.phone)
                 profile.mobile = data.get('mobile', profile.mobile)

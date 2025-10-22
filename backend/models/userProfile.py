@@ -1,12 +1,13 @@
 from typing import Optional
 from datetime import date
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, DateTime
 from sqlalchemy.dialects.postgresql import UUID, JSON
 from sqlalchemy.orm import relationship, Session
 from database import db  # sua instância do SQLAlchemy
 from models.user import User  # ajuste o caminho conforme necessário
 from sqlalchemy import Column, Integer, String, Date, ForeignKey, cast
 from sqlalchemy.orm import relationship, Session
+from datetime import datetime
 
 class UserProfile(db.Model):
     __tablename__ = 'profiles'
@@ -21,6 +22,8 @@ class UserProfile(db.Model):
     avatar_url = Column(String(255), nullable=True)
     phone = Column(String(20), nullable=True)
     mobile = Column(String(20), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relacionamentos
     user = relationship(
@@ -32,19 +35,23 @@ class UserProfile(db.Model):
 
     client_user = relationship(
         "ClientUser",
-        primaryjoin="foreign(ClientUser.id) == UserProfile.client_user_id",  # corrigido
+        primaryjoin="foreign(ClientUser.id) == UserProfile.user_id",  # corrigido
         uselist=False,
         viewonly=True,
     )
 
 
 
-    def __init__(self, user_id: int, username: Optional[str] = None,
+    def __init__(self,
+             user_id: int,
+             username: Optional[str] = None,
              full_name: Optional[str] = None,
              birth_date: Optional[date] = None,
              avatar_url: Optional[str] = None,
              phone: Optional[str] = None,
-             mobile: Optional[str] = None):
+             mobile: Optional[str] = None,
+             created_at: Optional[datetime] = None,
+             updated_at: Optional[datetime] = None):
         self.user_id = user_id
         self.username = username
         self.full_name = full_name
@@ -52,6 +59,8 @@ class UserProfile(db.Model):
         self.avatar_url = avatar_url
         self.phone = phone
         self.mobile = mobile
+        self.created_at = created_at or datetime.utcnow()
+        self.updated_at = updated_at or datetime.utcnow()
 
 
 # No model User, ajuste o relacionamento assim:
