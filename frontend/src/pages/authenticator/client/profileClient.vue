@@ -48,7 +48,13 @@
             <v-col cols="12" sm="6">
               <v-card class="pa-3" variant="outlined" rounded="lg">
                 <v-icon class="mr-2" color="blue">mdi-map-marker</v-icon>
-                <span>São Paulo, Brazil</span>
+                <span v-if="profile.addresses && profile.addresses.length">
+                  {{ profile.addresses[0].city }}, {{ profile.addresses[0].state }}, {{ profile.addresses[0].country }}
+                </span>
+                <span v-else>
+                  São Paulo, SP, Brazil
+                </span>
+
               </v-card>
             </v-col>
             <v-col cols="12" sm="6">
@@ -130,10 +136,10 @@ const openEditProfileDialog = async () => {
 const handleUpdateProfile = async (updatedProfile, avatarFile) => {
   profile.value = { ...updatedProfile }
   console.log('Perfil Atualizado:', updatedProfile);
-  
+
   try {
     const payload = new FormData();
-    
+
     // Adiciona campos do perfil
     for (const key in updatedProfile) {
       if (key === "address") {
@@ -158,7 +164,7 @@ const handleUpdateProfile = async (updatedProfile, avatarFile) => {
         'Content-Type': 'multipart/form-data'
       }
     });
-    
+
     profile.value = response.data;
     console.log('Perfil atualizado com sucesso:', response.data);
   }

@@ -1,5 +1,6 @@
 import json
 import uuid
+from datetime import datetime
 from flask import request, jsonify
 from models.userProfile import UserProfile
 from models.address import Address
@@ -10,21 +11,62 @@ from typing import Optional
 import cloudinary.uploader
 
 class ProfileController:
-    def get_user_profile_by_user_id(session: Session, userId: str) -> Optional[UserProfile]:
+    @staticmethod
+    def get_user_profile_by_user_id(session, userId):
         try:
+            if not userId or userId.lower() == "null" or userId.lower() == "undefined":
+                print("UserId inválido:", userId)
+                return None
             # Detecta se é string que parece número inteiro
             if isinstance(userId, str) and userId.isdigit():
                 filter_value = int(userId)
             else:
-                filter_value = userId  # string UUID ou string normal
-
+                filter_value = userId  # string UUID
+            # Busca perfil
             profile = session.query(UserProfile).filter_by(user_id=filter_value).first()
-
-            return profile
-
+            if not profile:
+                return None
+            # Busca endereços
+            addresses = session.query(Address).filter_by(client_user_id=filter_value).all()
+            address_list = []
+            for addr in addresses:
+                address_list.append({
+                    "id": addr.id,
+                    "street": addr.logradouro,
+                    "number": addr.numero,
+                    "complement": addr.complemento,
+                    "neighborhood": addr.bairro,
+                    "city": addr.cidade,
+                    "state": addr.estado,
+                    "zip": addr.cep,
+                    "country": addr.pais,
+                    "referencia": addr.referencia
+                })
+            # Retorna como dict
+            return {
+                "id": profile.id,
+                "user_id": profile.user_id,
+                "username": profile.username,
+                "full_name": profile.full_name,
+                "birth_date": profile.birth_date.isoformat()
+                        if hasattr(profile.birth_date, "isoformat")
+                        else profile.birth_date,
+                "avatar_url": profile.avatar_url,
+                "phone": profile.phone,
+                "mobile": profile.mobile,
+                "created_at": profile.created_at.strftime("%Y-%m-%dT%H:%M:%S") 
+                    if isinstance(profile.created_at, datetime) 
+                    else profile.created_at,
+                "updated_at": profile.updated_at.strftime("%Y-%m-%dT%H:%M:%S") 
+                    if isinstance(profile.updated_at, datetime) 
+                    else profile.updated_at,
+                "addresses": address_list
+            }
+              
         except Exception as e:
             print(f"Erro ao buscar perfil: {e}")
             raise
+
 
 
     @staticmethod

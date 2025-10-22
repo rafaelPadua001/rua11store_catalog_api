@@ -21,11 +21,29 @@ class ClientUserController:
         if not client:
             return jsonify({'error': 'Cliente não encontrado'}), 404
 
+        addresses = []
+        if client.addresses:
+            for addr in client.addresses:
+                addresses.append({
+                    "id": addr.id,
+                    "street": addr.logradouro,
+                    "number": addr.numero,
+                    "complement": addr.complemento,
+                    "neighborhood": addr.bairro,
+                    "city": addr.cidade,
+                    "state": addr.estado,
+                    "zip": addr.cep,
+                    "coutry": addr.pais,
+                    "referencia": addr.referencia,
+                    "created_at": addr.created_at.strftime("%Y-%m-%dT%H:%M:%S") if addr.created_at else None,
+                    "updated_at": addr.updated_at.strftime("%Y-%m-%dT%H:%M:%S") if addr.updated_at else None
+                })
+
         return jsonify({
             'id': str(client.id),
             'name': client.name,
             'email': client.email,
-            
+            'addresses': addresses
         }), 200
  
     def get_client():

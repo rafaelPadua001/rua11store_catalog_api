@@ -40,6 +40,12 @@ class UserProfile(db.Model):
         viewonly=True,
     )
 
+    addresses = relationship(
+        "Address",
+        primaryjoin="foreign(Address.client_user_id) == cast(UserProfile.user_id, UUID)",
+        viewonly=True,  # apenas leitura, já que a FK real está em outra tabela
+        lazy="joined"
+    )
 
 
     def __init__(self,
@@ -62,6 +68,20 @@ class UserProfile(db.Model):
         self.created_at = created_at or datetime.utcnow()
         self.updated_at = updated_at or datetime.utcnow()
 
+    def to_dict(self):
+        return {
+            "user_id": self.user_id,
+            "full_name": self.full_name,
+            "username": self.username,
+            "avatar_url": self.avatar_url,
+            "created_at": self.created_at,
+            "birth_date": (
+                self.birth_date.isoformat()
+                if hasattr(self.birth_date, "isoformat")
+                else self.birth_date
+            ),
+            "addresses": [address.to_dict() for address in self.addresses] if self.addresses else []
+        }
 
 # No model User, ajuste o relacionamento assim:
 # class User(db.Model):

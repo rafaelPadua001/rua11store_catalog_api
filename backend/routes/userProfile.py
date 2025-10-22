@@ -1,5 +1,6 @@
 from flask import Flask, Blueprint, request, jsonify
 from controllers.profileController import ProfileController
+from models.userProfile import UserProfile
 from database import db
 
 profile_bp = Blueprint('profile', __name__)
@@ -8,27 +9,28 @@ profile_bp = Blueprint('profile', __name__)
 def get_profile(userId):
     session = db.session
     profile = ProfileController.get_user_profile_by_user_id(session, userId)
+    
     if not profile:
         return {"message": "Perfil não encontrado"}, 404
 
+    # Se você quer incluir email e name, precisa buscar via session
     email = None
-    if profile.client_user:
-        email = profile.client_user.email
-    elif profile.user:
-        email = profile.user.email
+    name = None
+    user_obj = session.query(UserProfile).filter_by(user_id=profile["user_id"]).first()
+    if user_obj:
+        if user_obj.client_user:
+            email = user_obj.client_user.email
+            name = user_obj.client_user.name
+        elif user_obj.user:
+            email = user_obj.user.email
+            name = user_obj.user.name
 
-    return {
-        "id": profile.user_id,
-        "username": profile.username,
-        "full_name": profile.full_name,
-        "email": email,
-        "phone": profile.phone,
-        "mobile": profile.mobile,
-        "birth_date": profile.birth_date,
-        "avatar_url": profile.avatar_url,
-        "created_at": profile.created_at,
-        
-    }
+    # Acrescenta email e name no dict
+    profile["email"] = email
+    profile["name"] = name
+
+    return jsonify(profile), 200
+
 
 
 @profile_bp.route('/update-profile/<userId>', methods=["PUT"])

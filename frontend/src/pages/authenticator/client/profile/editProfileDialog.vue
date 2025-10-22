@@ -17,9 +17,9 @@
                             <v-col cols="3" class="d-flex flex-column justify-center">
                                 <div class="avatar-wrapper position-relative d-inline-block">
                                     <!-- Avatar -->
-                                   <v-avatar size="150" class="mt-4 overflow-hidden">
-  <v-img :src="avatarPreview || profile.avatar_url || defaultAvatar"></v-img>
-</v-avatar>
+                                    <v-avatar size="150" class="mt-4 overflow-hidden">
+                                        <v-img :src="avatarPreview || profile.avatar_url || defaultAvatar"></v-img>
+                                    </v-avatar>
 
 
                                     <!-- Fundo escurecido com blur -->
@@ -63,35 +63,35 @@
                             </v-col>
                             <v-divider></v-divider>
                             <v-col cols="6">
-                                <v-text-field v-model="formData.address.zip" label="ZIP / Postal Code"
+                                <v-text-field v-model="formData.addresses.zip" label="ZIP / Postal Code"
                                     @blur="getAddressByZipCode()" :rules="[rules.required, rules.cep]"></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field v-model="formData.address.street" label="Street / Address"
+                                <v-text-field v-model="formData.addresses.street" label="Street / Address"
                                     :rules="[v => !!v || 'Street is required']" required></v-text-field>
                             </v-col>
                             <!-- ADICIONE ESTE CAMPO AQUI -->
                             <v-col cols="6">
-                                <v-text-field v-model="formData.address.number" label="Number"
+                                <v-text-field v-model="formData.addresses.number" label="Number"
                                     :rules="[v => !!v || 'Number is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field v-model="formData.address.complement" label="Complement"></v-text-field>
+                                <v-text-field v-model="formData.addresses.complement" label="Complement"></v-text-field>
                             </v-col>
                             <v-col cols="6">
-                                <v-text-field v-model="formData.address.neighborhood" label="Neighborhood"
+                                <v-text-field v-model="formData.addresses.neighborhood" label="Neighborhood"
                                     :rules="[v => !!v || 'Neighborhood is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="4">
-                                <v-text-field v-model="formData.address.city" label="City"
+                                <v-text-field v-model="formData.addresses.city" label="City"
                                     :rules="[v => !!v || 'City is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="4">
-                                <v-text-field v-model="formData.address.state" label="State"
+                                <v-text-field v-model="formData.addresses.state" label="State"
                                     :rules="[v => !!v || 'State is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="4">
-                                <v-text-field v-model="formData.address.country" label="Country"
+                                <v-text-field v-model="formData.addresses.country" label="Country"
                                     :rules="[v => !!v || 'Country is required']" required></v-text-field>
                             </v-col>
                         </v-row>
@@ -158,7 +158,7 @@ const formData = reactive({
     birth_date: '',
     email: '',
     avatar_file: null,
-    address: {
+    addresses: {
         street: '',
         number: '', // ADICIONE ESTE CAMPO
         city: '',
@@ -180,21 +180,21 @@ watch(
         formData.birth_date = newVal.birth_date || ''
         formData.email = newVal.email || ''
         formData.avatar_file = null
-        if(newVal.avatar_file){
+        if (newVal.avatar_file) {
             avatarPreview.value = newVal.avatar_file
         }
         formData.avatar_file = newVal.avatar_file
-        formData.address.street = newVal.address?.street || ''
-        formData.address.number = newVal.address?.number || newVal.address?.numero || '' // ADICIONE ESTA LINHA
-        formData.address.city = newVal.address?.city || ''
-        formData.address.state = newVal.address?.state || ''
-        formData.address.zip = newVal.address?.zip || ''
-        formData.address.country = newVal.address?.country || ''
-        formData.address.complement = newVal.address?.complement || ''
-        formData.address.neighborhood = newVal.address?.neighborhood || ''
+        formData.addresses.street = newVal.addresses?.street || ''
+        formData.addresses.number = newVal.addresses?.number || newVal.address?.numero || '' // ADICIONE ESTA LINHA
+        formData.addresses.city = newVal.addresses?.city || ''
+        formData.addresses.state = newVal.addresses?.state || ''
+        formData.addresses.zip = newVal.addresses?.zip || ''
+        formData.addresses.country = newVal.addresses?.country || ''
+        formData.addresses.complement = newVal.addresses?.complement || ''
+        formData.addresses.neighborhood = newVal.addresses?.neighborhood || ''
         formData.phone = newVal.phone || ''
         formData.mobile = newVal.mobile || ''
-        
+
         // Se tiver avatar_url, use para o preview
         if (newVal.avatar_url) {
             avatarPreview.value = newVal.avatar_url
@@ -223,12 +223,12 @@ const getAuthenticatedUser = async () => {
 }
 
 const onAvatarChange = () => {
-  const file = formData.avatar_file
-  if (file) {
-    avatarPreview.value = URL.createObjectURL(file)
-  } else {
-    avatarPreview.value = ''
-  }
+    const file = formData.avatar_file
+    if (file) {
+        avatarPreview.value = URL.createObjectURL(file)
+    } else {
+        avatarPreview.value = ''
+    }
 }
 
 
@@ -238,7 +238,7 @@ const rules = {
 };
 
 const getAddressByZipCode = async () => {
-    const cleanCep = formData.address.zip.replace(/\D/g, '')
+    const cleanCep = formData.addresses.zip.replace(/\D/g, '')
     if (cleanCep.length !== 8) return
 
     loadingCep.value = true
@@ -247,12 +247,12 @@ const getAddressByZipCode = async () => {
         const data = await res.json()
 
         if (!data.erro) {
-            formData.address.street = data.logradouro || ''
-            formData.address.neighborhood = data.bairro || ''
-            formData.address.city = data.localidade || ''
-            formData.address.state = data.uf || ''
-            formData.address.complement = data.complemento || ''
-            formData.address.number = data.number || ''
+            formData.addresses.street = data.logradouro || ''
+            formData.addresses.neighborhood = data.bairro || ''
+            formData.addresses.city = data.localidade || ''
+            formData.addresses.state = data.uf || ''
+            formData.addresses.complement = data.complemento || ''
+            formData.addresses.number = data.number || ''
             // O campo "number" não é preenchido automaticamente pelo ViaCEP
             // pois o número é específico de cada endereço
         } else {
@@ -268,11 +268,11 @@ const getAddressByZipCode = async () => {
 
 // Formatar CEP enquanto digita
 const formatZipcode = () => {
-    let cep = formData.address.zip.replace(/\D/g, '')
+    let cep = formData.addresses.zip.replace(/\D/g, '')
     if (cep.length > 5) {
         cep = cep.substring(0, 5) + '-' + cep.substring(5, 8)
     }
-    formData.address.zip = cep
+    formData.addresses.zip = cep
 };
 
 const formatPhoneInput = (field) => {
@@ -285,17 +285,17 @@ const formatPhoneInput = (field) => {
         val = val.replace(/^(\d{2})(\d{0,5})/, '($1) $2')
     } else {
         val = val.replace(/^(\d*)/, '($1')
-    }
+    }a
     formData[field] = val
 }
 
-watch(() => formData.address.zip, (newVal) => {
+watch(() => formData.addresses.zip, (newVal) => {
     if (newVal && newVal.length <= 9) formatZipcode()
 });
 
 const saveProfile = () => {
     // Validação adicional para o campo number
-    if (!formData.address.number || formData.address.number.trim() === '') {
+    if (!formData.addresses.number || formData.addresses.number.trim() === '') {
         alert('Por favor, informe o número do endereço.')
         return
     }

@@ -81,7 +81,6 @@ class AddressController:
 
     @staticmethod
     def update_address(user_id, address_id, data):
-        print('update funtion')
         try:
             address = Address.query.filter_by(id=address_id, client_user_id=user_id).first()
             if not address:
