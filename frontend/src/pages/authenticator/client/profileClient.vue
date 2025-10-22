@@ -2,30 +2,27 @@
   <v-container class="py-6">
     <v-row justify="center">
       <v-col cols="12" md="8" lg="6">
-          <v-row justify="center" v-if="loading">
+        <v-row justify="center" v-if="loading">
+
           <v-col cols="auto">
-            <v-progress-circular
-              indeterminate
-              color="primary"
-              size="64"
-            ></v-progress-circular>
+            <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
           </v-col>
         </v-row>
-        <v-card class="pa-6" elevation="2" rounded="xl"  v-else>
-          
+        <v-card class="pa-6" elevation="2" rounded="xl" v-else>
+
           <!-- Cabeçalho do perfil -->
           <v-row align="center" class="mb-6">
             <v-col cols="12" md="4" class="d-flex justify-center">
               <v-avatar size="120">
-                <v-img
-                  src="https://cdn.vuetifyjs.com/images/john.jpg"
-                  alt="User Avatar"
-                ></v-img>
+                <v-img src="https://cdn.vuetifyjs.com/images/john.jpg" alt="User Avatar"></v-img>
               </v-avatar>
             </v-col>
             <v-col cols="12" md="8" class="text-center text-md-left">
-              <h2 class="font-weight-bold mb-1">Marcos Obrien</h2>
+              <h2 class="font-weight-bold mb-1" v-if="profile.full_name">{{ profile.full_name }}</h2>
+              <h2 class="font-weight-bold mb-1" v-else>Marcos Obrien</h2>
               <!-- <p class="text-medium-emphasis mb-1">Network Engineer</p> -->
+              <p class="text-caption" v-if="profile.username">Username: {{ profile.username }}</p>
+              <p class="text-caption" v-else>marcos.obrien@example.com</p>
               <p class="text-caption">marcos.obrien@example.com</p>
               <v-btn color="primary" variant="flat" size="small" class="mt-2" @click="openEditProfileDialog()">
                 Edit Profile
@@ -64,26 +61,17 @@
             Recent Activity
           </h3>
           <v-list density="compact" lines="two">
-            <v-list-item
-              prepend-icon="mdi-cart"
-              title="Order #1024"
-              subtitle="Placed 3 days ago"
-            ></v-list-item>
-            <v-list-item
-              prepend-icon="mdi-message"
-              title="Commented on 'Network Setup Guide'"
-              subtitle="2 days ago"
-            ></v-list-item>
-            <v-list-item
-              prepend-icon="mdi-account-edit"
-              title="Updated profile info"
-              subtitle="1 week ago"
-            ></v-list-item>
+            <v-list-item prepend-icon="mdi-cart" title="Order #1024" subtitle="Placed 3 days ago"></v-list-item>
+            <v-list-item prepend-icon="mdi-message" title="Commented on 'Network Setup Guide'"
+              subtitle="2 days ago"></v-list-item>
+            <v-list-item prepend-icon="mdi-account-edit" title="Updated profile info"
+              subtitle="1 week ago"></v-list-item>
           </v-list>
         </v-card>
 
         <v-dialog v-model="editDialog" width="800">
-           <edit-profile-dialog v-model="editDialog" :profile="profile" @update-profile="onProfileUpdated" />
+          <edit-profile-dialog v-model="editDialog" :profile="profile" @update-profile="handleUpdateProfile"
+            @update:modelValue="val => editDialog = val" />
         </v-dialog>
       </v-col>
     </v-row>
@@ -92,45 +80,58 @@
 
 
 <script setup>
-  import {ref, onMounted} from 'vue'
-  import axios from 'axios'
-  import editProfileDialog from './profile/editProfileDialog.vue';
-  
-  const api = axios.create({
-    baseURL:
-        window.location.hostname === "localhost"
-            ? "http://localhost:5000"
-            : "https://rua11store-catalog-api-lbp7.onrender.com",
-    headers: { "Content-Type": "application/json" },
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import editProfileDialog from './profile/editProfileDialog.vue';
+
+const api = axios.create({
+  baseURL:
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://rua11store-catalog-api-lbp7.onrender.com",
+  headers: { "Content-Type": "application/json" },
 });
 
 const userId = localStorage.getItem('user_id');
 const profile = ref({});
 const loading = ref(true);
 const editDialog = ref(false);
+let updatedProfile;
 
 const getProfileUser = async () => {
-  try{
-    const response = api.get(`/profile/get-profile/${userId}`);
-    profile.value = (await response).data;
+  try {
+    const response = await api.get(`/profile/get-profile/${userId}`);
+    profile.value = response.data;
     console.log("Response profile:", response.data);
   }
-  catch(e){
+  catch (e) {
     console.log('Erro ao buscar perfil de usuário:', e);
   }
-  finally{
+  finally {
     loading.value = false;
   }
 };
 
 const openEditProfileDialog = async () => {
-  try{
+  try {
     editDialog.value = true;
   }
-  catch(e){
+  catch (e) {
     console.log('Erro ao abrir dialog', e);
   }
 };
+
+const handleUpdateProfile = async (updatedProfile) => {
+  profile.value = { ...updatedProfile }
+  console.log('Perfil Atualizado:', updatedProfile);
+  try {
+    const response = await api.put(`/profile/update-profile/${userId}`, updatedProfile);
+    profile.value = response.data;
+  }
+  catch (e) {
+    console.log("Erro ao atualizar dados de usuario", e);
+  }
+}
 onMounted(() => {
   getProfileUser();
 });

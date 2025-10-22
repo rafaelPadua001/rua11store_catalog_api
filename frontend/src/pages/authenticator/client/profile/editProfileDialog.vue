@@ -47,11 +47,22 @@
                                     :rules="[v => !!v || 'Name is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="6">
+
+                                <!-- Name -->
+                                <v-text-field v-model="formData.user_name" label="Username"
+                                    :rules="[v => !!v || 'Name is required']" required></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
                                 <!-- Email -->
                                 <v-text-field v-model="formData.email" label="Email"
                                     :rules="[v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Email must be valid']"
                                     required></v-text-field>
                             </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="formData.birth_date" label="Birth Date" type="date"
+                                    :rules="[v => !!v || 'Birth date is required']" required></v-text-field>
+                            </v-col>
+
                         </v-row>
                         <v-row>
                             <v-col cols="12">
@@ -151,7 +162,9 @@ const token = localStorage.getItem('access_token') || localStorage.getItem('toke
 // Copia os dados do profile para formData
 const formData = reactive({
     full_name: '',
-    email: '',
+    user_name: '',
+    birth_date: '',
+    //email: '',
     avatar_file: null,
     address: {
         street: '',
@@ -170,6 +183,8 @@ watch(
     () => props.profile,
     (newVal) => {
         formData.full_name = newVal.full_name || ''
+        formData.user_name = newVal.user_name || ''
+        formData.birth_date = newVal.birth_date || ''
         formData.email = newVal.email || ''
         formData.avatar_file = newVal.avatar_file || ''
         formData.address.street = newVal.address?.street || ''
@@ -279,7 +294,7 @@ const saveProfile = () => {
     if (form.value.validate()) {
         // Emite evento para o componente pai atualizar o perfil
         emit('update-profile', { ...formData })
-        closeDialog()
+        emit('update:modelValue', false)
     }
 }
 
