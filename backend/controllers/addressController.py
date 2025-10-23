@@ -40,7 +40,17 @@ class AddressController:
             user_uuid = UUID_type(str(user_id))
 
             # Valida campos obrigatórios
-            required_fields = ['numero', 'cep', 'logradouro', 'bairro', 'cidade', 'estado']
+            required_fields = {
+                'street': 'logradouro',
+                'number': 'numero',
+                'complement': 'complemento',
+                'neighborhood': 'bairro',
+                'city': 'cidade',
+                'state': 'estado',
+                'zip': 'cep',
+                'country': 'pais',
+                #'reference': 'referencia'
+            }
             missing_fields = [f for f in required_fields if not data.get(f)]
             if missing_fields:
                 return {"error": f"Campos obrigatórios faltando: {', '.join(missing_fields)}"}
@@ -50,24 +60,28 @@ class AddressController:
             
             if existing_address:
                 # Atualiza endereço existente
+                # Atualiza somente os campos que vieram no payload
                 for key, value in data.items():
-                    if hasattr(existing_address, key) and value is not None:
-                        setattr(existing_address, key, value)
+                    model_field = required_fields.get(key, key)
+                    if hasattr(existing_address, model_field) and value is not None:
+                        setattr(existing_address, model_field, value)
+
+
                 db.session.commit()
                 return {"message": "Endereço atualizado com sucesso!", "address": existing_address.to_dict()}
 
             # Cria novo endereço
             new_address = Address(
                 client_user_id=user_uuid,
-                cep=data.get('cep'),
-                logradouro=data.get('logradouro'),
-                numero=data.get('numero'),
-                complemento=data.get('complemento'),
-                bairro=data.get('bairro'),
-                cidade=data.get('cidade'),
-                estado=data.get('estado'),
-                pais=data.get('pais', 'Brasil'),
-                referencia=data.get('referencia')
+                cep=data.get('zip'),
+                logradouro=data.get('street'),
+                numero=data.get('number'),
+                complemento=data.get('complement'),
+                bairro=data.get('neighborhood'),
+                cidade=data.get('city'),
+                estado=data.get('state'),
+                pais=data.get('country', 'Brasil'),
+                referencia=data.get('reference') or ''
             )
             db.session.add(new_address)
             db.session.commit()

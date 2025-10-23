@@ -4,6 +4,9 @@ from datetime import datetime
 from flask import request, jsonify
 from models.userProfile import UserProfile
 from models.address import Address
+from models.clientUser import ClientUser
+from models.user import User
+from models.cartItems import CartItems
 from controllers.addressController import AddressController
 from database import db
 from sqlalchemy.orm import Session
@@ -206,3 +209,39 @@ class ProfileController:
         except Exception as e:
             print(f"Erro ao fazer upload para Cloudinary: {e}")
             return None
+        
+    @staticmethod
+    def delete_profile(userId):
+        try:
+            if not userId or userId == 'null' or userId == 'undefined':
+                return jsonify({"error": "UserId é obrigatório"}), 400
+            
+            # Usar userId como string
+            user_id_str = str(userId)
+
+            #get Profile
+            profile = UserProfile.query.filter_by(user_id=user_id_str).first()
+
+
+            if not profile:
+                return jsonify({'Error': 'Perfil não encontrado'}), 404
+            
+            CartItems.query.filter_by(user_id=user_id_str).delete(synchronize_session=False)
+            Address.query.filter_by(client_user_id=user_id_str).delete(synchronize_session=False)
+            ClientUser.query.filter_by(id=user_id_str).delete(synchronize_session=False)
+
+           # User.query.filter_by(id=profile.user_id).delete()
+
+            db.session.delete(profile)
+            db.session.commit()
+
+           
+
+            db.session.commit()
+
+            return jsonify({'message': 'Perfil removido com sucesso !'}), 200
+
+        except Exception as e:
+            db.session.rollback()
+            print('Erro ao remover conta, tente novamente', e)
+            return jsonify({"error": "Erro ao remover conta, tente novamente"}), 500

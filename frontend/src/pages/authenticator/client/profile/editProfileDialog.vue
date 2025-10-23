@@ -176,7 +176,7 @@ watch(
     () => props.profile,
     (newVal) => {
         formData.full_name = newVal.full_name || ''
-        formData.user_name = newVal.username || ''
+        formData.user_name = newVal.username
         formData.birth_date = newVal.birth_date || ''
         formData.email = newVal.email || ''
         formData.avatar_file = null
@@ -217,8 +217,8 @@ const getAuthenticatedUser = async () => {
 
         formData.full_name = response.data.name;
         formData.email = response.data.email;
-        formData.user_name = response.data.profile.username || ''; // se tiver username
-        formData.birth_date = response.data.profile.birth_date || '';
+        formData.user_name = response.data.profile.username;// se tiver username
+        formData.birth_date = response.data.profile.birth_date;
 
         // Preenche os dados do endereço (o primeiro endereço, se houver)
         if (response.data.addresses && response.data.addresses.length > 0) {
