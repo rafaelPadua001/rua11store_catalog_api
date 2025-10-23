@@ -17,6 +17,14 @@ class ClientUser(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
     addresses = db.relationship("Address", back_populates="client_user")
+
+    profile = db.relationship(
+        "UserProfile",
+        back_populates="client_user",
+        primaryjoin="ClientUser.id == foreign(UserProfile.user_id)",
+        uselist=False,
+        viewonly=True
+    )
     
     # setter para salvar senha já criptografada
     @property

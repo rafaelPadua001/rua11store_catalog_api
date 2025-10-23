@@ -12,6 +12,53 @@ import uuid
 jwt = JWTManager()
 
 class ClientUserController:
+    def get_logged_client():
+        userId = get_jwt_identity()
+
+        # se o ClientUser.id for UUID
+        client = ClientUser.query.get(str(userId))
+
+        if not client:
+            return jsonify({'error': 'Cliente não encontrado'}), 404
+
+        addresses = []
+        if client.addresses:
+            for addr in client.addresses:
+                addresses.append({
+                    "id": addr.id,
+                    "street": addr.logradouro,
+                    "number": addr.numero,
+                    "complement": addr.complemento,
+                    "neighborhood": addr.bairro,
+                    "city": addr.cidade,
+                    "state": addr.estado,
+                    "zip": addr.cep,
+                    "country": addr.pais,
+                    "referencia": addr.referencia,
+                    "created_at": addr.created_at.strftime("%Y-%m-%dT%H:%M:%S") if addr.created_at else None,
+                    "updated_at": addr.updated_at.strftime("%Y-%m-%dT%H:%M:%S") if addr.updated_at else None
+                })
+        
+        profile_data = {}
+        if hasattr(client, "profile") and client.profile:
+            profile = client.profile
+            profile_data = {
+                "username": profile.username,
+                "full_name": profile.full_name,
+                "birth_date": profile.birth_date if profile.birth_date else None,
+                "avatar_url": profile.avatar_url,
+                "phone": profile.phone,
+                "mobile": profile.mobile,
+                "created_at": profile.created_at.strftime("%Y-%m-%dT%H:%M:%S") if profile.created_at else None,
+                "updated_at": profile.updated_at.strftime("%Y-%m-%dT%H:%M:%S") if profile.updated_at else None,
+            }
+        return jsonify({
+            'id': str(client.id),
+            'name': client.name,
+            'email': client.email,
+            'addresses': addresses,
+            'profile': profile_data
+        }), 200
  
     def get_client():
         query = request.args.get('q', '').strip()

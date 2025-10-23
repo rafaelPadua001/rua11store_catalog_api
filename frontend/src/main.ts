@@ -9,6 +9,7 @@ import { registerPlugins } from '@/plugins'
 // Importando o head manager
 import { createHead } from '@vueuse/head'
 
+
 const app = createApp(App)
 
 // Cria o gerenciador de head
