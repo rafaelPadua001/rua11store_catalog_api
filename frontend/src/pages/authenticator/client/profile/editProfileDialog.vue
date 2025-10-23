@@ -159,15 +159,15 @@ const formData = reactive({
     email: '',
     avatar_file: null,
     addresses: {
+        zip: '',
         street: '',
-        number: '', // ADICIONE ESTE CAMPO
+        number: '',
+        complement: '',
+        neighborhood: '',
         city: '',
         state: '',
-        zip: '',
-        neighborhood: '',
-        complement: '',
         country: ''
-    },
+      },
     phone: '',
     mobile: ''
 })
@@ -213,14 +213,43 @@ const getAuthenticatedUser = async () => {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
-        })
+        });
+
         formData.full_name = response.data.name;
         formData.email = response.data.email;
+        formData.user_name = response.data.profile.username || ''; // se tiver username
+        formData.birth_date = response.data.profile.birth_date || '';
+
+        // Preenche os dados do endereço (o primeiro endereço, se houver)
+        if (response.data.addresses && response.data.addresses.length > 0) {
+            formData.addresses = {
+                zip: response.data.addresses[0].zip || '',
+                street: response.data.addresses[0].street || '',
+                number: response.data.addresses[0].number || '',
+                complement: response.data.addresses[0].complement || '',
+                neighborhood: response.data.addresses[0].neighborhood || '',
+                city: response.data.addresses[0].city || '',
+                state: response.data.addresses[0].state || '',
+                country: response.data.addresses[0].country || '',
+            };
+        } else {
+            formData.addresses = {
+                zip: '',
+                street: '',
+                number: '',
+                complement: '',
+                neighborhood: '',
+                city: '',
+                state: '',
+                country: '',
+            };
+        }
+
+    } catch (e) {
+        console.log('Usuário não autenticado...', e);
     }
-    catch (e) {
-        console.log('usuario não authenticado...');
-    }
-}
+};
+
 
 const onAvatarChange = () => {
     const file = formData.avatar_file

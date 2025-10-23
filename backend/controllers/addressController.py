@@ -2,7 +2,7 @@ from flask import request, jsonify
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from models.address import Address
 from database import db
-import uuid
+from uuid import UUID as UUID_type
 
 class AddressController:
     @staticmethod
@@ -32,24 +32,21 @@ class AddressController:
         print("Endereços enviados:", address_list)  # debug
         return jsonify(address_list), 200
 
-    
     @staticmethod
     @jwt_required()
     def create_address(user_id, data):
         try:
+            # Converte o user_id para UUID
+            user_uuid = UUID_type(str(user_id))
+
             # Valida campos obrigatórios
-            required_fields = ['number']  # Ajuste conforme sua tabela
-            missing_fields = []
-            
-            for field in required_fields:
-                if field not in data or data[field] is None or data[field] == '':
-                    missing_fields.append(field)
-            
+            required_fields = ['numero', 'cep', 'logradouro', 'bairro', 'cidade', 'estado']
+            missing_fields = [f for f in required_fields if not data.get(f)]
             if missing_fields:
                 return {"error": f"Campos obrigatórios faltando: {', '.join(missing_fields)}"}
 
             # Verifica se já existe endereço para este usuário
-            existing_address = Address.query.filter_by(client_user_id=user_id).first()
+            existing_address = Address.query.filter_by(client_user_id=user_uuid).first()
             
             if existing_address:
                 # Atualiza endereço existente
@@ -58,23 +55,24 @@ class AddressController:
                         setattr(existing_address, key, value)
                 db.session.commit()
                 return {"message": "Endereço atualizado com sucesso!", "address": existing_address.to_dict()}
-            else:
-                # Cria novo endereço com validação
-                new_address = Address(
-                    client_user_id=user_id,
-                    cep=data.get('zip', data.get('cep', '')),
-                    logradouro=data.get('logradouro', data.get('street', '')),
-                    numero=data.get('number', data.get('number')),  # Campo obrigatório
-                    complemento=data.get('complemento', data.get('complement')),
-                    bairro=data.get('bairro', data.get('neighborhood', '')),
-                    cidade=data.get('cidade', data.get('city', '')),
-                    estado=data.get('estado', data.get('state', '')),
-                    pais=data.get('pais', 'Brasil'),
-                    referencia=data.get('referencia', data.get('reference'))
-                )
-                db.session.add(new_address)
-                db.session.commit()
-                return {"message": "Endereço criado com sucesso!", "address": new_address.to_dict()}
+
+            # Cria novo endereço
+            new_address = Address(
+                client_user_id=user_uuid,
+                cep=data.get('cep'),
+                logradouro=data.get('logradouro'),
+                numero=data.get('numero'),
+                complemento=data.get('complemento'),
+                bairro=data.get('bairro'),
+                cidade=data.get('cidade'),
+                estado=data.get('estado'),
+                pais=data.get('pais', 'Brasil'),
+                referencia=data.get('referencia')
+            )
+            db.session.add(new_address)
+            db.session.commit()
+            return {"message": "Endereço criado com sucesso!", "address": new_address.to_dict()}
+
         except Exception as e:
             db.session.rollback()
             return {"error": f"Erro ao processar endereço: {str(e)}"}
@@ -82,21 +80,35 @@ class AddressController:
     @staticmethod
     def update_address(user_id, address_id, data):
         try:
-            address = Address.query.filter_by(id=address_id, client_user_id=user_id).first()
+            user_uuid = UUID_type(str(user_id))
+            address = Address.query.filter_by(id=address_id, client_user_id=user_uuid).first()
             if not address:
                 return {"error": "Endereço não encontrado", "address": None}
 
-            # Atualiza apenas campos que existem e não são nulos
+            field_map = {
+                'zip': 'cep',
+                'street': 'logradouro',
+                'number': 'numero',
+                'complement': 'complemento',
+                'neighborhood': 'bairro',
+                'city': 'cidade',
+                'state': 'estado',
+                'country': 'pais',
+                'reference': 'referencia'
+            }
+
             for key, value in data.items():
-                if hasattr(address, key) and value is not None:
-                    setattr(address, key, value)
+                mapped_key = field_map.get(key, key)  # usa key original se não estiver no map
+                if hasattr(address, mapped_key) and value is not None:
+                    setattr(address, mapped_key, value)
+
             
             db.session.commit()
             return {"message": "Endereço atualizado com sucesso!", "address": address.to_dict()}
         except Exception as e:
             db.session.rollback()
             return {"error": f"Erro ao atualizar endereço: {str(e)}"}
-    
+
     @staticmethod
     def delete_address(address_id, user_id):
        

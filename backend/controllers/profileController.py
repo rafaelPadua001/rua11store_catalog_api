@@ -84,7 +84,7 @@ class ProfileController:
                 data = request.form.to_dict()
                 avatar_file = request.files.get('avatar_file')
             else:
-                data = request.get_json()
+                data = request.get_json() or {}
                 avatar_file = None
 
             # Busca perfil
@@ -98,26 +98,17 @@ class ProfileController:
 
             # Processa dados de endereço
             address_data = None
-            if 'address' in data:
-                try:
-                    # Se veio como string JSON, converte
-                    if isinstance(data['address'], str):
-                        address_data = json.loads(data['address'])
-                    else:
-                        address_data = data['address']
-                    
-                    # Valida campos obrigatórios do endereço
-                    if address_data:
-                        required_fields = ['number']  # Campos obrigatórios
-                        for field in required_fields:
-                            if not address_data.get(field):
-                                print(f"Campo obrigatório do endereço faltando: {field}")
-                                address_data = None  # Ignora endereço se campos obrigatórios faltarem
-                                break
-                                
-                except json.JSONDecodeError as e:
-                    print(f"Erro ao decodificar JSON do endereço: {e}")
-                    address_data = None
+            addresses_field = data.get('addresses') or data.get('address')
+            if addresses_field:
+                if isinstance(addresses_field, str):
+                    try:
+                        address_data = json.loads(addresses_field)
+                    except json.JSONDecodeError as e:
+                        print(f"Erro ao decodificar JSON do endereço: {e}")
+                        address_data = None
+                elif isinstance(addresses_field, dict):
+                    address_data = addresses_field
+
 
             # Atualiza ou cria perfil
             if profile:
@@ -158,12 +149,19 @@ class ProfileController:
                     address_result = AddressController.create_address(user_id_str, address_data)
 
                 if isinstance(address_result, dict):
+                    # aceita tanto 'address' quanto 'addresses'
                     if 'address' in address_result:
                         address_info = address_result['address']
+                    elif 'addresses' in address_result:
+                        address_info = address_result['addresses']
                     elif 'error' in address_result:
                         print("Erro ao processar endereço:", address_result['error'])
+                    else:
+                        print("Estrutura inesperada de retorno do endereço:", address_result)
                 else:
                     print("Resultado inesperado do endereço:", address_result)
+
+
 
             db.session.commit()
 

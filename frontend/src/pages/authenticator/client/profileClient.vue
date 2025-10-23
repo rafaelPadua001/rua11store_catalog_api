@@ -24,9 +24,10 @@
               <h2 class="font-weight-bold mb-1" v-if="profile.full_name">{{ profile.full_name }}</h2>
               <h2 class="font-weight-bold mb-1" v-else>Marcos Obrien</h2>
               <!-- <p class="text-medium-emphasis mb-1">Network Engineer</p> -->
-              <p class="text-caption" v-if="profile.username">Username: {{ profile.username }}</p>
+              <p class="text-caption" v-if="profile.username"><strong>Username:</strong> {{ profile.username }}</p>
               <p class="text-caption" v-else>marcos.obrien@example.com</p>
-              <p class="text-caption">marcos.obrien@example.com</p>
+              <p class="text-caption" v-if="profile.email"><strong>Email:</strong> {{ profile.email }}</p>
+              <p class="text-caption" v-else>marcos.obrien@example.com</p>
               <v-btn color="primary" variant="flat" size="small" class="mt-2" @click="openEditProfileDialog()">
                 Edit Profile
               </v-btn>
@@ -60,7 +61,7 @@
             <v-col cols="12" sm="6">
               <v-card class="pa-3" variant="outlined" rounded="lg">
                 <v-icon class="mr-2" color="green">mdi-calendar</v-icon>
-                <span v-if="profile.created_at">Joined: {{ profile.created_at }}</span>
+                <span v-if="profile.created_at">Last updated: {{ formatDateBr(profile.updated_at) }}</span>
                 <span v-else>Joined: March 2022</span>
               </v-card>
             </v-col>
@@ -114,7 +115,6 @@ const getProfileUser = async () => {
   try {
     const response = await api.get(`/profile/get-profile/${userId}`);
     profile.value = response.data;
-    console.log("Response profile:", response.data);
   }
   catch (e) {
     console.log('Erro ao buscar perfil de usuário:', e);
@@ -133,7 +133,7 @@ const openEditProfileDialog = async () => {
   }
 };
 
-const handleUpdateProfile = async (updatedProfile, avatarFile) => {
+const handleUpdateProfile = async (updatedProfile) => {
   profile.value = { ...updatedProfile }
   console.log('Perfil Atualizado:', updatedProfile);
 
@@ -142,9 +142,11 @@ const handleUpdateProfile = async (updatedProfile, avatarFile) => {
 
     // Adiciona campos do perfil
     for (const key in updatedProfile) {
-      if (key === "address") {
+
+      if (key === "addresses") {
         // Converte endereço para JSON string
         payload.append(key, JSON.stringify(updatedProfile[key]));
+        console.log(payload);
       } else if (key === "avatar_file") {
         // Não adiciona avatar_file aqui se vier separado
         continue;
@@ -166,12 +168,21 @@ const handleUpdateProfile = async (updatedProfile, avatarFile) => {
     });
 
     profile.value = response.data;
-    console.log('Perfil atualizado com sucesso:', response.data);
   }
   catch (e) {
     console.log("Erro ao atualizar dados de usuario", e);
   }
 }
+
+const formatDateBr = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 onMounted(() => {
   getProfileUser();
 });
