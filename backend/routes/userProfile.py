@@ -31,8 +31,11 @@ def get_profile(userId):
 
     return jsonify(profile), 200
 
-
-
 @profile_bp.route('/update-profile/<userId>', methods=["PUT"])
 def update_profile(userId):
     return ProfileController.update_profile(userId)
+
+
+@profile_bp.route('/delete-profile/<userId>', methods=['DELETE'])
+def delte_profile(userId):
+    return ProfileController.delete_profile(userId)

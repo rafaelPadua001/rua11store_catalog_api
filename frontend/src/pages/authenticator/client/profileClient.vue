@@ -82,7 +82,7 @@
           </v-list>
 
           <v-card-actions class="justify-center">
-            <v-btn color="error">
+            <v-btn color="error" @click="removeAccount(profile.user_id)">
               Delete account
             </v-btn>
           </v-card-actions>
@@ -189,6 +189,79 @@ const formatDateBr = (dateStr) => {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
+};
+
+const removeAccount = async (userId) => {
+  if(!confirm('Tem certeza que deseja remover sua conta permanentemente ?')) return;
+  try{
+    const response = await api.delete(`/profile/delete-profile/${userId}`);
+    if(response.status === 200 || response.status === 204){
+      profile.value = null;
+      alert('Conta removida com sucesso !');
+      window.location.href = '/authenticator/client/clientLogin';
+      logout();
+    }
+    else {
+      console.error('Erro inesperado ao remover conta:', response);
+      alert('Erro inesperado ao remover a conta.');
+    }
+  }
+  catch(e){
+    console.log('Erro ao remover a sua conta, tente novamente.', e);
+    alert('Erro ao remover a sua conta, tente novamente.');
+  }
+  
+};
+
+const logout = async () => {
+  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  const user_type = payload.user_type;
+
+  if (!token && user_type === 'client') {
+    alert("Você já está deslogado.");
+    navigateTo('/authenticator/client/clientLogin');
+    return;
+  }
+
+  try {
+    const response = await api.post(
+      '/client/logoutClient',
+      {},
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      localStorage.removeItem('access_token') || localStorage.removeItem('token');
+      localStorage.removeItem('user_id');
+      window.dispatchEvent(new Event('storage'));
+      alert('Logout realizado com sucesso!');
+
+      if (user_type !== 'client') {
+        return navigateTo('/authenticator/Login');
+      }
+      else {
+        return navigateTo('/authenticator/client/clientLogin');
+      }
+
+      // navigateTo('/authenticator/client/clientLogin');
+    }
+  } catch (error) {
+    console.error('Erro no logout:', error.response?.data || error.message);
+
+    if (error.response?.status === 401 || error.response?.status === 422) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user_id');
+      window.dispatchEvent(new Event('storage'));
+    }
+
+    navigateTo('/authenticator/client/clientLogin');
+  }
 };
 
 onMounted(() => {

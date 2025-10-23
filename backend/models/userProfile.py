@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSON
 from sqlalchemy.orm import relationship, Session
 from database import db  # sua instância do SQLAlchemy
 from models.user import User  # ajuste o caminho conforme necessário
+from models.address import Address
 from sqlalchemy import Column, Integer, String, Date, ForeignKey, cast
 from sqlalchemy.orm import relationship, Session
 from datetime import datetime
@@ -15,7 +16,6 @@ class UserProfile(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(String(36), ForeignKey('users.id'), nullable=True)
     client_user_id = Column(String(36), ForeignKey('client_users.id'), nullable=True, unique=True)
-
     username = Column(String(150), nullable=False, unique=True)
     full_name = Column(String(200), nullable=False)
     birth_date = Column(Date, nullable=False)
@@ -28,26 +28,26 @@ class UserProfile(db.Model):
     # Relacionamentos
     user = relationship(
         "User",
-        primaryjoin="foreign(cast(User.id, String)) == UserProfile.user_id",
-        uselist=False,
-        viewonly=True,
+        back_populates="profile",
+        cascade="all, delete",
+        passive_deletes=True
+    )
+
+    # Relacionamento 1-N com endereços
+    addresses = relationship(
+        "Address",
+        back_populates="profile",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     client_user = relationship(
         "ClientUser",
-        primaryjoin="foreign(ClientUser.id) == UserProfile.user_id",  # corrigido
+        primaryjoin="foreign(ClientUser.id) == UserProfile.user_id",
         uselist=False,
-        viewonly=True,
+        passive_deletes=True,
     )
-
-    addresses = relationship(
-        "Address",
-        primaryjoin="foreign(Address.client_user_id) == cast(UserProfile.user_id, UUID)",
-        viewonly=True,  # apenas leitura, já que a FK real está em outra tabela
-        lazy="joined"
-    )
-
-
+    
     def __init__(self,
              user_id: int,
              username: Optional[str] = None,

@@ -6,9 +6,8 @@ class Address(db.Model):
     __tablename__ = "addresses"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-
-    client_user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("client_users.id"), nullable=False)
-    
+    client_user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("client_users.id", ondelete='CASCADE'), nullable=False)
+    profile_id = db.Column(UUID(as_uuid=True), db.ForeignKey("profiles.user_id", ondelete="CASCADE"), nullable=True)
     cep = db.Column(db.String(9), nullable=False)
     logradouro = db.Column(db.String(255), nullable=False)
     numero = db.Column(db.String(20), nullable=False)
@@ -23,6 +22,8 @@ class Address(db.Model):
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     client_user = db.relationship("ClientUser", back_populates="addresses")
+
+    profile = db.relationship("UserProfile", back_populates="addresses")
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
