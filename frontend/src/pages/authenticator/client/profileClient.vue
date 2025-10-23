@@ -61,7 +61,7 @@
             <v-col cols="12" sm="6">
               <v-card class="pa-3" variant="outlined" rounded="lg">
                 <v-icon class="mr-2" color="green">mdi-calendar</v-icon>
-                <span v-if="profile.created_at">Last updated: {{ formatDateBr(profile.updated_at) }}</span>
+                <span v-if="profile.created_at">Joined: {{ formatDateBr(profile.created_at) }}</span>
                 <span v-else>Joined: March 2022</span>
               </v-card>
             </v-col>
@@ -71,13 +71,21 @@
           <h3 class="text-subtitle-1 font-weight-medium mt-6 mb-3">
             Recent Activity
           </h3>
+          <v-divider></v-divider>
+
           <v-list density="compact" lines="two">
             <v-list-item prepend-icon="mdi-cart" title="Order #1024" subtitle="Placed 3 days ago"></v-list-item>
             <v-list-item prepend-icon="mdi-message" title="Commented on 'Network Setup Guide'"
               subtitle="2 days ago"></v-list-item>
             <v-list-item prepend-icon="mdi-account-edit" title="Updated profile info"
-              subtitle="1 week ago"></v-list-item>
+              :subtitle="formatDateBr(profile.updated_at)"></v-list-item>
           </v-list>
+
+          <v-card-actions class="justify-center">
+            <v-btn color="error">
+              Delete account
+            </v-btn>
+          </v-card-actions>
         </v-card>
 
         <v-dialog v-model="editDialog" width="800">
