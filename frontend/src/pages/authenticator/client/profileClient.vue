@@ -82,7 +82,7 @@
           </v-list>
 
           <v-card-actions class="justify-center">
-            <v-btn color="error">
+            <v-btn color="error" @click="removeAccount(profile.user_id)">
               Delete account
             </v-btn>
           </v-card-actions>
@@ -189,6 +189,26 @@ const formatDateBr = (dateStr) => {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
+};
+
+const removeAccount = async (userId) => {
+  if(!confirm('Tem certeza que deseja remover sua conta permanentemente ?')) return;
+  try{
+    const response = await api.delete(`/profile/delete-profile/${userId}`);
+    if(response.status === 200 || response.status === 204){
+      profile.value = null;
+      alert('Conta removida com sucesso !');
+    }
+    else {
+      console.error('Erro inesperado ao remover conta:', response);
+      alert('Erro inesperado ao remover a conta.');
+    }
+  }
+  catch(e){
+    console.log('Erro ao remover a sua conta, tente novamente.', e);
+    alert('Erro ao remover a sua conta, tente novamente.');
+  }
+  
 };
 
 onMounted(() => {
