@@ -67,8 +67,6 @@ class ProfileController:
             print(f"Erro ao buscar perfil: {e}")
             raise
 
-
-
     @staticmethod
     def update_profile(userId):
         try:
