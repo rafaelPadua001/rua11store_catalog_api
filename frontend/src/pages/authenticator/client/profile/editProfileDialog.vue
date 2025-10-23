@@ -3,22 +3,22 @@
         <v-col>
             <v-card>
                 <v-card-title>
-                    <h1>Edit profile user</h1>
+                    <span class="text-h5">Edit profile user</span>
                 </v-card-title>
                 <v-divider></v-divider>
                 <v-card-text style="max-height: 500px; overflow-y: auto;">
                     <v-form ref="form" v-model="valid">
                         <v-row justify="center">
                             <v-col cols="12">
-                                <h3>Personal</h3>
+                                <span class="text-subtitle text-h6">Personal</span>
                             </v-col>
                             <v-divider></v-divider>
 
-                            <v-col cols="3" class="d-flex flex-column justify-center">
+                            <v-col cols="auto" class="d-flex flex-column justify-center">
                                 <div class="avatar-wrapper position-relative d-inline-block">
                                     <!-- Avatar -->
-                                    <v-avatar size="150" class="mt-4 overflow-hidden">
-                                        <v-img :src="avatarPreview || profile.avatar_url || defaultAvatar"></v-img>
+                                    <v-avatar class="mt-4 overflow-hidden" size="150">
+                                        <v-img :src="avatarPreview || profile.avatar_url || defaultAvatar" :alt="profile.avatar_url"></v-img>
                                     </v-avatar>
 
 
@@ -35,7 +35,7 @@
                                 </div>
                             </v-col>
                         </v-row>
-                        <v-row>
+                        <v-row dense justify-sm="center">
                             <v-col cols="6">
                                 <!-- Name -->
                                 <v-text-field v-model="formData.full_name" label="Name"
@@ -59,7 +59,7 @@
                         </v-row>
                         <v-row>
                             <v-col cols="12">
-                                <h3>Address</h3>
+                                <span class="text-subtitle text-h6">Address</span>
                             </v-col>
                             <v-divider></v-divider>
                             <v-col cols="6">
@@ -97,7 +97,7 @@
                         </v-row>
                         <v-row>
                             <v-col cols="12">
-                                <h3>Contact</h3>
+                                <span class="text-subtitle text-h6">Contact</span>
                             </v-col>
                             <v-divider class="mb-4"></v-divider>
                             <v-col cols="6">
@@ -314,7 +314,7 @@ const formatPhoneInput = (field) => {
         val = val.replace(/^(\d{2})(\d{0,5})/, '($1) $2')
     } else {
         val = val.replace(/^(\d*)/, '($1')
-    }a
+    }
     formData[field] = val
 }
 
