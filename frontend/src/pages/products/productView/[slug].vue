@@ -54,10 +54,6 @@
             Pedir pelo Whatsapp
           </v-btn>
         </div>
-
-
-
-
       </v-col>
 
     </v-row>
@@ -115,18 +111,26 @@
             <v-row no-gutters>
               <v-col cols="3" md="1">
                 <v-avatar color="grey" rounded="10" size="75">
-                  <v-img height="100%" src="https://cdn.vuetifyjs.com/images/cards/server-room.jpg" contain></v-img>
+                  <v-img height="100%" v-if="authUser?.[0]?.profile?.avatar_url" :src="authUser[0].profile.avatar_url"
+                    :alt="authUser[0].profile.avatar_url" contain></v-img>
+                  <v-img height="100%" v-else src="https://cdn.vuetifyjs.com/images/cards/server-room.jpg"
+                    contain></v-img>
                 </v-avatar>
               </v-col>
               <v-col cols="6" md="3">
-                <v-list-item class="" subtitle="Network engineer" title="Marcos Obrien">
+                <v-list-item class=""
+                  :subtitle="`${authUser?.[0]?.addresses?.[0]?.city}, ${authUser?.[0]?.addresses?.[0]?.state}`"
+                  :title="authUser?.[0]?.profile?.username">
 
                 </v-list-item>
               </v-col>
 
+              <br></br>
+
               <v-col cols="12">
                 <div class="d-flex align-end">
-                  <v-textarea placeholder="Comment here..." rows="2" auto-grow class="flex-grow- mr-1">
+                  <v-textarea v-model="message" placeholder="Comment here..." rows="2" auto-grow
+                    class="flex-grow- mr-1">
                   </v-textarea>
 
 
@@ -146,9 +150,50 @@
             </v-row>
           </v-card-text>
 
-          <v-divider></v-divider>
+          
 
-          <v-card-text>
+          <v-card-text v-if="product?.comments?.length">
+            <v-list density="compact" lines="two">
+              <v-list-item v-for="(comment, index) in product.comments" :key="index" class="border-b border-gray-200">
+                <template #prepend>
+                  <v-avatar size="50">
+                    <v-img v-if="comment.avatar_url" :src="comment.avatar_url" :alt="comment.username"></v-img>
+                    <v-img v-else src="https://cdn.vuetifyjs.com/images/profiles/marcus.jpg"></v-img>
+                  </v-avatar>
+                </template>
+
+                <v-list-item-title class="font-semibold">
+                  {{ comment.user_name }}
+                </v-list-item-title>
+
+                <v-list-item-subtitle>
+                  {{ comment.comment }}
+                </v-list-item-subtitle>
+
+                
+                <div justify="justify-end">
+                     {{ comment.updated_at }}
+                </div>
+               
+
+                <template #append>
+                  <div class="d-flex align-center">
+                    <v-btn v-if="authUser?.[0]?.id === comment.userId" size="x-small" variant="plain" color="primary">
+                      Edit
+                    </v-btn>
+                    <v-btn v-if="authUser?.[0]?.id === comment.userId" size="x-small" variant="plain" color="error">
+                      Remove
+                    </v-btn>
+                  </div>
+                </template>
+
+
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+
+          <v-card-text v-else>
+
             Load comments here....
           </v-card-text>
         </v-card>
@@ -178,7 +223,7 @@ const api = axios.create({
       : "https://rua11store-catalog-api-lbp7.onrender.com",
   headers: { "Content-Type": "application/json" },
 });
-
+const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 export default {
   data() {
     return {
@@ -187,10 +232,13 @@ export default {
       alert: null,
       alertError: null,
       alertMessage: '',
+      authUser: [],
+      message: '',
     };
   },
   async created() {
     await this.loadProduct();
+    await this.loadAuthUser();
   },
   computed: {
     currentImage() {
@@ -224,6 +272,25 @@ export default {
         }
       } catch (error) {
         console.error("Erro ao buscar produto:", error);
+      }
+    },
+    async loadAuthUser() {
+      try {
+        const response = await api.get('/client/get-logged-client', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        if (response.status === 200 || response.status === 201) {
+          return this.authUser.push(response.data);
+
+        }
+        else {
+          console.log('perfil de usuario não encontrado');
+        }
+      }
+      catch (e) {
+        console.log('Perfil de usuário não encontrado, tente novamente.', e);
       }
     },
     async addItemCart(product) {
@@ -286,8 +353,42 @@ export default {
         "_blank"
       );
     },
-    submitComment(){
-      window.alert('Desculpe o transtorno. Isso ainda esta em desenvolvimento');
+    async submitComment() {
+      try {
+        const payload = {
+          'comment': this.message,
+          'product_id': this.product.id,
+          'user_id': this.authUser?.[0]?.id,
+          'status': 'pending',
+          'user_name': this.authUser?.[0]?.profile?.username,
+          'avatar_url': this.authUser?.[0]?.profile?.avatar_url,
+        }
+        const response = await api.post(`/comments/new`, payload, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+
+         if (response.status === 200 || response.status === 201) {
+      // Limpa o campo da mensagem
+      this.message = '';
+
+      // Garante que product.comments exista
+      if (!this.product.comments) {
+        this.product.comments = [];
+      }
+
+      // Adiciona o novo comentário à lista
+      this.product.comments.push(response.data.comment);
+
+      console.log('Comentário adicionado com sucesso:', response.data.comment);
+    } else {
+      console.log('Erro ao registrar comentário:', response);
+    }
+      }
+      catch {
+        console.log('Erro ao registrar comentário', e);
+      }
     }
   },
 };

@@ -10,6 +10,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from controllers.productImageController import ProductImageController
 from controllers.productVideoController import ProductVideoController
 from models.productImage import ProductImage
+from models.comment import Comment
 import cloudinary
 import cloudinary.uploader
 from datetime import datetime
@@ -138,12 +139,27 @@ class ProductController:
         #found relation images
         product_id = product_data['id']
         images = ProductImage.query.filter_by(product_id=product_id).all()
+        comments = Comment.query.filter_by(product_id=product_id).all()
         image_list = [
             {
                 "id": img.id,
                 "url": img.image_path
             }
             for img in images
+        ]
+
+        comments_list = [
+            {
+                "id": comment.id,
+                "comment": comment.comment,
+                "userId": comment.user_id,
+                "user_name": comment.user_name,
+                "avatar_url": comment.avatar_url,
+                "product_id": comment.product_id,
+                "status": comment.status,
+                "updated_at": comment.updated_at
+            }
+            for comment in comments
         ]
 
         return jsonify({
@@ -161,6 +177,7 @@ class ProductController:
                 "meta_keywords": seo_data['meta_keywords'] 
             },
             "images": image_list,
+            "comments": comments_list,
             # Se quiser os comentários, precisa buscá-los separadamente
             # Ou incluir na consulta original
             # "comments": [...]
