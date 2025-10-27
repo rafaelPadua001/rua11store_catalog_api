@@ -37,6 +37,7 @@ declare module 'vue-router/auto-routes' {
     '/blog/blogView/comments': RouteRecordInfo<'/blog/blogView/comments', '/blog/blogView/comments', Record<never, never>, Record<never, never>>,
     '/cart/client/cartClient': RouteRecordInfo<'/cart/client/cartClient', '/cart/client/cartClient', Record<never, never>, Record<never, never>>,
     '/categories/categories': RouteRecordInfo<'/categories/categories', '/categories/categories', Record<never, never>, Record<never, never>>,
+    '/comments/client/commentForm': RouteRecordInfo<'/comments/client/commentForm', '/comments/client/commentForm', Record<never, never>, Record<never, never>>,
     '/comments/comment': RouteRecordInfo<'/comments/comment', '/comments/comment', Record<never, never>, Record<never, never>>,
     '/comments/commentsView/commentInputForm': RouteRecordInfo<'/comments/commentsView/commentInputForm', '/comments/commentsView/commentInputForm', Record<never, never>, Record<never, never>>,
     '/comments/commentsView/reportComment': RouteRecordInfo<'/comments/commentsView/reportComment', '/comments/commentsView/reportComment', Record<never, never>, Record<never, never>>,

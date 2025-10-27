@@ -132,13 +132,8 @@
                   <v-textarea v-model="message" placeholder="Comment here..." rows="2" auto-grow
                     class="flex-grow- mr-1">
                   </v-textarea>
-
-
                 </div>
-
               </v-col>
-
-
             </v-row>
             <v-row no-gutters>
               <v-col cols="12">
@@ -149,9 +144,6 @@
               </v-col>
             </v-row>
           </v-card-text>
-
-          
-
           <v-card-text v-if="product?.comments?.length">
             <v-list density="compact" lines="two">
               <v-list-item v-for="(comment, index) in product.comments" :key="index" class="border-b border-gray-200">
@@ -170,18 +162,18 @@
                   {{ comment.comment }}
                 </v-list-item-subtitle>
 
-                
-                <div justify="justify-end">
-                     {{ comment.updated_at }}
-                </div>
-               
 
-                <template #append>
+                <div justify="justify-end">
+                  {{ comment.updated_at }}
+                </div>
+
+
+                <template #append v-if="authUser?.[0]?.id === (comment.userId || comment.user_id)">
                   <div class="d-flex align-center">
-                    <v-btn v-if="authUser?.[0]?.id === comment.userId" size="x-small" variant="plain" color="primary">
+                    <v-btn size="x-small" variant="plain" color="primary" @click="editComment(comment)">
                       Edit
                     </v-btn>
-                    <v-btn v-if="authUser?.[0]?.id === comment.userId" size="x-small" variant="plain" color="error">
+                    <v-btn size="x-small" variant="plain" color="error" @click="removeComment(comment.id)">
                       Remove
                     </v-btn>
                   </div>
@@ -200,12 +192,22 @@
       </v-col>
     </v-row>
 
+    <v-dialog 
+      v-model="editCommentDialog"
+    >
+      <commentForm 
+        :authUser="authUser"
+        :editedComment="editedComment"
+        :comment="editedComment.comment"
+        @save="submitComment"
+        @close="editCommentDialog = false"/>
+    </v-dialog>
+
     <transition name="fade">
       <v-alert v-if="alert" class="notification" type="success" variant="elevated" elevation="8" border="start"
         :text="alertMessage" title="Produto adicionado ao carrinho" />
       <v-alert v-else-if="alertError" class="notification" type="error" elevation="8" border="start"
         :text="alertMessage" title="Erro ao adicionar o produto ao carrinho">
-
       </v-alert>
     </transition>
   </v-container>
@@ -214,6 +216,8 @@
 <script>
 import axios from "axios";
 import { useSeo } from "@/useSeo";
+import commentForm from "@/pages/comments/client/commentForm.vue";
+
 
 
 const api = axios.create({
@@ -225,20 +229,28 @@ const api = axios.create({
 });
 const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 export default {
+  components: {
+    commentForm,
+  },
   data() {
     return {
-      product: { images: [] },
+      product: { images: [], comments: [] },
       currentIndex: 0,
       alert: null,
       alertError: null,
       alertMessage: '',
       authUser: [],
       message: '',
+      editCommentDialog: false,
+      editedIndex: -1,
+      editedComment: {},
+      comments: [],
     };
   },
   async created() {
     await this.loadProduct();
     await this.loadAuthUser();
+    this.comments = this.product.comments || [];
   },
   computed: {
     currentImage() {
@@ -353,44 +365,99 @@ export default {
         "_blank"
       );
     },
-    async submitComment() {
-      try {
-        const payload = {
-          'comment': this.message,
-          'product_id': this.product.id,
-          'user_id': this.authUser?.[0]?.id,
-          'status': 'pending',
-          'user_name': this.authUser?.[0]?.profile?.username,
-          'avatar_url': this.authUser?.[0]?.profile?.avatar_url,
-        }
-        const response = await api.post(`/comments/new`, payload, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        });
+   async submitComment(updatedComment) {
+  try {
+    // Monta payload a partir do comentário atualizado
+    const payload = {
+      comment: this.message || updatedComment.comment,
+      product_id: this.product.id,
+      user_id: this.authUser?.[0]?.id,
+      status: 'pending' || updatedComment.status,
+      user_name:  this.authUser?.[0]?.profile?.username || updatedComment.user_name,
+      avatar_url: this.authUser?.[0]?.profile?.avatar_url || updatedComment.avatar_url,
+    }
 
-         if (response.status === 200 || response.status === 201) {
-      // Limpa o campo da mensagem
-      this.message = '';
+    let response;
 
-      // Garante que product.comments exista
-      if (!this.product.comments) {
-        this.product.comments = [];
+    if (this.editedIndex !== -1) {
+      // Atualiza comentário existente
+      response = await api.put(`/comments/update/${updatedComment.id}`, payload, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.status === 200) {
+        // Atualiza localmente
+        const index = this.product.comments.findIndex(c => c.id === updatedComment.id);
+        if (index !== -1) this.product.comments[index] = response.data;
+        console.log('Comentário atualizado com sucesso:', response.data.comment);
+      } else {
+        console.log('Erro ao atualizar comentário:', response);
       }
-
-      // Adiciona o novo comentário à lista
-      this.product.comments.push(response.data.comment);
-
-      console.log('Comentário adicionado com sucesso:', response.data.comment);
     } else {
-      console.log('Erro ao registrar comentário:', response);
-    }
+      // Cria novo comentário
+      response = await api.post(`/comments/new`, payload, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        if (!this.product.comments) this.product.comments = [];
+        this.product.comments.push(response.data.comment);
+        console.log('Comentário adicionado com sucesso:', response.data.comment);
+      } else {
+        console.log('Erro ao registrar comentário:', response);
       }
-      catch {
-        console.log('Erro ao registrar comentário', e);
+    }
+
+  } catch (e) {
+    console.log('Erro ao registrar comentário', e);
+  }
+},
+
+
+
+    async editComment(comment) {
+  // Usa o array correto
+  const comments = comment || [];
+
+  this.editedIndex = comment.id;
+
+  if (this.editedIndex === -1) {
+    console.warn('Comentário não encontrado:', comment);
+    return;
+  }
+
+  this.editedComment = { ...comment };
+  this.editCommentDialog = true;
+},
+
+    async removeComment(id) {
+      if (!confirm("Tem certeza que deseja remover este comentário permanentemente?")) return;
+
+      try {
+        const response = await api.delete(`/comments/delete/${id}`);
+
+        if (Array.isArray(this.product.comments)) {
+          // Encontrar o índice do comentário pelo id
+          const index = this.product.comments.findIndex(c => c?.id === id);
+
+          if (index > -1) {
+            // Remove o comentário específico
+            this.product.comments.splice(index, 1);
+          } else {
+            // Caso não encontre, faz uma filtragem completa
+            this.product.comments = this.product.comments.filter(c => c?.id !== id);
+            console.log('Comentário removido (via filtro).');
+          }
+        } else {
+          console.warn('this.comments não é um array, não foi possível atualizar localmente.');
+        }
+      } catch (e) {
+        console.error('Erro ao remover comentário, tente novamente.', e);
       }
     }
+
   },
+
 };
 </script>
 <style scoped>
