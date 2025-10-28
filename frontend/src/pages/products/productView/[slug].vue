@@ -103,12 +103,12 @@
       <v-col cols="12">
         <v-card elevation="0">
           <v-card-title>
-            Comments
+            Comments: ({{ this.product.comments?.length }})
           </v-card-title>
           <v-divider></v-divider>
 
           <v-card-text>
-            <v-row no-gutters>
+            <v-row no-gutters justify="center">
               <v-col cols="3" md="1">
                 <v-avatar color="grey" rounded="10" size="75">
                   <v-img height="100%" v-if="authUser?.[0]?.profile?.avatar_url" :src="authUser[0].profile.avatar_url"
@@ -117,7 +117,7 @@
                     contain></v-img>
                 </v-avatar>
               </v-col>
-              <v-col cols="6" md="3">
+              <v-col cols="6" md="1">
                 <v-list-item class=""
                   :subtitle="`${authUser?.[0]?.addresses?.[0]?.city}, ${authUser?.[0]?.addresses?.[0]?.state}`"
                   :title="authUser?.[0]?.profile?.username">
@@ -125,24 +125,20 @@
                 </v-list-item>
               </v-col>
 
-              <br></br>
-
-              <v-col cols="12">
+              <v-col cols="8" md="7">
                 <div class="d-flex align-end">
-                  <v-textarea v-model="message" placeholder="Comment here..." rows="2" auto-grow
-                    class="flex-grow- mr-1">
-                  </v-textarea>
+                  <v-textarea v-model="message" placeholder="Write a comment..." auto-grow rows="3" max-rows="4"
+                    hide-details variant="outlined" density="comfortable" class="flex-grow-1" />
                 </div>
               </v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col cols="12">
+              <v-col cols="8" md="9">
                 <div class="d-flex justify-end">
                   <v-btn color="primary" @click="submitComment()">Comment</v-btn>
                 </div>
 
               </v-col>
             </v-row>
+
           </v-card-text>
           <v-card-text v-if="product?.comments?.length">
             <v-list density="compact" lines="two">
@@ -186,21 +182,15 @@
 
           <v-card-text v-else>
 
-            Load comments here....
+
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
-    <v-dialog 
-      v-model="editCommentDialog"
-    >
-      <commentForm 
-        :authUser="authUser"
-        :editedComment="editedComment"
-        :comment="editedComment.comment"
-        @save="submitComment"
-        @close="editCommentDialog = false"/>
+    <v-dialog v-model="editCommentDialog">
+      <commentForm :authUser="authUser" :editedComment="editedComment" :comment="editedComment.comment"
+        @save="submitComment" @close="editCommentDialog = false" />
     </v-dialog>
 
     <transition name="fade">
@@ -365,70 +355,76 @@ export default {
         "_blank"
       );
     },
-   async submitComment(updatedComment) {
-  try {
-    // Monta payload a partir do comentário atualizado
-    const payload = {
-      comment: this.message || updatedComment.comment,
-      product_id: this.product.id,
-      user_id: this.authUser?.[0]?.id,
-      status: 'pending' || updatedComment.status,
-      user_name:  this.authUser?.[0]?.profile?.username || updatedComment.user_name,
-      avatar_url: this.authUser?.[0]?.profile?.avatar_url || updatedComment.avatar_url,
-    }
+    async submitComment(updatedComment) {
+      try {
+        // Monta payload a partir do comentário atualizado
+        const payload = {
+          comment: this.message || updatedComment.comment,
+          product_id: this.product.id,
+          user_id: this.authUser?.[0]?.id,
+          status: 'pending' || updatedComment.status,
+          user_name: this.authUser?.[0]?.profile?.username || updatedComment.user_name,
+          avatar_url: this.authUser?.[0]?.profile?.avatar_url || updatedComment.avatar_url,
+        }
 
-    let response;
+        let response;
 
-    if (this.editedIndex !== -1) {
-      // Atualiza comentário existente
-      response = await api.put(`/comments/update/${updatedComment.id}`, payload, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+        if (this.editedIndex !== -1) {
+          // Atualiza comentário existente
+          response = await api.put(`/comments/update/${updatedComment.id}`, payload, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
 
-      if (response.status === 200) {
-        // Atualiza localmente
-        const index = this.product.comments.findIndex(c => c.id === updatedComment.id);
-        if (index !== -1) this.product.comments[index] = response.data;
-        console.log('Comentário atualizado com sucesso:', response.data.comment);
-      } else {
-        console.log('Erro ao atualizar comentário:', response);
+          if (response.status === 200) {
+            // Atualiza localmente
+            const index = this.product.comments.findIndex(c => c.id === updatedComment.id);
+            if (index !== -1) this.product.comments[index] = response.data;
+            console.log('Comentário atualizado com sucesso:', response.data.comment);
+            this.editedIndex = -1;
+            this.message = '';
+            this.editedComment = null;
+          } else {
+            console.log('Erro ao atualizar comentário:', response);
+          }
+        } else {
+          // Cria novo comentário
+          response = await api.post(`/comments/new`, payload, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (response.status === 200 || response.status === 201) {
+            if (!this.product.comments) this.product.comments = [];
+            this.product.comments.push(response.data.comment);
+            console.log('Comentário adicionado com sucesso:', response.data.comment);
+            this.editedIndex = -1;
+            this.message = '';
+            this.editedComment = null;
+          } else {
+            console.log('Erro ao registrar comentário:', response);
+          }
+        }
+
+      } catch (e) {
+        console.log('Erro ao registrar comentário', e);
       }
-    } else {
-      // Cria novo comentário
-      response = await api.post(`/comments/new`, payload, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        if (!this.product.comments) this.product.comments = [];
-        this.product.comments.push(response.data.comment);
-        console.log('Comentário adicionado com sucesso:', response.data.comment);
-      } else {
-        console.log('Erro ao registrar comentário:', response);
-      }
-    }
-
-  } catch (e) {
-    console.log('Erro ao registrar comentário', e);
-  }
-},
+    },
 
 
 
     async editComment(comment) {
-  // Usa o array correto
-  const comments = comment || [];
+      // Usa o array correto
+      const comments = comment || [];
 
-  this.editedIndex = comment.id;
+      this.editedIndex = comment.id;
 
-  if (this.editedIndex === -1) {
-    console.warn('Comentário não encontrado:', comment);
-    return;
-  }
+      if (this.editedIndex === -1) {
+        console.warn('Comentário não encontrado:', comment);
+        return;
+      }
 
-  this.editedComment = { ...comment };
-  this.editCommentDialog = true;
-},
+      this.editedComment = { ...comment };
+      this.editCommentDialog = true;
+    },
 
     async removeComment(id) {
       if (!confirm("Tem certeza que deseja remover este comentário permanentemente?")) return;
