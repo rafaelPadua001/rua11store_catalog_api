@@ -108,7 +108,7 @@
           <v-divider></v-divider>
 
           <v-card-text>
-            <v-row no-gutters>
+            <v-row no-gutters justify="center">
               <v-col cols="3" md="1">
                 <v-avatar color="grey" rounded="10" size="75">
                   <v-img height="100%" v-if="authUser?.[0]?.profile?.avatar_url" :src="authUser[0].profile.avatar_url"
@@ -117,7 +117,7 @@
                     contain></v-img>
                 </v-avatar>
               </v-col>
-              <v-col cols="6" md="3">
+              <v-col cols="6" md="1">
                 <v-list-item class=""
                   :subtitle="`${authUser?.[0]?.addresses?.[0]?.city}, ${authUser?.[0]?.addresses?.[0]?.state}`"
                   :title="authUser?.[0]?.profile?.username">
@@ -125,24 +125,20 @@
                 </v-list-item>
               </v-col>
 
-              <br></br>
-
-              <v-col cols="12">
+              <v-col cols="8" md="7">
                 <div class="d-flex align-end">
-                  <v-textarea v-model="message" placeholder="Comment here..." rows="2" auto-grow
-                    class="flex-grow- mr-1">
-                  </v-textarea>
+                  <v-textarea v-model="message" placeholder="Write a comment..." auto-grow rows="3" max-rows="4"
+                    hide-details variant="outlined" density="comfortable" class="flex-grow-1" />
                 </div>
               </v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col cols="12">
+              <v-col cols="8" md="9">
                 <div class="d-flex justify-end">
                   <v-btn color="primary" @click="submitComment()">Comment</v-btn>
                 </div>
 
               </v-col>
             </v-row>
+
           </v-card-text>
           <v-card-text v-if="product?.comments?.length">
             <v-list density="compact" lines="two">
@@ -186,7 +182,7 @@
 
           <v-card-text v-else>
 
-            
+
           </v-card-text>
         </v-card>
       </v-col>
