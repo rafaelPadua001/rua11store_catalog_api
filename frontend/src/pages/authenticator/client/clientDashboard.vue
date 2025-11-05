@@ -20,17 +20,17 @@
             </v-col>
         </v-row>
         <br></br>
-        <v-divider></v-divider>
+
 
         <v-row dense>
             <v-col cols="auto">
                 <p class="text-h6">Pedidos por Categoria:</p>
             </v-col>
         </v-row>
-
+        <v-divider></v-divider>
         <v-row>
             <v-col v-if="orders">
-                <v-card height="300">
+                <v-card height="300" elevation="0">
                     <canvas ref="chartCanvas"></canvas>
                 </v-card>
             </v-col>
@@ -44,47 +44,46 @@
 
         <v-row>
             <v-col class="d-flex flex-column">
-                <v-card>
+                <v-card elevation="0">
                     <v-row>
                         <v-col>
                             <p class="text-h6">Last Actives:</p>
                         </v-col>
                     </v-row>
-
+                    <v-divider></v-divider>
                     <v-row>
                         <v-col cols="12" class="d-flex flex-column justify-center" v-if="orders?.length >= 1">
                             <v-card v-for="(order, index) in orders" :key="index">
                                 <v-card-text>
                                     <v-row>
                                         <v-col cols="11" class="d-flex flex-column">
-                                            <p class="text-h6">Order {{ '#' + order.id  }}</p>
+                                            <p class="text-h6">Order {{ '#' + order.id }}</p>
                                         </v-col>
                                         <v-col>
                                             <span><strong>R$ {{ order.total_amount }}</strong></span>
                                         </v-col>
                                     </v-row>
                                     <v-row dense>
-                                        <v-col  md='11'>
-                                            <span>Data {{ formatDate(order.order_date)}}</span>
+                                        <v-col md='11'>
+                                            <span>Data: {{ formatDate(order.order_date) }}</span>
                                         </v-col>
                                         <v-col cols="auto" md="1">
-                                            <v-chip v-if="order.status === 'pending' || order.status === 'in_process'" color="gray">
+                                            <v-chip v-if="order.status === 'pending' || order.status === 'in_process'"
+                                                color="gray">
                                                 {{ order.status }}
                                             </v-chip>
-                                           <v-chip v-else-if="order.status === 'approved'" color="success">
+                                            <v-chip v-else-if="order.status === 'approved'" color="success">
                                                 {{ order.status }}
-                                           </v-chip>
-                                           <v-chip v-else color="error">
+                                            </v-chip>
+                                            <v-chip v-else color="error">
                                                 {{ order.status }}
-                                           </v-chip>
+                                            </v-chip>
                                         </v-col>
                                     </v-row>
-                                   
-                                </v-card-text>
 
-                                <v-divider></v-divider>
+                                </v-card-text>
                             </v-card>
-                        </v-col> 
+                        </v-col>
                         <v-col v-else>
                             <v-card>
                                 <v-card-text>
@@ -98,7 +97,7 @@
                 </v-card>
             </v-col>
         </v-row>
-</v-container>
+    </v-container>
 
 </template>
 
@@ -107,7 +106,7 @@ import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router';
 import { Chart, registerables } from 'chart.js';
-import { useDate} from 'vuetify';
+import { useDate } from 'vuetify';
 
 const router = useRouter();
 const date = useDate()
@@ -155,7 +154,7 @@ const getCartsByUserId = async () => {
 const getOrdersByUserId = async () => {
     try {
         const response = await api.get(`/order/get-order/${userId}`)
-        
+
         if (response.status === 200 || response.status === 201) {
             orders.value = response.data;
         }
@@ -201,7 +200,7 @@ const goToCoupons = () => {
 
 const createChart = (data) => {
     if (chartInstance) chartInstance.destroy();
-    
+
     chartInstance = new Chart(chartCanvas.value, {
         type: "pie",
         data: {
@@ -235,7 +234,7 @@ const refreshChart = () => {
             const cat = o.categories?.[0]?.name ?? "Sem Categoria";
             const total = o.total_amount ?? 0;
 
-            if(!grouped[cat]) grouped[cat] = 0
+            if (!grouped[cat]) grouped[cat] = 0
             grouped[cat] += total
         });
 
@@ -247,12 +246,12 @@ const refreshChart = () => {
 };
 
 const formatDate = (value) => {
-    if(!value) return '';
+    if (!value) return '';
     return date.format(value, 'keyboardDateTime');
 }
 
 onMounted(refreshChart)
-watch(() => orders.value, refreshChart, {deep: true})
+watch(() => orders.value, refreshChart, { deep: true })
 
 
 onMounted(() => {
