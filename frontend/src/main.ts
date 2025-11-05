@@ -2,6 +2,7 @@
 
 import { createApp } from 'vue'
 import App from './App.vue'
+import 'vuetify/styles'
 
 // Plugins
 import { registerPlugins } from '@/plugins'
