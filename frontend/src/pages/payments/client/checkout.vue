@@ -374,6 +374,8 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+const userId = localStorage.getItem('user_id');
 const address = ref(null);
 const addressDialog = ref(false);
 const route = useRoute()
@@ -688,17 +690,18 @@ const saveAddress = async () => {
       pais: addressData.pais,
       referencia: addressData.referencia,
       delivery_option: selectedDelivery?.company?.name || null,
-      delivery_price: selectedDelivery?.price || null
+      delivery_price: selectedDelivery?.price || null,
+      
     }
 
     const response = await api.post('/address/create-address', data, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('access_token') || localStorage.getItem('token')}`
+        Authorization: `Bearer ${token}`
       }
     })
 
     // Atualiza endereço local
-    address.value = { ...data, id: response.data.address_id }
+    address.value = { ...data, user_id: userId, id: response.data.address_id }
 
     nextStep()
   } catch (e) {

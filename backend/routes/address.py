@@ -14,9 +14,9 @@ def get_address():
 @address_bp.route("/create-address", methods=["POST"])
 @jwt_required()
 def create_address():
-    data = request.json
     user_id = get_jwt_identity()
-    return AddressController.create_address()
+    data = request.get_json() or {}
+    return AddressController.create_address(user_id, data)
 
 @address_bp.route('/update-address/<int:address_id>', methods=["PUT"])
 @jwt_required()

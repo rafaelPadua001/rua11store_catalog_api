@@ -36,56 +36,52 @@ class AddressController:
     @jwt_required()
     def create_address(user_id, data):
         try:
-            # Converte o user_id para UUID
             user_uuid = UUID_type(str(user_id))
 
-            # Valida campos obrigatórios
-            required_fields = {
-                'street': 'logradouro',
-                'number': 'numero',
-                'complement': 'complemento',
-                'neighborhood': 'bairro',
-                'city': 'cidade',
-                'state': 'estado',
-                'zip': 'cep',
-                'country': 'pais',
-                #'reference': 'referencia'
-            }
-            missing_fields = [f for f in required_fields if not data.get(f)]
-            if missing_fields:
-                return {"error": f"Campos obrigatórios faltando: {', '.join(missing_fields)}"}
-
-            # Verifica se já existe endereço para este usuário
+            # BUSCA SE EXISTE ENDEREÇO PARA ESSE USUÁRIO
             existing_address = Address.query.filter_by(client_user_id=user_uuid).first()
-            
-            if existing_address:
-                # Atualiza endereço existente
-                # Atualiza somente os campos que vieram no payload
-                for key, value in data.items():
-                    model_field = required_fields.get(key, key)
-                    if hasattr(existing_address, model_field) and value is not None:
-                        setattr(existing_address, model_field, value)
 
+            # MAPEIA CAMPOS ACEITOS
+            mapping = {
+                'cep': 'cep',
+                'logradouro': 'logradouro',
+                'numero': 'numero',
+                'complemento': 'complemento',
+                'bairro': 'bairro',
+                'cidade': 'cidade',
+                'estado': 'estado',
+                'pais': 'pais',
+                'referencia': 'referencia'
+            }
+
+            if existing_address:
+                # ATUALIZA APENAS O QUE EXISTE
+                for key, model_field in mapping.items():
+                    if key in data and data[key] is not None:
+                        setattr(existing_address, model_field, data[key])
 
                 db.session.commit()
-                return {"message": "Endereço atualizado com sucesso!", "address": existing_address.to_dict()}
+                return {
+                    "message": "Endereço atualizado com sucesso!",
+                    "address": existing_address.to_dict()
+                }
 
-            # Cria novo endereço
+            # CRIA NOVO
             new_address = Address(
                 client_user_id=user_uuid,
-                cep=data.get('zip'),
-                logradouro=data.get('street'),
-                numero=data.get('number'),
-                complemento=data.get('complement'),
-                bairro=data.get('neighborhood'),
-                cidade=data.get('city'),
-                estado=data.get('state'),
-                pais=data.get('country', 'Brasil'),
-                referencia=data.get('reference') or ''
+                **{
+                    model_field: data.get(key)
+                    for key, model_field in mapping.items()
+                }
             )
+
             db.session.add(new_address)
             db.session.commit()
-            return {"message": "Endereço criado com sucesso!", "address": new_address.to_dict()}
+
+            return {
+                "message": "Endereço criado com sucesso!",
+                "address": new_address.to_dict()
+            }
 
         except Exception as e:
             db.session.rollback()
