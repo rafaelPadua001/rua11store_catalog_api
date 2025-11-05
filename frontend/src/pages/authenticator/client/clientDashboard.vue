@@ -29,10 +29,12 @@
         </v-row>
 
         <v-row>
-            <v-col v-if="orders[0]?.length >= 1">
-                Graph here
+            <v-col v-if="orders">
+                <v-card height="300">
+                    <canvas ref="chartCanvas"></canvas>
+                </v-card>
             </v-col>
-            <v-col>
+            <v-col v-else>
                 <v-card height="300">
                     <canvas ref="chartCanvas"></canvas>
                 </v-card>
@@ -50,9 +52,39 @@
                     </v-row>
 
                     <v-row>
-                        <v-col v-if="orders[0]?.length >= 1">
-                            Last activies Here...
-                        </v-col>
+                        <v-col cols="12" class="d-flex flex-column justify-center" v-if="orders?.length >= 1">
+                            <v-card v-for="(order, index) in orders" :key="index">
+                                <v-card-text>
+                                    <v-row>
+                                        <v-col cols="11" class="d-flex flex-column">
+                                            <p class="text-h6">Order {{ '#' + order.id  }}</p>
+                                        </v-col>
+                                        <v-col>
+                                            <span><strong>R$ {{ order.total_amount }}</strong></span>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row dense>
+                                        <v-col  md='11'>
+                                            <span>Data {{ formatDate(order.order_date)}}</span>
+                                        </v-col>
+                                        <v-col cols="auto" md="1">
+                                            <v-chip v-if="order.status === 'pending' || order.status === 'in_process'" color="gray">
+                                                {{ order.status }}
+                                            </v-chip>
+                                           <v-chip v-else-if="order.status === 'approved'" color="success">
+                                                {{ order.status }}
+                                           </v-chip>
+                                           <v-chip v-else color="error">
+                                                {{ order.status }}
+                                           </v-chip>
+                                        </v-col>
+                                    </v-row>
+                                   
+                                </v-card-text>
+
+                                <v-divider></v-divider>
+                            </v-card>
+                        </v-col> 
                         <v-col v-else>
                             <v-card>
                                 <v-card-text>
@@ -65,11 +97,8 @@
 
                 </v-card>
             </v-col>
-
         </v-row>
-
-
-    </v-container>
+</v-container>
 
 </template>
 
@@ -78,8 +107,10 @@ import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router';
 import { Chart, registerables } from 'chart.js';
+import { useDate} from 'vuetify';
 
 const router = useRouter();
+const date = useDate()
 const userId = localStorage.getItem('user_id');
 const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 const carts = ref([]);
@@ -87,6 +118,7 @@ const orders = ref([]);
 const coupons = ref([]);
 const chartCanvas = ref(null);
 let chartInstance = null;
+
 
 
 
@@ -123,6 +155,7 @@ const getCartsByUserId = async () => {
 const getOrdersByUserId = async () => {
     try {
         const response = await api.get(`/order/get-order/${userId}`)
+        
         if (response.status === 200 || response.status === 201) {
             orders.value = response.data;
         }
@@ -167,8 +200,8 @@ const goToCoupons = () => {
 };
 
 const createChart = (data) => {
-    if (chartInstance) chartInstance.destroy()
-
+    if (chartInstance) chartInstance.destroy();
+    
     chartInstance = new Chart(chartCanvas.value, {
         type: "pie",
         data: {
@@ -195,15 +228,31 @@ const refreshChart = () => {
         })
     }
     else {
+        //grouped orders
+        const grouped = {};
+
+        orders.value.forEach(o => {
+            const cat = o.categories?.[0]?.name ?? "Sem Categoria";
+            const total = o.total_amount ?? 0;
+
+            if(!grouped[cat]) grouped[cat] = 0
+            grouped[cat] += total
+        });
+
         createChart({
-            labels: orders.value.map(o => o.name),
-            values: orders.value.map(o => o.total)
+            labels: Object.keys(grouped),
+            values: Object.values(grouped)
         })
     }
 };
 
+const formatDate = (value) => {
+    if(!value) return '';
+    return date.format(value, 'keyboardDateTime');
+}
+
 onMounted(refreshChart)
-watch(() => orders, refreshChart)
+watch(() => orders.value, refreshChart, {deep: true})
 
 
 onMounted(() => {

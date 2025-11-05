@@ -15,6 +15,8 @@ import { VMaskInput } from 'vuetify/labs/VMaskInput'
 //Vpie
 import { VPie } from 'vuetify/labs/VPie'
 
+import { pt } from 'vuetify/locale';
+
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
   theme: {
@@ -23,5 +25,9 @@ export default createVuetify({
   components: {
     VMaskInput,
     VPie,
+  },
+  locale: {
+    locale: 'pt',
+    messages: { pt },
   },
 })
