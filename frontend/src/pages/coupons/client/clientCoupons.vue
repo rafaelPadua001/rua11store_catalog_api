@@ -9,7 +9,7 @@
                 <v-divider></v-divider>
 
                 <v-card-text>
-                     <!-- ✅ Loading -->
+                    <!-- ✅ Loading -->
                     <div v-if="loading" class="d-flex justify-center my-6">
                         <v-progress-circular indeterminate></v-progress-circular>
                     </div>
@@ -84,16 +84,16 @@ const getCoupons = async () => {
     loading.value = true;
     try {
         const response = await api.get(`/coupon/get-coupons/${userId}`);
-        if(response.status === 200 || response.status === 201){
+        if (response.status === 200 || response.status === 201) {
             coupons.value = response.data;
         }
-        
-        
+
+
     }
     catch (e) {
         console.log('Erro ao buscar cupons', e);
     }
-    finally{
+    finally {
         loading.value = false;
     }
 }
