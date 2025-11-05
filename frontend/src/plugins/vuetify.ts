@@ -12,6 +12,9 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import { VMaskInput } from 'vuetify/labs/VMaskInput'
 
+//Vpie
+import { VPie } from 'vuetify/labs/VPie'
+
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
   theme: {
@@ -19,5 +22,6 @@ export default createVuetify({
   },
   components: {
     VMaskInput,
+    VPie,
   },
 })

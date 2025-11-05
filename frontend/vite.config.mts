@@ -44,9 +44,10 @@ export default defineConfig({
         configFile: 'src/styles/settings.scss',
       },
     }),
+
     Fonts({
       google: {
-        families: [ {
+        families: [{
           name: 'Roboto',
           styles: 'wght@100;300;400;500;700;900',
         }],
