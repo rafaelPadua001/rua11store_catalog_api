@@ -10,7 +10,7 @@
 
                     <v-chip @click="goToOrders" class="cursor-pointer">
                         <v-icon>mdi-shopping</v-icon>
-                        Orders ({{ orders[0]?.length || 0 }})
+                        Orders ({{ orders.length || 0 }})
                     </v-chip>
                     <v-chip @click="goToCoupons" class="cursor-pointer">
                         <v-icon>mdi-ticket</v-icon>
