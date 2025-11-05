@@ -23,16 +23,16 @@
 
 
         <v-row>
-  <v-col>
-    <v-card height="300" elevation="0">
-      <canvas v-show="!loading" ref="chartCanvas"></canvas>
+            <v-col>
+                <v-card height="300" elevation="0">
+                    <canvas v-show="!loading" ref="chartCanvas"></canvas>
 
-      <div v-if="loading" class="d-flex justify-center align-center" style="height:100%">
-        <v-progress-circular indeterminate />
-      </div>
-    </v-card>
-  </v-col>
-</v-row>
+                    <div v-if="loading" class="d-flex justify-center align-center" style="height:100%">
+                        <v-progress-circular indeterminate />
+                    </div>
+                </v-card>
+            </v-col>
+        </v-row>
 
 
         <v-row>
@@ -190,10 +190,10 @@ const goToCoupons = () => {
 };
 
 const createChart = (data) => {
-      if (!chartCanvas.value) return;
-  if (!data?.labels?.length) return;
+    if (!chartCanvas.value) return;
+    if (!data?.labels?.length) return;
 
-  if (chartInstance) chartInstance.destroy();
+    if (chartInstance) chartInstance.destroy();
     chartInstance = new Chart(chartCanvas.value, {
         type: "pie",
         data: {
@@ -254,7 +254,7 @@ onMounted(async () => {
 });
 
 watch(orders, () => {
-  if (!loading.value) refreshChart()
+    if (!loading.value) refreshChart()
 })
 
 
