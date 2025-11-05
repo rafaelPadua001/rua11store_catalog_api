@@ -22,32 +22,25 @@
         <br></br>
 
 
-        <v-row dense>
-            <v-col cols="auto">
-                <p class="text-h6">Pedidos por Categoria:</p>
-            </v-col>
-        </v-row>
-        <v-divider></v-divider>
         <v-row>
-            <v-col v-if="orders">
-                <v-card height="300" elevation="0">
-                    <canvas ref="chartCanvas"></canvas>
-                </v-card>
-            </v-col>
-            <v-col v-else>
-                <v-card height="300">
-                    <canvas ref="chartCanvas"></canvas>
-                </v-card>
-            </v-col>
+  <v-col>
+    <v-card height="300" elevation="0">
+      <canvas v-show="!loading" ref="chartCanvas"></canvas>
 
-        </v-row>
+      <div v-if="loading" class="d-flex justify-center align-center" style="height:100%">
+        <v-progress-circular indeterminate />
+      </div>
+    </v-card>
+  </v-col>
+</v-row>
+
 
         <v-row>
             <v-col class="d-flex flex-column">
                 <v-card elevation="0">
                     <v-row>
                         <v-col>
-                            <p class="text-h6">Last Actives:</p>
+                            <p class="text-h6">Last activies:</p>
                         </v-col>
                     </v-row>
                     <v-divider></v-divider>
@@ -69,7 +62,7 @@
                                         </v-col>
                                         <v-col cols="auto" md="1">
                                             <v-chip v-if="order.status === 'pending' || order.status === 'in_process'"
-                                                color="gray">
+                                                color="grey">
                                                 {{ order.status }}
                                             </v-chip>
                                             <v-chip v-else-if="order.status === 'approved'" color="success">
@@ -117,9 +110,7 @@ const orders = ref([]);
 const coupons = ref([]);
 const chartCanvas = ref(null);
 let chartInstance = null;
-
-
-
+const loading = ref(true)
 
 const api = axios.create({
     baseURL:
@@ -199,8 +190,10 @@ const goToCoupons = () => {
 };
 
 const createChart = (data) => {
-    if (chartInstance) chartInstance.destroy();
+      if (!chartCanvas.value) return;
+  if (!data?.labels?.length) return;
 
+  if (chartInstance) chartInstance.destroy();
     chartInstance = new Chart(chartCanvas.value, {
         type: "pie",
         data: {
@@ -250,14 +243,18 @@ const formatDate = (value) => {
     return date.format(value, 'keyboardDateTime');
 }
 
-onMounted(refreshChart)
-watch(() => orders.value, refreshChart, { deep: true })
+onMounted(async () => {
+    await Promise.all([
+        getCartsByUserId(),
+        getOrdersByUserId(),
+        getCouponsByUserId()
+    ]);
+    loading.value = false;
+    refreshChart();
+});
 
-
-onMounted(() => {
-    getCartsByUserId();
-    getOrdersByUserId();
-    getCouponsByUserId();
+watch(orders, () => {
+  if (!loading.value) refreshChart()
 })
 
 
