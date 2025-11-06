@@ -14,7 +14,7 @@
                     </v-chip>
                     <v-chip @click="goToCoupons" class="cursor-pointer">
                         <v-icon>mdi-ticket</v-icon>
-                        Coupons ({{ coupons[0]?.length || 0 }})
+                        Coupons ({{ coupons.length || 0 }})
                     </v-chip>
                 </div>
             </v-col>
