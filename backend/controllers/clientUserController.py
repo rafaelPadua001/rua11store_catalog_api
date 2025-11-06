@@ -143,7 +143,11 @@ class ClientUserController:
         
         return jsonify({
             "message": "Login realizado com sucesso!",
-            "token": access_token
+            "token": access_token,
+            "user": {
+                "id": user.id,
+                "email": user.email
+            }
         }), 200
 
  

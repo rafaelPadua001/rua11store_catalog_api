@@ -103,7 +103,7 @@ import { useDate } from 'vuetify';
 
 const router = useRouter();
 const date = useDate()
-const userId = localStorage.getItem('user_id');
+const userId = ref(null);
 const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 const carts = ref([]);
 const orders = ref([]);
@@ -124,7 +124,8 @@ Chart.register(...registerables)
 
 const getCartsByUserId = async () => {
     try {
-        const response = await api.get(`/cart/get-cart/${userId}`, {
+        userId.value = localStorage.getItem('user_id');
+        const response = await api.get(`/cart/get-cart/${userId.value}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -144,7 +145,8 @@ const getCartsByUserId = async () => {
 
 const getOrdersByUserId = async () => {
     try {
-        const response = await api.get(`/order/get-order/${userId}`)
+        userId.value = localStorage.getItem('user_id');
+        const response = await api.get(`/order/get-order/${userId.value}`)
 
         if (response.status === 200 || response.status === 201) {
             orders.value = response.data;
@@ -164,7 +166,8 @@ const getOrdersByUserId = async () => {
 
 const getCouponsByUserId = async () => {
     try {
-        const response = await api.get(`/coupon/get-coupons/${userId}`);
+        userId.value = localStorage.getItem('user_id');
+        const response = await api.get(`/coupon/get-coupons/${userId.value}`);
         if (response.status === 200 || response.status === 201) {
             coupons.value = response.data;
         }
@@ -244,6 +247,13 @@ const formatDate = (value) => {
 }
 
 onMounted(async () => {
+    userId.value = localStorage.getItem('user_id');
+    console.log(userId);
+    if(!userId.value){
+        console.warn("No user_id found, redirecting to login");
+        //return router.push("/authenticator/login");
+    }
+
     await Promise.all([
         getCartsByUserId(),
         getOrdersByUserId(),

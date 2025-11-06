@@ -132,13 +132,14 @@ const login = async () => {
             });
 
             const token = response.data.token;
-            
+            const userId = response.data.user?.id;
 
             if (response.data.message == "Login realizado com sucesso!") {
+                localStorage.setItem('user_id', userId)
                 localStorage.setItem('token', token);
                 localStorage.setItem('refresh_token', response.data.refresh_token)
                 window.dispatchEvent(new Event("storage"));
-
+                
                 return router.push('/authenticator/client/clientDashboard');
             }
         } catch (error) {
