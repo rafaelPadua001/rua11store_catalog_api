@@ -44,12 +44,29 @@
         <br></br>
         <br></br>
         <div>
+          <v-row>
+            <v-col cols="12" sm="12">
+              <v-text-field v-model="searchQuery" :loading="loading" append-inner-icon="mdi-magnify"
+                density="comfortable" variant="solo" single-line hide-details
+                label="Posso te ajudar? Digite aqui o que procura." @click:append-inner="searchProduct"
+                @keyup.enter="searchProduct" />
+            </v-col>
 
-          <v-text-field v-model="searchQuery" :loading="loading" append-inner-icon="mdi-magnify" density="compact"
-            label="Posso te ajudar ? Digite aqui o que procura." variant="solo" hide-details single-line
-            @click:append-inner="searchProduct"></v-text-field>
+          </v-row>
 
+          <v-row dense>
+            <v-col cols="12" sm="1" class="d-flex gap-2">
+              <v-btn variant="flat" block>
+                <v-icon>mdi-filter</v-icon>
+                Filter
+              </v-btn>
 
+              <v-btn variant="flat" block>
+                <v-icon>mdi-sort</v-icon>
+                Sort
+              </v-btn>
+            </v-col>
+          </v-row>
         </div>
         <br></br>
         <!-- Produtos -->
