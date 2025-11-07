@@ -55,16 +55,36 @@
           </v-row>
 
           <v-row dense>
-            <v-col cols="12" sm="1" class="d-flex gap-2">
-              <v-btn variant="flat" block>
+            <v-col cols="3" md="1" class="d-flex gap-2">
+              <v-menu>
+                <template #activator="{props}">
+                  <v-btn variant="flat" block v-bind="props">
                 <v-icon>mdi-filter</v-icon>
                 Filter
               </v-btn>
+                </template>
 
-              <v-btn variant="flat" block>
+                <v-list>
+                  <v-list-item @click="sortMode = 'desc'">
+                      <v-list-item-title>Maior preço</v-list-item-title>
+                  </v-list-item>
+                   <v-list-item @click="sortMode = 'asc'">
+                      <v-list-item-title>Menor preço</v-list-item-title>
+                  </v-list-item>
+                 <!-- <v-list-item @click="sortMode = 'recent'">
+                      <v-list-item-title>Lançamentos</v-list-item-title>
+                  </v-list-item>-->
+                  <v-list-item @click="clearFilters">
+                      <v-list-item-title>Clear</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+              
+
+              <!--<v-btn variant="flat" block>
                 <v-icon>mdi-sort</v-icon>
                 Sort
-              </v-btn>
+              </v-btn>-->
             </v-col>
           </v-row>
         </div>
@@ -407,7 +427,8 @@ const fabButtons = [
     color: 'blue',
     href: 'https://chat.whatsapp.com/XXXXXXXXXXXXXXX'
   }
-]
+];
+const sortMode = ref('');
 
 interface Product {
   id: number,
@@ -575,20 +596,47 @@ function handleScroll() {
 }
 //reactive filter
 const filteredProducts = computed(() => {
-  if (!searchQuery.value.trim()) return productsData.value
-  const q = searchQuery.value.toLowerCase()
-  return productsData.value.filter(
-    (p) =>
-      p.name.toLowerCase().includes(q) ||
-      p.seo?.slug?.toLowerCase().includes(q)
-  )
-})
+  let result = [...productsData.value];
+
+  // filtro
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase();
+    result = result.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.seo?.slug?.toLowerCase().includes(q)
+    );
+  }
+
+  // sort
+  if (sortMode.value === "desc") {
+    result.sort((a, b) => Number(b.price) - Number(a.price));
+  }
+
+  if (sortMode.value === "asc") {
+    result.sort((a, b) => a.price - b.price)
+  }
+
+    //last updated
+   /* if(sortMode.value === 'recent'){
+      result.sort(
+        (a,b) => new Date(b.created_at).getTime() - new Date(a.updated_at).getTime()
+      );
+    } */
+  return result;
+});
+
 
 const searchProduct = () => {
   loading.value = true
   setTimeout(() => {
     loading.value = false
   }, 400)
+}
+
+const clearFilters = () => {
+  searchQuery.value = "";
+  sortMode.value = "";
 }
 
 const addItemCart = async (product: Product) => {
@@ -611,6 +659,12 @@ const addItemCart = async (product: Product) => {
   } catch (e) {
     console.log("erro ao inserir item no carrinho", e);
   }
+};
+
+const filterByMajorPrice = async (products : any) => {
+  console.log(products)
+  return [...products].sort((a, b) => b.price - a.price);
+
 }
 
 onMounted(() => {
