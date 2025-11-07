@@ -103,14 +103,14 @@
 
             <v-col cols="6" md="4" sm="4" v-for="(product, index) in filteredProducts" :key="index" elevation="2">
               <v-row>
-                <v-col>
-                  <v-card class="d-flex flex-column">
+                <v-col class="d-flex flex-column">
+                  <v-card  max-width="300" max-height="600">
                     <v-card-text>
 
                       <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
                         <a :href="`https://rua11store-catalog-api.vercel.app/products/productView/${product.seo.slug}`"
                           target="_blank" rel="noopener noreferrer">
-                          <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer" contain>
+                          <v-img :src="product.thumbnail_path" :alt="product.seo?.slug" class="cursor-pointer" cover>
 
                             <v-chip class="ma-0" color="deep-purple" text-color="white"
                               style="position: absolute; top: 0; right: 0;">
@@ -126,7 +126,7 @@
                           </v-card-text> -->
 
 
-                        <span class="d-block text-truncate " style="max-width: 100%; overflow: hidden;">
+                        <span class="d-block text-truncate text-subtitle" style="max-width: 100%; overflow: hidden;">
                           <strong>{{ product.name }}</strong>
                         </span>
 
@@ -138,6 +138,10 @@
 
                       <v-btn icon color="primary" @click="addItemCart(product)">
                         <v-icon>mdi-cart-plus</v-icon>
+                      </v-btn>
+
+                      <v-btn icon color="green" @click="whatsAppMessage()">
+                        <v-icon>mdi-whatsapp</v-icon>
                       </v-btn>
 
 
@@ -665,6 +669,10 @@ const filterByMajorPrice = async (products : any) => {
   console.log(products)
   return [...products].sort((a, b) => b.price - a.price);
 
+}
+
+const whatsAppMessage = () => {
+  window.alert('Estamos preparando isso');
 }
 
 onMounted(() => {
