@@ -57,29 +57,29 @@
           <v-row dense>
             <v-col cols="3" md="1" class="d-flex gap-2">
               <v-menu>
-                <template #activator="{props}">
+                <template #activator="{ props }">
                   <v-btn variant="flat" block v-bind="props">
-                <v-icon>mdi-filter</v-icon>
-                Filter
-              </v-btn>
+                    <v-icon>mdi-filter</v-icon>
+                    Filter
+                  </v-btn>
                 </template>
 
                 <v-list>
                   <v-list-item @click="sortMode = 'desc'">
-                      <v-list-item-title>Maior preço</v-list-item-title>
+                    <v-list-item-title>Maior preço</v-list-item-title>
                   </v-list-item>
-                   <v-list-item @click="sortMode = 'asc'">
-                      <v-list-item-title>Menor preço</v-list-item-title>
+                  <v-list-item @click="sortMode = 'asc'">
+                    <v-list-item-title>Menor preço</v-list-item-title>
                   </v-list-item>
-                 <!-- <v-list-item @click="sortMode = 'recent'">
+                  <!-- <v-list-item @click="sortMode = 'recent'">
                       <v-list-item-title>Lançamentos</v-list-item-title>
                   </v-list-item>-->
                   <v-list-item @click="clearFilters">
-                      <v-list-item-title>Clear</v-list-item-title>
+                    <v-list-item-title>Clear</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-menu>
-              
+
 
               <!--<v-btn variant="flat" block>
                 <v-icon>mdi-sort</v-icon>
@@ -104,7 +104,7 @@
             <v-col cols="6" md="4" sm="4" v-for="(product, index) in filteredProducts" :key="index" elevation="2">
               <v-row>
                 <v-col class="d-flex flex-column">
-                  <v-card  max-width="300" max-height="600">
+                  <v-card max-width="300" max-height="600">
                     <v-card-text>
 
                       <template v-if="product.seo?.slug && product.seo.slug.trim() !== ''">
@@ -140,7 +140,7 @@
                         <v-icon>mdi-cart-plus</v-icon>
                       </v-btn>
 
-                      <v-btn icon color="green" @click="whatsAppMessage()">
+                      <v-btn icon color="green" @click="goToWhatsApp(product)">
                         <v-icon>mdi-whatsapp</v-icon>
                       </v-btn>
 
@@ -471,7 +471,7 @@ const productsData = ref<Product[]>([])
 const comments = ref<Comment[]>([])
 let coupons = ref<Coupons[]>([])
 const activeIndex = ref(0)
-const activeCommentIndex = ref(0)
+const activeCommentIndex = ref(0);
 
 
 const api = axios.create({
@@ -621,12 +621,12 @@ const filteredProducts = computed(() => {
     result.sort((a, b) => a.price - b.price)
   }
 
-    //last updated
-   /* if(sortMode.value === 'recent'){
-      result.sort(
-        (a,b) => new Date(b.created_at).getTime() - new Date(a.updated_at).getTime()
-      );
-    } */
+  //last updated
+  /* if(sortMode.value === 'recent'){
+     result.sort(
+       (a,b) => new Date(b.created_at).getTime() - new Date(a.updated_at).getTime()
+     );
+   } */
   return result;
 });
 
@@ -665,15 +665,34 @@ const addItemCart = async (product: Product) => {
   }
 };
 
-const filterByMajorPrice = async (products : any) => {
+const filterByMajorPrice = async (products: any) => {
   console.log(products)
   return [...products].sort((a, b) => b.price - a.price);
 
 }
 
-const whatsAppMessage = () => {
-  window.alert('Estamos preparando isso');
-}
+const goToWhatsApp = async (product: any) => {
+  const phone = "556191865680";
+
+  const message = `
+🛒 *Interesse no Produto*
+
+🔹 *Nome:* ${product.name}
+💰 *Preço:* R$ ${product.price}
+
+🖼️ *Imagem:* ${product.thumbnail_path}
+
+Pode me ajudar?
+`.trim();
+
+  window.open(
+    `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+};
+
+
+
 
 onMounted(() => {
   window.addEventListener("scroll", handleScroll)
