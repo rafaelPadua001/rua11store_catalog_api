@@ -703,9 +703,6 @@ Pode me ajudar?
   );
 };
 
-
-
-
 onMounted(() => {
   window.addEventListener("scroll", handleScroll)
 })
