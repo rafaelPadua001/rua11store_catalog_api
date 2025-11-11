@@ -18,7 +18,7 @@ import { initMetaPixel } from "@/plugins/meta-pixel";
 const app = createApp(App)
 
 initMetaPixel("801771992806957")
-console.log("pixel init done")
+
 // Cria o gerenciador de head
 const head = createHead()
 app.use(head)
