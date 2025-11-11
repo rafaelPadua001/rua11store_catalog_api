@@ -241,6 +241,16 @@ export default {
     await this.loadProduct();
     await this.loadAuthUser();
     this.comments = this.product.comments || [];
+
+    if(window.fbq && this.product){
+        fbq('track', 'ViewContent', {
+        content_ids: [this.product.id],
+        content_type: 'product',
+        content_name: this.product.name,
+        valu: this.product.price,
+        currentcy: 'BRL'
+      });
+    }
   },
   computed: {
     currentImage() {
@@ -317,7 +327,19 @@ export default {
               Authorization: `Bearer ${token}`
             }
           });
-        this.showNotification()
+        
+
+        if(typeof window.fqb === 'function'){
+          window.fbq("track", "AddToCart", {
+            content_ids: [product.id],
+            content_type: "product",
+            content_name: product.name,
+            value: product.price ?? 0,
+            currency: "BRL"
+          });
+
+          this.showNotification();
+        }
         console.log('Item adicionado');
       } catch (e) {
         console.log("erro ao inserir item no carrinho", e);
@@ -348,7 +370,6 @@ export default {
         "_blank"
       );
     },
-
     downloadApp() {
       window.open(
         "https://play.google.com/store/apps/details?id=sua.app",
@@ -408,9 +429,6 @@ export default {
         console.log('Erro ao registrar comentário', e);
       }
     },
-
-
-
     async editComment(comment) {
       // Usa o array correto
       const comments = comment || [];
@@ -425,7 +443,6 @@ export default {
       this.editedComment = { ...comment };
       this.editCommentDialog = true;
     },
-
     async removeComment(id) {
       if (!confirm("Tem certeza que deseja remover este comentário permanentemente?")) return;
 

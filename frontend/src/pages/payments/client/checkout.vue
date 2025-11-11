@@ -595,7 +595,7 @@ const calculateDelivery = async () => {
     return
   }
 
-  const zipcodeOrigin = '97010002' 
+  const zipcodeOrigin = '97010002'
   try {
     const products = (cart.items || []).map(item => ({
       product_id: item.product_id,
@@ -691,7 +691,7 @@ const saveAddress = async () => {
       referencia: addressData.referencia,
       delivery_option: selectedDelivery?.company?.name || null,
       delivery_price: selectedDelivery?.price || null,
-      
+
     }
 
     const response = await api.post('/address/create-address', data, {
@@ -871,6 +871,16 @@ async function submitPayment() {
 onMounted(async () => {
   await getCoupon();
   await loadAddress();
+  const totalReal =
+    totalCarrinho.value;
+
+  if (typeof window.fbq === "function") {
+    window.fbq("track", "InitiateCheckout", {
+      content_ids: cart.value?.map(item => item.id) ?? [],
+      value: totalReal ?? 0,
+      currency: "BRL"
+    });
+  }
   try {
     mp.value = new MercadoPago('APP_USR-f969c2eb-5d4f-4e5c-974d-ace6053a80a8', {
       locale: 'pt-BR'

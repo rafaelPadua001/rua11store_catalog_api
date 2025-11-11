@@ -660,6 +660,18 @@ const addItemCart = async (product: Product) => {
         }
       });
     console.log('Item adicionado');
+
+     if(typeof window.fbq === 'function'){
+          window.fbq("track", "AddToCart", {
+            content_ids: [product.id],
+            content_type: "product",
+            content_name: product.name,
+            value: product.price ?? 0,
+            currency: "BRL"
+          });
+
+          //this.showNotification();
+        }
   } catch (e) {
     console.log("erro ao inserir item no carrinho", e);
   }
