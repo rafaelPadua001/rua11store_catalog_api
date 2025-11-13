@@ -28,7 +28,7 @@ from routes.supabaseUsers import supabaseUsers_bp
 from routes.postSeo import postSeo_bp
 from routes.post_comment import postComment_bp
 from routes.post_views import post_views_bp
-
+from routes.meta import meta_bp
 
 def register_routes(app):
     app.register_blueprint(address_bp, url_prefix='/address')
@@ -60,3 +60,4 @@ def register_routes(app):
     app.register_blueprint(config_bp, url_prefix='/config')
     app.register_blueprint(upload_images_bp, url_prefix='/uploadImages')
     app.register_blueprint(supabaseUsers_bp, url_prefix='/supabaseUsers')
+    app.register_blueprint(meta_bp, url_prefix='/meta')

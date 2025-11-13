@@ -22,6 +22,7 @@
     "axios": "^1.8.4",
     "chart.js": "^4.5.1",
     "core-js": "^3.37.1",
+    "crypto-js": "^4.2.0",
     "mercadopago": "^2.9.0",
     "roboto-fontface": "*",
     "socket.io-client": "^4.8.1",

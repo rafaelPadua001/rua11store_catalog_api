@@ -362,6 +362,8 @@ import axios from 'axios'
 import addressForm from '@/address/addressForm.vue';
 import { useDisplay } from 'vuetify'
 import PaymentResult from './payment_result.vue';
+import { SHA256 } from 'crypto-js';
+
 
 const { mdAndUp } = useDisplay()
 
@@ -789,7 +791,6 @@ function formatExpiration() {
     payment.value.expiration_date = val.slice(0, 2) + '/' + val.slice(2); // adiciona '/' automaticamente
   }
 }
-
 async function submitPayment() {
   try {
     console.log('🚀 Iniciando processo de pagamento...');
@@ -841,6 +842,25 @@ async function submitPayment() {
     if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
       paymentStatus.value = 'approved';
       paymentMessage.value = 'Pagamento aprovado com sucesso!';
+
+      const eventId = crypto.randomUUID();
+
+      fbq('track', 'Purchase', {
+        content_ids: [order.id],
+        value: order.total,
+        currency: 'BRL',
+        contents: cart.value.map(i => ({
+          id: i.id,
+          quantity: i.quantity,
+          item_price: i.price
+        })),
+        content_type: 'product',
+        eventId: eventId
+      });
+
+      //Send to meta conversion
+      await sendMetaConversion(totalAmount, cart, payment, eventId);
+
       window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
     } else if (response.data.status === 'pending') {
@@ -865,6 +885,29 @@ async function submitPayment() {
     console.log('Erro desconhecido. Tente novamente.', error);
     window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
+  }
+}
+
+async function sendMetaConversion(totalAmount, cart, payment, eventId){
+  try{
+    await api.post('/meta/meta/conversion', {
+      event_name: 'Purchase',
+      event_id: eventId,
+      value: totalAmount,
+      contents: cart.value.map(item => ({
+        id: item.id,
+        quantity: item.quantity,
+        item_price: item.price,
+      })),
+      email_hash: sha256(payment.value.email?.trim().toLowerCase() || ''),
+      phone_hash: sha256(payment.value.phone?.replace(/\D/g, '') || ''),
+      event_source_url: window.location.href
+    });
+
+    console.log('Conversion enviada ao backend (CAPI)');
+  }
+  catch(e){
+    console.log("Erro ao enviar Conversion API:", error);
   }
 }
 
