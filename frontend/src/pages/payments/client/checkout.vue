@@ -362,6 +362,8 @@ import axios from 'axios'
 import addressForm from '@/address/addressForm.vue';
 import { useDisplay } from 'vuetify'
 import PaymentResult from './payment_result.vue';
+import { SHA256 } from 'crypto-js';
+
 
 const { mdAndUp } = useDisplay()
 
@@ -888,7 +890,7 @@ async function submitPayment() {
 
 async function sendMetaConversion(totalAmount, cart, payment, eventId){
   try{
-    await api.post('/meta/conversion', {
+    await api.post('/meta/meta/conversion', {
       event_name: 'Purchase',
       event_id: eventId,
       value: totalAmount,

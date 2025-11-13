@@ -2,10 +2,17 @@ import requests
 from flask import Flask, Blueprint, request, jsonify
 import os
 from dotenv import load_dotenv
+import hashlib
 
 load_dotenv
 
 meta_bp = Blueprint('meta', __name__)
+
+def sha256_hash(value):
+    if not value:
+        return None
+    value = str(value).strip().lower().encode('utf-8')
+    return hashlib.sha256(value).hexdigest()
 
 @meta_bp.route("/meta/conversion", methods=["POST"])
 def meta_conversion():
@@ -21,11 +28,12 @@ def meta_conversion():
             "action_source": "website",
             "event_source_url": data.get("event_source_url"),
             "user_data": {
-                "em": data.get("email_hash"),  # SHA256 do e-mail
-                "ph": data.get("phone_hash"),  # SHA256 do telefone
+                "em": sha256_hash(data.get("email")),
+                "ph": sha256_hash(data.get("phone")),
                 "client_ip_address": request.remote_addr,
                 "client_user_agent": request.headers.get("User-Agent"),
             },
+
             "custom_data": {
                 "currency": "BRL",
                 "value": data.get("value"),
