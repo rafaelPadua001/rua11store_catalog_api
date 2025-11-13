@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 import hashlib
 
-load_dotenv
+load_dotenv()
 
 meta_bp = Blueprint('meta', __name__)
 
