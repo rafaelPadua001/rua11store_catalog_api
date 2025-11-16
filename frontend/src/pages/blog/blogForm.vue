@@ -17,16 +17,12 @@
         <v-text-field v-model="form.slug" label="Slug" readonly></v-text-field>
 
         <!-- Resumo -->
-<label class="text-subtitle-2 font-weight-medium mb-1">Resumo (opcional)</label>
+        <label class="text-subtitle-2 font-weight-medium mb-1">Resumo (opcional)</label>
 
-<EditorContent v-if="excerptEditor" :editor="excerptEditor" class="excerpt-editor" />
+        <EditorContent v-if="excerptEditor" :editor="excerptEditor" class="excerpt-editor" />
 
-<!-- PREVIEW DO HTML -->
-<div
-  v-if="form.excerpt"
-  class="excerpt-preview mt-3 pa-3"
-  v-html="form.excerpt"
-></div>
+        <!-- PREVIEW DO HTML -->
+        <div v-if="form.excerpt" class="excerpt-preview mt-3 pa-3" v-html="form.excerpt"></div>
         <div>
           <!-- Toolbar do editor -->
           <div v-if="editor" class="editor-toolbar mb-2">
@@ -41,23 +37,23 @@
                 <v-icon icon="mdi-format-italic"></v-icon>
               </v-btn>
             </v-btn-toggle>
-            
+
             <v-btn-toggle v-model="alignment" variant="outlined" divided>
-             <v-btn small @click="() => editor.chain().focus().setTextAlign('left').run()">
-  <v-icon>mdi-format-align-left</v-icon>
-</v-btn>
+              <v-btn small @click="() => editor.chain().focus().setTextAlign('left').run()">
+                <v-icon>mdi-format-align-left</v-icon>
+              </v-btn>
 
-<v-btn small @click="() => editor.chain().focus().setTextAlign('center').run()">
-  <v-icon>mdi-format-align-center</v-icon>
-</v-btn>
+              <v-btn small @click="() => editor.chain().focus().setTextAlign('center').run()">
+                <v-icon>mdi-format-align-center</v-icon>
+              </v-btn>
 
-<v-btn small @click="() => editor.chain().focus().setTextAlign('right').run()">
-  <v-icon>mdi-format-align-right</v-icon>
-</v-btn>
+              <v-btn small @click="() => editor.chain().focus().setTextAlign('right').run()">
+                <v-icon>mdi-format-align-right</v-icon>
+              </v-btn>
 
-<v-btn small @click="() => editor.chain().focus().setTextAlign('justify').run()">
-  <v-icon>mdi-format-align-justify</v-icon>
-</v-btn>
+              <v-btn small @click="() => editor.chain().focus().setTextAlign('justify').run()">
+                <v-icon>mdi-format-align-justify</v-icon>
+              </v-btn>
 
 
               <v-btn small @click="insertLink">
@@ -65,7 +61,7 @@
               </v-btn>
               <v-btn small @click="editor.chain().focus().unsetLink().run()">
                 <v-icon left>mdi-link-off</v-icon>
-                
+
               </v-btn>
 
             </v-btn-toggle>
@@ -195,15 +191,15 @@ export default {
       content: '<p></p>',
     });
     this.excerptEditor = new Editor({
-    extensions: [
-      StarterKit,
-      TextAlign.configure({ types: ['paragraph'] }),
-    ],
-    content: this.form.excerpt || '',
-    onUpdate: () => {
-      this.form.excerpt = this.excerptEditor.getHTML()
-    }
-  });
+      extensions: [
+        StarterKit,
+        TextAlign.configure({ types: ['paragraph'] }),
+      ],
+      content: this.form.excerpt || '',
+      onUpdate: () => {
+        this.form.excerpt = this.excerptEditor.getHTML()
+      }
+    });
   },
   beforeDestroy() {
     if (this.editor) this.editor.destroy()
@@ -251,27 +247,27 @@ export default {
     toggleItalic() {
       this.editor.chain().focus().toggleItalic().run()
     },
-    alignCenter(){
+    alignCenter() {
       this.editor.chain().focus().setTextAlign('center').run();
-    
+
     },
     setAlign(align) {
-  this.editor.chain().focus().setTextAlign(align).run()
-},
+      this.editor.chain().focus().setTextAlign(align).run()
+    },
 
-    insertLink(){
+    insertLink() {
       const previousUrl = this.editor.getAttributes('link').href;
       const url = prompt('Informe a Url interna:', previousUrl || '/products/productView/');
 
-      if(url === null) return
+      if (url === null) return
 
-      if(url === ''){
+      if (url === '') {
         //remove url link
         this.editor.chain().focus().unsetLink().run();
         return;
       }
 
-      this.editor.chain().focus().extendMarkRange('link').setLink({href: url}).run()
+      this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
     },
     async savePost() {
       if (!this.$refs.form.validate()) return
@@ -314,8 +310,9 @@ export default {
   min-height: 200px;
   border: 1px solid #ccc;
   padding: 10px;
- 
+
 }
+
 .editor-content * {
   outline: none !important;
 }
