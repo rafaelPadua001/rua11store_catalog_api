@@ -17,7 +17,16 @@
         <v-text-field v-model="form.slug" label="Slug" readonly></v-text-field>
 
         <!-- Resumo -->
-        <v-textarea v-model="form.excerpt" label="Resumo (opcional)" rows="2"></v-textarea>
+<label class="text-subtitle-2 font-weight-medium mb-1">Resumo (opcional)</label>
+
+<EditorContent v-if="excerptEditor" :editor="excerptEditor" class="excerpt-editor" />
+
+<!-- PREVIEW DO HTML -->
+<div
+  v-if="form.excerpt"
+  class="excerpt-preview mt-3 pa-3"
+  v-html="form.excerpt"
+></div>
         <div>
           <!-- Toolbar do editor -->
           <div v-if="editor" class="editor-toolbar mb-2">
@@ -34,16 +43,29 @@
             </v-btn-toggle>
             
             <v-btn-toggle v-model="alignment" variant="outlined" divided>
-              <v-btn>
-                <v-icon icon="mdi-format-align-center"></v-icon>
-              </v-btn>
+             <v-btn small @click="() => editor.chain().focus().setTextAlign('left').run()">
+  <v-icon>mdi-format-align-left</v-icon>
+</v-btn>
 
-              <v-btn>
-                <v-icon icon="mdi-format-align-left"></v-icon>
-              </v-btn>
+<v-btn small @click="() => editor.chain().focus().setTextAlign('center').run()">
+  <v-icon>mdi-format-align-center</v-icon>
+</v-btn>
 
-              <v-btn>
-                <v-icon icon="mdi-format-align-right"></v-icon>
+<v-btn small @click="() => editor.chain().focus().setTextAlign('right').run()">
+  <v-icon>mdi-format-align-right</v-icon>
+</v-btn>
+
+<v-btn small @click="() => editor.chain().focus().setTextAlign('justify').run()">
+  <v-icon>mdi-format-align-justify</v-icon>
+</v-btn>
+
+
+              <v-btn small @click="insertLink">
+                <v-icon left>mdi-link</v-icon>
+              </v-btn>
+              <v-btn small @click="editor.chain().focus().unsetLink().run()">
+                <v-icon left>mdi-link-off</v-icon>
+                
               </v-btn>
 
             </v-btn-toggle>
@@ -86,6 +108,8 @@
 <script>
 import { EditorContent, Editor } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
+import TextAlign from '@tiptap/extension-text-align'
+import Link from '@tiptap/extension-link'
 import axios from 'axios'
 
 const API_BASE =
@@ -155,9 +179,31 @@ export default {
   },
   mounted() {
     this.editor = new Editor({
-      extensions: [StarterKit],
+      extensions: [StarterKit,
+        TextAlign.configure({
+          type: ['heading', 'paragraph'],
+        }),
+        Link.configure({
+          openOnClic: false,
+          autolink: true,
+          linkOnPaste: true,
+          validate: href => {
+            return href.startsWith('/') || href.startsWith('http') || href.startsWith('https');
+          },
+        }),
+      ],
       content: '<p></p>',
-    })
+    });
+    this.excerptEditor = new Editor({
+    extensions: [
+      StarterKit,
+      TextAlign.configure({ types: ['paragraph'] }),
+    ],
+    content: this.form.excerpt || '',
+    onUpdate: () => {
+      this.form.excerpt = this.excerptEditor.getHTML()
+    }
+  });
   },
   beforeDestroy() {
     if (this.editor) this.editor.destroy()
@@ -193,17 +239,39 @@ export default {
       if (!path) return null
       return path.startsWith('http') ? path : `${API_BASE}/${path}`
     },
+    addAdBanner() {
+      const slotId = '1234567890';
+      if (!slotId) return
+      const adHtml = `<ad-banner slot="${slotId}" format="auto"></ad-banner>`
+      this.editor.chain().focus().insertContent(adHtml).run()
+    },
     toggleBold() {
       this.editor.chain().focus().toggleBold().run()
     },
     toggleItalic() {
       this.editor.chain().focus().toggleItalic().run()
     },
-    addAdBanner() {
-      const slotId = '1234567890';
-      if (!slotId) return
-      const adHtml = `<ad-banner slot="${slotId}" format="auto"></ad-banner>`
-      this.editor.chain().focus().insertContent(adHtml).run()
+    alignCenter(){
+      this.editor.chain().focus().setTextAlign('center').run();
+    
+    },
+    setAlign(align) {
+  this.editor.chain().focus().setTextAlign(align).run()
+},
+
+    insertLink(){
+      const previousUrl = this.editor.getAttributes('link').href;
+      const url = prompt('Informe a Url interna:', previousUrl || '/products/productView/');
+
+      if(url === null) return
+
+      if(url === ''){
+        //remove url link
+        this.editor.chain().focus().unsetLink().run();
+        return;
+      }
+
+      this.editor.chain().focus().extendMarkRange('link').setLink({href: url}).run()
     },
     async savePost() {
       if (!this.$refs.form.validate()) return
@@ -258,5 +326,19 @@ export default {
 
 .italic {
   font-style: italic;
+}
+
+.excerpt-preview {
+  background: #f8f8f8;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 40px;
+}
+
+/* Garante que os alinhamentos funcionam */
+.excerpt-preview p {
+  margin: 0;
 }
 </style>
