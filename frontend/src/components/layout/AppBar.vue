@@ -37,10 +37,7 @@
               <v-icon>mdi-cart</v-icon>
             </v-btn>
           </template>
-          <v-list
-            :lines="false"
-            max-width="400"
-          >
+          <v-list :lines="false" max-width="400">
             <v-list-item>
               <v-list-item-title class="text-h6">Carrinho</v-list-item-title>
             </v-list-item>
@@ -550,8 +547,8 @@ const removeItem = async (item) => {
 };
 
 const checkout = (item) => {
-  router.push({ path: '/payments/client/checkout', query: { item: JSON.stringify(item) } });
-
+  sessionStorage.setItem('checkout_item', JSON.stringify(item));
+  router.push('/payments/client/checkout');
 };
 
 const logout = async () => {

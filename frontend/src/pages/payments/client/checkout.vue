@@ -381,7 +381,7 @@ const userId = localStorage.getItem('user_id');
 const address = ref(null);
 const addressDialog = ref(false);
 const route = useRoute()
-const cartData = route.query.item ? JSON.parse(route.query.item) : { items: [] }
+const cartData = JSON.parse(sessionStorage.getItem('checkout_item') || '{"items": []}');
 const coupons = ref([]);
 const selectedCoupon = ref(null);
 const appliedCoupon = ref(null);
@@ -888,8 +888,8 @@ async function submitPayment() {
   }
 }
 
-async function sendMetaConversion(totalAmount, cart, payment, eventId){
-  try{
+async function sendMetaConversion(totalAmount, cart, payment, eventId) {
+  try {
     await api.post('/meta/meta/conversion', {
       event_name: 'Purchase',
       event_id: eventId,
@@ -906,7 +906,7 @@ async function sendMetaConversion(totalAmount, cart, payment, eventId){
 
     console.log('Conversion enviada ao backend (CAPI)');
   }
-  catch(e){
+  catch (e) {
     console.log("Erro ao enviar Conversion API:", error);
   }
 }
