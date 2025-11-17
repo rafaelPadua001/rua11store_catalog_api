@@ -71,55 +71,34 @@
                     </v-row>
                 </v-col>
 
-              <v-col cols="12" md="4" sm="6">
-    <v-file-input
-        v-model="editedProduct.video"
-        label="Product Video"
-        outlined
-        show-size
-        dense
-        prepend-icon="mdi-video"
-        accept="video/*"
-    />
+                <v-col cols="12" md="4" sm="6">
+                    <v-file-input v-model="editedProduct.video" label="Product Video" outlined show-size dense
+                        prepend-icon="mdi-video" accept="video/*" />
 
-    <!-- Se for vídeo novo (preview do FileInput) -->
-    <v-row v-if="videoPreview">
-        <v-col cols="auto">
-            <video :src="videoPreview" controls style="max-width: 100%; margin-top: 10px;"></video>
-            <v-btn
-                icon
-                size="x-small"
-                color="black"
-                class="mt-2"
-                @click="removeVideo"
-                style="top: 5px; right: 5px;"
-            >
-                <v-icon>mdi-close</v-icon>
-            </v-btn>
-        </v-col>
-    </v-row>
+                    <!-- Se for vídeo novo (preview do FileInput) -->
+                    <v-row v-if="videoPreview">
+                        <v-col cols="auto">
+                            <video :src="videoPreview" controls style="max-width: 100%; margin-top: 10px;"></video>
+                            <v-btn icon size="x-small" color="black" class="mt-2" @click="removeVideo"
+                                style="top: 5px; right: 5px;">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                        </v-col>
+                    </v-row>
 
-    <!-- Se for vídeo vindo do banco -->
-    <v-row v-else-if="editedProduct.video">
-        <v-col cols="auto">
-            <video
-                :src="typeof editedProduct.video === 'string' ? editedProduct.video : editedProduct.video.video_path"
-                controls
-                style="max-width: 100%; margin-top: 10px;"
-            ></video>
-            <v-btn
-                icon
-                size="x-small"
-                color="black"
-                class="mt-2"
-                @click="removeVideo"
-                style="top: 5px; right: 5px;"
-            >
-                <v-icon>mdi-close</v-icon>
-            </v-btn>
-        </v-col>
-    </v-row>
-</v-col>
+                    <!-- Se for vídeo vindo do banco -->
+                    <v-row v-else-if="editedProduct.video">
+                        <v-col cols="auto">
+                            <video
+                                :src="typeof editedProduct.video === 'string' ? editedProduct.video : editedProduct.video.video_path"
+                                controls style="max-width: 100%; margin-top: 10px;"></video>
+                            <v-btn icon size="x-small" color="black" class="mt-2" @click="removeVideo"
+                                style="top: 5px; right: 5px;">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                </v-col>
 
             </v-row>
 
@@ -134,6 +113,81 @@
                 <v-col cols="12" md="6" sm="6">
                     <v-select v-model="editedProduct.subcategory_id" :items="subcategories" label="Subcategory"
                         item-title="name" item-text="name" item-value="id" outlined dense></v-select>
+                </v-col>
+
+            </v-row>
+
+            <v-row dense>
+                <v-subheader class="text-left">Variations</v-subheader>
+                <v-divider></v-divider>
+
+             <v-col cols="12" md="6">
+  <div v-for="(size, index) in editedProduct.sizes" :key="'size-' + index" class="d-flex mb-2 align-center">
+    <!-- Nome do tamanho -->
+    <v-text-field
+      v-model="size.name"
+      label="Tamanho"
+      outlined
+      dense
+      class="me-2"
+      append-icon="mdi-close"
+      @click:append="removeSize(index)"
+    ></v-text-field>
+
+    <!-- Quantidade -->
+    <v-text-field
+      v-model.number="size.quantity"
+      label="Quantidade"
+      type="number"
+      outlined
+      dense
+      style="max-width: 120px;"
+    ></v-text-field>
+  </div>
+
+  <v-btn text small color="primary" @click="addSize">Adicionar Tamanho</v-btn>
+</v-col>
+
+                <v-col cols="12" md="6">
+                    <div v-for="(color, index) in editedProduct.colors" :key="'color-' + index"
+                        class="mb-2 d-flex align-center">
+                        <!-- Campo de cor -->
+                         <v-menu v-model="colorMenu[index]" :close-on-content-click="false" max-width="290px" offset-y>
+    <template #activator="{ props }">
+      <v-text-field
+        v-bind="props"
+        v-model="editedProduct.colors[index].value"
+        label="Cor"
+        outlined
+        dense
+        readonly
+        append-icon="mdi-chevron-down"
+      ></v-text-field>
+    </template>
+
+    <!-- Color Picker -->
+    <v-color-picker
+      v-model="editedProduct.colors[index].value"
+      flat
+    ></v-color-picker>
+  </v-menu>
+
+  <!-- Quantidade -->
+  <v-text-field
+    v-model.number="editedProduct.colors[index].quantity"
+    label="Quantidade"
+    type="number"
+    outlined
+    dense
+    style="max-width: 120px;"
+  ></v-text-field>
+                        <!-- Botão de remover -->
+                        <v-btn variant="plain" size="x-small" color="red" @click="removeColor(index)" icon="mdi-close">
+
+                        </v-btn>
+                    </div>
+
+                    <v-btn text small color="primary" @click="addColor">Adicionar Cor</v-btn>
                 </v-col>
 
             </v-row>
@@ -252,12 +306,9 @@ export default {
             editedIndex: -1,
             products: [],
             thumbnailImage: null,
-            //editedProduct: {
-            //    thumbnail: null,
-            //    images: [],
-            //},
             imagesPreviews: [],
             videoPreview: null,
+            colorMenu: [],
         };
     },
     watch: {
@@ -316,7 +367,6 @@ export default {
             immediate: true
         }
     },
-
     computed: {
         formattedPrice: {
             get() {
@@ -348,6 +398,24 @@ export default {
 
     },
     created() {
+        if (!this.editedProduct.sizes){
+            this.editedProduct.sizes = [];
+        }
+        else{
+            this.editedProduct.sizes = this.editedProduct.sizes.map(s => {
+                if(typeof s === 'string') return {name: s, quantity: 0};
+                return {...s};
+            });
+        }
+        if (!this.editedProduct.colors) {
+            this.editedProduct.colors = [];
+        }
+        else{
+            this.editedProduct.colors = this.editedProduct.colors.map(s => {
+                if(typeof s === 'string') return {name: s, quantity: 0};
+                return {...s};
+            });
+        }
     },
     methods: {
         editProduct(item) {
@@ -399,6 +467,20 @@ export default {
             const category = this.categories.find((c) => c.id === id);
             return category ? category.name : "Unknown";
         },
+        addSize() {
+            this.editedProduct.sizes.push({name: '', quantity: 0});
+        },
+        removeSize(index) {
+            this.editedProduct.sizes.splice(index, 1);
+        },
+        addColor() {
+            this.editedProduct.colors.push({name: '', quantity: 0});
+            this.colorMenu.push(false);
+        },
+        removeColor(index) {
+            this.editedProduct.colors.splice(index, 1);
+            this.colorMenu.splice(index, 1);
+        },
         removeThumbnail() {
             this.editedProduct.thumbnail = null;
             this.thumbnailImage = null;
@@ -424,9 +506,6 @@ export default {
                 this.videoPreview = null;
             }
         }
-
-
-
     },
 };
 

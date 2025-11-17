@@ -246,6 +246,8 @@ export default {
                 formData.append("price", this.editedProduct.price || "0.00");
                 formData.append("category_id", this.editedProduct.category_id || "");
                 formData.append("subcategory_id", this.editedProduct.subcategory_id || "");
+                formData.append('sizes', JSON.stringify(this.editedProduct.sizes || ''));
+                formData.append('colors', JSON.stringify(this.editedProduct.colors || ''));
                 formData.append("quantity", this.editedProduct.quantity || 1);
                 formData.append("thumbnail", this.editedProduct.thumbnail || "");
                 if (Array.isArray(this.editedProduct.images)) {
