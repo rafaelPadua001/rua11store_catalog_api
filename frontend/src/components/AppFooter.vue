@@ -10,6 +10,7 @@
     <v-divider class="my-0" thickness="2" width="50"></v-divider>
     
     <div class="text-caption font-weight-regular opacity-60" color="surface-light">
+      
       <v-btn v-for="link in items" :key="link.title" :text="link.name" variant="text" rounded 
         class="" @click="navigateToPage(link)"></v-btn>
 
@@ -49,7 +50,11 @@ const api = axios.create({
 onMounted(async () => {
   try {
     const response = await api.get('/pages/pages')
-    items.value = response.data.pages
+    items.value = response.data.pages.sort((a: PageItem, b: PageItem) => {
+      if(a.name === 'Home Page') return -1;
+      if(b.name === 'Home Page') return 1;
+      return 0;
+    })
 
   } catch (error) {
     console.error('Error fetching social links:', error)
