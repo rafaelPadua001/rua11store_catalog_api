@@ -3,46 +3,57 @@ from models.cartItems import CartItems
 from database import db
 from controllers.cartItemController import CartItemController
 from flask import jsonify
+import uuid
 
 class CartController:
     def get_cart_items(user_id):
-        results = (
-            db.session.query(Cart, CartItems)
-            .outerjoin(CartItems, Cart.id == CartItems.cart_id)
-            .filter(Cart.user_id == user_id)
-            .all()
-        )
+        try:
+            # Converter user_id para UUID
+            if isinstance(user_id, str):
+                try:
+                    user_id = uuid.UUID(user_id)
+                except ValueError:
+                    return jsonify({"error": "ID de usuário inválido"}), 400
+            
+            results = (
+                db.session.query(Cart, CartItems)
+                .outerjoin(CartItems, Cart.id == CartItems.cart_id)
+                .filter(Cart.user_id == user_id)
+                .all()
+            )
 
-        if not results:
-            return jsonify({"message": "nenhum carrinho encontrado."}), 404
+            if not results:
+                return jsonify({"message": "Nenhum carrinho encontrado."}), 404
 
-        carts_dict = {}
+            carts_dict = {}
 
-        for cart, item in results:
-            if cart.id not in carts_dict:
-                carts_dict[cart.id] = {
-                    "id": cart.id,
-                    "user_id": cart.user_id,
-                    "created_at": cart.created_at,
-                    "items": []
-                }
-            if item:
-               carts_dict[cart.id]["items"].append({
-                    "id": item.id,
-                    "product_id": item.product_id,
-                    "product_name": item.product_name,
-                    "product_price": item.product_price,
-                    "product_image": item.product_image,
-                    "quantity": item.quantity,
-                    "product_height": item.product_height,
-                    "product_width": item.product_width,
-                    "product_weight": item.product_weight,
-                    "product_length": item.product_length
-                })
+            for cart, item in results:
+                if cart.id not in carts_dict:
+                    carts_dict[cart.id] = {
+                        "id": str(cart.id),  # Converter UUID para string
+                        "user_id": str(cart.user_id),  # Converter UUID para string
+                        "created_at": cart.created_at.isoformat() if cart.created_at else None,
+                        "items": []
+                    }
+                if item:
+                    carts_dict[cart.id]["items"].append({
+                        "id": item.id,
+                        "product_id": str(item.product_id) if item.product_id else None,
+                        "product_name": item.product_name,
+                        "product_price": str(item.product_price) if item.product_price else None,
+                        "product_image": item.product_image,
+                        "quantity": item.quantity,
+                        "product_height": item.product_height,
+                        "product_width": item.product_width,
+                        "product_weight": item.product_weight,
+                        "product_length": item.product_length
+                    })
 
+            return jsonify(list(carts_dict.values())), 200
 
-
-        return jsonify(list(carts_dict.values())), 200
+        except Exception as e:
+            print(f"Erro ao buscar carrinho: {e}")
+            return jsonify({"error": "Erro interno do servidor"}), 500
 
     
 

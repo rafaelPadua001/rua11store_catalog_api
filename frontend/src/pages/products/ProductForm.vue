@@ -121,66 +121,38 @@
                 <v-subheader class="text-left">Variations</v-subheader>
                 <v-divider></v-divider>
 
-             <v-col cols="12" md="6">
-  <div v-for="(size, index) in editedProduct.sizes" :key="'size-' + index" class="d-flex mb-2 align-center">
-    <!-- Nome do tamanho -->
-    <v-text-field
-      v-model="size.name"
-      label="Tamanho"
-      outlined
-      dense
-      class="me-2"
-      append-icon="mdi-close"
-      @click:append="removeSize(index)"
-    ></v-text-field>
+                <v-col cols="12" md="6">
+                    <div v-for="(size, index) in editedProduct.sizes" :key="'size-' + index"
+                        class="d-flex mb-2 align-center">
+                        <!-- Nome do tamanho -->
+                        <v-text-field v-model="size.value" label="Tamanho" outlined dense class="me-2"
+                            append-icon="mdi-close" @click:append="removeSize(index)"></v-text-field>
 
-    <!-- Quantidade -->
-    <v-text-field
-      v-model.number="size.quantity"
-      label="Quantidade"
-      type="number"
-      outlined
-      dense
-      style="max-width: 120px;"
-    ></v-text-field>
-  </div>
+                        <!-- Quantidade -->
+                        <v-text-field v-model.number="size.quantity" label="Quantidade" type="number" outlined dense
+                            style="max-width: 120px;"></v-text-field>
+                    </div>
 
-  <v-btn text small color="primary" @click="addSize">Adicionar Tamanho</v-btn>
-</v-col>
+                    <v-btn text small color="primary" @click="addSize">Adicionar Tamanho</v-btn>
+                </v-col>
 
                 <v-col cols="12" md="6">
                     <div v-for="(color, index) in editedProduct.colors" :key="'color-' + index"
                         class="mb-2 d-flex align-center">
                         <!-- Campo de cor -->
-                         <v-menu v-model="colorMenu[index]" :close-on-content-click="false" max-width="290px" offset-y>
-    <template #activator="{ props }">
-      <v-text-field
-        v-bind="props"
-        v-model="editedProduct.colors[index].value"
-        label="Cor"
-        outlined
-        dense
-        readonly
-        append-icon="mdi-chevron-down"
-      ></v-text-field>
-    </template>
+                        <v-menu v-model="colorMenu[index]" :close-on-content-click="false" max-width="290px" offset-y>
+                            <template #activator="{ props }">
+                                <v-text-field v-bind="props" v-model="editedProduct.colors[index].value" label="Cor"
+                                    outlined dense readonly append-icon="mdi-chevron-down"></v-text-field>
+                            </template>
 
-    <!-- Color Picker -->
-    <v-color-picker
-      v-model="editedProduct.colors[index].value"
-      flat
-    ></v-color-picker>
-  </v-menu>
+                            <!-- Color Picker -->
+                            <v-color-picker v-model="editedProduct.colors[index].value" flat></v-color-picker>
+                        </v-menu>
 
-  <!-- Quantidade -->
-  <v-text-field
-    v-model.number="editedProduct.colors[index].quantity"
-    label="Quantidade"
-    type="number"
-    outlined
-    dense
-    style="max-width: 120px;"
-  ></v-text-field>
+                        <!-- Quantidade -->
+                        <v-text-field v-model.number="editedProduct.colors[index].quantity" label="Quantidade"
+                            type="number" outlined dense style="max-width: 120px;"></v-text-field>
                         <!-- Botão de remover -->
                         <v-btn variant="plain" size="x-small" color="red" @click="removeColor(index)" icon="mdi-close">
 
@@ -398,29 +370,52 @@ export default {
 
     },
     created() {
-        if (!this.editedProduct.sizes){
+        if (!this.editedProduct.sizes) {
             this.editedProduct.sizes = [];
         }
-        else{
+        else {
             this.editedProduct.sizes = this.editedProduct.sizes.map(s => {
-                if(typeof s === 'string') return {name: s, quantity: 0};
-                return {...s};
+                if (typeof s === 'string') return { name: s, quantity: 0 };
+                return { ...s };
             });
         }
-        if (!this.editedProduct.colors) {
-            this.editedProduct.colors = [];
-        }
-        else{
-            this.editedProduct.colors = this.editedProduct.colors.map(s => {
-                if(typeof s === 'string') return {name: s, quantity: 0};
-                return {...s};
-            });
-        }
+       if (!this.editedProduct.colors) {
+    this.editedProduct.colors = [];
+} else {
+    this.editedProduct.colors = this.editedProduct.colors.map(s => {
+        if (typeof s === 'string') return { value: s, quantity: 0 }; // ✅ usar value
+        return { value: s.value || s.name || '', quantity: s.quantity || 0 };
+    });
+}
     },
     methods: {
         editProduct(item) {
             this.editedIndex = this.products.findIndex((p) => p.id === item.id);
-            this.editedProduct = { ...item, seo: item.seo ? { ...item.seo } : { meta_title: "", meta_description: "", slug: "", keywords: "" } };
+
+            //sizes and colors is array
+            const sizes = Array.isArray(item.sizes) 
+                ? item.sizes.map(s => (typeof s === 'string' ? {name: s, quantity: 0} : {
+                    name: s.name || '',
+                    quantity: s.quantity || 0
+                }))
+                : [];
+
+            const colors = Array.isArray(item.colors)
+    ? item.colors.map(c => (typeof c === 'string' ? { value: c, quantity: 0 } : {
+        value: c.value || c.name || '',
+        quantity: c.quantity || 0
+      }))
+    : [];
+
+
+            
+            this.editedProduct = { 
+                ...item,
+                sizes,
+                colors,
+                seo: item.seo ? { ...item.seo } : { meta_title: "", meta_description: "", slug: "", keywords: "" } };
+
+            this.colorMenu = colors.map(() => false);
             this.productDialog = true;
         },
         async saveProduct() {
@@ -468,15 +463,16 @@ export default {
             return category ? category.name : "Unknown";
         },
         addSize() {
-            this.editedProduct.sizes.push({name: '', quantity: 0});
+            this.editedProduct.sizes.push({ name: '', quantity: 0 });
         },
         removeSize(index) {
             this.editedProduct.sizes.splice(index, 1);
         },
         addColor() {
-            this.editedProduct.colors.push({name: '', quantity: 0});
-            this.colorMenu.push(false);
-        },
+    this.editedProduct.colors.push({ value: '', quantity: 0 }); // ✅ value, não name
+    this.colorMenu.push(false);
+},
+
         removeColor(index) {
             this.editedProduct.colors.splice(index, 1);
             this.colorMenu.splice(index, 1);

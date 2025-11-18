@@ -8,7 +8,7 @@ class Variation(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Relacionamento com produto
-    product_id = db.Column(db.Integer, nullable=False, index=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"))
 
     product_name = db.Column(db.String(255), nullable=False)
 
@@ -18,6 +18,7 @@ class Variation(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    product = db.relationship("Product", back_populates="variations")
     def to_dict(self):
         return {
             "id": self.id,
