@@ -12,7 +12,7 @@ from models.productVideo import ProductVideo
 class Product(db.Model):
     __tablename__ = 'products'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     price = db.Column(Numeric(10,2))
@@ -35,16 +35,17 @@ class Product(db.Model):
     images = db.relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
     
     def save(self):
-        """Salva ou atualiza o produto"""
         try:
-            if not self.id:
-                db.session.add(self)
-            db.session.commit()
+            db.session.add(self)        # Sempre adiciona à sessão
+            db.session.commit()         # Commit gera o ID no banco
+            db.session.refresh(self)    # Atualiza o objeto com o ID gerado
             return True
         except Exception as e:
             print(f"Erro ao salvar produto: {e}")
             db.session.rollback()
             return False
+
+
 
     def update(self, **kwargs):
         """Atualiza campos do produto"""

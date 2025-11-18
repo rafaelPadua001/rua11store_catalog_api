@@ -45,5 +45,5 @@ __all__ = [
     'PostSeo',
     'PostComment'
     'BlogPostView',
-  
+    'Variation',
 ]
