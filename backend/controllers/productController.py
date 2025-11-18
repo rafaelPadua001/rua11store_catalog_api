@@ -1,4 +1,7 @@
+import cloudinary
+import cloudinary.uploader
 import os
+import json
 from flask import jsonify, request, send_from_directory
 from werkzeug.utils import secure_filename
 from database import db
@@ -9,10 +12,11 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_req
 from decimal import Decimal, ROUND_HALF_UP
 from controllers.productImageController import ProductImageController
 from controllers.productVideoController import ProductVideoController
+from controllers.variationController import VariationController
 from models.productImage import ProductImage
 from models.comment import Comment
-import cloudinary
-import cloudinary.uploader
+from models.productSeo import ProductSeo
+
 from datetime import datetime
 
 class ProductController:
@@ -186,11 +190,6 @@ class ProductController:
     @staticmethod
     @jwt_required()
     def adicionar_produto():
-        #print("request.files keys:", list(request.files.keys()))
-        for key in request.files:
-            print(f"{key} => {[f.filename for f in request.files.getlist(key)]}")
-
-        # Função auxiliar para converter para float sem erro
         def to_float(value, default=0.0):
             try:
                 return float(value)
@@ -207,51 +206,27 @@ class ProductController:
         subcategory_id = int(request.form.get("subcategory_id", 0))
         quantity = int(request.form.get("quantity", 1))
 
-        # Arquivos do formulário
-        thumbnail_file = request.files.get("thumbnail")      # thumbnail única
-        images_files = request.files.getlist("images")       # múltiplas imagens
-        video_file = request.files.get("video")              # vídeo único
-
-        # Nome para pastas do Cloudinary
+        # Arquivos
+        thumbnail_file = request.files.get("thumbnail")
+        images_files = request.files.getlist("images")
+        video_file = request.files.get("video")
         product_name = ProductController.formatar_nome(name) if name else "produto_sem_nome"
 
-        # Upload da thumbnail para Cloudinary
-        thumbnail_path = None
-        if thumbnail_file and thumbnail_file.filename:
-            thumbnail_path = ProductController.upload_imagem(thumbnail_file, product_name)
+        thumbnail_path = ProductController.upload_imagem(thumbnail_file, product_name) if thumbnail_file else None
+        imagem_paths = [ProductController.upload_imagem(img, product_name) for img in images_files if img] if images_files else []
+        video_path = ProductController.upload_video(video_file, product_name) if video_file else None
 
-        # Upload das múltiplas imagens
-        imagem_paths = []
-        if images_files:
-           for img in images_files:
-                if img and img.filename:
-                    url = ProductController.upload_imagem(img, product_name)
-                    print(f"Upload imagem: {img.filename} -> {url}")
-                    if url:
-                        imagem_paths.append(url)
-                
-
-
-        # Upload do vídeo
-        video_path = None
-        if video_file and video_file.filename:
-            video_url = ProductController.upload_video(video_file, product_name)
-            if video_url:
-                video_path = video_url
-
-        # Dimensões
         width = to_float(request.form.get("width"))
         height = to_float(request.form.get("height"))
         weight = to_float(request.form.get("weight"))
         length = to_float(request.form.get("length"))
 
-        # Usuário autenticado
         user_id = get_jwt_identity()
         if not user_id:
             return jsonify({"erro": "Usuário não autenticado"}), 401
 
         try:
-            # Criar produto principal
+            # 1️⃣ Adiciona produto na sessão (sem commit)
             novo_produto = Product(
                 name=name,
                 description=description,
@@ -267,9 +242,10 @@ class ProductController:
                 length=length,
                 user_id=user_id
             )
-            novo_produto.save()
+            db.session.add(novo_produto)
+            db.session.flush()  # força geração do ID
 
-            # Criar estoque
+            # 2️⃣ Criar estoque
             stock_data = {
                 "id_product": novo_produto.id,
                 "user_id": novo_produto.user_id,
@@ -281,7 +257,7 @@ class ProductController:
             }
             Stock.create(stock_data)
 
-            # Criar SEO
+            # 3️⃣ Criar SEO
             seo_data = {
                 "product_id": novo_produto.id,
                 "meta_title": request.form.get("meta_title", ""),
@@ -289,17 +265,47 @@ class ProductController:
                 "slug": request.form.get("slug", ProductController.formatar_nome(name)),
                 "keywords": request.form.get("keywords", "")
             }
-            if any(seo_data.values()):
-                ProductSeoController.create_product_seo(seo_data)
 
-            # Salvar imagens extras no banco
+            if any(seo_data.values()):
+                seo = ProductSeo(**seo_data)
+                novo_produto.seo = seo
+                db.session.add(seo)
+
+            # 4️⃣ Criar variações
+            raw_sizes = request.form.get('sizes', '[]')
+            raw_colors = request.form.get('colors', '[]')
+            sizes = json.loads(raw_sizes) if raw_sizes else []
+            colors = json.loads(raw_colors) if raw_colors else []
+
+            variations = [
+                {"type": "Size", "value": s.get("name"), "quantity": s.get("quantity", 0)}
+                for s in sizes
+            ] + [
+                {"type": "Color", "value": c.get("value"), "quantity": c.get("quantity", 0)}
+                for c in colors
+            ]
+
+            for v in variations:
+                v['product_id'] = novo_produto.id
+                v['product_name'] = novo_produto.name
+
+            if variations:
+                VariationController.insert_variations(
+                    product_id=novo_produto.id,
+                    product_name=novo_produto.name,
+                    variations_data=variations
+                )
+
+            # 5️⃣ Salvar imagens extras
             if imagem_paths:
-                #print(imagem_paths)
                 ProductImageController.create_images(novo_produto.id, imagem_paths)
 
-            # Salvar vídeo no banco
+            # 6️⃣ Salvar vídeo
             if video_path:
                 ProductVideoController.create_video(novo_produto.id, video_path)
+
+            # 7️⃣ Commit de tudo de uma vez
+            db.session.commit()
 
             return jsonify({
                 "mensagem": "Produto adicionado com sucesso!",

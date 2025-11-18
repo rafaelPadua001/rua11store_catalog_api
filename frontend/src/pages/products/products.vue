@@ -48,7 +48,7 @@
 
                     <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
-                        <router-link :to="`/products/productView/${item.seo.slug}`">
+                        <router-link  v-if="item.seo" :to="`/products/productView/${item.seo.slug}`">
                             <v-icon small color="primary">mdi-eye</v-icon>
                         </router-link>
 
