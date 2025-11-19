@@ -289,8 +289,23 @@ export default {
                     this.products.push(response.data.product);
                 } else {
                     response = await api.put(`/products/${this.editedProduct.id}`, formData, config);
-                    Object.assign(this.products[this.editedIndex], response.data.product);
+
+                    const updated = response.data.product;
+                    const target = this.products[this.editedIndex];
+
+                    // Atualiza somente o que veio do backend (não sobrescreve as variações!)
+                    for (const key in updated) {
+                        target[key] = updated[key];
+                    }
+
+                    // Mantém as cores/tamanhos
+                    target.colors = [...this.editedProduct.colors];
+                    target.sizes = [...this.editedProduct.sizes];
+                    target.variations = { ...this.editedProduct.variations };
+
+                    console.log("FINAL PRODUCT =>", target);
                 }
+
 
                 this.close();
             } catch (error) {

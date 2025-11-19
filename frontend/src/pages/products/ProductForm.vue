@@ -143,7 +143,18 @@
                         <v-menu v-model="colorMenu[index]" :close-on-content-click="false" max-width="290px" offset-y>
                             <template #activator="{ props }">
                                 <v-text-field v-bind="props" v-model="editedProduct.colors[index].value" label="Cor"
-                                    outlined dense readonly append-icon="mdi-chevron-down"></v-text-field>
+                                    outlined dense readonly append-icon="mdi-chevron-down">
+
+                                    <template #prepend-inner>
+                                        <div :style="{
+                                            backgroundColor: editedProduct.colors[index].value,
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '50%',
+                                            border: '1px solid #ccc'
+                                        }"></div>
+                                    </template>
+                                </v-text-field>
                             </template>
 
                             <!-- Color Picker -->
