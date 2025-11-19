@@ -1,6 +1,7 @@
 from datetime import datetime
 from database import db
 from sqlalchemy.orm import joinedload
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 class Stock(db.Model):
@@ -13,7 +14,7 @@ class Stock(db.Model):
     product_name = db.Column(db.String(255), nullable=False)
     product_price = db.Column(db.Float, nullable=False)
     product_quantity = db.Column(db.Float, nullable=False)
-    variations = db.Column(db.Text, nullable=True)
+    variations = db.Column(JSONB)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

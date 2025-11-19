@@ -8,6 +8,8 @@ class ProductVideo(db.Model):
     video_path = db.Column(db.String, nullable=False)  # Caminho para o vídeo do produto
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
+    product = db.relationship("Product", back_populates="videos")
+    
     def save(self):
         """Salva ou atualiza o vídeo do produto"""
         try:

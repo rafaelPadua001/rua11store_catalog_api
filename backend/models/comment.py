@@ -7,7 +7,7 @@ class Comment(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     comment = db.Column(db.Text, nullable=False)
-    product_id = db.Column(db.Integer, nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"))
     user_id = db.Column(db.Integer, nullable=False)
     user_name = db.Column(db.String(100))
     avatar_url = db.Column(db.String(255))
@@ -15,6 +15,9 @@ class Comment(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    product = db.relationship("Product", back_populates="comments")
+
 
     def to_dict(self):
         return{

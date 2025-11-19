@@ -42,13 +42,13 @@
                     </template>
 
                     <!-- slot para price-->
-                     <template v-slot:item.price="{item}">
+                    <template v-slot:item.price="{ item }">
                         <span v-if="item && item.price">R$ {{ item.price }}</span>
-                     </template>
+                    </template>
 
                     <!-- 🔹 Slot para ações -->
                     <template v-slot:item.actions="{ item }">
-                        <router-link  v-if="item.seo" :to="`/products/productView/${item.seo.slug}`">
+                        <router-link v-if="item.seo" :to="`/products/productView/${item.seo.slug}`">
                             <v-icon small color="primary">mdi-eye</v-icon>
                         </router-link>
 
@@ -141,13 +141,13 @@ export default {
             categories: [],
             headers: [
                 // { text: "ID", value: "id", width: "20px", align: "center" },
-                { title: "Image", key: "thumbnail_path", sortable: false,  width: "150px" },
+                { title: "Image", key: "thumbnail_path", sortable: false, width: "150px" },
                 { title: "Product Name", key: "name", width: "150px" },
-               // { title: "Product Description", key: "description", width: "150px" },
+                // { title: "Product Description", key: "description", width: "150px" },
                 { title: "Category", key: "category", width: "100px" },
                 { title: "Price", key: "price", width: "120px", align: "right" },
-               // { title: "Quantity", key: "quantity", width: "120px", align: "right" },
-              //  { title: "Weight", key: "weight", width: "120px", align: "right" },
+                // { title: "Quantity", key: "quantity", width: "120px", align: "right" },
+                //  { title: "Weight", key: "weight", width: "120px", align: "right" },
                 { title: "Actions", key: "actions", width: "100px", align: "center", sortable: false },
             ],
         };
@@ -213,7 +213,7 @@ export default {
             try {
                 const response = await api.get("/products");
                 this.products = response.data;
-              //  console.log(this.products);
+                //  console.log(this.products);
             } catch (error) {
                 console.error("Error loading products:", error);
             } finally {
@@ -300,7 +300,7 @@ export default {
         getProductImage(imagePath, productId = null) {
             // Imagem padrão se não houver caminho
             if (!imagePath) return "https://via.placeholder.com/300";
-                
+
 
             return imagePath.startsWith('http')
                 ? imagePath.replace('http://', 'https://') // garante HTTPS

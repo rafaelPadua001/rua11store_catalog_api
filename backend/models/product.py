@@ -7,6 +7,7 @@ from models.productSeo import ProductSeo
 from models.comment import Comment
 from models.productImage import ProductImage
 from models.productVideo import ProductVideo
+from models.variation import Variation
 
 
 class Product(db.Model):
@@ -33,7 +34,16 @@ class Product(db.Model):
     stock = db.relationship('Stock', back_populates='product', uselist=False)
     seo = db.relationship('ProductSeo', uselist=False, back_populates='product', cascade="all, delete-orphan")
     images = db.relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
-    
+    comments = db.relationship("Comment", back_populates="product")
+
+    videos = db.relationship("ProductVideo", back_populates="product", cascade="all, delete-orphan")
+    variations = db.relationship(
+        "Variation",
+        back_populates="product",
+        lazy="joined",
+        cascade="all, delete-orphan"
+    )
+
     def save(self):
         try:
             db.session.add(self)        # Sempre adiciona à sessão
@@ -68,94 +78,60 @@ class Product(db.Model):
     @staticmethod
     def get_all():
         try:
-           
-            results = db.session.query(
-                Product,
-                ProductImage,
-                ProductVideo,
-                Stock.product_quantity,
-                ProductSeo,
-                Comment
-            ).join(
-                Stock, Product.id == Stock.id_product
-            ).outerjoin(
-                ProductSeo, Product.id == ProductSeo.product_id
-            ).outerjoin(
-                Comment, Product.id == Comment.product_id
-            ).outerjoin(
-                ProductImage, Product.id == ProductImage.product_id
-            ).outerjoin(
-                ProductVideo, Product.id == ProductVideo.product_id
+            products = Product.query.options(
+                joinedload(Product.images),
+                joinedload(Product.stock),
+                joinedload(Product.seo),
+                joinedload(Product.comments),
+                joinedload(Product.variations),
+                joinedload(Product.videos)
             ).all()
 
-            product_map = {}
+            product_list = []
 
-            for product, product_image, product_video, quantity, seo, comment in results:
-                pid = product.id
+            for p in products:
+                item = {
+                    "product": {
+                        "id": p.id,
+                        "name": p.name,
+                        "description": p.description,
+                        "price": str(p.price),
+                        "thumbnail_path": p.thumbnail_path,
+                        "category_id": p.category_id,
+                        "subcategory_id": p.subcategory_id,
+                        "user_id": p.user_id,
+                        "length": p.length,
+                        "width": p.width,
+                        "height": p.height,
+                        "weight": p.weight,
+                        "quantity": p.quantity,
+                        "sizes": [],
+                        "colors": [],
+                    },
+                    "product_images": [{"id": img.id, "image_path": img.image_path} for img in p.images],
+                    "product_videos": [{"id": vid.id, "video_path": vid.video_path} for vid in getattr(p, "videos", [])],
+                    "product_quantity": getattr(p.stock, "product_quantity", 0),
+                    "seo": {
+                        "meta_title": p.seo.meta_title if p.seo else None,
+                        "meta_description": p.seo.meta_description if p.seo else None,
+                        "slug": p.seo.slug if p.seo else None,
+                        "keywords": p.seo.keywords if p.seo else None
+                    } if p.seo else None,
+                    "comments": [{"id": c.id, "comment": c.comment} for c in getattr(p, "comments", [])]
+                }
 
-                if pid not in product_map:
-                    product_map[pid] = {
-                        "product": {
-                            "id": product.id,
-                            "name": product.name,
-                            "description": product.description,
-                            "price": str(product.price),
-                            "thumbnail_path": product.thumbnail_path,
-                            "category_id": product.category_id,
-                            "subcategory_id": product.subcategory_id,
-                            "user_id": product.user_id,
-                            "length": product.length,
-                            "width": product.width,
-                            "height": product.height,
-                            "weight": product.weight,
-                            "quantity": product.quantity,
-                        },
-                        "product_images": [],
-                        "product_videos": [],
-                        "product_quantity": quantity,
-                        "seo": {
-                            "meta_title": seo.meta_title if seo else None,
-                            "meta_description": seo.meta_description if seo else None,
-                            "slug": seo.slug if seo else None,
-                            "keywords": seo.keywords if seo else None
-                        } if seo else None,
-                        "comments": [],
-                    }
+                # Variations
+                for v in p.variations:
+                    vtype = v.variation_type.lower()  # normaliza para minúsculo
 
-                # Adiciona imagens (todas as encontradas)
-                if product_image:
-                    product_map[pid]["product_images"].append({
-                        "id": product_image.id,
-                        "product_id": product_image.product_id,
-                        "image_path": product_image.image_path,
-                        "is_thumbnail": product_image.is_thumbnail,
-                        "created_at": product_image.created_at.isoformat() if product_image.created_at else None
-                    })
+                    if vtype == "size":
+                        item["product"]["sizes"].append({"value": v.value, "quantity": v.quantity})
+                    elif vtype == "color":
+                        item["product"]["colors"].append({"value": v.value, "quantity": v.quantity})
 
-                # adiciona videos (todos encontrados)
-                if product_video:
-                    product_map[pid]["product_videos"].append({
-                        "id": product_video.id,
-                        "product_id": product_video.product_id,
-                        "video_path":   product_video.video_path,
-                        "created_at": product_video.created_at,
-                    })
+                product_list.append(item)
 
-                # Adiciona comentários (todos)
-                if comment:
-                    product_map[pid]["comments"].append({
-                        "id": comment.id,
-                        "product_id": comment.product_id,
-                        "user_id": comment.user_id,
-                        "user_name": comment.user_name,
-                        "avatar_url": comment.avatar_url,
-                        "comment": comment.comment,
-                        "status": comment.status,
-                        "created_at": comment.created_at.isoformat() if comment.created_at else None,
-                        "updated_at": comment.updated_at.isoformat() if comment.updated_at else None
-                    })
-
-            return list(product_map.values())
+            return product_list
 
         except Exception as e:
             print(f"Erro ao buscar produtos: {e}")
