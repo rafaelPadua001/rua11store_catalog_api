@@ -336,6 +336,7 @@ class ProductController:
         category_id = request.form.get("category_id", product.category_id)
         subcategory_id = request.form.get("subcategory_id", product.subcategory_id)
         quantity = request.form.get("quantity", product.quantity)
+
         width = request.form.get('width', product.width)
         height = request.form.get('height', product.height)
         weight = request.form.get('weight', product.weight)
@@ -389,6 +390,52 @@ class ProductController:
             # Mantém o vídeo já existente
             new_video_path = video_record.video_path if video_record else None
 
+         # --------------------------
+        # VARIAÇÕES (Size / Color)
+        # --------------------------
+       
+        raw_sizes = request.form.get("sizes", "[]")
+        raw_colors = request.form.get("colors", "[]")
+
+        try:
+            sizes = json.loads(raw_sizes)
+            colors = json.loads(raw_colors)
+        except:
+            sizes = []
+            colors = []
+
+        variations = []
+
+        for s in sizes:
+            if s.get("value"):
+                variations.append({
+                    "type": "Size",
+                    "value": s.get("value"),
+                    "quantity": int(s.get("quantity", 0)),
+                    "product_id": product.id,
+                    "product_name": product.name
+                })
+
+        for c in colors:
+            if c.get("value"):
+                variations.append({
+                    "type": "Color",
+                    "value": c.get("value"),
+                    "quantity": int(c.get("quantity", 0)),
+                    "product_id": product.id,
+                    "product_name": product.name
+                })
+
+        # Se enviou variações → apaga e insere de novo
+        if variations:
+            VariationController.delete_variations_by_product(product.id)
+            VariationController.insert_variations(
+                product_id=product.id,
+                product_name=product.name,
+                variations_data=variations
+            )
+
+
         # --------------------------
         # ATUALIZA PRODUTO
         # --------------------------
@@ -422,7 +469,18 @@ class ProductController:
                 "product_height": product.height,
                 "product_weight": product.weight,
                 "product_lenght": product.length,
-                "variations": None,
+                "variations": {
+                    "sizes": [
+                        {"value": v.value, "quantity": v.quantity}
+                        for v in product.variations
+                        if v.variation_type == 'Size'
+                    ],
+                    "colors": [
+                        {"value": v.value, "quantity": v.quantity}
+                        for v in product.variations
+                        if v.variation_type == 'Color'
+                    ]
+                },
             }
 
             stock_id = Stock.get_stock_id_by_product(product.id)
@@ -439,7 +497,9 @@ class ProductController:
                 }
                 ProductSeoController.update_product_seo(product.id, seo_data)
 
-            return jsonify({"mensagem": "Produto atualizado com sucesso!", "product": product.to_dict()}), 200
+            updated_product = Product.get_by_id(product.id)
+
+            return jsonify({"mensagem": "Produto atualizado com sucesso!", "product": updated_product.to_dict()}), 200
 
         except Exception as e:
             return jsonify({"erro": f"Erro ao atualizar produto: {str(e)}"}), 500

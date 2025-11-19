@@ -379,41 +379,42 @@ export default {
                 return { ...s };
             });
         }
-       if (!this.editedProduct.colors) {
-    this.editedProduct.colors = [];
-} else {
-    this.editedProduct.colors = this.editedProduct.colors.map(s => {
-        if (typeof s === 'string') return { value: s, quantity: 0 }; // ✅ usar value
-        return { value: s.value || s.name || '', quantity: s.quantity || 0 };
-    });
-}
+        if (!this.editedProduct.colors) {
+            this.editedProduct.colors = [];
+        } else {
+            this.editedProduct.colors = this.editedProduct.colors.map(s => {
+                if (typeof s === 'string') return { value: s, quantity: 0 }; // ✅ usar value
+                return { value: s.value || s.name || '', quantity: s.quantity || 0 };
+            });
+        }
     },
     methods: {
         editProduct(item) {
             this.editedIndex = this.products.findIndex((p) => p.id === item.id);
 
             //sizes and colors is array
-            const sizes = Array.isArray(item.sizes) 
-                ? item.sizes.map(s => (typeof s === 'string' ? {name: s, quantity: 0} : {
+            const sizes = Array.isArray(item.sizes)
+                ? item.sizes.map(s => (typeof s === 'string' ? { name: s, quantity: 0 } : {
                     name: s.name || '',
                     quantity: s.quantity || 0
                 }))
                 : [];
 
             const colors = Array.isArray(item.colors)
-    ? item.colors.map(c => (typeof c === 'string' ? { value: c, quantity: 0 } : {
-        value: c.value || c.name || '',
-        quantity: c.quantity || 0
-      }))
-    : [];
+                ? item.colors.map(c => (typeof c === 'string' ? { value: c, quantity: 0 } : {
+                    value: c.value || c.name || '',
+                    quantity: c.quantity || 0
+                }))
+                : [];
 
 
-            
-            this.editedProduct = { 
+
+            this.editedProduct = {
                 ...item,
                 sizes,
                 colors,
-                seo: item.seo ? { ...item.seo } : { meta_title: "", meta_description: "", slug: "", keywords: "" } };
+                seo: item.seo ? { ...item.seo } : { meta_title: "", meta_description: "", slug: "", keywords: "" }
+            };
 
             this.colorMenu = colors.map(() => false);
             this.productDialog = true;
@@ -469,9 +470,9 @@ export default {
             this.editedProduct.sizes.splice(index, 1);
         },
         addColor() {
-    this.editedProduct.colors.push({ value: '', quantity: 0 }); // ✅ value, não name
-    this.colorMenu.push(false);
-},
+            this.editedProduct.colors.push({ value: '', quantity: 0 }); // ✅ value, não name
+            this.colorMenu.push(false);
+        },
 
         removeColor(index) {
             this.editedProduct.colors.splice(index, 1);
