@@ -529,7 +529,10 @@ class ProductController:
                 Stock.delete_by_productId(product.id)
             except Exception as e:
                 print(f'Erro ao excliur do estoque: {str(e)}')    
-            
+            try:
+                VariationController.delete_variations_by_product(product.id)
+            except Exception as e:
+                print(f'Erro ao excluir variações: {str(e)}')
             product.delete()
             return jsonify({"mensagem": "Produto excluído com sucesso"}), 200
         except Exception as e:
