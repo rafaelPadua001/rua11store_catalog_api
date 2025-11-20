@@ -54,9 +54,57 @@
             Pedir pelo Whatsapp
           </v-btn>
         </div>
+
+        <div class="mt-4">
+          <!-- Agrupamento: percorre cada tipo (ex: 'Color', 'Size') -->
+          <template v-for="(items, type) in groupedVariations" :key="type">
+            <!-- só mostra o grupo quando existir items -->
+            <div v-if="items && items.length" class="mb-3">
+              <strong class="mr-2">{{ type }}:</strong>
+
+              <v-chip v-for="(variation, i) in items.filter(v => v.quantity > 0)"
+                :key="`${type}-${i}-${variation.value ?? i}`" class="ma-1"
+                :color="type === 'Color' && variation.value ? variation.value : undefined"
+                @click="selectVariation(variation)" clickable outlined small>
+                <!-- Nome da cor com proteção -->
+                <span v-if="type === 'Color'">
+                  {{ colorNames[variation.value?.toUpperCase()] || variation.value }}
+                </span>
+
+                <!-- Tamanho / outros tipos -->
+                <span v-else>
+                  {{ variation.value }}
+                </span>
+              </v-chip>
+            </div>
+          </template>
+        </div>
+
+        <!-- Mostrar apenas se houver pelo menos 1 variação selecionada -->
+        <div class="d-flex flex-wrap align-center" v-if="selectedVariations && selectedVariations.length">
+          <strong class="mr-3">Selected:</strong>
+
+          <div class="d-flex flex-wrap align-center">
+            <div v-for="(selectedVariation, index) in selectedVariations"
+              :key="`selected-${index}-${selectedVariation.value}`" class="mr-2 d-flex align-center">
+              <span v-if="selectedVariation.variation_type === 'Size'">
+                <strong>{{ selectedVariation.value }}</strong>
+              </span>
+
+              <span v-else>
+                <strong>
+                  {{ colorNames[selectedVariation.value?.toUpperCase()] || selectedVariation.value }}
+                </strong>
+              </span>
+            </div>
+          </div>
+        </div>
+
       </v-col>
 
     </v-row>
+
+
     <!-- Sugestoes de produtos -->
     <v-row>
       <v-col cols="12">
@@ -224,7 +272,7 @@ export default {
   },
   data() {
     return {
-      product: { images: [], comments: [] },
+      product: { images: [], comments: [], variations: [] },
       currentIndex: 0,
       alert: null,
       alertError: null,
@@ -235,15 +283,32 @@ export default {
       editedIndex: -1,
       editedComment: {},
       comments: [],
+      colorNames: {
+        "#000000": "Preto",
+        "#FFFFFF": "Branco",
+        "#FF0000": "Vermelho",
+        "#EB0909": "Vermelho",
+        "#00FF00": "Verde",
+        "#0000FF": "Azul",
+        "#FFFF00": "Amarelo",
+        "#FF00FF": "Rosa",
+        "#730CF8": "Roxo",
+        "#00FFFF": "Ciano",
+        "#808080": "Cinza",
+        // coloque aqui os HEX que seu catálogo usa
+      },
+      selectedVariations: [],
+
     };
   },
   async created() {
     await this.loadProduct();
+    console.log(this.loadProduct());
     await this.loadAuthUser();
     this.comments = this.product.comments || [];
 
-    if(window.fbq && this.product){
-        fbq('track', 'ViewContent', {
+    if (window.fbq && this.product) {
+      fbq('track', 'ViewContent', {
         content_ids: [this.product.id],
         content_type: 'product',
         content_name: this.product.name,
@@ -253,6 +318,17 @@ export default {
     }
   },
   computed: {
+    groupedVariations() {
+      const groups = {};
+
+      this.product.variations.forEach(v => {
+        const type = v.variation_type;
+        if (!groups[type]) groups[type] = [];
+        groups[type].push(v);
+      });
+
+      return groups;
+    },
     currentImage() {
       // primeira é thumbnail, depois imagens
       if (this.currentIndex === 0) {
@@ -305,6 +381,18 @@ export default {
         console.log('Perfil de usuário não encontrado, tente novamente.', e);
       }
     },
+    async selectVariation(variation) {
+      const existingIndex = this.selectedVariations.findIndex(
+        (v) => v.variation_type === variation.variation_type
+      );
+
+      if (existingIndex !== -1) {
+        this.selectedVariations.splice(existingIndex, 1, variation);
+      } else {
+        this.selectedVariations.push(variation);
+      }
+    },
+
     async addItemCart(product) {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('access_token');
@@ -320,16 +408,17 @@ export default {
 
         const response = await api.post(`/cart/add-cart`, {
           product_id: product.id,
-          quantity: 1
+          quantity: 1,
+          selectedVariations: this.selectedVariations,
         },
           {
             headers: {
               Authorization: `Bearer ${token}`
             }
           });
-        
 
-        if(typeof window.fqb === 'function'){
+
+        if (typeof window.fqb === 'function') {
           window.fbq("track", "AddToCart", {
             content_ids: [product.id],
             content_type: "product",

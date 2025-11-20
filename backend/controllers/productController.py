@@ -16,6 +16,7 @@ from controllers.variationController import VariationController
 from models.productImage import ProductImage
 from models.comment import Comment
 from models.productSeo import ProductSeo
+from models.variation import Variation
 
 from datetime import datetime
 
@@ -145,6 +146,7 @@ class ProductController:
         product_id = product_data['id']
         images = ProductImage.query.filter_by(product_id=product_id).all()
         comments = Comment.query.filter_by(product_id=product_id).all()
+        variations = Variation.query.filter_by(product_id=product_id).all()
         image_list = [
             {
                 "id": img.id,
@@ -167,6 +169,19 @@ class ProductController:
             for comment in comments
         ]
 
+        variations_list = [
+            {
+                "id": variation.id,
+                "product_id": variation.product_id,
+                "product_name": variation.product_name,
+                "variation_type": variation.variation_type,
+                "value": variation.value,
+                "quantity": variation.quantity,
+            }
+
+            for variation in variations
+        ]
+
         return jsonify({
             "id": product_data["id"],
             "name": product_data["name"],
@@ -183,6 +198,7 @@ class ProductController:
             },
             "images": image_list,
             "comments": comments_list,
+            "variations": variations_list,
             # Se quiser os comentários, precisa buscá-los separadamente
             # Ou incluir na consulta original
             # "comments": [...]
