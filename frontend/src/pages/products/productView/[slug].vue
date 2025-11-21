@@ -62,20 +62,18 @@
             <div v-if="items && items.length" class="mb-3">
               <strong class="mr-2">{{ type }}:</strong>
 
-              <v-chip v-for="(variation, i) in items.filter(v => v.quantity > 0)"
-                :key="`${type}-${i}-${variation.value ?? i}`" class="ma-1"
-                :color="type === 'Color' && variation.value ? variation.value : undefined"
+              <v-chip v-for="(variation, i) in items.filter(v => v && (v.quantity === undefined || v.quantity > 0))"
+                :key="i" class="ma-1" :color="type === 'Color' ? variation.value : undefined"
                 @click="selectVariation(variation)" clickable outlined small>
-                <!-- Nome da cor com proteção -->
                 <span v-if="type === 'Color'">
                   {{ colorNames[variation.value?.toUpperCase()] || variation.value }}
                 </span>
 
-                <!-- Tamanho / outros tipos -->
                 <span v-else>
                   {{ variation.value }}
                 </span>
               </v-chip>
+
             </div>
           </template>
         </div>
@@ -319,18 +317,18 @@ export default {
   },
   computed: {
     groupedVariations() {
-      const variations = Array.isArray(this.produc?.variations)
+      const variations = Array.isArray(this.product?.variations)
         ? this.product.variations
         : [];
 
       const groups = {};
 
-      variations.forEach(v  => {
-        if(!v) return;
+      variations.forEach(v => {
+        if (!v) return;
 
         const type = v.variation_type || "other";
 
-        if(!groups[type]) groups[type] = [];
+        if (!groups[type]) groups[type] = [];
 
         groups[type].push(v);
       })
