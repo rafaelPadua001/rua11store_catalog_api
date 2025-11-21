@@ -3,7 +3,8 @@ from database import db
 class PaymentProduct(db.Model):
     __tablename__ = 'payments_product'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
     payment_id = db.Column(db.Integer, db.ForeignKey('payments.payment_id'), nullable=False)
     product_id = db.Column(db.Integer, nullable=False)
     product_name = db.Column(db.String(255), nullable=False)

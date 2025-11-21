@@ -8,6 +8,7 @@ from uuid import uuid4
 import requests
 import re
 from datetime import datetime
+import json
 
 load_dotenv()
 
@@ -35,6 +36,19 @@ class CreditCardPayment(PaymentStrategy):
         payer_email = data.get("payer_email") or data.get('email')
         payer_cpf = data.get("payer_cpf") or data.get('cpf')
         payer_name = data.get("payer_name") or data.get('name')
+        products = data.get("products")
+        print(products)
+        address = data.get("address") or {}
+
+        if isinstance(products, str):
+            try:
+                products = json.loads(products)
+            except Exception:
+                products = []
+
+        # Se for None ou não for lista, transforma em lista vazia
+        if not isinstance(products, list):
+            products = []
 
         card_token = self.create_card_token(data)
         if not card_token:
@@ -81,7 +95,7 @@ class CreditCardPayment(PaymentStrategy):
                         "quantity": item.get("quantity", 1),
                         "unit_price": float(item.get("unit_price", data["total"]))  # fallback para valor total
                     }
-                    for item in data.get("products", [])
+                    for item in products if item is not None
                 ],
                 "payer": {
                     "first_name":  payer_name.split(' ')[0] if payer_name else "Test",
@@ -103,6 +117,7 @@ class CreditCardPayment(PaymentStrategy):
 
         response = requests.post(url, headers=headers, json=payment_data)
         result = response.json()
+       
 
         if response.status_code == 201:
             payment = Payment(
@@ -115,7 +130,7 @@ class CreditCardPayment(PaymentStrategy):
                 name=payer_name,
                 status=result["status"],
                 usuario_id=data["userId"],
-                products=data["products"],
+                products=products,
                 address=data.get("address"),
                 coupon_code=coupon_code,
                 coupon_amount=coupon_amount

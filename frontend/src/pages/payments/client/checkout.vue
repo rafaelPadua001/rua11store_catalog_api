@@ -17,6 +17,7 @@
                       <v-list>
                         <v-list-item v-for="(item, index) in cart.items" :key="index">
                           <v-card class="d-flex flex-column w-full max-w-lg mx-auto" elevation="0">
+                            
                             <v-avatar size="150">
                               <v-img :src="item.product_image" :alt="item.product_name" cover></v-img>
                             </v-avatar>
@@ -28,6 +29,23 @@
                               <v-col cols="12" sm="12" md="6">
                                 <strong>R$ {{ item.product_price }}</strong>
                               </v-col>
+                            
+                              <v-col cols="12" sm="12" md="6">
+                                <strong>Variations:</strong>
+                              </v-col>
+                              <v-col cols="12" sm="12" md="6">
+                                <div v-for="(variation, index) in item.variations" :key="index">
+                                  <v-chip v-if="variation.variation_type === 'Size'">
+                                    {{ variation.value }}
+                                  </v-chip>
+                                  <v-chip v-else :color="variation.value">
+
+                                  </v-chip>
+                                </div>
+                                
+                              </v-col>
+                              <v-spacer></v-spacer>
+
                               <v-col cols="12" sm="12" md="2">
                                 <strong>Qtd:</strong>
                               </v-col>
@@ -378,6 +396,7 @@ const api = axios.create({
 
 const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 const userId = localStorage.getItem('user_id');
+console.log(userId);
 const address = ref(null);
 const addressDialog = ref(false);
 const route = useRoute()
@@ -807,6 +826,9 @@ async function submitPayment() {
       name: payment.value.name,
       cpf: payment.value.cpf,
       email: payment.value.email,
+      userId: userId,
+      products: cartData.items,
+      address: address.value,
     };
 
 
@@ -830,7 +852,8 @@ async function submitPayment() {
       };
 
       payload.installments = payment.value.installments;
-      payload.payment_method_id = payment.value.payment_method_id?.id || 'visa';
+      payload.payment_method_id = payment.value.payment_method_id || 'visa';
+      console.log(payment.value.payment_method_id);
 
     }
     //  console.log('📤 Enviando para backend:', payload);
@@ -866,24 +889,24 @@ async function submitPayment() {
     } else if (response.data.status === 'pending') {
       paymentStatus.value = 'pending';
       paymentMessage.value = 'Pagamento pendente. Aguarde confirmação.';
-      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+    //  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
     } else if (response.data.status === 'rejected') {
       paymentStatus.value = 'rejected';
       paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
-      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+    //  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
     } else {
       paymentStatus.value = 'rejected';
       paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
-      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+     // window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
     }
 
   } catch (error) {
     paymentStatus.value = 'rejected';
     paymentMessage.value = 'Erro desconhecido. Tente novamente.';
     console.log('Erro desconhecido. Tente novamente.', error);
-    window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+   // window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
   }
 }
@@ -914,6 +937,7 @@ async function sendMetaConversion(totalAmount, cart, payment, eventId) {
 onMounted(async () => {
   await getCoupon();
   await loadAddress();
+  await calculateDelivery();
   const totalReal =
     totalCarrinho.value;
 

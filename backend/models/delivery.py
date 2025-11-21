@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship, joinedload
 from database import db  # ou o local correto da sua instância SQLAlchemy
+from sqlalchemy.dialects.postgresql import JSON
 from models.order import Order
 from models.orderItem import OrderItem
 from models.product import Product
@@ -11,8 +12,8 @@ class Delivery(db.Model):
     __tablename__ = 'delivery'
 
     id = Column(Integer, primary_key=True)
-    product_id = Column(Integer, ForeignKey('products.id', ondelete='CASCADE'), nullable=True)
-    user_id = Column(Integer, nullable=False)
+    product_ids = Column(JSON)
+    user_id = Column(String(255), nullable=False)
     recipient_name = Column(String(255))
     street = Column(String(255))
     number = Column(String(50))
@@ -65,7 +66,7 @@ class Delivery(db.Model):
     received_at = Column(String(100))
     risk = Column(String(255))
     #cpf = Column(String(20))
-    status = Column(String(50))
+    #status = Column(String(50))
     #service_status = Column(String(50))
     #state_abbr = Column(String(10))
     #company_name = Column(String(100))
@@ -73,13 +74,13 @@ class Delivery(db.Model):
 
     melhorenvio_id = Column(String(100), unique=True)
     order_id = Column(String(100))
-    product = relationship('Product', backref=db.backref('deliveries', passive_deletes=True))
+    #product = relationship('Product', backref=db.backref('deliveries', passive_deletes=True))
 
     
     def to_dict(self):
         return {
             "id": self.id,
-            "product_id": self.product_id,
+            "product_ids": self.product_ids,
             "user_id": self.user_id,
             "recipient_name": self.recipient_name,
             "street": self.street,
