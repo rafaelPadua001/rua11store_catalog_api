@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, desc
 from sqlalchemy.orm import relationship, Session
 import requests
-from database import db  # Supondo que você tenha Base e engine já configurados no db.py
+from database import db
 import uuid
 import io
 from reportlab.lib.pagesizes import A4
@@ -14,7 +14,7 @@ from reportlab.lib.utils import ImageReader
 class Order(db.Model):
     __tablename__ = 'orders'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(String(36), nullable=False, default=lambda: str(uuid.uuid4()))
     payment_id = db.Column(db.Integer, db.ForeignKey('payments.id'))
     delivery_id = Column(Integer, ForeignKey('delivery.id'))
