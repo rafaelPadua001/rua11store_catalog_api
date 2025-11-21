@@ -4,7 +4,7 @@ from models.cart import Cart
 from database import db
 
 class CartItemController:
-    def add_cart_item(cart_id, user_id, product, quantity=1):
+    def add_cart_item(cart_id, user_id, product,  variations, quantity=1):
         # create cart item
         cart_item = CartItems(
             cart_id = cart_id,
@@ -17,8 +17,9 @@ class CartItemController:
             product_width = product.width,
             product_weight = product.weight,
             product_length = product.length,
+            variation_data=variations,
             quantity = quantity
-
+            
         )
 
         db.session.add(cart_item)

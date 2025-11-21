@@ -21,13 +21,14 @@ def add_cart():
     data = request.json
     product_id = data.get("product_id")
     quantity = data.get("quantity", 1)
+    variations = data.get("selectedVariations", [])
 
     # aqui você pode buscar o produto no DB
     product = Product.query.get(product_id)
     if not product:
         return jsonify({"msg": "Produto não encontrado"}), 404
 
-    return CartController.add_cart(user_id, product, quantity)
+    return CartController.add_cart(user_id, product,  variations, quantity)
 
 @cart_bp.route("/cart-item-remove/<int:itemId>", methods=["DELETE"])
 @jwt_required()
