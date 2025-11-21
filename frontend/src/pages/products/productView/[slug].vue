@@ -319,14 +319,21 @@ export default {
   },
   computed: {
     groupedVariations() {
+      const variations = Array.isArray(this.produc?.variations)
+        ? this.product.variations
+        : [];
+
       const groups = {};
 
-      this.product.variations.forEach(v => {
-        const type = v.variation_type;
-        if (!groups[type]) groups[type] = [];
-        groups[type].push(v);
-      });
+      variations.forEach(v  => {
+        if(!v) return;
 
+        const type = v.variation_type || "other";
+
+        if(!groups[type]) groups[type] = [];
+
+        groups[type].push(v);
+      })
       return groups;
     },
     currentImage() {
