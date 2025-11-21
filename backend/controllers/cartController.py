@@ -46,7 +46,8 @@ class CartController:
                         "product_height": item.product_height,
                         "product_width": item.product_width,
                         "product_weight": item.product_weight,
-                        "product_length": item.product_length
+                        "product_length": item.product_length,
+                        "variations": item.variation_data
                     })
 
             return jsonify(list(carts_dict.values())), 200
