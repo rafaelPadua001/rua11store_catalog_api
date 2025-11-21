@@ -53,27 +53,36 @@
 
                 <!-- Itera pelos itens dentro de cada carrinho -->
                 <v-card v-for="(item, i) in cart.items" :key="item.id" elevation="1"
-                  class="mb-2 pa-2 d-flex align-center" width="350">
+                  class="mb-2 pa-2 d-flex align-center" width="350" style="gap: 12px;">
+
                   <v-avatar>
-                    <v-img :src="item.product_image" width="60" height="60" contain class="rounded mr-2"></v-img>
+                    <v-img :src="item.product_image" width="60" height="60" contain class="rounded "></v-img>
                   </v-avatar>
 
 
-                  <div class="flex-grow-1">
+                  <div class="flex-grow-2">
                     <div class="font-weight-medium">{{ item.product_name }}</div>
-                    <div class="text-caption text-grey d-flex align-center">
-                      <!-- <v-text-field
-              v-model.number="item.quantity"
-              type="number"
-              min="1"
-              style="width: 60px; margin-left: 8px"
-              @change.stop="updateQuantity(item)"
-              dense
-              hide-details
-            ></v-text-field>-->
-                      <v-text-field v-model.number="item.quantity" type="number" min="1" class="shrink ml-2"
-                        density="compact" hide-details @click.stop @mousedown.stop></v-text-field>
+
+                    <div class="d-flex align-center flex-wrap" style="gap: 6px;">
+
+                      <!-- Chips -->
+                      <div v-for="(variation, index) in item.variations" :key="index">
+                        <v-chip v-if="variation.variation_type === 'Size'" size="small">
+                          {{ variation.value }}
+                        </v-chip>
+
+                        <v-chip v-else :color="variation.value" size="small">
+                          {{ colorNames[variation.value?.toUpperCase()] || variation.value }}
+                        </v-chip>
+                      </div>
+
+                      <!-- Textfield do lado -->
+                      <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact" hide-details
+                        class="ml-2" style="max-width: 70px;" @click.stop @mousedown.stop></v-text-field>
+
                     </div>
+
+
                     <div class="text-caption text-grey">
                       {{ item.quantity }}x — R$ {{ item.product_price }}
                     </div>
@@ -271,6 +280,20 @@ const notifications = inject('notifications', ref([]));
 const hasNewNotifications = inject('hasNewNotifications', ref(true));
 const blogMenuOpen = ref(false);
 const cartItems = ref([]);
+const colorNames = {
+  "#000000": "Preto",
+  "#FFFFFF": "Branco",
+  "#FF0000": "Vermelho",
+  "#EB0909": "Vermelho",
+  "#00FF00": "Verde",
+  "#0000FF": "Azul",
+  "#FFFF00": "Amarelo",
+  "#FF00FF": "Rosa",
+  "#730CF8": "Roxo",
+  "#00FFFF": "Ciano",
+  "#808080": "Cinza",
+  // coloque aqui os HEX que seu catálogo usa
+};
 let pages = inject('pages', ref([]));
 
 
