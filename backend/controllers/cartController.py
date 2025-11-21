@@ -57,7 +57,7 @@ class CartController:
 
     
 
-    def add_cart(user_id, product, quantity=1):
+    def add_cart(user_id, product, variations, quantity=1):
         #search user cart or create a new
         cart = Cart.query.filter_by(user_id=user_id).first()
         if not cart:
@@ -70,8 +70,9 @@ class CartController:
             cart_id = cart.id,
             user_id = user_id,
             product = product,
-            quantity = quantity
-
+            variations = variations,
+            quantity = quantity,
+            
         )
 
         item_data = {
@@ -85,6 +86,7 @@ class CartController:
             "product_width": cart_item.product_width,
             "product_weight": cart_item.product_weight,
             "product_length": cart_item.product_length,
+            "variation_data": cart_item.variation_data,
             "quantity": cart_item.quantity,
             "created_at": cart_item.created_at.isoformat()
         }

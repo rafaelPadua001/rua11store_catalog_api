@@ -11,7 +11,7 @@ class CartItems(db.Model):
     cart_id = db.Column(db.Integer, db.ForeignKey("carts.id"), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("client_users.id"), nullable=False)
-
+    variation_data = db.Column(db.JSON, nullable=True)
     product_name = db.Column(db.Text, nullable=False)
     product_price = db.Column(db.Numeric(10, 2), nullable=False)
     product_image = db.Column(db.Text)
