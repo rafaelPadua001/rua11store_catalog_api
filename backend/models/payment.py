@@ -236,7 +236,7 @@ class Payment(db.Model):
                     print("Erro: 'id' não encontrado no produto:", product)
                     continue
 
-                product_id = product.get('product_id') or product.get('id') 
+                product_id = product.get('product_id') # or product.get('id') 
                 product_name = product.get('name') or product.get('product_name')
                 price = float(product.get('price') or product.get('product_price'))
                 quantity = int(product.get('quantity', 1))
