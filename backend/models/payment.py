@@ -219,16 +219,16 @@ class Payment(db.Model):
             db.session.flush()
             order_id = order.id
 
-           # create_notification(
-           #     message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-           #     is_global=True,
-           #     session=db.session
-           # )    
-           # socketio.emit('new_notification', {
-           #     'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-           #     'order_id': order_id,
-           #     'is_global': True
-           # })
+            create_notification(
+                message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+                is_global=True,
+                session=db.session
+            )    
+            socketio.emit('new_notification', {
+                'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+                'order_id': order_id,
+                'is_global': True
+            })
 
             products_html = "<ul style='list-style: none; padding: 0;'>"
             for product in self.products:
@@ -236,7 +236,7 @@ class Payment(db.Model):
                     print("Erro: 'id' não encontrado no produto:", product)
                     continue
 
-                product_id = product.get('id') or product.get('product_id')
+                product_id = product.get('product_id') or product.get('id') 
                 product_name = product.get('name') or product.get('product_name')
                 price = float(product.get('price') or product.get('product_price'))
                 quantity = int(product.get('quantity', 1))
