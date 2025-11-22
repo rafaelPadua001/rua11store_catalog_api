@@ -44,6 +44,8 @@ class Product(db.Model):
         cascade="all, delete-orphan"
     )
 
+    order_items = db.relationship('OrderItem', back_populates='product', passive_deletes=True)
+
     def save(self):
         try:
             db.session.add(self)        # Sempre adiciona à sessão

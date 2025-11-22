@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, desc
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import relationship, Session, joinedload
 import requests
 from database import db
 import uuid
@@ -8,8 +8,9 @@ import io
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
-
-
+from models.product import Product
+from models.productSeo import ProductSeo
+from models.orderItem import OrderItem
 
 class Order(db.Model):
     __tablename__ = 'orders'
@@ -58,13 +59,13 @@ class Order(db.Model):
             ],
             'product_seo': [
                 {
-                    'product_id': item.product.id,
+                    'product_id': item.product.id if item.product else None,
                     'meta_title': item.product.seo.meta_title if item.product and item.product.seo else None,
                     'meta_description': item.product.seo.meta_description if item.product and item.product.seo else None,
                     'keywords': item.product.seo.keywords if item.product and item.product.seo else None,
                     'slug': item.product.seo.slug if item.product and item.product.seo else None,
                 }
-                for item in self.items if item.product.seo
+                for item in self.items
             ],
             'categories': [
                 {
@@ -91,10 +92,8 @@ class Order(db.Model):
                 'total_value': self.delivery.total_value if self.delivery else None,
              #   'total': self.delivery.total_value if self.total_value else None,
               #  'created_at': self.delivery.created_at.isoformat() if self.delivery and self.delivery.created_at else None,
-                }
-           
-
-        }
+            }
+    }
 
     @staticmethod
     def get_all():
@@ -106,17 +105,28 @@ class Order(db.Model):
     @staticmethod
     def get_by_user_id(user_id):
         print("user_id recebido:", user_id)
+
         try:
-            user_uuid = uuid.UUID(user_id)  # converter para objeto UUID
+            user_uuid = uuid.UUID(user_id)
         except ValueError:
             return None
 
         orders = (
             db.session.query(Order)
             .filter(Order.user_id == user_uuid)
+            .options(
+                joinedload(Order.items)
+                    .joinedload(OrderItem.product)
+                    .joinedload(Product.seo),
+                joinedload(Order.items)
+                    .joinedload(OrderItem.product)
+                    .joinedload(Product.category),
+                joinedload(Order.delivery)
+            )
             .order_by(desc(Order.id))
             .all()
         )
+
         return [order.to_dict() for order in orders]
 
 

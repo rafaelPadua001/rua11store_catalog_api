@@ -11,7 +11,7 @@ class OrderItem(db.Model):
     unit_price = db.Column(db.Float, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
     order = relationship('Order', back_populates='items')
-    product = relationship('Product', backref=db.backref('order_items', passive_deletes=True))
+    product = relationship('Product', back_populates='order_items')
 
     def __init__(self, order_id, product_id, quantity, unit_price, total_price):
         self.order_id = order_id
@@ -29,8 +29,10 @@ class OrderItem(db.Model):
             'unit_price': self.unit_price,
             'total_price': self.total_price,
             'product': {
-                'id' : self.id,
-                'name': self.product_name,
+                'id': self.product.id if self.product else None,
+                'name': self.product.name if self.product else None,
+                'thumbnail_path': self.product.thumbnail_path if self.product else None,
+                'price': float(self.product.price) if self.product and self.product.price else None
                 
-            }
+            } if self.product else None
         }
