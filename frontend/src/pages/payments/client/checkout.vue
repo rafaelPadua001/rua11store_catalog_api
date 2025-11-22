@@ -396,7 +396,8 @@ const api = axios.create({
 
 const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 const userId = localStorage.getItem('user_id');
-console.log(userId);
+let profileUser = ref([]);
+
 const address = ref(null);
 const addressDialog = ref(false);
 const route = useRoute()
@@ -545,6 +546,17 @@ const getCoupon = async () => {
     console.log("Erro ao carregar cupons, tente novamente mais tarde", e);
   }
 }
+
+const loadProfile = async () => {
+  try{
+    const response = await api.get(`/profile/get-profile/${userId}`);
+    profileUser = response.data;
+    console.log(profileUser);
+  }
+  catch(e){
+    console.log("erro ao carregar perfil do usuario", e);
+  }
+};
 
 const applyCoupon = async () => {
   if (useTextInput.value) {
@@ -814,16 +826,18 @@ async function submitPayment() {
   try {
     console.log('🚀 Iniciando processo de pagamento...');
 
-    const deliveryPrice = parseFloat(selectedDelivery?.price || 0);
+    const deliveryPrice = parseFloat(selectedDelivery?.value.price || 0);
+  
     const cartTotal = parseFloat(totalCarrinho?.value || 0);
     const totalAmount = deliveryPrice + cartTotal;
-
+    
     const payload = {
       paymentType: tab.value,
       total: totalAmount,
       coupon_code: payment.value.coupon_code || null,
       coupon_amount: payment.value.coupon_amount || 0,
       name: payment.value.name,
+      recipient_name: profileUser.full_name,
       cpf: payment.value.cpf,
       email: payment.value.email,
       userId: userId,
@@ -860,12 +874,13 @@ async function submitPayment() {
 
     // ⚡ ENVIA PARA SEU BACKEND PYTHON
     const response = await api.post('/payment/payment', payload);
-    // console.log('✅ Resposta do backend:', response.data);
+    console.log('✅ Resposta do backend:', response.data);
 
-    if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
+    if (response.data.status === 'approved') {
       paymentStatus.value = 'approved';
       paymentMessage.value = 'Pagamento aprovado com sucesso!';
-
+      localStorage.setItem('paymentStatus', paymentStatus.value);
+      localStorage.setItem('paymentMessage', paymentMessage.value);
       const eventId = crypto.randomUUID();
 
       fbq('track', 'Purchase', {
@@ -889,24 +904,24 @@ async function submitPayment() {
     } else if (response.data.status === 'pending') {
       paymentStatus.value = 'pending';
       paymentMessage.value = 'Pagamento pendente. Aguarde confirmação.';
-    //  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
     } else if (response.data.status === 'rejected') {
       paymentStatus.value = 'rejected';
       paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
-    //  window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
     } else {
       paymentStatus.value = 'rejected';
       paymentMessage.value = response.data.message || 'Pagamento rejeitado.';
-     // window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+      window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
     }
 
   } catch (error) {
     paymentStatus.value = 'rejected';
     paymentMessage.value = 'Erro desconhecido. Tente novamente.';
     console.log('Erro desconhecido. Tente novamente.', error);
-   // window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
+    window.location.href = `/payments/client/payment_result?status=${paymentStatus}&message=${paymentMessage}`;
 
   }
 }
@@ -936,6 +951,7 @@ async function sendMetaConversion(totalAmount, cart, payment, eventId) {
 
 onMounted(async () => {
   await getCoupon();
+  await loadProfile();
   await loadAddress();
   await calculateDelivery();
   const totalReal =

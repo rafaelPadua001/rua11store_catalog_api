@@ -25,7 +25,7 @@ class PaymentController:
             payment.save()
 
             address_data = dados_pagamento.get('address')
-
+           
             if address_data:
                 delivery = Delivery(
                     usuario_id=dados_pagamento['usuario_id'],
