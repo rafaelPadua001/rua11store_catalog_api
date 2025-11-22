@@ -381,7 +381,7 @@ class Payment(db.Model):
             db.session.commit()
 
             recipient_name = self.address.get('recipient_name', 'Cliente')
-           # trigger_push_notification(order_id, recipient_name, self.total_value)
+            trigger_push_notification(order_id, recipient_name, self.total_value)
         except Exception as e:
             print(f"Erro ao salvar o pagamento: {e}")
             db.session.rollback()
