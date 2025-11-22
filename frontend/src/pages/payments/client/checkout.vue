@@ -320,7 +320,7 @@
                           <VMaskInput label="CPF" v-model="payment.cpf" mask="###.###.###-##" variant="underlined" />
                           <v-text-field label="Email" v-model="payment.email" :rules="[
                             v => !!v || 'E-mail é obrigatório',
-                            v => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v) || 'E-mail inválido',
+                            v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'E-mail inválido',
                           ]" variant="underlined" />
                           <v-text-field label="Código de Segurança" v-model="payment.security_code" maxlength="3"
                             variant="outlined"
