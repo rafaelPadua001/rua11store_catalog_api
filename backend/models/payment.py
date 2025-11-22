@@ -98,7 +98,7 @@ class Payment(db.Model):
             delivery_id = None
 
             products_list = []
-
+            payload = getattr(self, "payload", {}) or {}
             if isinstance(self.products, dict):
                 products_list = self.products.get("items", [])
             elif isinstance(self.products, list):
@@ -118,16 +118,16 @@ class Payment(db.Model):
             product_ids = [p['product_id'] for p in products_list]
 
             
-
+            
             delivery = Delivery(
                 product_ids=product_ids,
                 user_id=self.usuario_id,
                 user_name=self.name,
 
                 recipient_name=(
-                    self.address.get('recipient_name')
-                    or self.address.get('nome')
-                    or None
+                    payload.get('recipient_name')                    # vem do payload raiz
+                    or self.address.get('recipient_name')         # fallback se um dia vier no endereço
+                    or self.name                                  # fallback final
                 ),
 
                 street=(
@@ -183,7 +183,7 @@ class Payment(db.Model):
                     or None
                 ),
 
-                total_value=self.address.get('total_value', 0),
+                total_value=self.address.get('total_value') or payload.get('total'),
                 delivery_id=self.address.get('delivery_id') or None,
 
                 width=round(total_width, 2),
@@ -219,16 +219,16 @@ class Payment(db.Model):
             db.session.flush()
             order_id = order.id
 
-            create_notification(
-                message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                is_global=True,
-                session=db.session
-            )    
-            socketio.emit('new_notification', {
-                'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                'order_id': order_id,
-                'is_global': True
-            })
+           # create_notification(
+           #     message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+           #     is_global=True,
+           #     session=db.session
+           # )    
+           # socketio.emit('new_notification', {
+           #     'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+           #     'order_id': order_id,
+           #     'is_global': True
+           # })
 
             products_html = "<ul style='list-style: none; padding: 0;'>"
             for product in self.products:
@@ -255,7 +255,7 @@ class Payment(db.Model):
                     product_id=product_id,
                     quantity=quantity,
                     unit_price=price,
-                    total_price=price * quantity
+                    total_price= payload.get('total')
                 )
                 db.session.add(order_item)
 
@@ -381,7 +381,7 @@ class Payment(db.Model):
             db.session.commit()
 
             recipient_name = self.address.get('recipient_name', 'Cliente')
-            trigger_push_notification(order_id, recipient_name, self.total_value)
+           # trigger_push_notification(order_id, recipient_name, self.total_value)
         except Exception as e:
             print(f"Erro ao salvar o pagamento: {e}")
             db.session.rollback()

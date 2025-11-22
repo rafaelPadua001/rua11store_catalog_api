@@ -37,7 +37,7 @@ class CreditCardPayment(PaymentStrategy):
         payer_cpf = data.get("payer_cpf") or data.get('cpf')
         payer_name = data.get("payer_name") or data.get('name')
         products = data.get("products")
-        print(products)
+        
         address = data.get("address") or {}
 
         if isinstance(products, str):
@@ -135,6 +135,8 @@ class CreditCardPayment(PaymentStrategy):
                 coupon_code=coupon_code,
                 coupon_amount=coupon_amount
             )
+
+            payment.payload = data
             payment.save()
 
             if result.get("status") == "rejected":
@@ -179,13 +181,13 @@ class CreditCardPayment(PaymentStrategy):
                 }
             }
 
-            print("🔄 Criando token do cartão:", token_payload)
+            #print("🔄 Criando token do cartão:", token_payload)
 
             response = requests.post(token_url, headers=headers, json=token_payload)
             result = response.json()
 
             if response.status_code == 201:
-                print("✅ Token criado com sucesso:", result.get("id"))
+                #print("✅ Token criado com sucesso:", result.get("id"))
                 return result.get("id")
             else:
                 print("❌ Erro ao criar token:", result)
