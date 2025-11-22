@@ -295,7 +295,7 @@ class ProductController:
             colors = json.loads(raw_colors) if raw_colors else []
 
             variations = [
-                {"type": "Size", "value": s.get("name"), "quantity": s.get("quantity", 0)}
+                {"type": "Size", "value": s.get("value"), "quantity": s.get("quantity", 0)}
                 for s in sizes
             ] + [
                 {"type": "Color", "value": c.get("value"), "quantity": c.get("quantity", 0)}
