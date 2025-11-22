@@ -92,45 +92,112 @@ class Payment(db.Model):
     def save(self):
         try:
             db.session.add(self)
-            db.session.flush()  # Garante que o pagamento esteja no banco
+            db.session.flush()
 
             payment_id = self.id
             delivery_id = None
 
-            total_weight = sum(float(p.get('weight', 0)) * int(p.get('quantity', 1)) for p in self.products)
-            total_height = sum(float(p.get('height', 0)) * int(p.get('quantity', 1)) for p in self.products)
-            total_width  = sum(float(p.get('width', 0)) * int(p.get('quantity', 1)) for p in self.products)
-            total_length = sum(float(p.get('length', 0)) * int(p.get('quantity', 1)) for p in self.products)
-                    
-            if self.address and self.products:
-                product = self.products[0]
-                delivery = Delivery(
-                    product_id=product['product_id'],
-                    user_id=self.usuario_id,
-                    user_name=self.name,
-                    recipient_name=self.address.get('recipient_name', ''),
-                    street=self.address.get('street', ''),
-                    number=self.address.get('number', ''),
-                    complement=self.address.get('complement', ''),
-                    city=self.address.get('city', ''),
-                    state=self.address.get('state', ''),
-                    zip_code=self.address.get('zip_code', ''),
-                    country=self.address.get('country', ''),
-                    phone=self.address.get('phone', ''),
-                    bairro=self.address.get('bairro', ''),
-                    total_value=self.address.get('total_value', 0),
-                    delivery_id=self.address.get('delivery_id', ''),
-                    width=round(total_width, 2),
-                    height=round(total_height, 2),
-                    length=round(total_length, 2),
-                    weight=round(total_weight, 2)
-                )
-                db.session.add(delivery)
-                db.session.flush()
-                delivery_id = delivery.id
+            products_list = []
+            payload = getattr(self, "payload", {}) or {}
+            if isinstance(self.products, dict):
+                products_list = self.products.get("items", [])
+            elif isinstance(self.products, list):
+                products_list = self.products
             else:
-                print('Endereço ou produtos ausentes. Pedido pode estar incompleto')
+                print("⚠ self.products está num formato inesperado:", type(self.products))
 
+            if not products_list:
+                return
+
+            total_weight = sum(float(p.get('product_weight', 0)) * int(p.get('quantity', 1)) for p in products_list)
+            total_height = sum(float(p.get('product_height', 0)) * int(p.get('quantity', 1)) for p in products_list)
+            total_width  = sum(float(p.get('product_width', 0)) * int(p.get('quantity', 1)) for p in products_list)
+            total_length = sum(float(p.get('product_length', 0)) * int(p.get('quantity', 1)) for p in products_list)
+
+            
+            product_ids = [p['product_id'] for p in products_list]
+
+            
+            
+            delivery = Delivery(
+                product_ids=product_ids,
+                user_id=self.usuario_id,
+                user_name=self.name,
+
+                recipient_name=(
+                    payload.get('recipient_name')                    # vem do payload raiz
+                    or self.address.get('recipient_name')         # fallback se um dia vier no endereço
+                    or self.name                                  # fallback final
+                ),
+
+                street=(
+                    self.address.get('street')        # versão interna
+                    or self.address.get('logradouro') # versão frontend
+                    or None
+                ),
+
+                number=(
+                    self.address.get('number')
+                    or self.address.get('numero')
+                    or None
+                ),
+
+                complement=(
+                    self.address.get('complement')
+                    or self.address.get('complemento')
+                    or None
+                ),
+
+                city=(
+                    self.address.get('city')
+                    or self.address.get('cidade')
+                    or None
+                ),
+
+                state=(
+                    self.address.get('state')
+                    or self.address.get('estado')
+                    or None
+                ),
+
+                zip_code=(
+                    self.address.get('zip_code')
+                    or self.address.get('cep')
+                    or None
+                ),
+
+                country=(
+                    self.address.get('country')
+                    or self.address.get('pais')
+                    or None
+                ),
+
+                phone=(
+                    self.address.get('phone')
+                    or self.address.get('telefone')
+                    or None
+                ),
+
+                bairro=(
+                    self.address.get('bairro')
+                    or None
+                ),
+
+                total_value=self.address.get('total_value') or payload.get('total'),
+                delivery_id=self.address.get('delivery_id') or None,
+
+                width=round(total_width, 2),
+                height=round(total_height, 2),
+                length=round(total_length, 2),
+                weight=round(total_weight, 2)
+            )
+
+
+
+            db.session.add(delivery)
+            db.session.flush()
+
+            delivery_id = delivery.id
             for product in self.products:
                 product_id = product.get('id') or product.get('product_id')
                 quantity = int(product.get('quantity', 1))
@@ -143,7 +210,7 @@ class Payment(db.Model):
                 user_id=uuid.UUID(str(self.usuario_id)),
                 payment_id=payment_id,
                 delivery_id=delivery_id,
-                shipment_info=self.address.get('zip_code', '') if self.address else '',
+                shipment_info=(self.address.get('zip_code') or self.address.get('cep') or '') if self.address else '',
                 total_amount=self.total_value,
                 order_date=datetime.utcnow(),
                 status=self.status if hasattr(self, 'status') else 'pendente'
@@ -152,19 +219,16 @@ class Payment(db.Model):
             db.session.flush()
             order_id = order.id
 
-            create_notification(
-                message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                is_global=True,
-                session=db.session
-            )
-
-            socketio.emit('new_notification', {
-                'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                'order_id': order_id,
-                'is_global': True
-            })
-
-           
+           # create_notification(
+           #     message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+           #     is_global=True,
+           #     session=db.session
+           # )    
+           # socketio.emit('new_notification', {
+           #     'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+           #     'order_id': order_id,
+           #     'is_global': True
+           # })
 
             products_html = "<ul style='list-style: none; padding: 0;'>"
             for product in self.products:
@@ -174,7 +238,7 @@ class Payment(db.Model):
 
                 product_id = product.get('id') or product.get('product_id')
                 product_name = product.get('name') or product.get('product_name')
-                price = float(product.get('price', 0))
+                price = float(product.get('price') or product.get('product_price'))
                 quantity = int(product.get('quantity', 1))
 
                 payment_product = PaymentProduct(
@@ -191,7 +255,7 @@ class Payment(db.Model):
                     product_id=product_id,
                     quantity=quantity,
                     unit_price=price,
-                    total_price=price * quantity
+                    total_price= payload.get('total')
                 )
                 db.session.add(order_item)
 
@@ -317,7 +381,7 @@ class Payment(db.Model):
             db.session.commit()
 
             recipient_name = self.address.get('recipient_name', 'Cliente')
-            trigger_push_notification(order_id, recipient_name, self.total_value)
+           # trigger_push_notification(order_id, recipient_name, self.total_value)
         except Exception as e:
             print(f"Erro ao salvar o pagamento: {e}")
             db.session.rollback()

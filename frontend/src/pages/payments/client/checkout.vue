@@ -17,6 +17,7 @@
                       <v-list>
                         <v-list-item v-for="(item, index) in cart.items" :key="index">
                           <v-card class="d-flex flex-column w-full max-w-lg mx-auto" elevation="0">
+                            
                             <v-avatar size="150">
                               <v-img :src="item.product_image" :alt="item.product_name" cover></v-img>
                             </v-avatar>
@@ -28,6 +29,23 @@
                               <v-col cols="12" sm="12" md="6">
                                 <strong>R$ {{ item.product_price }}</strong>
                               </v-col>
+                            
+                              <v-col cols="12" sm="12" md="6">
+                                <strong>Variations:</strong>
+                              </v-col>
+                              <v-col cols="12" sm="12" md="6">
+                                <div v-for="(variation, index) in item.variations" :key="index">
+                                  <v-chip v-if="variation.variation_type === 'Size'">
+                                    {{ variation.value }}
+                                  </v-chip>
+                                  <v-chip v-else :color="variation.value">
+
+                                  </v-chip>
+                                </div>
+                                
+                              </v-col>
+                              <v-spacer></v-spacer>
+
                               <v-col cols="12" sm="12" md="2">
                                 <strong>Qtd:</strong>
                               </v-col>
@@ -378,6 +396,8 @@ const api = axios.create({
 
 const token = localStorage.getItem('access_token') || localStorage.getItem('token');
 const userId = localStorage.getItem('user_id');
+let profileUser = ref([]);
+
 const address = ref(null);
 const addressDialog = ref(false);
 const route = useRoute()
@@ -526,6 +546,17 @@ const getCoupon = async () => {
     console.log("Erro ao carregar cupons, tente novamente mais tarde", e);
   }
 }
+
+const loadProfile = async () => {
+  try{
+    const response = await api.get(`/profile/get-profile/${userId}`);
+    profileUser = response.data;
+    console.log(profileUser);
+  }
+  catch(e){
+    console.log("erro ao carregar perfil do usuario", e);
+  }
+};
 
 const applyCoupon = async () => {
   if (useTextInput.value) {
@@ -795,18 +826,23 @@ async function submitPayment() {
   try {
     console.log('🚀 Iniciando processo de pagamento...');
 
-    const deliveryPrice = parseFloat(selectedDelivery?.price || 0);
+    const deliveryPrice = parseFloat(selectedDelivery?.value.price || 0);
+  
     const cartTotal = parseFloat(totalCarrinho?.value || 0);
     const totalAmount = deliveryPrice + cartTotal;
-
+    
     const payload = {
       paymentType: tab.value,
       total: totalAmount,
       coupon_code: payment.value.coupon_code || null,
       coupon_amount: payment.value.coupon_amount || 0,
       name: payment.value.name,
+      recipient_name: profileUser.full_name,
       cpf: payment.value.cpf,
       email: payment.value.email,
+      userId: userId,
+      products: cartData.items,
+      address: address.value,
     };
 
 
@@ -830,19 +866,21 @@ async function submitPayment() {
       };
 
       payload.installments = payment.value.installments;
-      payload.payment_method_id = payment.value.payment_method_id?.id || 'visa';
+      payload.payment_method_id = payment.value.payment_method_id || 'visa';
+      console.log(payment.value.payment_method_id);
 
     }
     //  console.log('📤 Enviando para backend:', payload);
 
     // ⚡ ENVIA PARA SEU BACKEND PYTHON
     const response = await api.post('/payment/payment', payload);
-    // console.log('✅ Resposta do backend:', response.data);
+    console.log('✅ Resposta do backend:', response.data);
 
-    if (response.data.status === 201 || response.data.status === 'approved' || response.data.success) {
+    if (response.data.status === 'approved') {
       paymentStatus.value = 'approved';
       paymentMessage.value = 'Pagamento aprovado com sucesso!';
-
+      localStorage.setItem('paymentStatus', paymentStatus.value);
+      localStorage.setItem('paymentMessage', paymentMessage.value);
       const eventId = crypto.randomUUID();
 
       fbq('track', 'Purchase', {
@@ -913,7 +951,9 @@ async function sendMetaConversion(totalAmount, cart, payment, eventId) {
 
 onMounted(async () => {
   await getCoupon();
+  await loadProfile();
   await loadAddress();
+  await calculateDelivery();
   const totalReal =
     totalCarrinho.value;
 

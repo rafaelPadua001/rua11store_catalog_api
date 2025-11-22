@@ -36,8 +36,7 @@ const status = ref('')
 const message = ref('')
 
 onMounted(() => {
-  status.value = sessionStorage.getItem('paymentStatus')
-  message.value = sessionStorage.getItem('paymentMessage')
-  console.log(status.value);
+  status.value = localStorage.getItem('paymentStatus')
+  message.value = localStorage.getItem('paymentMessage')
 })
 </script>
