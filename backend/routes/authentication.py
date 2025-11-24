@@ -68,7 +68,7 @@ def check_if_token_in_blocklist(jwt_header, jwt_payload):
 @auth_bp.route('/register', methods=["POST"])
 def register():
     data = request.json
-    email = data.get('email')
+    email = (data.get('email') or "").strip().lower()
     password = data.get('password')
     name = data.get('name')
     birth_date = data.get('birthDate')
