@@ -74,6 +74,10 @@ def register():
     birth_date = data.get('birthDate')
     avatar_url = data.get('avatarUrl', '')
 
+    #new datas
+    user_type = data.get('type', 'admin')
+    #fcm_token = data.get('fcm_token')
+
     if not all([email, password, name, birth_date]):
         return jsonify({"error": "Campos obrigatórios faltando"}), 400
 
@@ -86,11 +90,13 @@ def register():
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
     
-    user = User(email=email, password=hashed_password, name=name, birth_date=birth_date)
+    user = User(email=email, password=hashed_password, name=name, birth_date=birth_date, type=user_type,
+                 #fcm_token=fcm_token
+                )
     db.session.add(user)
     db.session.commit()
 
-    profile = UserProfile(user_id=user.id, username=name, full_name=name, birth_date=birth_date, avatar_url=avatar_url)
+    profile = UserProfile(user_id=user.id, username=name, full_name=name, birth_date=birth_date, avatar_url=avatar_url, phone='(00) 00000-0000', mobile='(00) 00000-0000')
     db.session.add(profile)
     db.session.commit()
 
@@ -102,6 +108,7 @@ def register():
         "user_id": user.id,
         "username": name
     }), 201
+
 
 @auth_bp.route('/user/<uuid:userId>', methods=['GET'])
 @jwt_required()

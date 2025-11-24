@@ -11,6 +11,7 @@ class NotificationController:
     @staticmethod
     def get_unread_notifications(user_id):
         notifications = Notification.query.filter_by(user_id=user_id, is_read=False).all()
+        
         return [
             {
                 'id': n.id,
