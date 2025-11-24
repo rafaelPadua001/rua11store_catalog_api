@@ -12,6 +12,7 @@ import uuid
 import extensions
 from models.delivery import Delivery # se você tiver essa model
 from models.order import Order
+from models.user import User
 from database import db 
 from models.orderItem import OrderItem
 from models.paymentProduct import PaymentProduct
@@ -219,16 +220,32 @@ class Payment(db.Model):
             db.session.flush()
             order_id = order.id
 
-            create_notification(
-                message=f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                is_global=True,
-                session=db.session
-            )    
-            socketio.emit('new_notification', {
-                'message': f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-                'order_id': order_id,
-                'is_global': True
-            })
+            admins = User.query.filter_by(type='admin').all()
+            message = f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+            for admin in admins:
+
+                create_notification(
+                    user_id=admin.id,
+                    message=message,
+                    is_global=True,
+                    session=db.session
+                )
+            for admin in admins:
+                user_id = str(admin.id)
+
+                create_notification(user_id, message)
+
+                if user_id in admins:
+                    sid = admin[user_id]
+                    socketio.emit(
+                        f'notification_{user_id}',
+                        {
+                            'message': message,
+                            'order_id': order_id
+                        },
+                        to=sid
+                    )
+
 
             products_html = "<ul style='list-style: none; padding: 0;'>"
             for product in self.products:

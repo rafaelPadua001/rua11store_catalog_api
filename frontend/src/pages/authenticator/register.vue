@@ -148,12 +148,12 @@ const register = async () => {
     if (valid) {
         loading.value = true;
 
-        console.log("Nome:", name.value);
-        console.log("Data de Nascimento:", birthDate.value);
-        console.log("Email:", email.value);
-        console.log("Senha:", password.value);
+       // console.log("Nome:", name.value);
+       // console.log("Data de Nascimento:", birthDate.value);
+       // console.log("Email:", email.value);
+       // console.log("Senha:", password.value);
         try {
-            const response = await axios.post('https://rua11store-catalog-api-lbp7.onrender.com/auth/register', {
+            const response = await api.post('/auth/register', {
                 name: name.value,
                 birthDate: birthDate.value,
                 email: email.value,

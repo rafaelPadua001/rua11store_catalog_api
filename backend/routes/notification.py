@@ -8,7 +8,7 @@ notification_bp = Blueprint('notifications', __name__)
 connected_users = {}
 socketio = None  # variável global para usar socketio
 
-@notification_bp.route('/notifications/<int:user_id>', methods=['GET', 'OPTIONS'])
+@notification_bp.route('/notifications/<string:user_id>', methods=['GET', 'OPTIONS'])
 def get_notifications(user_id):
     if request.method == 'OPTIONS':
         return '', 204
