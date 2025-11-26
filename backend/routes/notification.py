@@ -3,10 +3,41 @@ from flask_socketio import emit
 from utils.notifications_utils import create_notification, get_unread_notifications, mark_notification_as_read
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from services.fcm_service import send_fcm_notification
+import logging
+
+logger = logging.getLogger(__name__)
 
 notification_bp = Blueprint('notifications', __name__)
 connected_users = {}
 socketio = None  # variável global para usar socketio
+
+def register_socketio_events(sio):
+    global socketio
+    socketio = sio  # guarda a instância do socketio para usar nas rotas
+
+    @socketio.on('connect')
+    def handle_connect():
+        print("SOCKET CONNECTED sid=", request.sid)
+        logger.info(f"SOCKET CONNECTED sid={request.sid}")
+
+    @socketio.on('auth')
+    def handle_auth(data):
+        user_id = data.get('user_id')
+        print("AUTH recebido:", data, "sid=", request.sid)
+        logger.info(f"AUTH recebido: {data} sid={request.sid}")
+        if user_id:
+            connected_users[str(user_id)] = request.sid
+            print("connected_users agora:", connected_users)
+            logger.info(f"connected_users now: {connected_users}")
+
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        print("DISCONNECT sid=", request.sid)
+        for user_id, sid in list(connected_users.items()):
+            if sid == request.sid:
+                del connected_users[user_id]
+                print(f"Removed {user_id} from connected_users")
+                break
 
 @notification_bp.route('/notifications/<string:user_id>', methods=['GET', 'OPTIONS'])
 def get_notifications(user_id):

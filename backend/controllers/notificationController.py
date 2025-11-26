@@ -6,8 +6,10 @@ class NotificationController:
     def create_notification(user_id=None, message="", is_global=False, session=None):
         session = session or db.session
         try:
+            # se a model Notification tem agora user_uuid, ajuste:
             notification = Notification(
-                user_id=user_id,
+                user_id=None,              # manter compatibilidade com coluna antiga
+                user_uuid=str(user_id) if user_id else None,
                 message=message,
                 is_read=False,
                 created_at=datetime.utcnow(),
@@ -22,7 +24,10 @@ class NotificationController:
 
     @staticmethod
     def get_unread_notifications(user_id):
-        notifications = Notification.query.filter_by(user_id=user_id, is_read=False).all()
+        notifications = Notification.query.filter(
+            (Notification.user_uuid == str(user_id)) | (Notification.is_global == True),
+            Notification.is_read == False
+        ).order_by(Notification.created_at.desc()).all()
         
         return [
             {

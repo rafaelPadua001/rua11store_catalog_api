@@ -40,17 +40,34 @@ export default {
       // Aqui você poderia abrir uma modal com a lista de notificações
     }
   },
-  mounted() {
-    this.socket = io('https://rua11store-catalog-api-lbp7.onrender.com')
-    this.socket.emit('auth', { user_id: this.userId })
+ mounted() {
+    this.socket = io('https://rua11store-catalog-api-lbp7.onrender.com', {
+      transports: ['websocket']
+    });
+
+    this.socket.on('connect', () => {
+      console.log('Socket connected, id=', this.socket.id);
+      // envie auth após conectar
+      this.socket.emit('auth', { user_id: String(this.userId) });
+    });
+
+    this.socket.on('connect_error', (err) => {
+      console.error('connect_error', err);
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('socket disconnected', reason);
+    });
 
     this.socket.on(`notification_${this.userId}`, (data) => {
-      this.message = data.message
-      this.show = true
-      this.unreadCount++
-    })
+      console.log('notification received', data);
+      this.message = data.message;
+      this.show = true;
+      this.unreadCount++;
+    });
 
-    this.fetchUnread()
+    this.fetchUnread();
   }
+
 }
 </script>
