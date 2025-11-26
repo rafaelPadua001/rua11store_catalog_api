@@ -223,6 +223,12 @@ class Payment(db.Model):
 
             admins = User.query.filter_by(type='admin').all()
             message = f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
+
+            
+            print("admins:", [str(a.id) for a in admins])
+            print("connected_users:", connected_users)
+            print("socketio inicializado?", bool(socketio))
+
             for admin in admins:
                 user_id = str(admin.id)
 
