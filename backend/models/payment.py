@@ -222,17 +222,12 @@ class Payment(db.Model):
             order_id = order.id
 
             admins = User.query.filter_by(type='admin').all()
-            message = f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
-
-            
-            print("admins:", [str(a.id) for a in admins])
-            print("connected_users:", connected_users)
-            print("socketio inicializado?", bool(socketio))
+            message = f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}"
 
             for admin in admins:
                 user_id = str(admin.id)
 
-                # Salva no banco
+                # Salva no banco (use seu helper; certifique-se que aceita user_id como string)
                 create_notification(
                     user_id=user_id,
                     message=message,
@@ -242,7 +237,7 @@ class Payment(db.Model):
 
                 # Se o admin está conectado, envia em tempo real
                 sid = connected_users.get(user_id)
-                if sid:
+                if sid and socketio:
                     socketio.emit(
                         f'notification_{user_id}',
                         {
