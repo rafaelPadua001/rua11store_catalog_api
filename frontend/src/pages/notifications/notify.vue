@@ -42,7 +42,10 @@ export default {
   },
  mounted() {
     this.socket = io('https://rua11store-catalog-api-lbp7.onrender.com', {
-      transports: ['websocket']
+      transports: ['websocket'],
+      reconnection: true,
+      pingInterval: 25000,
+      pingTimeout: 60000,
     });
 
     this.socket.on('connect', () => {
