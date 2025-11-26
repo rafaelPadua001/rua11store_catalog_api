@@ -19,6 +19,7 @@ from models.paymentProduct import PaymentProduct
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
+
 connected_users = {}
 
 def trigger_push_notification(order_id, recipient_name, total_value):

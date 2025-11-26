@@ -91,20 +91,6 @@ def send_notification():
     resp = send_fcm_notification(token, title, body, link)
     return jsonify({"status": resp.status_code, "response": resp.json})
 
-def register_socketio_events(sio):
-    global socketio
-    socketio = sio  # guarda a instância do socketio para usar nas rotas
 
-    @socketio.on('auth')
-    def handle_auth(data):
-        user_id = data.get('user_id')
-        if user_id:
-            connected_users[user_id] = request.sid
-
-    @socketio.on('disconnect')
-    def handle_disconnect():
-        for user_id, sid in list(connected_users.items()):
-            if sid == request.sid:
-                del connected_users[user_id]
 
 
