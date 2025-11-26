@@ -1,12 +1,24 @@
 from models.notification import Notification
 from database import db
-
+from datetime import datetime
 class NotificationController:
     @staticmethod
-    def create_notification(user_id, message):
-        notification = Notification(user_id=user_id, message=message)
-        db.session.add(notification)
-        db.session.commit()
+    def create_notification(user_id=None, message="", is_global=False, session=None):
+        session = session or db.session
+        try:
+            notification = Notification(
+                user_id=user_id,
+                message=message,
+                is_read=False,
+                created_at=datetime.utcnow(),
+                is_global=is_global
+            )
+            session.add(notification)
+            session.commit()
+        except Exception as e:
+            print(f"Erro ao salvar notificação: {e}")
+            session.rollback()
+
 
     @staticmethod
     def get_unread_notifications(user_id):
