@@ -19,6 +19,7 @@ from models.paymentProduct import PaymentProduct
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
+connected_users = {}
 
 def trigger_push_notification(order_id, recipient_name, total_value):
         try:
@@ -223,20 +224,19 @@ class Payment(db.Model):
             admins = User.query.filter_by(type='admin').all()
             message = f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}",
             for admin in admins:
+                user_id = str(admin.id)
 
+                # Salva no banco
                 create_notification(
-                    user_id=admin.id,
+                    user_id=user_id,
                     message=message,
                     is_global=True,
                     session=db.session
                 )
-            for admin in admins:
-                user_id = str(admin.id)
 
-                create_notification(user_id, message)
-
-                if user_id in admins:
-                    sid = admin[user_id]
+                # Se o admin está conectado, envia em tempo real
+                sid = connected_users.get(user_id)
+                if sid:
                     socketio.emit(
                         f'notification_{user_id}',
                         {
@@ -245,7 +245,6 @@ class Payment(db.Model):
                         },
                         to=sid
                     )
-
 
             products_html = "<ul style='list-style: none; padding: 0;'>"
             for product in self.products:

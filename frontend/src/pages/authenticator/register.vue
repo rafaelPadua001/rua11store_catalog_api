@@ -148,10 +148,10 @@ const register = async () => {
     if (valid) {
         loading.value = true;
 
-       // console.log("Nome:", name.value);
-       // console.log("Data de Nascimento:", birthDate.value);
-       // console.log("Email:", email.value);
-       // console.log("Senha:", password.value);
+        console.log("Nome:", name.value);
+        console.log("Data de Nascimento:", birthDate.value);
+        console.log("Email:", email.value);
+        console.log("Senha:", password.value);
         try {
             const response = await api.post('/auth/register', {
                 name: name.value,
