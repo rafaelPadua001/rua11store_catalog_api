@@ -52,6 +52,7 @@ export default {
       console.log('Socket connected, id=', this.socket.id);
       // envie auth após conectar
       this.socket.emit('auth', { user_id: String(this.userId) });
+      console.log("AUTH enviado:", this.userId);
     });
 
     this.socket.on('connect_error', (err) => {
