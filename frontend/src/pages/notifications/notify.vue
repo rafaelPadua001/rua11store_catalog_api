@@ -43,9 +43,6 @@ export default {
  mounted() {
     this.socket = io('https://rua11store-catalog-api-lbp7.onrender.com', {
       transports: ['websocket'],
-      reconnection: true,
-      pingInterval: 25000,
-      pingTimeout: 60000,
     });
 
     this.socket.on('connect', () => {
@@ -55,13 +52,9 @@ export default {
       console.log("AUTH enviado:", this.userId);
     });
 
-    this.socket.on('connect_error', (err) => {
-      console.error('connect_error', err);
-    });
+   
 
-    this.socket.on('disconnect', (reason) => {
-      console.log('socket disconnected', reason);
-    });
+    
 
     this.socket.on(`notification_${this.userId}`, (data) => {
       console.log('notification received', data);
@@ -69,7 +62,12 @@ export default {
       this.show = true;
       this.unreadCount++;
     });
-
+     this.socket.on('connect_error', (err) => {
+      console.error('connect_error', err);
+    });
+    this.socket.on('disconnect', (reason) => {
+      console.log('socket disconnected', reason);
+    });
     this.fetchUnread();
   }
 
