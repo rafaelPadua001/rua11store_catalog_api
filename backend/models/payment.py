@@ -223,7 +223,11 @@ class Payment(db.Model):
             order_id = order.id
 
             admins = User.query.filter_by(type='admin').all()
-            message = f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, valor total: R${self.total_value:.2f}"
+            message = (
+                f"Novo pedido recebido: #{order_id}, Para: {self.address.get('recipient_name', 'Cliente')}, "
+                f"valor total: R${self.total_value:.2f}"
+            )
+
 
             for admin in admins:
                 user_id = str(admin.id)
