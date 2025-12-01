@@ -17,7 +17,14 @@ def register_socketio_events(sio):
 
     @socketio.on('connect')
     def handle_connect():
-        print("SOCKET CONNECTED sid=", request.sid)
+        user_id = request.args.get('user_id')
+
+        print("SOCKET CONNECTED sid=", request.sid, "user_id=", user_id)
+
+        if user_id:
+            connected_users[user_id] = request.sid
+            print(f"USER CONNECTED: {user_id} -> {request.sid}")
+        
         logger.info(f"SOCKET CONNECTED sid={request.sid}")
 
     @socketio.on('auth')

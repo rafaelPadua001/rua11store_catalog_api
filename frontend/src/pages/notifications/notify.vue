@@ -40,9 +40,10 @@ export default {
       // Aqui você poderia abrir uma modal com a lista de notificações
     }
   },
- mounted() {
+  mounted() {
     this.socket = io('https://rua11store-catalog-api-lbp7.onrender.com', {
       transports: ['websocket'],
+      query: {user_id: this.userId}
     });
 
     this.socket.on('connect', () => {
@@ -52,9 +53,6 @@ export default {
       console.log("AUTH enviado:", this.userId);
     });
 
-   
-
-    
 
     this.socket.on(`notification_${this.userId}`, (data) => {
       console.log('notification received', data);
@@ -62,7 +60,7 @@ export default {
       this.show = true;
       this.unreadCount++;
     });
-     this.socket.on('connect_error', (err) => {
+    this.socket.on('connect_error', (err) => {
       console.error('connect_error', err);
     });
     this.socket.on('disconnect', (reason) => {
