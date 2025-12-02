@@ -1,5 +1,7 @@
 #from gevent import monkey
 #monkey.patch_all()
+from eventlet import monkey_patch
+monkey_patch()
 
 from flask import Flask
 from flask_cors import CORS
@@ -7,6 +9,7 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
+from sqlalchemy.pool import NullPool
 
 from config import Config
 from database import db
@@ -33,11 +36,16 @@ load_dotenv()
 app = Flask(__name__, static_folder="uploads", static_url_path="/uploads")
 app.config.from_object(Config)
 
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "poolclass": NullPool,
+    "pool_pre_ping": True
+}
+
 # 👉 Trata DATABASE_URL para forçar IPv4
 # Apenas isso: mantemos a URL original do Supabase
 raw_db_url = os.getenv("DATABASE_URL", "")
-# if raw_db_url.startswith("postgresql://"):
-#     raw_db_url = raw_db_url.replace("postgresql://", "postgresql+psycopg2://")
+if raw_db_url.startswith("postgresql://"):
+    raw_db_url = raw_db_url.replace("postgresql://", "postgresql+psycopg2://")
 
 # Sem usar socket.gethostbyname()
 app.config['SQLALCHEMY_DATABASE_URI'] = raw_db_url
