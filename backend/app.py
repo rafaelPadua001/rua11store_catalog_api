@@ -8,14 +8,14 @@ from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 
-from config import Config
-from database import db
-from routes import register_routes
-from controllers.emailController import EmailController
-from extensions import socketio, mail, email_controller
-from routes.notification import notification_bp, register_socketio_events
+from .config import Config
+from .database import db
+from .routes import register_routes
+from .controllers.emailController import EmailController
+from .extensions import socketio, mail, email_controller
+from .routes.notification import register_socketio_events
+from .services.recovery_service import RecoveryService
 from apscheduler.schedulers.background import BackgroundScheduler
-from services.recovery_service import RecoveryService
 from dotenv import load_dotenv
 
 import os
