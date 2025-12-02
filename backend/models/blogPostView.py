@@ -1,17 +1,7 @@
 from datetime import datetime
 from database import db
 
-class BlogPostView(db.Model):
-    __tablename__ = "post_views"
 
-    id = db.Column(db.Integer, primary_key=True)
-    post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    post = db.relationship("BlogPost", back_populates='views')
-
-    from datetime import datetime
-from database import db
 
 class BlogPostView(db.Model):
     __tablename__ = "post_views"
