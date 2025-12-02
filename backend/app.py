@@ -1,7 +1,6 @@
-#from gevent import monkey
-#monkey.patch_all()
-from eventlet import monkey_patch
-monkey_patch()
+from gevent import monkey
+monkey.patch_all()
+
 
 from flask import Flask
 from flask_cors import CORS
