@@ -73,7 +73,7 @@ with app.app_context():
 register_routes(app)
 
 # SocketIO
-socketio.init_app(app, cors_allowed_origins="*", async_mode="gevent")
+socketio.init_app(app, cors_allowed_origins="*", async_mode="eventlet")
 register_socketio_events(socketio)
 
 # E-mail
