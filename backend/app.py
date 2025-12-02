@@ -1,5 +1,5 @@
-#from gevent import monkey
-#monkey.patch_all()
+from gevent import monkey
+monkey.patch_all()
 
 from flask import Flask
 from flask_cors import CORS
@@ -8,14 +8,14 @@ from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 
-from .config import Config
-from .database import db
-from .routes import register_routes
-from .controllers.emailController import EmailController
-from .extensions import socketio, mail, email_controller
-from .routes.notification import register_socketio_events
-from .services.recovery_service import RecoveryService
+from config import Config
+from database import db
+from routes import register_routes
+from controllers.emailController import EmailController
+from extensions import socketio, mail, email_controller
+from routes.notification import notification_bp, register_socketio_events
 from apscheduler.schedulers.background import BackgroundScheduler
+from services.recovery_service import RecoveryService
 from dotenv import load_dotenv
 
 import os
@@ -73,7 +73,7 @@ with app.app_context():
 register_routes(app)
 
 # SocketIO
-socketio.init_app(app, cors_allowed_origins="*", async_mode="eventlet")
+socketio.init_app(app, cors_allowed_origins="*", async_mode="gevent")
 register_socketio_events(socketio)
 
 # E-mail
