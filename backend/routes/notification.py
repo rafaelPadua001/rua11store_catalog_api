@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_socketio import emit
+from flask_socketio import emit, join_room, leave_room
 from utils.notifications_utils import create_notification, get_unread_notifications, mark_notification_as_read
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from services.fcm_service import send_fcm_notification
@@ -30,7 +30,8 @@ def register_socketio_events(sio):
     @socketio.on('auth')
     def handle_auth(data):
         user_id = str(data.get('user_id'))
-
+        join_room(str(user_id))
+        print("Usuário entrou na sala:", user_id)
         if not user_id:
             print("AUTH sem user_id — ignorado")
             return
