@@ -42,7 +42,7 @@ export default {
   },
   mounted() {
     this.socket = io('https://rua11store-catalog-api-lbp7.onrender.com', {
-      transports: ['websocket'],
+      transports: ['polling'],
       query: {user_id: this.userId}
     });
 
