@@ -111,7 +111,7 @@ scheduler.add_job(
     kwargs={"hours": 1}
 )
 
-scheduler.start()
+#scheduler.start()
 
 cloudinary.config(
     cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
