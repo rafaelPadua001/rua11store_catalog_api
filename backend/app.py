@@ -17,6 +17,7 @@ from controllers.emailController import EmailController
 from extensions import socketio, mail, email_controller
 from routes.notification import notification_bp, register_socketio_events
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.gevent import GeventScheduler
 from services.recovery_service import RecoveryService
 from dotenv import load_dotenv
 
@@ -100,7 +101,8 @@ email_ctrl = EmailController(mail)
 import extensions
 extensions.email_controller = email_ctrl
 
-scheduler = BackgroundScheduler()
+#scheduler = BackgroundScheduler()
+scheduler = GeventScheduler()
 scheduler.add_job(
     func=RecoveryService.check_and_send_recovery_emails,
     trigger="interval",
