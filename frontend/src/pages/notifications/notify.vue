@@ -49,12 +49,12 @@ export default {
     this.socket.on('connect', () => {
       console.log('Socket connected, id=', this.socket.id);
       // envie auth após conectar
-      this.socket.emit('auth', { user_id: String(this.userId) });
+      socketio.emit('notification_global', {'message': message})
       console.log("AUTH enviado:", this.userId);
     });
 
 
-    this.socket.on(`notification_${this.userId}`, (data) => {
+    this.socket.on(`notification_global`, (data) => {
       console.log('notification received', data);
       this.message = data.message;
       this.show = true;
