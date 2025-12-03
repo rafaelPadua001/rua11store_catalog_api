@@ -1,5 +1,5 @@
-#from gevent import monkey
-#monkey.patch_all()
+from gevent import monkey
+monkey.patch_all()
 
 
 from flask import Flask
@@ -120,7 +120,7 @@ cloudinary.config(
 )
 
 # Rodar servidor
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    print("USING PORT:", port)
-    socketio.run(app, host="0.0.0.0", port=port, debug=False)
+#if __name__ == "__main__":
+#    port = int(os.environ.get("PORT", 5000))
+#    print("USING PORT:", port)
+#    socketio.run(app, host="0.0.0.0", port=port, debug=False)

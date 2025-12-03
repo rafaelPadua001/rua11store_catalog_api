@@ -82,7 +82,7 @@ def notify():
     create_notification(user_id, message)
 
     if user_id in connected_users and socketio:
-        socketio.emit(f'notification_{user_id}', {'message': message}, to=connected_users[user_id])
+        socketio.emit(f'notification_global', {'message': message})
 
     return jsonify({'status': 'sent'})
 
