@@ -30,11 +30,13 @@ def register_socketio_events(sio):
     @socketio.on('auth')
     def handle_auth(data):
         user_id = str(data.get('user_id'))
-        join_room(str(user_id))
-        print("Usuário entrou na sala:", user_id)
+       
         if not user_id:
             print("AUTH sem user_id — ignorado")
             return
+        
+        join_room(str(user_id))
+        print("Usuário entrou na sala:", user_id)
 
         connected_users[user_id] = request.sid
         print(f"AUTH OK — user_id={user_id} sid={request.sid}")
