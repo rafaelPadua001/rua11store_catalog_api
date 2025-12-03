@@ -29,13 +29,14 @@ def register_socketio_events(sio):
 
     @socketio.on('auth')
     def handle_auth(data):
-        user_id = data.get('user_id')
-        print("AUTH recebido:", data, "sid=", request.sid)
-        logger.info(f"AUTH recebido: {data} sid={request.sid}")
-        if user_id:
-            connected_users[str(user_id)] = request.sid
-            print("connected_users agora:", connected_users)
-            logger.info(f"connected_users now: {connected_users}")
+        user_id = str(data.get('user_id'))
+
+        if not user_id:
+            print("AUTH sem user_id — ignorado")
+            return
+
+        connected_users[user_id] = request.sid
+        print(f"AUTH OK — user_id={user_id} sid={request.sid}")
 
     @socketio.on('disconnect')
     def handle_disconnect():
