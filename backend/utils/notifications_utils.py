@@ -2,7 +2,7 @@ from models.notification import Notification
 from database import db
 from datetime import datetime
 
-def create_notification(user_id=None, message="", is_global=False, session=None):
+def create_notification(user_id=None, message="", is_global=True, session=None):
     session = session or db.session
     try:
         notification = Notification(
