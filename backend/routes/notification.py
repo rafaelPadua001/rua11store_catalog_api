@@ -3,7 +3,9 @@ from flask_socketio import emit, join_room, leave_room
 from utils.notifications_utils import create_notification, get_unread_notifications, mark_notification_as_read
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from services.fcm_service import send_fcm_notification
+from models.user import User
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -79,14 +81,26 @@ def read_notification(notification_id):
 def notify():
     global socketio
     data = request.json
-    user_id = data['user_id']
     message = data['message']
-    create_notification(user_id, message)
 
-    if user_id in connected_users and socketio:
-        socketio.emit(f'notification', {'message': message}, room=user_id)
+    # 1) Buscar todos os usuários da tabela Users
+    users = User.query.all()
 
-    return jsonify({'status': 'sent'})
+    # 2) Criar uma notificação para cada usuário
+    for user in users:
+        create_notification(str(user.id), message)
+
+        # 3) Enviar via socket para quem está conectado
+        user_id = str(user.id)
+        if user_id in connected_users and socketio:
+            socketio.emit(
+                'notification',
+                {'message': message},
+                room=user_id
+            )
+
+    return jsonify({'status': 'sent', 'users_notified': len(users)})
+
 
 @notification_bp.route('/send-notification', methods=['POST'])
 def send_notification():
