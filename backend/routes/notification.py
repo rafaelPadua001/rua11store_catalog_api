@@ -83,23 +83,18 @@ def notify():
     data = request.json
     message = data['message']
 
-    # 1) Buscar todos os usuários da tabela Users
+    # Import aqui para evitar circular import
+    from models import User
     users = User.query.all()
 
-    # 2) Criar uma notificação para cada usuário
     for user in users:
-        create_notification(str(user.id), message)
+        create_notification(user.id, message)
 
-        # 3) Enviar via socket para quem está conectado
-        user_id = str(user.id)
-        if user_id in connected_users and socketio:
-            socketio.emit(
-                'notification',
-                {'message': message},
-                room=user_id
-            )
+        if socketio:
+            # Se estiver conectado — envia na hora
+            socketio.emit('notification', {'message': message}, room=str(user.id))
 
-    return jsonify({'status': 'sent', 'users_notified': len(users)})
+    return jsonify({'status': 'sent'})
 
 
 @notification_bp.route('/send-notification', methods=['POST'])
