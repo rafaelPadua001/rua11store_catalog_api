@@ -50,11 +50,11 @@ onMounted(() => {
   socket = io('https://rua11store-catalog-api-lbp7.onrender.com', { transports: ['websocket', 'polling'] })
 
   socket.on('connect', () => {
-    console.log('Socket conectado:', socket.id)
+ //   console.log('Socket conectado:', socket.id)
   })
 
   socket.on('notification', (data) => {
-    console.log('Notificação recebida:', data)
+  //  console.log('Notificação recebida:', data)
     notifications.value.push({ message: data.message, show: true })
     hasNewNotifications.value = true
   })
