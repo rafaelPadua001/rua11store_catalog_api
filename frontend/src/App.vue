@@ -47,14 +47,14 @@ provide('hasNewNotifications', hasNewNotifications)
 provide('notifications', notifications) // ← aqui
 
 onMounted(() => {
-  socket = io('https://rua11store-catalog-api-lbp7.onrender.com', { transports: ['websocket'] })
+  socket = io('https://rua11store-catalog-api-lbp7.onrender.com', { transports: ['websocket', 'polling'] })
 
   socket.on('connect', () => {
-    //console.log('Socket conectado:', socket.id)
+    console.log('Socket conectado:', socket.id)
   })
 
-  socket.on('new_notification', (data) => {
-    //console.log('Notificação recebida:', data)
+  socket.on('notification', (data) => {
+    console.log('Notificação recebida:', data)
     notifications.value.push({ message: data.message, show: true })
     hasNewNotifications.value = true
   })
