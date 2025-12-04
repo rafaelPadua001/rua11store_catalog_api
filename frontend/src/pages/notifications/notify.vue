@@ -49,7 +49,7 @@ export default {
     this.socket.on('connect', () => {
       console.log('Socket connected, id=', this.socket.id);
       // envie auth após conectar
-     
+     this.socket.emit("auth", { user_id: this.userId });  
       console.log("AUTH enviado:", this.userId);
     });
 
