@@ -4,6 +4,8 @@ from utils.notifications_utils import create_notification, get_unread_notificati
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from services.fcm_service import send_fcm_notification
 from models.user import User
+from database import db
+from sqlalchemy import text
 import logging
 
 
