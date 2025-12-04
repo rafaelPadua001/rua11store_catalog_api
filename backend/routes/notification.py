@@ -84,7 +84,7 @@ def notify():
     create_notification(user_id, message)
 
     if user_id in connected_users and socketio:
-        socketio.emit(f'notification_global', {'message': message})
+        socketio.emit(f'notification', {'message': message}, room=user_id)
 
     return jsonify({'status': 'sent'})
 
