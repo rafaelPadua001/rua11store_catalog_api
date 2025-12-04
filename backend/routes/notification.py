@@ -78,23 +78,32 @@ def read_notification(notification_id):
     return jsonify({"status": "ok"})
 
 @notification_bp.route('/notify', methods=['POST'])
-def notify():
+def notify_all():
     global socketio
     data = request.json
     message = data['message']
 
-    # Import aqui para evitar circular import
-    from models import User
-    users = User.query.all()
+    # 1. Buscar todos os usuários
+    users = db.session.execute(text("SELECT id FROM users")).fetchall()
 
-    for user in users:
-        create_notification(user.id, message)
+    notified = []
 
-        if socketio:
-            # Se estiver conectado — envia na hora
-            socketio.emit('notification', {'message': message}, room=str(user.id))
+    for row in users:
+        user_id = str(row.id)
 
-    return jsonify({'status': 'sent'})
+        # 2. Criar notificação no banco
+        create_notification(user_id, message)
+
+        # 3. Enviar socket se o usuário estiver conectado
+        if user_id in connected_users and socketio:
+            socketio.emit("notification", {"message": message}, room=user_id)
+
+        notified.append(user_id)
+
+    return jsonify({
+        "status": "sent",
+        "users_notified": notified
+    })
 
 
 @notification_bp.route('/send-notification', methods=['POST'])
