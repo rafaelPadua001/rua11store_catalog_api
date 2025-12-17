@@ -98,7 +98,7 @@
               </span>
 
               <!-- Quantity field-->
-              <v-text-field v-model.number="selectedVariation.input_quantity" type="number" min="0" density="compact"
+              <v-text-field v-model.number="selectedVariation.input_quantity" type="number" min="0" :max="selectedVariation.stock_quantity" density="compact"
                 hide-details style="max-width: 90px;" label="Qtd:" />
 
             </div>
@@ -341,6 +341,18 @@ export default {
       })
       return groups;
     },
+    totalInputQuantity(){
+      return this.selectedVariations.reduce(
+        (sum, v) => sum + (v.input_quantity || 0),
+        0
+      )
+    },
+    totalStockQuantity(){
+      return this.selectedVariations.reduce(
+        (sum, v) => sum +(v.stock_quantity || 0),
+        0
+      )
+    },
     currentImage() {
       // primeira é thumbnail, depois imagens
       if (this.currentIndex === 0) {
@@ -413,9 +425,7 @@ export default {
         input_quantity: 0
       }
     },
-
-
-    async addItemCart(product) {
+  async addItemCart(product) {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('access_token');
         if (!token) {
@@ -425,6 +435,11 @@ export default {
         if (product.product_quantity == 0) {
           // console.log(this.alert);
           this.showNotification();
+          return;
+        }
+
+        if(this.totalInputQuantity > this.totalStockQuantity){
+          alert('Não é permitido adicionar quantidade de variações maior que o estoque disponível');
           return;
         }
 
