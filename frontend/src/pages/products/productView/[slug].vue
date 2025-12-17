@@ -56,6 +56,7 @@
         </div>
 
         <div class="mt-4">
+          <span class="text-subtitle"><strong>Variatons:</strong></span>
           <!-- Agrupamento: percorre cada tipo (ex: 'Color', 'Size') -->
           <template v-for="(items, type) in groupedVariations" :key="type">
             <!-- só mostra o grupo quando existir items -->
@@ -93,7 +94,13 @@
                 <strong>
                   {{ colorNames[selectedVariation.value?.toUpperCase()] || selectedVariation.value }}
                 </strong>
+
               </span>
+
+              <!-- Quantity field-->
+              <v-text-field v-model.number="selectedVariation.input_quantity" type="number" min="0" density="compact"
+                hide-details style="max-width: 90px;" label="Qtd:" />
+
             </div>
           </div>
         </div>
@@ -388,15 +395,25 @@ export default {
     },
     async selectVariation(variation) {
       const existingIndex = this.selectedVariations.findIndex(
-        (v) => v.variation_type === variation.variation_type
-      );
+        v => v.variation_type === variation.variation_type
+      )
+
+      const normalized = this.normalizeVariation(variation)
 
       if (existingIndex !== -1) {
-        this.selectedVariations.splice(existingIndex, 1, variation);
+        this.selectedVariations.splice(existingIndex, 1, normalized)
       } else {
-        this.selectedVariations.push(variation);
+        this.selectedVariations.push(normalized)
       }
     },
+    normalizeVariation(variation) {
+      return {
+        ...variation,
+        stock_quantity: variation.quantity,
+        input_quantity: 0
+      }
+    },
+
 
     async addItemCart(product) {
       try {
@@ -411,10 +428,21 @@ export default {
           return;
         }
 
+        const variationsPayload = this.selectedVariations
+          .filter(v => v.input_quantity > 0)
+          .map(v => ({
+            variation_id: v.id,
+            quantity: v.input_quantity
+          }))
+
+        if (variationsPayload.length === 0) {
+          alert('Informe a quantidade de pelo menos uma variação');
+        }
+
+
         const response = await api.post(`/cart/add-cart`, {
           product_id: product.id,
-          quantity: 1,
-          selectedVariations: this.selectedVariations,
+          selectedVariations: variationsPayload,
         },
           {
             headers: {
@@ -437,7 +465,7 @@ export default {
         console.log('Item adicionado');
       } catch (e) {
         console.log("erro ao inserir item no carrinho", e);
-        this.notification();
+        //this.notification();
       }
     },
     showNotification() {
