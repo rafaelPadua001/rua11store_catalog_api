@@ -98,8 +98,9 @@
               </span>
 
               <!-- Quantity field-->
-              <v-text-field v-model.number="selectedVariation.input_quantity" type="number" min="0" :max="selectedVariation.stock_quantity" density="compact"
-                hide-details style="max-width: 90px;" label="Qtd:" />
+              <v-text-field v-model.number="selectedVariation.input_quantity" type="number" min="0"
+                :max="selectedVariation.stock_quantity" density="compact" hide-details style="max-width: 90px;"
+                label="Qtd:" />
 
             </div>
           </div>
@@ -341,15 +342,15 @@ export default {
       })
       return groups;
     },
-    totalInputQuantity(){
+    totalInputQuantity() {
       return this.selectedVariations.reduce(
         (sum, v) => sum + (v.input_quantity || 0),
         0
       )
     },
-    totalStockQuantity(){
+    totalStockQuantity() {
       return this.selectedVariations.reduce(
-        (sum, v) => sum +(v.stock_quantity || 0),
+        (sum, v) => sum + (v.stock_quantity || 0),
         0
       )
     },
@@ -425,7 +426,7 @@ export default {
         input_quantity: 0
       }
     },
-  async addItemCart(product) {
+    async addItemCart(product) {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('access_token');
         if (!token) {
@@ -438,7 +439,7 @@ export default {
           return;
         }
 
-        if(this.totalInputQuantity > this.totalStockQuantity){
+        if (this.totalInputQuantity > this.totalStockQuantity) {
           alert('Não é permitido adicionar quantidade de variações maior que o estoque disponível');
           return;
         }
@@ -447,7 +448,8 @@ export default {
           .filter(v => v.input_quantity > 0)
           .map(v => ({
             variation_id: v.id,
-            quantity: v.input_quantity
+            quantity: v.input_quantity,
+            value: v.value
           }))
 
         if (variationsPayload.length === 0) {
