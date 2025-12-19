@@ -17,7 +17,7 @@
                       <v-list>
                         <v-list-item v-for="(item, index) in cart.items" :key="index">
                           <v-card class="d-flex flex-column w-full max-w-lg mx-auto" elevation="0">
-                            
+
                             <v-avatar size="150">
                               <v-img :src="item.product_image" :alt="item.product_name" cover></v-img>
                             </v-avatar>
@@ -29,7 +29,7 @@
                               <v-col cols="12" sm="12" md="6">
                                 <strong>R$ {{ item.product_price }}</strong>
                               </v-col>
-                            
+
                               <v-col cols="12" sm="12" md="6">
                                 <strong>Variations:</strong>
                               </v-col>
@@ -42,7 +42,7 @@
 
                                   </v-chip>
                                 </div>
-                                
+
                               </v-col>
                               <v-spacer></v-spacer>
 
@@ -50,11 +50,13 @@
                                 <strong>Qtd:</strong>
                               </v-col>
                               <v-col cols="12" sm="12" md="4">
-                                <v-text-field v-model.number="item.quantity" type="number" min="1" density="compact"
-                                  hide-details style="width: 80px;" @click.stop @mousedown.stop />
+                                <v-text-field :model-value="getItemQuantity(item)"
+                                  @update:model-value="val => setItemQuantity(item, val)" type="number" min="1"
+                                  density="compact" hide-details style="width: 80px" @click.stop @mousedown.stop />
+
                               </v-col>
                               <v-col cols="12" sm="12" md="6">
-                                <strong>R$ {{ (Number(item.quantity) * Number(item.product_price)).toFixed(2)
+                                <strong>R$ {{ (Number(getItemQuantity(item)) * Number(item.product_price)).toFixed(2)
                                 }}</strong>
                               </v-col>
                             </v-row>
@@ -493,14 +495,47 @@ const prevStep = () => {
   if (currentStep.value > 1) currentStep.value--
 }
 
+const getItemQuantity = (item) => {
+
+  if (item.variations?.length) {
+    return item.variations.reduce(
+      (t, v) => t + (v.quantity || 0),
+      0
+    )
+  }
+  return item.quantity || 0
+}
+
+const setItemQuantity = (item, value) => {
+  const qty = Number(value) || 0
+
+  if (item.variations?.length) {
+    item.variations.forEach(v => {
+      v.quantity = qty
+    })
+  } else {
+    item.quantity = qty
+  }
+}
+
+
 const totalCarrinho = computed(() => {
-  if (!cart.items || !Array.isArray(cart.items)) return 0
+  if (!Array.isArray(cart.items)) return 0
+
   return cart.items.reduce((acc, item) => {
-    const price = Number(item.product_price)
-    const quantity = Number(item.quantity)
-    return acc + (isNaN(price) || isNaN(quantity) ? 0 : price * quantity)
+    const price = Number(item.product_price) || 0
+
+    const quantity = item.variations?.length
+      ? item.variations.reduce(
+          (t, v) => t + (Number(v.quantity) || 0),
+          0
+        )
+      : Number(item.quantity) || 0
+
+    return acc + price * quantity
   }, 0)
 })
+
 
 const totalComDesconto = computed(() => {
   if (!appliedCoupon.value || !appliedCoupon.value.discount) {
@@ -548,12 +583,12 @@ const getCoupon = async () => {
 }
 
 const loadProfile = async () => {
-  try{
+  try {
     const response = await api.get(`/profile/get-profile/${userId}`);
     profileUser = response.data;
     console.log(profileUser);
   }
-  catch(e){
+  catch (e) {
     console.log("erro ao carregar perfil do usuario", e);
   }
 };
@@ -827,10 +862,10 @@ async function submitPayment() {
     console.log('🚀 Iniciando processo de pagamento...');
 
     const deliveryPrice = parseFloat(selectedDelivery?.value.price || 0);
-  
+
     const cartTotal = parseFloat(totalCarrinho?.value || 0);
     const totalAmount = deliveryPrice + cartTotal;
-    
+
     const payload = {
       paymentType: tab.value,
       total: totalAmount,
